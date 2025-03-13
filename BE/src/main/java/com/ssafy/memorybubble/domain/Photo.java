@@ -2,6 +2,7 @@ package com.ssafy.memorybubble.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class Photo {
     private String path;
 
     @Column(nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Builder
