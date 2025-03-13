@@ -1,0 +1,18 @@
+/* Color Palette */
+@import './color.css';
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* 기본 폰트 Pretendard로 설정 */
+body {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 100;
+}
+
+a {
+  text-decoration: none;
+}
