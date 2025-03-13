@@ -1,0 +1,58 @@
+package com.ssafy.memorybubble.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Letter {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "letter_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
+
+    @Column(name = "letter_content", nullable = false)
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Type type;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime openAt; // default: createdAt과 같음
+
+    @ColumnDefault("false")
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    private Boolean isRead;
+
+    @Column(length = 30)
+    private String backgroundColor;
+
+    @Builder
+    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDateTime openAt, Boolean isRead, String backgroundColor) {
+        this.receiver = receiver;
+        this.sender = sender;
+        this.content = content;
+        this.type = type;
+        this.createdAt = createdAt;
+        this.openAt = openAt;
+        this.isRead = isRead;
+        this.backgroundColor = backgroundColor;
+    }
+}
