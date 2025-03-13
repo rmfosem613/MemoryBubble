@@ -1,11 +1,25 @@
-import React from "react";
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
+
+import MainPage from './pages/MainPage';
+import BasicPhotoAlbumPage from './pages/BasicPhotoAlbumPage';
+import FontPage from './pages/FontPage';
+import LoginPage from './pages/LoginPage';
+import PhotoAlbumPage from './pages/PhotoAlbumPage';
+import WriteLetterPage from './pages/WriteLetterPage';
 
 function App() {
   return (
-    <div className="font-pretendard">
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <p className="text-album-100">안녕</p>
-      <a href="#">안녕</a>
+    <div className='font-pretendard font-normal'>
+      <BrowserRouter>
+        <Routes>
+          <Route index path='/' element={<MainPage />} />
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/font' element={<FontPage />} />
+          <Route path='/letter' element={<WriteLetterPage />} />
+          <Route path='/album/basic' element={<BasicPhotoAlbumPage />} />
+          <Route path='/album' element={<PhotoAlbumPage />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   )
 }
