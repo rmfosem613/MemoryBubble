@@ -58,292 +58,358 @@ module.exports = {
       container: {
         center: true,
         padding: {
-          DEFAULT: "1rem",
-          sm: "2rem",
-          md: "3rem",
+          DEFAULT: "1rem", // 16px
+          sm: "2rem", // 32px
+          md: "3rem", // 48px
           lg: "6rem",
           xl: "150px",
-          "2xl": "150px",
+          // "2xl": "150px", // 이것도 할 건가요?
         },
         screens: {
           sm: "640px",
           md: "768px",
           lg: "1024px",
           xl: "1280px",
-          "2xl": "1536px",
+          // "2xl": "1536px", // 이것도 할 건가요?
         },
       },
       fontFamily: {
         pretendard: ["Pretendard", "sans-serif"],
         stunning: ["STUNNING", "sans-serif"],
       },
-      keyframes: {
-        shake: {
-          "0%, 100%": { transform: "translateX(0)" },
-          "20%": { transform: "translateX(-5px)" },
-          "40%": { transform: "translateX(5px)" },
-          "60%": { transform: "translateX(-5px)" },
-          "80%": { transform: "translateX(5px)" },
-        },
-        gradient: {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-        },
-        glow: {
-          "0%, 100%": { boxShadow: "0 0 15px rgba(107,76,255,0.5)" },
-          "50%": { boxShadow: "0 0 25px rgba(107,76,255,0.8)" },
-        },
-        pulse: {
-          "0%, 100%": { opacity: 1 },
-          "50%": { opacity: 0.8 },
-        },
-        slideOutLeft: {
-          "0%": { transform: "translateX(0)", opacity: "1" },
-          "100%": { transform: "translateX(-100%)", opacity: "0" },
-        },
-        slideInRight: {
-          "0%": { transform: "translateX(100%)", opacity: "0" },
-          "100%": { transform: "translateX(0)", opacity: "1" },
-        },
-      },
-      animation: {
-        gradient: "gradient 8s linear infinite",
-        glow: "glow 2s ease-in-out infinite",
-        pulse: "pulse 2s ease-in-out infinite",
-        shake: "shake 0.3s ease-in-out",
-        "slide-out-left": "slideOutLeft 0.5s ease-in-out forwards",
-        "slide-in-right": "slideInRight 0.5s ease-in-out forwards",
-      },
       fontSize: {
         // Desktop (lg)
-        "h1-lg": [
-          "3.75rem",
+        "h1-lg": [ // 추억보관함, 나의 폰트, 편지쓰기 등 페이지 이름
+          "38px",
           {
-            // 60px
-            lineHeight: "98%",
-            letterSpacing: "-0.02em",
-            fontWeight: "700",
+            lineHeight: "57px",
+            letterSpacing: "-0.4px",
+            // fontWeight: "700",
           },
         ],
-        "h2-lg": [
-          "3rem",
+        "h2-lg": [ // 추억방울 만들기, 나의 폰트 만들기 등 컨텐츠 안에 제목
+          "32px",
           {
-            // 48px
-            lineHeight: "98%",
-            letterSpacing: "-0.02em",
-            fontWeight: "600",
+            lineHeight: "48px",
+            letterSpacing: "-0.3px",
+            // fontWeight: "700",
           },
         ],
-        "h3-lg": [
-          "2.25rem",
+        "h3-lg": [ // 메인-앨범 작은 제목, 모달 제목, 막내아들 글씨체 (컨텐츠 강조), 달력 년월, 편지 to/from
+          "24px",
           {
-            // 36px
-            lineHeight: "120%",
-            letterSpacing: "-0.02em",
-            fontWeight: "600",
+            lineHeight: "36px",
+            letterSpacing: "-0.3px",
+            // fontWeight: "700",
           },
         ],
-        "h4-lg": [
-          "1.75rem",
+        "h4-lg": [ // 사진 엽서 보낸이, 카센트 보낸이
+          "20px",
           {
-            // 28px
-            lineHeight: "140%",
-            letterSpacing: "-0.02em",
-            fontWeight: "500",
+            lineHeight: "30px",
+            letterSpacing: "-0.2px",
+            // fontWeight: "700",
+          },
+        ],
+        "h5-lg": [ // 달력 요일
+          "18px",
+          {
+            lineHeight: "27px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "700",
+          },
+        ],
+        "subtitle-1-lg": [
+          "16px",
+          {
+            lineHeight: "24px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "500",
+          },
+        ],
+        "subtitle-2-lg": [
+          "14px",
+          {
+            lineHeight: "22px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "500",
+          },
+        ],
+        "subtitle-3-lg": [
+          "12px",
+          {
+            lineHeight: "18px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "500",
           },
         ],
         "lg-lg": [
-          "1.5rem",
+          "16px",
           {
-            // 24px
-            lineHeight: "120%",
-            fontWeight: "500",
+            lineHeight: "24px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "400",
           },
         ],
         "p-lg": [
-          "1.25rem",
+          "14px",
           {
-            // 20px
-            lineHeight: "120%",
-            letterSpacing: "0em",
-            fontWeight: "400",
+            lineHeight: "22px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "400",
           },
         ],
         "sm-lg": [
-          "1.125rem",
+          "12px",
           {
-            // 18px
-            lineHeight: "120%",
-            letterSpacing: "0em",
-            fontWeight: "400",
+            lineHeight: "18px",
+            letterSpacing: "-0.1px",
+            // fontWeight: "400",
           },
         ],
-        "mn-lg": [
-          "1rem",
+        "h-logo-lg": [ // 헤더에 로고
+          "20px",
           {
-            // 16px
-            lineHeight: "130%",
-            letterSpacing: "0em",
-            fontWeight: "300",
+            lineHeight: "30px",
+            letterSpacing: "-0.4px",
+            // fontWeight: "800",
+          },
+        ],
+        "album-1-lg": [
+          "180px",
+          {
+            lineHeight: "180px",
+            letterSpacing: "-0.4px",
+            // fontWeight: "400",
+          },
+        ],
+        "album-2-lg": [
+          "160px",
+          {
+            lineHeight: "180px",
+            letterSpacing: "-0.4px",
+            // fontWeight: "400",
+          },
+        ],
+        "album-3-lg": [
+          "140px",
+          {
+            lineHeight: "180px",
+            letterSpacing: "-0.4px",
+            // fontWeight: "400",
           },
         ],
 
         // Tablet (md)
         "h1-md": [
-          "3rem",
+          "32px",
           {
-            // 48px
-            lineHeight: "98%",
-            letterSpacing: "-0.02em",
-            fontWeight: "700",
+            lineHeight: "48px",
+            letterSpacing: "-0.4px",
           },
         ],
         "h2-md": [
-          "2.5rem",
+          "28px",
           {
-            // 40px
-            lineHeight: "98%",
-            letterSpacing: "-0.02em",
-            fontWeight: "600",
+            lineHeight: "42px",
+            letterSpacing: "-0.3px",
           },
         ],
         "h3-md": [
-          "2rem",
+          "22px",
           {
-            // 32px
-            lineHeight: "120%",
-            letterSpacing: "-0.02em",
-            fontWeight: "600",
+            lineHeight: "33px",
+            letterSpacing: "-0.3px",
           },
         ],
         "h4-md": [
-          "1.5rem",
+          "18px",
           {
-            // 24px
-            lineHeight: "140%",
-            letterSpacing: "-0.02em",
-            fontWeight: "500",
+            lineHeight: "27px",
+            letterSpacing: "-0.2px",
+          },
+        ],
+        "h5-md": [
+          "16px",
+          {
+            lineHeight: "24px",
+            letterSpacing: "-0.1px",
+          },
+        ],
+        "subtitle-1-md": [
+          "15px",
+          {
+            lineHeight: "23px",
+            letterSpacing: "-0.1px",
+          },
+        ],
+        "subtitle-2-md": [
+          "14px",
+          {
+            lineHeight: "21px",
+            letterSpacing: "-0.1px",
+          },
+        ],
+        "subtitle-3-md": [
+          "12px",
+          {
+            lineHeight: "18px",
+            letterSpacing: "-0.1px",
           },
         ],
         "lg-md": [
-          "1.375rem",
+          "15px",
           {
-            // 22px
-            lineHeight: "120%",
-            fontWeight: "500",
+            lineHeight: "23px",
+            letterSpacing: "-0.1px",
           },
         ],
         "p-md": [
-          "1.125rem",
+          "14px",
           {
-            // 18px
-            lineHeight: "120%",
-            letterSpacing: "0em",
-            fontWeight: "400",
+            lineHeight: "21px",
+            letterSpacing: "-0.1px",
           },
         ],
         "sm-md": [
-          "1rem",
+          "12px",
           {
-            // 16px
-            lineHeight: "120%",
-            letterSpacing: "0em",
-            fontWeight: "400",
+            lineHeight: "18px",
+            letterSpacing: "-0.1px",
           },
         ],
-        "mn-md": [
-          "0.875rem",
+        "h-logo-md": [
+          "18px",
           {
-            // 14px
-            lineHeight: "130%",
-            letterSpacing: "0em",
-            fontWeight: "300",
+            lineHeight: "27px",
+            letterSpacing: "-0.4px",
+          },
+        ],
+        "album-1-md": [
+          "150px",
+          {
+            lineHeight: "160px",
+            letterSpacing: "-0.4px",
+          },
+        ],
+        "album-2-md": [
+          "130px",
+          {
+            lineHeight: "150px",
+            letterSpacing: "-0.4px",
+          },
+        ],
+        "album-3-md": [
+          "110px",
+          {
+            lineHeight: "140px",
+            letterSpacing: "-0.4px",
           },
         ],
 
         // Mobile (sm)
         "h1-sm": [
-          "2.25rem",
+          "28px",
           {
-            // 36px
-            lineHeight: "98%",
-            letterSpacing: "-0.02em",
-            fontWeight: "700",
+            lineHeight: "42px",
+            letterSpacing: "-0.4px",
           },
         ],
         "h2-sm": [
-          "2rem",
+          "24px",
           {
-            // 32px
-            lineHeight: "98%",
-            letterSpacing: "-0.02em",
-            fontWeight: "600",
+            lineHeight: "36px",
+            letterSpacing: "-0.3px",
           },
         ],
         "h3-sm": [
-          "1.75rem",
+          "20px",
           {
-            // 28px
-            lineHeight: "120%",
-            letterSpacing: "-0.02em",
-            fontWeight: "600",
+            lineHeight: "30px",
+            letterSpacing: "-0.3px",
           },
         ],
         "h4-sm": [
-          "1.25rem",
+          "18px",
           {
-            // 20px
-            lineHeight: "140%",
-            letterSpacing: "-0.02em",
-            fontWeight: "500",
+            lineHeight: "27px",
+            letterSpacing: "-0.2px",
+          },
+        ],
+        "h5-sm": [
+          "16px",
+          {
+            lineHeight: "24px",
+            letterSpacing: "-0.1px",
+          },
+        ],
+        "subtitle-1-sm": [
+          "15px",
+          {
+            lineHeight: "23px",
+            letterSpacing: "-0.1px",
+          },
+        ],
+        "subtitle-2-sm": [
+          "13px",
+          {
+            lineHeight: "20px",
+            letterSpacing: "-0.1px",
+          },
+        ],
+        "subtitle-3-sm": [
+          "11px",
+          {
+            lineHeight: "17px",
+            letterSpacing: "-0.1px",
           },
         ],
         "lg-sm": [
-          "1.25rem",
+          "14px",
           {
-            // 20px
-            lineHeight: "120%",
-            fontWeight: "500",
+            lineHeight: "21px",
+            letterSpacing: "-0.1px",
           },
         ],
         "p-sm": [
-          "1rem",
+          "13px",
           {
-            // 16px
-            lineHeight: "120%",
-            letterSpacing: "0em",
-            fontWeight: "400",
+            lineHeight: "20px",
+            letterSpacing: "-0.1px",
           },
         ],
         "sm-sm": [
-          "0.875rem",
+          "11px",
           {
-            // 14px
-            lineHeight: "120%",
-            letterSpacing: "0em",
-            fontWeight: "400",
+            lineHeight: "17px",
+            letterSpacing: "-0.1px",
           },
         ],
-        "mn-sm": [
-          "0.75rem",
+        "h-logo-sm": [
+          "16px",
           {
-            // 12px
-            lineHeight: "130%",
-            letterSpacing: "0em",
-            fontWeight: "300",
+            lineHeight: "24px",
+            letterSpacing: "-0.4px",
           },
         ],
+        // 모바일 버전에서 album font 사용 x
       },
       fontWeight: {
-        h1: "700",
-        h2: "600",
-        h3: "600",
-        h4: "400",
-        large: "400",
-        paragraph: "500",
-      },
-      textShadow: {
-        sm: "0 1px 2px rgba(0, 0, 0, 0.25)",
+        h1: "700", // bold
+        h2: "700",
+        h3: "700",
+        h4: "700",
+        h5: "700",
+        'subtitle-1': "500", // medium
+        'subtitle-2': "500",
+        'subtitle-3': "500",
+        'paragraph-lg': "400", // regular
+        paragraph: "400", 
+        'paragraph-sm': "400",
+        "h-logo": "800", // ExtraBold
+        "album-1": "800",
+        "album-2": "800",
+        "album-3": "800",
       },
     },
   },
