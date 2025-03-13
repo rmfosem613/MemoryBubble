@@ -2,6 +2,7 @@ package com.ssafy.memorybubble.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,8 +41,9 @@ public class Schedule {
     private Boolean isRepeat;
 
     @Builder
-    public Schedule(Family family, String content, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime endDate, Boolean isRepeat) {
+    public Schedule(Family family, Album album, String content, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime endDate, Boolean isRepeat) {
         this.family = family;
+        this.album = album;
         this.content = content;
         this.createdAt = createdAt;
         this.startDate = startDate;

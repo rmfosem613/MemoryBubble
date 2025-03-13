@@ -3,6 +3,8 @@ package com.ssafy.memorybubble.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Letter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +35,7 @@ public class Letter {
     private Type type;
 
     @Column(nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
@@ -54,5 +58,12 @@ public class Letter {
         this.openAt = openAt;
         this.isRead = isRead;
         this.backgroundColor = backgroundColor;
+    }
+
+    @PrePersist
+    protected void onPersist() {
+        if (this.openAt == null) {
+            this.openAt = this.createdAt; // openAt이 null 이면 createdAt과 동일해야 함
+        }
     }
 }

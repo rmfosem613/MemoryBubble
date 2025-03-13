@@ -2,12 +2,14 @@ package com.ssafy.memorybubble.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -40,13 +40,14 @@ public class User {
     private Boolean active;
 
     @Builder
-    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, Boolean active) {
+    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Boolean active) {
         this.family = family;
         this.email = email;
         this.name = name;
         this.profile = profile;
         this.phoneNumber = phoneNumber;
         this.gender = gender;
+        this.birth = birth;
         this.active = active;
     }
 }
