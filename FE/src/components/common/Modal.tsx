@@ -1,17 +1,15 @@
 import React, { ReactNode } from 'react';
-
-interface ModalProps {
-  title: string;
-  children: ReactNode;
-  primaryButtonText?: string;
-  secondaryButtonText?: string;
-}
+import { ModalProps } from '@/types/modal';
 
 const Modal: React.FC<ModalProps> = ({
+  isOpen = true,
+  onClose,
   title = '제목',
   children = '내용',
   primaryButtonText = '확인하기',
   secondaryButtonText = '취소하기',
+  onPrimaryButtonClick,
+  onSecondaryButtonClick,
 }) => {
   return (
     // 백드롭 (배경 어둡게 및 블러 처리)
