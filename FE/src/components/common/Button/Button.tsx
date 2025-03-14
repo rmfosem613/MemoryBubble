@@ -2,6 +2,9 @@ import { ButtonType } from '@/types/Button'
 import { Icon } from './Icon'
 import { iconStyle } from './ButtonStyle'
 
+// 두 가지 버전의 버튼 사용 가능
+// <Button icon='send' name='보내기' color='blue'>
+// <Button name='보내기' color='blue'>
 function Button({ icon, name, color }: ButtonType) {
   return (
     <>
