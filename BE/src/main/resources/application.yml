@@ -36,3 +36,5 @@ spring:
               - profile_nickname
               - profile_image
               - account_email
+jwt:
+  secret: ${jwt.secret}

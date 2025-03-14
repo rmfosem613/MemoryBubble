@@ -1,6 +1,6 @@
 package com.ssafy.memorybubble.security.handler;
 
-import com.ssafy.memorybubble.security.dto.PrincipalDetails;
+import com.ssafy.memorybubble.security.jwt.TokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,18 +18,19 @@ import java.io.IOException;
 @Slf4j
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
+    private final TokenProvider tokenProvider;
     private static final String URI = "/api/auth/success";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        // Authentication에 OAuth2User(인증된 사용자 정보) 객체가 담김
+        String accessToken = tokenProvider.generateAccessToken(authentication);
 
-        // 토큰 전달을 위한 redirect URI -> test용 queryParam, access token으로 수정 필요
+        // 토큰 전달을 위한 redirect URI -> 추후 클라이언트로 redirect
         String redirectUrl = UriComponentsBuilder.fromUriString(URI)
-                .queryParam("userId", principalDetails.getUsername())
+                .queryParam("accessToken", accessToken)
                 .build().toUriString();
 
-        log.info("OAuth2 인증 성공 - 리디렉트 URL: {}", redirectUrl);
         response.sendRedirect(redirectUrl);
     }
 }
