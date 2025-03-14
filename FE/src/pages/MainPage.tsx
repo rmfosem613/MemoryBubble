@@ -1,6 +1,6 @@
-import SlidingAlbumList from "../components/album/SlidingAlbumList"
+import SlidingAlbumList from "@/components/album/SlidingAlbumList"
 
-import useAlbumStore from "../stores/useAlbumStore";
+import useAlbumStore from "@/stores/useAlbumStore";
 
 function MainPage() {
 

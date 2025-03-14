@@ -1,4 +1,4 @@
-import { MainAlbumProps } from "../../types/Album";
+import { MainAlbumProps } from "@/types/Album";
 
 function MainAlbum({
   title,

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import useAlbumStore from '../stores/useAlbumStore';
+import useAlbumStore from '@/stores/useAlbumStore';
 
 export default function useAlbumNavigation() {
   const { nextAlbum, previousAlbum } = useAlbumStore();

@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import MainAlbum from './MainAlbum';
-import { SlidingAlbumListProps } from '../../types/Album';
-import useAlbumStore from '../../stores/useAlbumStore';
-import useAlbumNavigation from '../../hooks/useAlbumNavigation';
-import { getVisibleAlbums, getAlbumStyle } from '../../utils/albumUtils';
+import { SlidingAlbumListProps } from '@/types/Album';
+import useAlbumStore from '@/stores/useAlbumStore';
+import useAlbumNavigation from '@/hooks/useAlbumNavigation';
+import { getVisibleAlbums, getAlbumStyle } from '@/utils/albumUtils';
 
 function SlidingAlbumList({ onAlbumChange }: SlidingAlbumListProps) {
   // 상태관리 스토어에서 데이터 가져오기
