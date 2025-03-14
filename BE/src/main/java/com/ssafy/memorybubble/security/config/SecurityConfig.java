@@ -1,0 +1,54 @@
+package com.ssafy.memorybubble.security.config;
+
+import com.ssafy.memorybubble.security.handler.OAuth2FailureHandler;
+import com.ssafy.memorybubble.security.handler.OAuth2SuccessHandler;
+import com.ssafy.memorybubble.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@RequiredArgsConstructor
+@Configuration
+@EnableMethodSecurity
+@EnableWebSecurity
+public class SecurityConfig {
+    private final CustomOAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.
+                csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
+                .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 로그인 비활성화
+                .formLogin(AbstractHttpConfigurer::disable) // 기본 폼 로그인 비활성화
+                .logout(AbstractHttpConfigurer::disable) // 기본 로그아웃 비활성화
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 x
+                // request 인증, 인가 설정
+                .authorizeHttpRequests(request ->
+                        request.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
+                                .permitAll()
+                                .requestMatchers("/api/auth/**")
+                                .permitAll()
+                                .anyRequest().authenticated()
+                )
+                // oauth 설정
+                .oauth2Login(oauth ->
+                        oauth
+                                .authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/login"))
+                                .userInfoEndpoint(c->c.userService(oAuth2UserService))
+                                .successHandler(oAuth2SuccessHandler)
+                                .failureHandler(oAuth2FailureHandler)
+                );
+
+        return http.build();
+    }
+
+}
