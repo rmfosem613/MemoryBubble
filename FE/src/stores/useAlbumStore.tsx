@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { AlbumData } from '../types/Album';
-import albumsData from '../components/album/AlbumsData.json';
+import { AlbumData } from '@/types/Album';
+import albumsData from '@/components/album/AlbumsData.json';
 
 // ??
 interface AlbumState {
