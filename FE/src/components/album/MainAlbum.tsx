@@ -8,8 +8,8 @@ function MainAlbum({
   photoCount
 }: MainAlbumProps) {
   return (
+    // 앨범 색이 적용이 안 될때, 아래 주석을 풀고 100부터 600까지 저장 후 다시 시도하면 작동함 (무슨 문제인지 모르겠습니다)
     <div className={`${bgColor} relative rounded-[8px] mb-[4px]`}>
-      {/* 앨범 색이 적용이 안 될때, 아래 주석을 풀고 100부터 600까지 저장 후 다시 시도하면 작동함 (무슨 문제인지 모르겠습니다) */}
       {/* <div className={`bg-album-600 relative rounded-[8px] mb-[15px]`}> */}
       <div className="relative z-10 p-[10px] flex flex-row">
 
