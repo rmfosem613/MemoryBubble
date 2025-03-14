@@ -2,6 +2,8 @@ package com.ssafy.memorybubble.security.config;
 
 import com.ssafy.memorybubble.security.handler.OAuth2FailureHandler;
 import com.ssafy.memorybubble.security.handler.OAuth2SuccessHandler;
+import com.ssafy.memorybubble.security.jwt.TokenAuthenticationFilter;
+import com.ssafy.memorybubble.security.jwt.TokenExceptionFilter;
 import com.ssafy.memorybubble.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +24,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                                 .permitAll()
-                                .requestMatchers("/api/auth/**")
+                                .requestMatchers("/api/auth/success", "/api/auth/login")
                                 .permitAll()
                                 .anyRequest().authenticated()
                 )
@@ -46,7 +49,10 @@ public class SecurityConfig {
                                 .userInfoEndpoint(c->c.userService(oAuth2UserService))
                                 .successHandler(oAuth2SuccessHandler)
                                 .failureHandler(oAuth2FailureHandler)
-                );
+                )
+                // jwt 설정
+                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new TokenExceptionFilter(), tokenAuthenticationFilter.getClass());
 
         return http.build();
     }
