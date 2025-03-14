@@ -11,9 +11,20 @@ const Modal: React.FC<ModalProps> = ({
   onPrimaryButtonClick,
   onSecondaryButtonClick,
 }) => {
+  if (!isOpen) return null;
+
+  // 배경 클릭 시 모달 닫기 기능
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     // 백드롭 (배경 어둡게 및 블러 처리)
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]"
+      onClick={handleBackdropClick}>
       {/* 모달 컨테이너 */}
       <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh]">
         {/* 제목 영역 */}
