@@ -3,7 +3,7 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      colors:{
+      colors: {
         transparent: 'tranparent',
         // Gray
         'gray-000': '#FFFFFF',
@@ -29,9 +29,9 @@ module.exports = {
         'red-100': '#FFF2F2',
         'red-200': '#F5535E',
         'red-300': '#D91C29',
-        'green-100':'#EBF8F5',
-        'green-200':'#00A881',
-        'green-300':'#08785E',
+        'green-100': '#EBF8F5',
+        'green-200': '#00A881',
+        'green-300': '#08785E',
 
         // Calender
         'spring-100': '#FFEFEF',
@@ -53,7 +53,7 @@ module.exports = {
         'album-300': '#F7F0D5',
         'album-400': '#BFDAAB',
         'album-500': '#C5DFE6',
-        'album-600': '#B3C6E3'
+        'album-600': '#B3C6E3',
       },
       container: {
         center: true,
@@ -178,15 +178,15 @@ module.exports = {
         "album-1-lg": [
           "180px",
           {
-            lineHeight: "180px",
-            letterSpacing: "-0.4px",
+            lineHeight: "238px",
+            letterSpacing: "8px",
             // fontWeight: "400",
           },
         ],
         "album-2-lg": [
           "160px",
           {
-            lineHeight: "180px",
+            lineHeight: "249px",
             letterSpacing: "-0.4px",
             // fontWeight: "400",
           },
@@ -194,7 +194,7 @@ module.exports = {
         "album-3-lg": [
           "140px",
           {
-            lineHeight: "180px",
+            lineHeight: "264px",
             letterSpacing: "-0.4px",
             // fontWeight: "400",
           },
@@ -404,12 +404,18 @@ module.exports = {
         'subtitle-2': "500",
         'subtitle-3': "500",
         'paragraph-lg': "400", // regular
-        paragraph: "400", 
+        paragraph: "400",
         'paragraph-sm': "400",
         "h-logo": "800", // ExtraBold
         "album-1": "800",
         "album-2": "800",
         "album-3": "800",
+      },
+      boxShadow: {
+        'sm': '0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.2)',
+        'md': '0 0.125rem 0.625rem rgba(0, 0, 0, 0.2)',
+        'lg': '0 0.25rem 1rem rgba(0, 0, 0, 0.2)',
+        'xl': '0 1rem 2rem rgba(0, 0, 0, 0.2)',
       },
     },
   },
