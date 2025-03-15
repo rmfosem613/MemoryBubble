@@ -6,7 +6,7 @@ const initialState: ModalState = {
   isOpen: false,
   title: '',
   content: '',
-  confirmButtonText: '확인하기',
+  confirmButtonText: '',
   cancelButtonText: '',
   onConfirmClick: undefined,
 };

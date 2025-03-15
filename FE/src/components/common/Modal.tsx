@@ -43,7 +43,7 @@ const Modal: React.FC = () => {
               )}
               {/* 확인 버튼 */}
               <button className="border" onClick={handleConfirmClick}>
-                {confirmButtonText}
+                {confirmButtonText || '확인하기'}
               </button>
             </div>
           </div>
