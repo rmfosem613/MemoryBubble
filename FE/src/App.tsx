@@ -6,6 +6,7 @@ import FontPage from './pages/FontPage';
 import LoginPage from './pages/LoginPage';
 import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
+import Modal from './components/common/Modal';
 
 function App() {
   return (
@@ -20,8 +21,9 @@ function App() {
           <Route path='/album' element={<PhotoAlbumPage />} />
         </Routes>
       </BrowserRouter>
+      <Modal />
     </div>
-  )
+  );
 }
 
 export default App;
