@@ -1,11 +1,13 @@
-import { Send, Mic, PenLine } from 'lucide-react'
+import { Send, Mic, PenLine, ArrowLeft, ArrowRight } from 'lucide-react'
 import { IconProps } from '@/types/Button';
 
-// IconMark 종류는 3개
+// IconMark 종류는 5개
 const iconMark = {
   send: Send,
   mic: Mic,
-  pen: PenLine
+  pen: PenLine,
+  left: ArrowLeft,
+  right: ArrowRight
 };
 
 export function Icon({ icon }: IconProps) {
@@ -18,7 +20,7 @@ export function Icon({ icon }: IconProps) {
   return (
     // icon 크기 반응형
     <IconComponent
-      className="mr-[8px] w-[20px] h-[20px] md:w-[22px] md:h-[22px] lg:w-[24px] lg:h-[24px]"
+      className="w-[20px] h-[20px] md:w-[22px] md:h-[22px] lg:w-[24px] lg:h-[24px]"
       strokeWidth={1}
     />
   )

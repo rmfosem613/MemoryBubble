@@ -26,9 +26,12 @@ function Button({ icon, name, color }: ButtonType) {
       >
         <Icon icon={icon} />
 
-        <span className="text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg font-subtitle-1">
-          {name}
-        </span>
+        {/* name 값이 없을 때 여백 뜨지 않게 */}
+        {name &&
+          <span className="text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg font-subtitle-1 ml-[8px]">
+            {name}
+          </span>
+        }
       </button>
     </>
   );
