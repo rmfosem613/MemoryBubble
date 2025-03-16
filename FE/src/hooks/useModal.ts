@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { ModalState, ModalHook } from '@/types/ModalType';
 import { useModalStore } from '@/stores/useModalStore';
 
-export const useModal = (): ModalHook => {
+export function useModal(): ModalHook {
   // 상태
   const {
     modal,
@@ -56,4 +56,4 @@ export const useModal = (): ModalHook => {
     handleConfirmClick,
     handleCancelClick,
   };
-};
+}
