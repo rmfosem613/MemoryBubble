@@ -2,7 +2,7 @@ import React from 'react';
 import { useModalStore } from '@/stores/useModalStore';
 import { useModal } from '@/hooks/useModal';
 
-const Modal: React.FC = () => {
+function Modal() {
   // 상태
   const { isOpen, title, content, confirmButtonText, cancelButtonText } =
     useModalStore().modal;
@@ -24,7 +24,7 @@ const Modal: React.FC = () => {
           {/* 모달 컨테이너 */}
           <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh]">
             {/* 제목 영역 */}
-            <h1 className="font-pretendard font-h3 text-h3-sm p-5 pb-1 md:p-6 md:pb-1 lg:p-7 lg:pb-1 border-b-2 border-dashed border-gray-300 md:text-h3-md lg:text-h3-lg">
+            <h1 className="font-h3 text-h3-sm p-5 pb-1 md:p-6 md:pb-1 lg:p-7 lg:pb-1 border-b-2 border-dashed border-gray-300 md:text-h3-md lg:text-h3-lg">
               {title}
             </h1>
 
@@ -51,6 +51,6 @@ const Modal: React.FC = () => {
       )}
     </>
   );
-};
+}
 
 export default Modal;
