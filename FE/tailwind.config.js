@@ -415,6 +415,18 @@ module.exports = {
         'lg': '0 0.25rem 1rem rgba(0, 0, 0, 0.2)',
         'xl': '0 1rem 2rem rgba(0, 0, 0, 0.2)',
       },
+
+      animation: {
+        'drift': 'drift 7000ms infinite linear',
+        'drift-fast': 'drift 3000ms infinite linear',
+        'drift-slow': 'drift 7500ms infinite linear',
+      },
+      keyframes: {
+        drift: {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
+        }
+      },
     },
   },
   plugins: [
