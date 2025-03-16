@@ -19,9 +19,9 @@ function Button({ icon, name, color }: ButtonType) {
           flex items-center justify-center 
           rounded-[8px] 
           font-subtitle-1
-          pt-[5px] pb-[5px] pl-[12px] pr-[12px]
-          md:pt-[9px] md:pb-[9px] md:pl-[16px] md:pr-[16px]
-          lg:pt-[14px] lg:pb-[14px] lg:pl-[24px] lg:pr-[24px]
+          pt-[13px] pb-[13px] pl-[12px] pr-[12px]
+          md:pt-[13px] md:pb-[13px] md:pl-[16px] md:pr-[16px]
+          lg:pt-[13px] lg:pb-[13px] lg:pl-[24px] lg:pr-[24px]
         `}
       >
         <Icon icon={icon} />
