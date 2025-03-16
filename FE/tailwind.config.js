@@ -6,7 +6,6 @@ module.exports = {
       colors: {
         transparent: 'tranparent',
         // Gray
-        'gray-000': '#FFFFFF',
         'gray-100': '#F7F7FA',
         'gray-200': '#F0F0F5',
         'gray-300': '#E1E1E8',
@@ -15,7 +14,6 @@ module.exports = {
         'gray-600': '#858899',
         'gray-700': '#3E404C',
         'gray-800': '#2B2D36',
-        'gray-900': '#000000',
 
         // Blue
         'blue-100': '#F5FBFF',

@@ -56,12 +56,12 @@ function MainPage() {
           <div className="h-full bg-blue-400">
             <SlidingAlbumList />
             <div className="fixed w-[360px] p-4 mr-auto ml-[-380px] bottom-[8px] z-40 grid grid-cols-2 gap-4">
-              <div className="flex cursor-pointer justify-center bg-gray-000 pt-[14px] pb-[14px] rounded-[8px] shadow-md">
+              <div className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
                 <p className="text-subtitle-1-lg font-subtitle-1">
                   앨범 생성
                 </p>
               </div>
-              <div className="flex cursor-pointer justify-center bg-gray-000 pt-[14px] pb-[14px] rounded-[8px] shadow-md">
+              <div className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
                 <p className="text-subtitle-1-lg font-subtitle-1">
                   사진 추가
                 </p>
