@@ -1,9 +1,13 @@
 import SlidingAlbumList from "@/components/album/SlidingAlbumList"
 
 import useAlbumStore from "@/stores/useAlbumStore";
-import { Link } from "react-router-dom";
 
 import { useModal } from "@/hooks/useModal";
+
+// 모달창 관련 컴포넌트
+import InputText from "@/components/common/Modal/InputText";
+import InputImg from "@/components/common/Modal/InputImg";
+import DropDown from "@/components/common/Modal/DropDown";
 
 function MainPage() {
 
@@ -63,11 +67,27 @@ function MainPage() {
             <SlidingAlbumList />
             <div className="fixed w-[360px] p-4 mr-auto ml-[-380px] bottom-[8px] z-40 grid grid-cols-2 gap-4">
               <button
-                // onClick={() => console.log('앨범 생성 버튼이 클릭되었습니다.')}
                 onClick={() => openModal({
-
                   title: "앨범 생성",
-                  content: <div>새로운 추억보관함을 생성해보세요!</div>,
+                  content: (
+                    <div className="py-2">
+                      <p className="mb-4">새로운 추억보관함을 생성해보세요!</p>
+                      <p className="text-subtitle-1-lg font-p-500 text-black">앨범 이름 (최대 7자)</p>
+                      <InputText />
+                      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 한 줄 설명 (최대 60자)</p>
+                      <InputText />
+                      <p className="mt-[3px]  text-subtitle-1-lg font-p-500 text-black">표지색 정하기</p>
+
+                      <div className="flex space-x-3 mt-[12px] mb-[8px]">
+                        <div className="w-[35px] h-[35px] rounded-full bg-album-100"></div>
+                        <div className="w-[35px] h-[35px] rounded-full bg-album-200"></div>
+                        <div className="w-[35px] h-[35px] rounded-full bg-album-300"></div>
+                        <div className="w-[35px] h-[35px] rounded-full bg-album-400"></div>
+                        <div className="w-[35px] h-[35px] rounded-full bg-album-500"></div>
+                        <div className="w-[35px] h-[35px] rounded-full bg-album-600"></div>
+                      </div>
+                    </div>
+                  ),
                   confirmButtonText: "생성하기",
                   cancelButtonText: "취소하기",
                 })}
@@ -81,8 +101,16 @@ function MainPage() {
                 onClick={() => openModal({
 
                   title: "추억 보관하기",
-                  content: <div>사진은 최대 5장까지 한 번에 추가할 수 있습니다.</div>,
-                  confirmButtonText: "생성하기",
+                  content: (
+                    <div className="py-2">
+                      <p className="mb-4">사진은 최대 5장까지 한 번에 추가할 수 있습니다.</p>
+                      <InputImg />
+                      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
+                      <DropDown />
+
+                    </div>
+                  ),
+                  confirmButtonText: "보관하기",
                   cancelButtonText: "취소하기",
                 })}
                 className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">

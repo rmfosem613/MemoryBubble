@@ -1,6 +1,7 @@
 import React from 'react';
 import { useModalStore } from '@/stores/useModalStore';
 import { useModal } from '@/hooks/useModal';
+import Button from '../Button/Button';
 
 function Modal() {
   // 상태
@@ -29,7 +30,7 @@ function Modal() {
             </h1>
 
             {/* 본문 영역 */}
-            <div className="flex-1 px-5 py-3 md:px-6 lg:px-8 overflow-auto">
+            <div className="flex-1 px-5 py-3 md:px-6 lg:px-8 overflow-auto font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg text-gray-600">
               {content}
             </div>
 
@@ -37,14 +38,20 @@ function Modal() {
             <div className="px-5 py-4 md:px-6 lg:px-8 bg-gray-100 rounded-b-lg flex justify-end space-x-3">
               {/* 취소 버튼 */}
               {cancelButtonText && (
-                <button className="border" onClick={handleCancelClick}>
-                  {cancelButtonText}
-                </button>
+                // 버튼 컴포넌트 적용
+                <div onClick={handleCancelClick}>
+                  <Button
+                    name={cancelButtonText}
+                    color='white' />
+                </div>
+
               )}
               {/* 확인 버튼 */}
-              <button className="border" onClick={handleConfirmClick}>
-                {confirmButtonText || '확인하기'}
-              </button>
+              <div onClick={handleConfirmClick}>
+                <Button
+                  name={confirmButtonText}
+                  color='blue' />
+              </div>
             </div>
           </div>
         </div>
