@@ -24,7 +24,7 @@ function MainAlbum({
 
         {/* 텍스트 영역 */}
         <div className="flex flex-col gap-1 pl-[10px] w-[50%]">
-          <p className="text-h3-lg font-h3 mt-auto">{title}</p>
+          <p className="text-h3-lg font-p-700 mt-auto">{title}</p>
           <p className="text-lg-lg">{description}</p>
           <p className="text-lg-lg mt-auto text-right">{photoCount}</p>
         </div>

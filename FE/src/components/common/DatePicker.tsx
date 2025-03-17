@@ -75,7 +75,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onChange }) => {
     <div className="relative w-full">
       <input
         type="text"
-        className="w-full p-2 rounded-lg border border-gray-300 text-sm font-pretendard cursor-pointer"
+        className="w-full p-2 rounded-lg border border-gray-300 text-sm cursor-pointer"
         value={formatDate(selectedDate)}
         onClick={toggleCalendar}
         readOnly

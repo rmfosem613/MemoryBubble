@@ -17,8 +17,8 @@ function LetterContent() {
       <div className="relative z-10 h-full flex flex-col">
         <div>
           <div className="flex space-x-3 relative z-20 items-end mb-[9px]">
-            <p className="text-h3-lg font-h3">TO.</p>
-            <p className="pb-[2px] text-h4-lg font-h4">사랑스런 큰딸</p>
+            <p className="text-h3-lg font-p-700">TO.</p>
+            <p className="pb-[2px] text-h4-lg font-p-700">사랑스런 큰딸</p>
           </div>
         </div>
         
@@ -32,8 +32,8 @@ function LetterContent() {
 
         <div>
           <div className="flex space-x-3 relative z-20 items-end mt-[-15px] justify-end">
-            <p className="text-h3-lg font-h3">From.</p>
-            <p className="pb-[2px] text-h4-lg font-h4">엄마가</p>
+            <p className="text-h3-lg font-p-700">From.</p>
+            <p className="pb-[2px] text-h4-lg font-p-700">엄마가</p>
           </div>
         </div>
       </div>
