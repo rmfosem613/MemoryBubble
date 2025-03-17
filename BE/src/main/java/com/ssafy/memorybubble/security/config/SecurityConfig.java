@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @RequiredArgsConstructor
 @Configuration
@@ -25,11 +26,14 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    private final TokenExceptionFilter tokenExceptionFilter;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.
-                csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
+        http
+                .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
+                .cors(c->c.configurationSource(corsConfigurationSource)) // FrontEnd cors설정
                 .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 로그인 비활성화
                 .formLogin(AbstractHttpConfigurer::disable) // 기본 폼 로그인 비활성화
                 .logout(AbstractHttpConfigurer::disable) // 기본 로그아웃 비활성화
@@ -38,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                                 .permitAll()
-                                .requestMatchers("/api/auth/success", "/api/auth/login")
+                                .requestMatchers("/api/auth/success", "/api/auth/login", "/api/auth/reissue")
                                 .permitAll()
                                 .anyRequest().authenticated()
                 )
@@ -52,7 +56,7 @@ public class SecurityConfig {
                 )
                 // jwt 설정
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new TokenExceptionFilter(), tokenAuthenticationFilter.getClass());
+                .addFilterBefore(tokenExceptionFilter, tokenAuthenticationFilter.getClass());
 
         return http.build();
     }
