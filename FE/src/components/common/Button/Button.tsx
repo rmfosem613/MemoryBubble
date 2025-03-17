@@ -18,7 +18,7 @@ function Button({ icon, name, color }: ButtonType) {
           ${iconStyle[color].border} 
           flex items-center justify-center 
           rounded-[8px] 
-          font-subtitle-1
+          font-p-500
           pt-[13px] pb-[13px] pl-[12px] pr-[12px]
           md:pt-[13px] md:pb-[13px] md:pl-[16px] md:pr-[16px]
           lg:pt-[13px] lg:pb-[13px] lg:pl-[24px] lg:pr-[24px]
@@ -28,7 +28,7 @@ function Button({ icon, name, color }: ButtonType) {
 
         {/* name 값이 없을 때 여백 뜨지 않게 */}
         {name &&
-          <span className="text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg font-subtitle-1 ml-[8px]">
+          <span className="text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg font-p-500 ml-[8px]">
             {name}
           </span>
         }

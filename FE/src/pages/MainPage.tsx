@@ -1,31 +1,37 @@
 import SlidingAlbumList from "@/components/album/SlidingAlbumList"
 
 import useAlbumStore from "@/stores/useAlbumStore";
+import { Link } from "react-router-dom";
+
+import { useModal } from "@/hooks/useModal";
 
 function MainPage() {
 
-  const {currentAlbum} = useAlbumStore();
+  const { currentAlbum } = useAlbumStore();
+
+  // 모달 컴포넌트 불러오기
+  const { openModal } = useModal();
 
   return (
     <>
       {/* 임시 헤더 영역 */}
       <div className="w-full h-[65px] z-50 fixed top-0 left-0 bg-white opacity-[80%]">
-        <p className="text-h-logo-lg font-h-logo p-[16px]">추억방울</p>
+        <p className="text-h-logo-lg font-p-800 p-[16px]">추억방울</p>
       </div>
 
       {/* 여기서부터 MainPage */}
       <div className={`${currentAlbum?.bgColor || 'bg-album-200'} h-screen transition-colors duration-500`}>
-        <div className="flex w-[90%] ml-0 z-0 relative flex">
+        <div className="flex w-[90%] ml-0 z-0 relative">
           {/* 영역1 */}
           <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex">
             {/* 앨범 이미지 영역 */}
-            <div className="flex mb-auto w-full">
+            <div className="flex mb-auto w-full h-full cursor-pointer">
 
               {/* 앨범 제목 */}
               <div className={`absolute z-10 w-full bg-album-200 ${currentAlbum?.bgColor || 'bg-album-200'} transition-colors duration-500`}>
                 <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
                   <p
-                    className='absolute text-album-1-lg font-album-1 bg-clip-text w-[94%]
+                    className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
                     drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]
                     '
                     style={{
@@ -56,20 +62,38 @@ function MainPage() {
           <div className="h-full bg-blue-400">
             <SlidingAlbumList />
             <div className="fixed w-[360px] p-4 mr-auto ml-[-380px] bottom-[8px] z-40 grid grid-cols-2 gap-4">
-              <div className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
-                <p className="text-subtitle-1-lg font-subtitle-1">
+              <button
+                // onClick={() => console.log('앨범 생성 버튼이 클릭되었습니다.')}
+                onClick={() => openModal({
+
+                  title: "앨범 생성",
+                  content: <div>새로운 추억보관함을 생성해보세요!</div>,
+                  confirmButtonText: "생성하기",
+                  cancelButtonText: "취소하기",
+                })}
+                className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md"
+              >
+                <p className="text-subtitle-1-lg font-p-500">
                   앨범 생성
                 </p>
-              </div>
-              <div className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
-                <p className="text-subtitle-1-lg font-subtitle-1">
+              </button>
+              <button
+                onClick={() => openModal({
+
+                  title: "추억 보관하기",
+                  content: <div>사진은 최대 5장까지 한 번에 추가할 수 있습니다.</div>,
+                  confirmButtonText: "생성하기",
+                  cancelButtonText: "취소하기",
+                })}
+                className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
+                <p className="text-subtitle-1-lg font-p-500">
                   사진 추가
                 </p>
-              </div>
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </div >
     </>
   )
 }

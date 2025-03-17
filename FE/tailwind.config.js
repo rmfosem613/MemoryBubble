@@ -393,21 +393,10 @@ module.exports = {
         // 모바일 버전에서 album font 사용 x
       },
       fontWeight: {
-        h1: "700", // bold
-        h2: "700",
-        h3: "700",
-        h4: "700",
-        h5: "700",
-        'subtitle-1': "500", // medium
-        'subtitle-2': "500",
-        'subtitle-3': "500",
-        'paragraph-lg': "400", // regular
-        paragraph: "400",
-        'paragraph-sm': "400",
-        "h-logo": "800", // ExtraBold
-        "album-1": "800",
-        "album-2": "800",
-        "album-3": "800",
+        "p-700": "700", // h1~h5였음
+        'p-500': "500", // medium, subtitle
+        'p-400': "400", // regular, preg
+        'p-800': "800", // 로고, 메인 페이지 큰 글자
       },
       boxShadow: {
         'sm': '0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.2)',

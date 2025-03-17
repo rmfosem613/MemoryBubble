@@ -22,8 +22,8 @@ function CassetteContent() {
 
       {/* 카세트 보낸이 */}
       <div className='absolute z-20 flex w-full top-0 h-full justify-center mt-[14%]'>
-        <p className='absolute font-h4 text-h4-lg ml-[-25px]'>From. 아빠</p>
-        <p className='absolute text-gray-600 mt-[110px] ml-[200px] text-p-lg font-pretendard'>2024.03.17</p>
+        <p className='absolute font-p-700 text-h4-lg ml-[-25px]'>From. 아빠</p>
+        <p className='absolute text-gray-600 mt-[110px] ml-[200px] text-p-lg'>2024.03.17</p>
       </div>
 
       <div className='absolute z-20 top-0 h-full w-full flex justify-center'>

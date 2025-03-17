@@ -14,17 +14,17 @@ function LetterControls() {
     <div className="border-2 border-gray-300 rounded-[8px] h-full w-full mb-1">
 
       <div className="bg-gray-200 p-[10px] mb-[10px]">
-        <p className="text-h5-lg font-subtitle-1">편지 상세 설정</p>
+        <p className="text-h5-lg font-p-500">편지 상세 설정</p>
       </div>
 
       <div className="ml-[12px]">
 
         {/* 받는 사람 */}
-        <p className="text-subtitle-1-lg font-subtitle-1 mb-[3px]">받는 사람</p>
+        <p className="text-subtitle-1-lg font-p-500 mb-[3px]">받는 사람</p>
 
         <Menu as="div" className="relative inline-block w-full pr-[12px] text-left mb-[15px]">
           <div>
-            <MenuButton className="inline-flex w-full justify-between gap-x-1.5 rounded-[8px] bg-white px-3 py-2 text-p-sm font-pretendard text-gray-500 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50">
+            <MenuButton className="inline-flex w-full justify-between gap-x-1.5 rounded-[8px] bg-white px-3 py-2 text-p-sm text-gray-500 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50">
               멤버
               <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
             </MenuButton>
@@ -81,8 +81,8 @@ function LetterControls() {
         </Menu>
 
         {/* 느린 편지 보내기 */}
-        <p className="text-subtitle-1-lg font-subtitle-1">느린 편지 보내기</p>
-        <p className="text-sm-lg font-pretendard mb-[3px]">설정 시, 해당 날짜에 열람 가능합니다.</p>
+        <p className="text-subtitle-1-lg font-p-500">느린 편지 보내기</p>
+        <p className="text-sm-lg mb-[3px]">설정 시, 해당 날짜에 열람 가능합니다.</p>
 
         {/* DatePicker */}
         {/* <div className="border border-gray-300 h-[38px] rounded-[8px] mr-[12px] mb-[15px]">
@@ -92,7 +92,7 @@ function LetterControls() {
         </div>
 
         {/* 색상 */}
-        <p className="text-subtitle-1-lg font-subtitle-1">색상</p>
+        <p className="text-subtitle-1-lg font-p-500">색상</p>
         <div className="flex justify-between items-center border border-gray-300 h-[50px] rounded-[8px] mr-[12px] mb-[10px] pl-[18px] pr-[18px]">
           <div className="justify-center items-center w-[30px] h-[30px] bg-spring-200 rounded-full"></div>
           <div className="justify-center items-center w-[30px] h-[30px] bg-summer-200 rounded-full"></div>
