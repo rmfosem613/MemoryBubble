@@ -1,14 +1,8 @@
-import React from 'react';
-
-interface ColorOption {
-  id: string;
-  className: string;
-  waveColor: string;
-}
+import { ColorOption, ColorTheme } from '@/types/Letter';
 
 interface ColorSelectorProps {
   colors: ColorOption[];
-  selectedColor: string | null;
+  selectedColor: ColorTheme;
   onSelectColor: (colorId: string) => void;
 }
 
@@ -21,7 +15,7 @@ function ColorSelector({ colors, selectedColor, onSelectColor }: ColorSelectorPr
           className={`flex justify-center items-center w-[30px] h-[30px] ${color.className} rounded-full cursor-pointer ${
             selectedColor === color.id ? 'ring-2 ring-blue-500 ring-offset-2' : ''
           }`}
-          onClick={() => onSelectColor(color.id)}
+          onClick={() => onSelectColor(color.id!)}
         />
       ))}
     </div>

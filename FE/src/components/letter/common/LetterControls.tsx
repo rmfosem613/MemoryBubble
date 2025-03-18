@@ -1,34 +1,11 @@
-import { useState } from 'react'
 import DatePicker from '@/components/common/DatePicker'
-import LetterDropdown from './LetterDropDown'
-import ColorSelector from './ColorSelector'
+import LetterDropdown from '@/components/letter/common/LetterDropDown'
+import ColorSelector from '@/components/letter/common/ColorSelector'
 import { useLetterStore } from '@/stores/useLetterStore'
-
-// 색상 정보를 정의하는 상수 객체
-export const COLORS = {
-  spring: { id: 'spring', className: 'bg-spring-200', waveColor: '#FFBFCD' }, 
-  summer: { id: 'summer', className: 'bg-summer-200', waveColor: '#76C1DE' },
-  autumn: { id: 'autumn', className: 'bg-autumn-200', waveColor: '#F8C37F' },
-  winter: { id: 'winter', className: 'bg-winter-200', waveColor: '#97A1D6' },
-};
+import { COLOR_OPTIONS, MEMBER_OPTIONS } from '@/utils/letterUtils';
 
 function LetterControls() {
-  const { selectedColor, setSelectedColor } = useLetterStore();
-  const [selectedMember, setSelectedMember] = useState<{ id: string; label: string } | null>(null);
-
-  const colors = [
-    COLORS.spring,
-    COLORS.summer,
-    COLORS.autumn,
-    COLORS.winter,
-  ];
-
-  const memberOptions = [
-    { id: 'mom', label: '울엄마' },
-    { id: 'dad', label: '울아빠' },
-    { id: 'daughter', label: '사랑스런 큰딸' },
-    { id: 'son', label: '막내아들' },
-  ];
+  const { selectedColor, setSelectedColor, selectedMember, setSelectedMember } = useLetterStore();
 
   const handleMemberSelect = (option: { id: string; label: string }) => {
     setSelectedMember(option);
@@ -48,7 +25,7 @@ function LetterControls() {
         {/* 받는 사람 */}
         <p className="text-subtitle-1-lg font-p-500 mb-[3px]">받는 사람</p>
         <LetterDropdown 
-          options={memberOptions}
+          options={MEMBER_OPTIONS}
           placeholder="멤버"
           onSelect={handleMemberSelect}
           selectedOption={selectedMember}
@@ -66,7 +43,7 @@ function LetterControls() {
         {/* 색상 */}
         <p className="text-subtitle-1-lg font-p-500">색상</p>
         <ColorSelector 
-          colors={colors} 
+          colors={COLOR_OPTIONS} 
           selectedColor={selectedColor} 
           onSelectColor={handleColorSelect} 
         />

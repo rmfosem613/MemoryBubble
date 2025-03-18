@@ -1,16 +1,12 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
-
-interface LetterDropdown {
-  id: string;
-  label: string;
-}
+import { LetterMember } from '@/types/Letter';
 
 interface DropdownMenuProps {
-  options: LetterDropdown[];
+  options: LetterMember[];
   placeholder?: string;
-  onSelect: (option: LetterDropdown) => void;
-  selectedOption?: LetterDropdown | null;
+  onSelect: (option: LetterMember) => void;
+  selectedOption?: LetterMember | null;
 }
 
 function LetterDropdown({

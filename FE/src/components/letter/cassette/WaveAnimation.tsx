@@ -1,6 +1,5 @@
-import React from 'react';
 import { useLetterStore } from '@/stores/useLetterStore';
-import { COLORS } from './LetterControls';
+import { COLORS } from '@/utils/letterUtils';
 
 function WaveAnimation() {
   const { selectedColor } = useLetterStore();
