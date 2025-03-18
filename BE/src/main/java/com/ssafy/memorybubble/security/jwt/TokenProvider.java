@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.security.jwt;
 
+import com.ssafy.memorybubble.dto.TokenDto;
 import com.ssafy.memorybubble.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -7,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +32,7 @@ import static com.ssafy.memorybubble.exception.ErrorCode.INVALID_TOKEN;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class TokenProvider {
 
     @Value("${jwt.secret}")
@@ -43,6 +46,17 @@ public class TokenProvider {
     private void setSecretKey() {
         byte[] keyBytes = Base64.getDecoder().decode(secret);
         secretKey = Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public TokenDto getTokenDto(Authentication authentication) {
+        // accessToken과 refreshToken 생성
+        String accessToken = generateAccessToken(authentication);
+        String refreshToken = generateRefreshToken(authentication);
+
+        return TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     // Authentication 객체의 권한 정보 사용해서 access token 생성 및 반환
@@ -63,8 +77,6 @@ public class TokenProvider {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining());
-        log.info("Generating access token for user: {}", authentication.getName());
-        log.info("authorities : {}", authorities);
 
         return Jwts.builder()
                 .subject(authentication.getName())
