@@ -48,8 +48,8 @@ function LetterContent() {
       default:
         return (
           <>
-            <img src={snow} className="absolute bottom-[-70px] left-[-60px] z-0 w-[330px] lg:w-[350px] md:w-[340px]" />
-            <img src={snowman} className="absolute bottom-[-30px] right-[10px] z-0 w-[130px] lg:w-[250px] md:w-[140px]" />
+            <img src={snow} className="absolute bottom-[-70px] left-[-60px] z-0 w-[300px] lg:w-[350px] md:w-[320px]" />
+            <img src={snowman} className="absolute bottom-[-30px] right-[10px] z-0 w-[200px] lg:w-[250px] md:w-[230px]" />
           </>
         );
     }

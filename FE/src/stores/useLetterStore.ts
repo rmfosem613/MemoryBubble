@@ -15,6 +15,8 @@ interface Page {
 // 카세트 데이터 타입 정의
 interface CassetteData {
   isRecorded?: boolean;
+  recordingUrl?: string | null;
+  recordingDuration?: number;
 }
 
 // 편지 상태 인터페이스
@@ -22,7 +24,7 @@ interface LetterState {
   
   // 편지 타입
   letterType: LetterType;
-  cassetteData?: CassetteData;
+  cassetteData: CassetteData;
   
   // 색상 테마
   selectedColor: ColorTheme;
@@ -52,7 +54,9 @@ export const useLetterStore = create<LetterState>((set) => ({
   currentPage: 0,
   letterType: 'text',
   cassetteData: {
-    isRecorded: false
+    isRecorded: false,
+    recordingUrl: null,
+    recordingDuration: 0
   },
   
   // 색상 테마 초기값
