@@ -1,40 +1,70 @@
 import Cassette from '@/assets/letter/cassette-1.svg'
+import Cassette2 from '@/assets/letter/cassette-2.svg'
+import Cassette3 from '@/assets/letter/cassette-3.svg'
+import Cassette4 from '@/assets/letter/cassette-4.svg'
 import CassetteReel from '@/assets/letter/cassette-reel.svg'
-
+import WaveAnimation from './WaveAnimation'
 import { Circle, Headset } from 'lucide-react'
+import { useLetterStore } from '@/stores/useLetterStore'
 
 function CassetteContent() {
+  const { selectedColor } = useLetterStore();
+  
+  // 선택된 색상에 따라 카세트 이미지 변경
+  const getCassetteImage = () => {
+    switch (selectedColor) {
+      case 'summer':
+        return Cassette2; // 여름
+      case 'spring':
+        return Cassette3; // 봄
+      case 'autumn':
+        return Cassette4; // 가을
+      case 'winter':
+      default:
+        return Cassette; // 겨울 또는 기본값
+    }
+  };
+
   return (
-    <div className="border-2 border-gray-300 rounded-[8px] p-5 h-[95.5%] relative overflow-hidden w-[100%]">
+    <div className="border-2 border-gray-300 rounded-[8px] p-5 h-[95.5%] relative overflow-hidden w-[100%] flex">
 
       {/* 카세트 이미지 */}
       <div className='flex h-full w-full justify-center mt-[-50px]'>
-        <img src={Cassette} className='relative z-10 w-[400px]' />
-        <img src={CassetteReel} className='absolute w-[44px] mt-[182px] ml-[-161.6px] z-10 animate-spin-slow' />
-        <img src={CassetteReel} className='absolute w-[44px] mt-[182px] ml-[161.3px] z-10 animate-spin-slow' />
+        <div className='mt-[80px] h-[234px]'>
+          <img src={getCassetteImage()} className='relative z-10 w-[400px] h-full' />
+          <img src={CassetteReel} className='relative w-[44px] z-10 animate-spin-slow
+          top-[-149px] 
+         left-[24%] sm:left-[93px] md:left-[99px]' />
+          <img src={CassetteReel} className='relative w-[44px] z-10 animate-spin-slow
+          top-[-192px] 
+          ml-[-15px] sm:ml-0
+          left-[68%] sm:left-[249px] md:left-[257px]' />
+
+          {/* 카세트 보낸이 */}
+          <div className='relative z-30 flex justify-center top-[-315px] h-full p-[25px]'>
+            <div className='absolute bg-white w-0 sm:w-[120px] h-[20px]' />
+            <div className='relative bg-white w-0 sm:w-[120px] h-[20px] ml-[10px] mt-[15px]' />
+          </div>
+
+          <div className='relative z-30 flex justify-center top-[-520px] w-full h-0 sm:h-[130px] overflow-hidden'>
+            <p className='absolute font-p-700 text-h4-lg'>From. 아빠</p>
+            <p className='relative text-gray-600 mt-[110px] ml-[250px] text-p-lg'>2024.03.17</p>
+          </div>
+        </div>
       </div>
 
-      {/* 카세트 흰 테이프 */}
-      <div className='absolute z-20 flex justify-center top-0 h-full w-full'>
-        <div className='absolute bg-white w-[120px] h-[20px] mt-[100px] ml-[-28px]' />
-        <div className='absolute bg-white w-[120px] h-[20px] mt-[110px] ml-[-19px] ' />
+      <div className='absolute z-20 top-0 h-full w-full flex justify-center left-0'>
+        <div className='absolute flex top-[320px]'>
+          <div className='relative h-[10px] w-[400px] bg-winter-100 rounded-full'></div>
+          <div className='absolute h-[10px] w-[50px] bg-winter-300 rounded-full'></div>
+          <p className='absolute left-0 top-[10px]'>0:40</p>
+          <p className='absolute right-0 top-[10px]'>3:30</p>
+        </div>
       </div>
 
-      {/* 카세트 보낸이 */}
-      <div className='absolute z-20 flex w-full top-0 h-full justify-center mt-[14%]'>
-        <p className='absolute font-p-700 text-h4-lg ml-[-25px]'>From. 아빠</p>
-        <p className='absolute text-gray-600 mt-[110px] ml-[200px] text-p-lg'>2024.03.17</p>
-      </div>
 
-      <div className='absolute z-20 top-0 h-full w-full flex justify-center'>
-        <div className='absolute bottom-0 mb-[134px] ml-[-40px] h-[10px] w-[400px] bg-winter-100 rounded-full'></div>
-        <div className='absolute bottom-0 mb-[134px] ml-[-390px] h-[10px] w-[50px] bg-winter-300 rounded-full'></div>
-        <p className='absolute bottom-0 mb-[106px] ml-[145px] left-0'>0:00</p>
-        <p className='absolute bottom-0 mb-[106px] mr-[185px] right-0'>3:30</p>
-      </div>
-
-      <div className='absolute z-20 w-full justify-center ml-[-23px] flex mt-[-30px]'>
-        <div className='relative bg-white border-[1px] border-gray-500 w-[250px] h-[50px] rounded grid grid-cols-2'>
+      <div className='absolute top-[400px] z-20 w-full justify-center ml-[-23px] flex mt-[-30px]'>
+        <div className='absolute bg-white border-[1px] border-gray-500 w-[250px] h-[50px] rounded grid grid-cols-2'>
           <div className=''>
             <Circle fill='#F5535E' strokeWidth={0} width={'25px'} height={'25px'} className='absolute mt-[12px] ml-[50px] cursor-pointer' />
           </div>
@@ -45,23 +75,11 @@ function CassetteContent() {
         </div>
       </div>
 
-
-
-
-      {/* 파도 애니메이션 컨테이너 */}
-      <div className="absolute bottom-0 left-0 w-full h-full overflow-hidden">
-        {/* 첫 번째 파도 */}
-        <div className="absolute top-[60%] left-[-30%] bg-[#97A1D6] w-[1500px] h-[1500px] -ml-[150px] -mb-[250px] origin-[50%_48%] rounded-[43%] opacity-60 animate-drift"></div>
-
-        {/* 두 번째 파도 */}
-        <div className="absolute top-[60%] left-[-30%] bg-[#97A1D6] w-[1500px] h-[1500px] -ml-[150px] -mb-[250px] origin-[50%_48%] rounded-[43%] opacity-60 animate-drift-fast"></div>
-
-        {/* 세 번째 파도 */}
-        <div className="absolute top-[60%] left-[-30%] bg-[#97A1D6] w-[1500px] h-[1500px] -ml-[150px] -mb-[250px] origin-[50%_48%] rounded-[43%] opacity-60 animate-drift-slow"></div>
-      </div>
+      {/* 파도 애니메이션 컴포넌트 */}
+      <WaveAnimation />
 
       {/* 이 스타일을 head에 추가하거나 전역 CSS 파일에 포함시켜야 합니다 */}
-      <style jsx>{`
+      <style>{`
         @keyframes spin-slow {
           from {
             transform: rotate(0deg);
@@ -74,8 +92,17 @@ function CassetteContent() {
         .animate-spin-slow {
           animation: spin-slow 4s linear infinite;
         }
+        
+        @keyframes drift {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        .animate-drift {
+          animation: drift 25s infinite linear;
+        }
       `}</style>
-    </div>
+    </div >
   );
 };
 

@@ -10,7 +10,7 @@ import Modal from './components/common/Modal/Modal';
 
 function App() {
   return (
-    <div className='font-pretendard font-normal'>
+    <div className='font-pretendard font-normal min-w-80'>
       <BrowserRouter>
         <Routes>
           <Route index path='/' element={<MainPage />} />

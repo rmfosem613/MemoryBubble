@@ -3,6 +3,9 @@ import { create } from 'zustand';
 // 편지 타입 정의
 type LetterType = 'text' | 'cassette';
 
+// 색상 테마 타입 정의
+type ColorTheme = 'spring' | 'summer' | 'autumn' | 'winter' | null;
+
 // 페이지 타입 정의
 interface Page {
   lines: string[];
@@ -20,6 +23,10 @@ interface LetterState {
   // 편지 타입
   letterType: LetterType;
   cassetteData?: CassetteData;
+  
+  // 색상 테마
+  selectedColor: ColorTheme;
+  setSelectedColor: (color: ColorTheme) => void;
 
   // 텍스트 편지 페이지
   pages: Page[];
@@ -47,6 +54,10 @@ export const useLetterStore = create<LetterState>((set) => ({
   cassetteData: {
     isRecorded: false
   },
+  
+  // 색상 테마 초기값
+  selectedColor: null,
+  setSelectedColor: (color) => set({ selectedColor: color }),
   
   // 페이지 배열
   setPages: (pages) => set({ pages }),
