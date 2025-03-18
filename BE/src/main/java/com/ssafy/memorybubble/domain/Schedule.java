@@ -39,17 +39,13 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
-    @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    private Boolean isRepeat;
-
     @Builder
-    public Schedule(Family family, Album album, String content, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime endDate, Boolean isRepeat) {
+    public Schedule(Family family, Album album, String content, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime endDate) {
         this.family = family;
         this.album = album;
         this.content = content;
         this.createdAt = createdAt;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.isRepeat = isRepeat;
     }
 }
