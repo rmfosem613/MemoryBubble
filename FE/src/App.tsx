@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
 import Modal from './components/common/Modal/Modal';
+import CalendarPage from './pages/CalendarPage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path='/letter' element={<WriteLetterPage />} />
           <Route path='/album/basic' element={<BasicPhotoAlbumPage />} />
           <Route path='/album' element={<PhotoAlbumPage />} />
+          <Route path='/calendar' element={<CalendarPage />} />
         </Routes>
       </BrowserRouter>
       <Modal />
