@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.security.jwt;
 
+import com.ssafy.memorybubble.exception.TokenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static com.ssafy.memorybubble.exception.ErrorCode.TOKEN_EXPIRED;
 
 @RequiredArgsConstructor
 @Component
@@ -28,13 +30,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         log.info("Access token: {}", accessToken);
 
         // accessToken 검증
-        if (tokenProvider.validateToken(accessToken)) {
-            // 토큰이 유효할 경우, Authentication 객체를 가지고 와서 Security Context에 저장
-            Authentication authentication = tokenProvider.getAuthentication(accessToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        else {
-            // access token 재발급 로직 추가
+        if (StringUtils.hasText(accessToken)) {
+            if (tokenProvider.validateToken(accessToken)) {
+                log.info("Access token validated");
+                // 토큰이 유효할 경우, Authentication 객체를 가지고 와서 Security Context에 저장
+                Authentication authentication = tokenProvider.getAuthentication(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                log.info("Access token expired");
+                throw new TokenException(TOKEN_EXPIRED);
+            }
         }
 
         filterChain.doFilter(request, response);
