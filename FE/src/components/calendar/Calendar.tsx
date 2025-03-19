@@ -1,77 +1,66 @@
-// useCalendar.ts
-import { useMemo } from 'react';
-import {
-  DayInfo,
-  DayName,
-  CalendarDateInfo,
-  CalendarHookReturn,
-} from '@/types/CalendarType';
-import useCalendarStore from '@/stores/useCalendarStore';
+// Calendar.tsx
+import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCalendar } from '@/hooks/useCalendar';
 
-const getCalendarDateInfo = (date: Date): CalendarDateInfo => {
-  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+const Calendar = () => {
+  const { currentDate, dayNames, days, nextMonth, prevMonth } = useCalendar();
 
-  return {
-    year: date.getFullYear(),
-    month: date.getMonth(),
-    today: new Date(),
-    firstDay,
-    lastDay,
-    firstDayOfWeek: firstDay.getDay(),
-    daysInMonth: lastDay.getDate(),
-  };
-};
-
-// 오늘 날짜 체크를 위한 함수 추출
-const checkIsToday = (day: number, dateInfo: CalendarDateInfo): boolean => {
   return (
-    dateInfo.today.getDate() === day &&
-    dateInfo.today.getMonth() === dateInfo.month &&
-    dateInfo.today.getFullYear() === dateInfo.year
+    <div className="flex flex-col w-full h-full p-4 border">
+      {/* 달력 헤더 */}
+      <div className="flex justify-center items-center space-x-2 mb-3">
+        <button
+          onClick={prevMonth}
+          className="rounded-full hover:bg-winter-100 focus:outline-none transition-colors duration-300 ease-in-out">
+          <ChevronLeft strokeWidth={3} size={28} />
+        </button>
+
+        <h2 className="text-h3-lg font-p-700">
+          {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월
+        </h2>
+
+        <button
+          onClick={nextMonth}
+          className="rounded-full hover:bg-winter-100 focus:outline-none transition-colors duration-300 ease-in-out">
+          <ChevronRight strokeWidth={3} size={28} />
+        </button>
+      </div>
+
+      {/* 요일 헤더 */}
+      <div className="grid grid-cols-7 gap-1 mb-3">
+        {dayNames.map((day, index) => (
+          <div
+            key={index}
+            className={`text-h5-lg font-p-700 text-end px-3
+              ${day === '일' ? 'text-red-300' : day === '토'? 'text-blue-700' : ''}
+            `}>
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* 날짜 그리드 */}
+      <div className="flex-1 grid grid-cols-7 gap-1">
+        {days.map((day, index) => (
+          <div
+            key={index}
+            className={`
+            relative min-h-20 flex items-center justify-center rounded-[4px] border-2 border-winter-100 transition-colors duration-300 ease-in-out 
+              ${!day.date ? 'invisible' : 'cursor-pointer'}
+            `}>
+            {/* 날짜(일) 표시 */}
+            <div className="absolute top-1 right-2">
+              <span
+                className={`text-h5-lg ${day.isToday ? 'bg-winter-200 text-white px-1.5 py-1 rounded-full' : ''}`}>
+                {day.date}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
-export function useCalendar(): CalendarHookReturn {
-  const { currentDate, nextMonth, prevMonth } = useCalendarStore();
-
-  // 요일 이름 배열
-  const dayNames: DayName[] = ['일', '월', '화', '수', '목', '금', '토'];
-
-  // 현재 달의 날짜 생성
-  const days: DayInfo[] = useMemo(() => {
-    const dateInfo = getCalendarDateInfo(currentDate);
-
-    // 빈 칸 배열 만들기 (첫 주 시작 전)
-    const emptyDays: DayInfo[] = Array.from(
-      { length: dateInfo.firstDayOfWeek },
-      () => ({
-        date: null,
-      }),
-    );
-
-    // 현재 달의 날짜 배열 만들기
-    const monthDays: DayInfo[] = Array.from(
-      { length: dateInfo.daysInMonth },
-      (_, i) => {
-        const dayNumber: number = i + 1;
-
-        return {
-          date: dayNumber,
-          isToday: checkIsToday(dayNumber, dateInfo),
-        };
-      },
-    );
-
-    // 두 배열 합치기
-    return [...emptyDays, ...monthDays];
-  }, [currentDate]);
-
-  return {
-    currentDate,
-    dayNames,
-    days,
-    nextMonth,
-    prevMonth,
-  };
-}
+export default Calendar;
