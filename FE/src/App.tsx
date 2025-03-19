@@ -19,7 +19,7 @@ function App() {
           <Route path='/font' element={<FontPage />} />
           <Route path='/letter' element={<WriteLetterPage />} />
           <Route path='/album/basic' element={<BasicPhotoAlbumPage />} />
-          <Route path='/album' element={<PhotoAlbumPage />} />
+          <Route path='/album/:id' element={<PhotoAlbumPage />} />
         </Routes>
       </BrowserRouter>
       <Modal />
