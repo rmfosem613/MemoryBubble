@@ -105,18 +105,6 @@ function InputImg() {
         accept="image/*"
         onChange={handleImageSelect}
       />
-
-      {/* 이미지 업로드 설명 */}
-      {/* <div 
-        className="w-full p-4 border border-dashed border-gray-300 rounded-md cursor-pointer bg-gray-50 text-center"
-        onClick={triggerFileInput}
-      >
-        <p className="text-gray-500">
-          {selectedImages.length === 0 
-            ? '클릭하여 사진을 추가하세요' 
-            : `${selectedImages.length}/5 이미지 선택됨`}
-        </p>
-      </div> */}
     </div>
   );
 }

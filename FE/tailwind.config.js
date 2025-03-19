@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      minWidth:{
+        'app':'510px'
+      },
       colors: {
         transparent: 'tranparent',
         // Gray
@@ -177,7 +180,7 @@ module.exports = {
           "180px",
           {
             lineHeight: "238px",
-            letterSpacing: "8px",
+            letterSpacing: "-2px",
             // fontWeight: "400",
           },
         ],
