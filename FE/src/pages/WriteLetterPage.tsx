@@ -1,25 +1,19 @@
 import Title from "@/components/common/Title";
-import LetterTypeSelector from '@/components/letter/LetterTypeSelector';
-import LetterContent from '@/components/letter/LetterContent';
-import CassetteContent from "@/components/letter/CassetteContent";
-import LetterControls from '@/components/letter/LetterControls';
-import { useLetterInput } from '@/hooks/useLetterInput';
-
+import LetterTypeSelector from '@/components/letter/common/LetterTypeSelector';
+import TextLetterContent from '@/components/letter/text/TextLetterContent';
+import CassetteContent from "@/components/letter/cassette/CassetteContent";
+import LetterControls from '@/components/letter/common/LetterControls';
 import Button from "@/components/common/Button/Button";
 import { useLetterStore } from "@/stores/useLetterStore";
 
 function WriteLetterPage() {
-
-  // 화면 클릭 감지
-  const { handleClick } = useLetterInput();
-
   // 편지 타입 선택
   const { letterType } = useLetterStore();
 
   return (
     <>
       <Title text="편지쓰기" />
-      <div className="container mt-[17px]" onClick={handleClick}>
+      <div className="container mt-[17px]">
         <div className="grid grid-cols-12 gap-1">
 
           {/* grid 9 */}
@@ -31,8 +25,7 @@ function WriteLetterPage() {
               </div>
               {/* 편지 레이아웃 */}
               <div className="row-span-10">
-                {/* <LetterContent /> */}
-                {letterType === 'text' ? <LetterContent /> : <CassetteContent />}
+                {letterType === 'text' ? <TextLetterContent /> : <CassetteContent />}
               </div>
             </div>
           </div>
