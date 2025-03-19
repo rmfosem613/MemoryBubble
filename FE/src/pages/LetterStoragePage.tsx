@@ -4,6 +4,9 @@ import LetterTypeSelector from '@/components/storage/StorageTypeSelector'
 import Button from '@/components/common/Button/Button'
 import { useBoxStore } from '@/stores/useLetterStore'
 
+import NewLetterContent from '@/components/storage/NewLetterContent'
+import ReceivedLetterContent from '@/components/storage/ReceivedLetterContent'
+
 import postBox from '@/assets/storage/postBox.svg'
 import doll from '@/assets/storage/doll.svg'
 
@@ -14,22 +17,6 @@ function LetterStoragePage() {
   const handleButtonClick = () => {
     navigate('/letter')
   }
-
-  // 새 편지 컨텐츠
-  const NewLetterContent = () => (
-    <div className="flex flex-col items-center justify-center h-full">
-      <div className="text-2xl font-bold text-gray-700 mb-4">새 편지함</div>
-      <p className="text-gray-500">아직 새로운 편지가 없습니다.</p>
-    </div>
-  )
-
-  // 받은 편지 컨텐츠
-  const ReceivedLetterContent = () => (
-    <div className="flex flex-col items-center justify-center h-full">
-      <div className="text-2xl font-bold text-gray-700 mb-4">받은 편지함</div>
-      <p className="text-gray-500">아직 받은 편지가 없습니다.</p>
-    </div>
-  )
 
   return (
     <>
