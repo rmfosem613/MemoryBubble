@@ -1,7 +1,77 @@
-import React from 'react';
+// useCalendar.ts
+import { useMemo } from 'react';
+import {
+  DayInfo,
+  DayName,
+  CalendarDateInfo,
+  CalendarHookReturn,
+} from '@/types/CalendarType';
+import useCalendarStore from '@/stores/useCalendarStore';
 
-function Calendar() {
-  return <div>Calendar</div>;
+const getCalendarDateInfo = (date: Date): CalendarDateInfo => {
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth(),
+    today: new Date(),
+    firstDay,
+    lastDay,
+    firstDayOfWeek: firstDay.getDay(),
+    daysInMonth: lastDay.getDate(),
+  };
+};
+
+// 오늘 날짜 체크를 위한 함수 추출
+const checkIsToday = (day: number, dateInfo: CalendarDateInfo): boolean => {
+  return (
+    dateInfo.today.getDate() === day &&
+    dateInfo.today.getMonth() === dateInfo.month &&
+    dateInfo.today.getFullYear() === dateInfo.year
+  );
+};
+
+export function useCalendar(): CalendarHookReturn {
+  const { currentDate, nextMonth, prevMonth } = useCalendarStore();
+
+  // 요일 이름 배열
+  const dayNames: DayName[] = ['일', '월', '화', '수', '목', '금', '토'];
+
+  // 현재 달의 날짜 생성
+  const days: DayInfo[] = useMemo(() => {
+    const dateInfo = getCalendarDateInfo(currentDate);
+
+    // 빈 칸 배열 만들기 (첫 주 시작 전)
+    const emptyDays: DayInfo[] = Array.from(
+      { length: dateInfo.firstDayOfWeek },
+      () => ({
+        date: null,
+      }),
+    );
+
+    // 현재 달의 날짜 배열 만들기
+    const monthDays: DayInfo[] = Array.from(
+      { length: dateInfo.daysInMonth },
+      (_, i) => {
+        const dayNumber: number = i + 1;
+
+        return {
+          date: dayNumber,
+          isToday: checkIsToday(dayNumber, dateInfo),
+        };
+      },
+    );
+
+    // 두 배열 합치기
+    return [...emptyDays, ...monthDays];
+  }, [currentDate]);
+
+  return {
+    currentDate,
+    dayNames,
+    days,
+    nextMonth,
+    prevMonth,
+  };
 }
-
-export default Calendar;

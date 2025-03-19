@@ -5,12 +5,24 @@ import CalendarEvent from '@/components/calendar/CalendarEvent';
 
 function CalendarPage() {
   return (
-    <div className="pt-[65px] h-screen flex space-x-3 justify-center items-center">
-      <CalendarHeader />
-      <div className="min-w-[1024px]">
+    <div className="w-full h-screen pt-[65px] grid grid-cols-[1fr_660px_366px_1fr]">
+      {/* 영역 1 */}
+      <div className="border flex items-center justify-center">
+        <CalendarHeader />
+      </div>
+
+      {/* 영역 2 */}
+      <div className="border flex items-center justify-center">
         <Calendar />
       </div>
-      <CalendarEvent />
+
+      {/* 영역 3 */}
+      <div className="border flex items-center justify-center">
+        <CalendarEvent />
+      </div>
+
+      {/* 영역 4 */}
+      <div className="border flex items-center justify-center">4</div>
     </div>
   );
 }
