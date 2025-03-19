@@ -40,5 +40,14 @@ spring:
               - profile_nickname
               - profile_image
               - account_email
+  cloud:
+    aws:
+      region:
+        static: ${aws.region}
+      credentials:
+        access-key: ${aws.access-key}
+        secret-key: ${aws.secret-key}
+      s3:
+        bucket: ${aws.bucket}
 jwt:
   secret: ${jwt.secret}
