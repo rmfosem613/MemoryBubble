@@ -177,15 +177,15 @@ module.exports = {
           },
         ],
         "album-1-lg": [
-          "180px",
+          "165px",
           {
-            lineHeight: "238px",
+            lineHeight: "246px",
             letterSpacing: "-2px",
             // fontWeight: "400",
           },
         ],
         "album-2-lg": [
-          "160px",
+          "140px",
           {
             lineHeight: "249px",
             letterSpacing: "-0.4px",
@@ -193,7 +193,7 @@ module.exports = {
           },
         ],
         "album-3-lg": [
-          "140px",
+          "120px",
           {
             lineHeight: "264px",
             letterSpacing: "-0.4px",
