@@ -1,8 +1,7 @@
 import SlidingAlbumList from "@/components/album/SlidingAlbumList"
-
 import useAlbumStore from "@/stores/useAlbumStore";
-
-import { useModal } from "@/hooks/useModal";
+import { useModal } from '@/hooks/useModal';
+import { useNavigate } from 'react-router-dom';
 
 // 모달창 관련 컴포넌트
 import InputText from "@/components/common/Modal/InputText";
@@ -10,11 +9,24 @@ import InputImg from "@/components/common/Modal/InputImg";
 import DropDown from "@/components/common/Modal/DropDown";
 
 function MainPage() {
-
   const { currentAlbum } = useAlbumStore();
+  const navigate = useNavigate();
 
-  // 모달 컴포넌트 불러오기
+  // 모달 관련
   const { openModal } = useModal();
+
+  // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
+  const handleAlbumClick = () => {
+    if (!currentAlbum) return;
+    
+    // 앨범 ID가 1인 경우 BasicPhotoAlbumPage로 이동
+    if (currentAlbum.id === 1) {
+      navigate('/album/basic');
+    } else {
+      // 그 외의 경우 일반 PhotoAlbumPage로 이동하며 id 전달
+      navigate(`/album/${currentAlbum.id}`);
+    }
+  };
 
   return (
     <>
@@ -24,15 +36,15 @@ function MainPage() {
       </div>
 
       {/* 여기서부터 MainPage */}
-      <div className={`${currentAlbum?.bgColor || 'bg-album-200'} h-screen transition-colors duration-500`}>
+      <div className={`${currentAlbum?.bgColor || 'bg-p-800'} h-screen transition-colors duration-500`}>
         <div className="flex w-[90%] ml-0 z-0 relative">
           {/* 영역1 */}
           <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex">
             {/* 앨범 이미지 영역 */}
-            <div className="flex mb-auto w-full h-full cursor-pointer">
+            <div className="flex mb-auto w-full">
 
               {/* 앨범 제목 */}
-              <div className={`absolute z-10 w-full bg-album-200 ${currentAlbum?.bgColor || 'bg-album-200'} transition-colors duration-500`}>
+              <div className={`absolute z-10 w-full bg-p-800 ${currentAlbum?.bgColor || 'bg-album-200'} transition-colors duration-500`}>
                 <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
                   <p
                     className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
@@ -50,10 +62,11 @@ function MainPage() {
                 </div>
               </div>
 
-              {/* 앨범 이미지 */}
+              {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
                 src={currentAlbum?.imageUrl || "src/assets/images/album-1.png"}
-                className='w-[94%] object-cover'
+                className='w-[94%] object-cover cursor-pointer'
+                onClick={handleAlbumClick}
               />
             </div>
 
@@ -118,6 +131,7 @@ function MainPage() {
                   사진 추가
                 </p>
               </button>
+
             </div>
           </div>
         </div>
