@@ -7,6 +7,7 @@ import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
 import Modal from './components/common/Modal/Modal';
 import MainWithLoading from './pages/MainWithLoading';
+import LetterStoragePage from './pages/LetterStoragePage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path='/letter' element={<WriteLetterPage />} />
           <Route path='/album/basic' element={<BasicPhotoAlbumPage />} />
           <Route path='/album/:id' element={<PhotoAlbumPage />} />
+          <Route path='/storage' element={<LetterStoragePage />} />
         </Routes>
       </BrowserRouter>
       <Modal />
