@@ -9,6 +9,9 @@ import Modal from './components/common/Modal/Modal';
 import CalendarPage from './pages/CalendarPage';
 import MainWithLoading from './pages/MainWithLoading';
 import LetterStoragePage from './pages/LetterStoragePage';
+import EnterPage from './pages/EnterPage';
+import JoinPage from './pages/JoinPage';
+import CreateGroupPage from './pages/CreateGroupPage';
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
           <Route path='/album/:id' element={<PhotoAlbumPage />} />
           <Route path='/storage' element={<LetterStoragePage />} />
           <Route path='/calendar' element={<CalendarPage />} />
+          <Route path='/enter' element={<EnterPage />} />
+          <Route path='/join' element={<JoinPage />} />
+          <Route path='/create' element={<CreateGroupPage />} />
         </Routes>
       </BrowserRouter>
       <Modal />
