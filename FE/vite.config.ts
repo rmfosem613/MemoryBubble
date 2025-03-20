@@ -20,4 +20,32 @@ export default defineConfig({
       '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)), // 유틸 함수 (데이터 포맷 변환, 공통 함수 등)
     },
   },
+      // 정적 에셋 처리 개선
+    build: {
+        assetsDir: 'assets',
+        // 빌드 명령 실행 시 콘솔에 상세 정보 출력
+        reportCompressedSize: true,
+        rollupOptions: {
+            output: {
+                // 청크 이름 커스터마이징
+                manualChunks: {
+                    vendor: ['react', 'react-dom'],
+                },
+                // 에셋 파일명 형식 지정
+                assetFileNames: (assetInfo) => {
+                    const info = assetInfo.name.split('.');
+                    const extType = info[info.length - 1];
+                    if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+                        return `assets/images/[name]-[hash][extname]`;
+                    }
+                    if (/woff|woff2|ttf|eot/i.test(extType)) {
+                        return `assets/fonts/[name]-[hash][extname]`;
+                    }
+                    return `assets/[name]-[hash][extname]`;
+                },
+            },
+        },
+    },
+    // 퍼블릭 디렉토리와 에셋 설정
+    publicDir: 'public',
 })
