@@ -1,7 +1,11 @@
+import PhotoAlbum from '@/components/album/PhotoAlbum';
+
 function PhotoAlbumPage() {
   return (
-    <div>PhotoAlbumPage</div>
-  )
+    <div>
+      <PhotoAlbum />
+    </div>
+  );
 }
 
-export default PhotoAlbumPage
+export default PhotoAlbumPage;
