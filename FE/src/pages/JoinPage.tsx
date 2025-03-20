@@ -8,6 +8,8 @@ import InputPic from "@/components/join/InputPic";
 
 import { useNavigate } from 'react-router-dom'
 
+import Title from "@/components/common/Title";
+
 // Custom components to replace missing react-icons
 const CircleNumber = ({ number, isActive }) => {
   const bgColor = isActive ? "#7DABF8" : "#E1E1E8";
@@ -61,70 +63,76 @@ function JoinPage() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-screen">
-
-      {/* 앞에 흰 div */}
-      <div className="px-10 py-[40px] w-[440px] h-[550px] border border-gray-300 bg-white rounded-[8px] flex flex-col z-30">
-        <div className="flex-grow">
-          <div className="flex justify-between">
-            <div className="flex justify-center items-center">
-              {currentStep > 1 ? (
-                <CircleCheck />
-              ) : (
-                <CircleNumber number={1} isActive={currentStep >= 1} />
-              )}
-              <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(1)}`}>개인정보</p>
-            </div>
-
-            <ChevronRight color="#4B4B51" size={20} />
-
-            <div className="flex justify-center items-center">
-              {currentStep > 2 ? (
-                <CircleCheck />
-              ) : (
-                <CircleNumber number={2} isActive={currentStep >= 2} />
-              )}
-              <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(2)}`}>생일입력</p>
-            </div>
-
-            <ChevronRight color="#4B4B51" size={20} />
-
-            <div className="flex justify-center items-center">
-              <CircleNumber number={3} isActive={currentStep >= 3} />
-              <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(3)}`}>사진등록</p>
-            </div>
-          </div>
-
-          <hr className="my-8" />
-
-          {/* Content based on current step */}
-          <div className="transition-opacity duration-300">
-            {currentStep === 1 && <InputInfo />}
-            {currentStep === 2 && <InputBirth />}
-            {currentStep === 3 && <InputPic />}
-          </div>
-        </div>
-
-        {/* Buttons fixed to bottom */}
-        <div className="flex justify-end mt-auto">
-          <div className="flex space-x-2">
-            {currentStep > 1 && (
-              <Button name="이전" color="white" onClick={handlePrev} />
-            )}
-            <Button name={currentStep === 3 ? "완료" : "다음"} color="blue" onClick={handleNext} />
-          </div>
-        </div>
+    <>
+      <div className="container">
+        <Title text="그룹 가입하기"/>
       </div>
 
-      {/* 세번째 파란색 div */}
-      <div className="absolute ml-[60px] px-8 py-[40px] w-[440px] h-[510px] bg-blue-500 rounded-[8px] flex flex-col z-10px" />
+      <div className="flex mt-[10px] items-center justify-center">
+
+        {/* 앞에 흰 div */}
+        <div className="px-10 py-[40px] w-[440px] h-[550px] border border-gray-300 bg-white rounded-[8px] flex flex-col z-30">
+          <div className="flex-grow">
+            <div className="flex justify-between">
+              <div className="flex justify-center items-center">
+                {currentStep > 1 ? (
+                  <CircleCheck />
+                ) : (
+                  <CircleNumber number={1} isActive={currentStep >= 1} />
+                )}
+                <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(1)}`}>개인정보</p>
+              </div>
+
+              <ChevronRight color="#4B4B51" size={20} />
+
+              <div className="flex justify-center items-center">
+                {currentStep > 2 ? (
+                  <CircleCheck />
+                ) : (
+                  <CircleNumber number={2} isActive={currentStep >= 2} />
+                )}
+                <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(2)}`}>생일입력</p>
+              </div>
+
+              <ChevronRight color="#4B4B51" size={20} />
+
+              <div className="flex justify-center items-center">
+                <CircleNumber number={3} isActive={currentStep >= 3} />
+                <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(3)}`}>사진등록</p>
+              </div>
+            </div>
+
+            <hr className="my-8" />
+
+            {/* Content based on current step */}
+            <div className="transition-opacity duration-300">
+              {currentStep === 1 && <InputInfo />}
+              {currentStep === 2 && <InputBirth />}
+              {currentStep === 3 && <InputPic />}
+            </div>
+          </div>
+
+          {/* Buttons fixed to bottom */}
+          <div className="flex justify-end mt-auto">
+            <div className="flex space-x-2">
+              {currentStep > 1 && (
+                <Button name="이전" color="white" onClick={handlePrev} />
+              )}
+              <Button name={currentStep === 3 ? "완료" : "다음"} color="blue" onClick={handleNext} />
+            </div>
+          </div>
+        </div>
+
+        {/* 세번째 파란색 div */}
+        <div className="absolute ml-[60px] px-8 py-[40px] w-[440px] h-[510px] bg-blue-500 rounded-[8px] flex flex-col z-10px" />
 
 
-      {/* 두번째 하늘색 div */}
-      <div className="absolute ml-[30px] px-8 py-[40px] w-[440px] h-[530px] bg-blue-300 rounded-[8px] flex flex-col z-20px" />
+        {/* 두번째 하늘색 div */}
+        <div className="absolute ml-[30px] px-8 py-[40px] w-[440px] h-[530px] bg-blue-300 rounded-[8px] flex flex-col z-20px" />
 
 
-    </div>
+      </div>
+    </>
   );
 }
 
