@@ -25,7 +25,7 @@ public class FamilyController {
 
     private final FamilyService familyService;
 
-    @PostMapping("")
+    @PostMapping
     @Operation(
             summary = "가족 생성 API",
             description = "body에 familyName을 전달하고 가족(그룹)을 생성합니다.",
