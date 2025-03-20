@@ -10,6 +10,9 @@ import InputImg from "@/components/common/Modal/InputImg"
 import DropDown from "@/components/common/Modal/DropDown"
 import Alert from "@/components/common/Alert"
 
+import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
+
+
 function BasicPhotoAlbumPage() {
   const photos = [
     album1, album2, album3, album4, album5,
@@ -185,6 +188,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={toggleSelectionMode}
                 >
+                  <CircleCheck strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-300"></div>
                   <p className="font-p-500 text-subtitle-1-lg">선택하기</p>
                 </div>
@@ -192,6 +197,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={enterThumbnailMode}
                 >
+                  <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
                   <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
                 </div>
@@ -199,6 +206,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={openAddPhotoModal}
                 >
+                  <CirclePlus strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200"></div>
                   <p className="font-p-500 text-subtitle-1-lg">사진 추가</p>
                 </div>
@@ -210,6 +219,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={toggleSelectionMode}
                 >
+                  <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
                   <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
                 </div>
@@ -217,6 +228,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={openMoveAlbumModal}
                 >
+                  <FolderUp strokeWidth={1} className="absolute z-30 ml-[-5pX] mt-[2px]" size={'22px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-400"></div>
                   <p className="font-p-500 text-subtitle-1-lg">앨범 이동하기</p>
                 </div>
@@ -224,6 +237,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={deleteSelectedPhotos}
                 >
+                  <Trash2 strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[1px]" size={'22px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-red-200 opacity-[70%]"></div>
                   <p className="font-p-500 text-subtitle-1-lg">삭제하기</p>
                 </div>
@@ -235,10 +250,13 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={cancelAllModes}
                 >
+                  <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
                   <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
                 </div>
                 <div className="flex space-x-1">
+                  <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
                   <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
                 </div>
