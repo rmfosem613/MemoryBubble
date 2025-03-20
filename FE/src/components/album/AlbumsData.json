@@ -11,7 +11,7 @@
     "id": 2,
     "title": "사랑이100일",
     "description": "사랑아 우리 곁에 와주어서 고마워. 항상 건강하게만 자라다오.",
-    "imageUrl": "src/assets/images/album-2.png",
+    "imageUrl": "/assets/album-2.png",
     "bgColor": "bg-album-300",
     "photoCount": "8장의 순간"
   },
@@ -19,7 +19,7 @@
     "id": 3,
     "title": "여행 앨범",
     "description": "특별한 장소에서의 추억",
-    "imageUrl": "src/assets/images/album-4.png",
+    "imageUrl": "/assets/album-4.png",
     "bgColor": "bg-album-100",
     "photoCount": "12장의 순간"
   },
@@ -27,7 +27,7 @@
     "id": 4,
     "title": "가족 모음집",
     "description": "함께한 시간들의 기록",
-    "imageUrl": "src/assets/images/album-5.png",
+    "imageUrl": "/assets/album-5.png",
     "bgColor": "bg-album-500",
     "photoCount": "18장의 순간"
   },
@@ -35,7 +35,7 @@
     "id": 5,
     "title": "특별한순간",
     "description": "소중한 순간들을 한데 모아 보세요.",
-    "imageUrl": "src/assets/images/album-3.png",
+    "imageUrl": "/assets/album-3.png",
     "bgColor": "bg-album-400",
     "photoCount": "15장의 순간"
   }

@@ -18,7 +18,7 @@ function MainPage() {
   // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
   const handleAlbumClick = () => {
     if (!currentAlbum) return;
-    
+
     // 앨범 ID가 1인 경우 BasicPhotoAlbumPage로 이동
     if (currentAlbum.id === 1) {
       navigate('/album/basic');
@@ -55,7 +55,8 @@ function MainPage() {
                       WebkitBackgroundClip: "text",
                       // WebkitTextStroke:"1px rgba(0, 0, 0, 0.1)", // 글자 stroke 버전
                       // backgroundImage: `url('${currentAlbum?.imageUrl || "./assets/album-1.png"}')`,
-                      backgroundImage: `url('${"../public/assets/album-1.png"}')`,
+                      // backgroundImage: `url('${"../public/assets/album-1.png"}')`,
+                      backgroundImage: `url('${currentAlbum?.imageUrl || "/assets/album-1.png"}')`,
                       backgroundSize: "100%"
                     }}>
                     {currentAlbum?.title || "추억보관함"}
@@ -66,7 +67,8 @@ function MainPage() {
               {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
                 // src={currentAlbum?.imageUrl || "./assets/album-1.png"}
-                src={"../../public/assets/album-1.png"}
+                // src={"../../public/assets/album-1.png"}
+                src={currentAlbum?.imageUrl || "/assets/album-1.png"}
                 className='w-[94%] object-cover cursor-pointer'
                 onClick={handleAlbumClick}
               />
