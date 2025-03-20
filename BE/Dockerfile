@@ -8,7 +8,7 @@ WORKDIR /app
 COPY build/libs/MemoryBubble-0.0.1-SNAPSHOT.jar /app/MemoryBubble-0.0.1-SNAPSHOT.jar
 
 # application-private.yml 파일을 컨테이너 내부로 복사
-COPY ./src/main/resources/application-private.yml /app/src/main/resources/application-private.yml
+COPY src/main/resources/application-private.yml /app/src/main/resources/application-private.yml
 
 # 컨테이너가 8081 포트를 사용함을 문서화
 EXPOSE 8081
