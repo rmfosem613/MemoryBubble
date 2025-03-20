@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.controller;
 
+import com.ssafy.memorybubble.dto.CodeResponse;
 import com.ssafy.memorybubble.dto.FamilyRequest;
 import com.ssafy.memorybubble.dto.FamilyResponse;
 import com.ssafy.memorybubble.exception.ErrorResponse;
@@ -40,5 +41,20 @@ public class FamilyController {
         // 그룹 생성
         FamilyResponse familyResponse = familyService.addFamily(Long.valueOf(userDetails.getUsername()), familyRequest);
         return ResponseEntity.ok(familyResponse);
+    }
+
+    @Operation(
+            summary = "가족 초대코드 발급 API",
+            description = "body에 familyName을 전달하고 가족(그룹)을 생성합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공 (초대 코드 8자리 반환)"),
+                    @ApiResponse(responseCode = "404", description = "해당 그룹에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    @GetMapping("/{familyId}/invite")
+    public ResponseEntity<CodeResponse> getInvite(@AuthenticationPrincipal UserDetails userDetails,
+                                                  @PathVariable Long familyId) {
+        // 요청 코드 생성
+        return ResponseEntity.ok(familyService.getInviteCode(Long.valueOf(userDetails.getUsername()), familyId));
     }
 }

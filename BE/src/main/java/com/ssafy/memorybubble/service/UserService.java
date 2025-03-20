@@ -30,4 +30,11 @@ public class UserService {
                 .orElseThrow(() -> new UserException(USER_NOT_FOUND));
         user.updateFamily(family);
     }
+
+    public Family getFamily(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        return user.getFamily();
+    }
 }
