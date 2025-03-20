@@ -12,8 +12,11 @@ function WriteLetterPage() {
 
   return (
     <>
-      <Title text="편지쓰기" />
+
       <div className="container mt-[17px]">
+        <Title text="편지쓰기" />
+        <p className="absolute mt-[-27px] ml-[140px]">나만의 손글씨를 사용하여 편지로 마음을 전해보세요</p>
+
         <div className="grid grid-cols-12 gap-1">
 
           {/* grid 9 */}

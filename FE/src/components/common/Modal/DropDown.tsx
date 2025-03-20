@@ -6,6 +6,25 @@ function DropDown() {
   const { albums, currentAlbum } = useAlbumStore();
   const [selectedAlbum, setSelectedAlbum] = useState(currentAlbum || { title: '추억보관함' });
   const dropdownRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  // 드롭다운 위치 계산
+  useEffect(() => {
+    if (dropdownRef.current && isOpen) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      // 드롭다운 목록의 너비는 원래 요소와 동일하게 설정
+      const width = rect.width;
+      
+      // 화면 중앙에 위치하도록 계산
+      const left = (windowWidth - width) / 2;
+      const top = (windowHeight - 240) / 2; // 240px은 드롭다운 목록의 고정 높이
+      
+      setPosition({ top, left, width });
+    }
+  }, [isOpen]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -47,9 +66,17 @@ function DropDown() {
         </svg>
       </div>
 
-      {/* 드롭다운 목록 */}
+      {/* 드롭다운 목록 - 화면 중앙에 고정 위치 */}
       {isOpen && (
-        <div className="absolute z-10 w-full mt-[-247px] h-[240px] bg-white border border-gray-300 rounded-md max-h-60 overflow-auto">
+        <div 
+          className="ml-[-8px] mt-[-18px] fixed z-50 bg-white border border-gray-300 rounded-md overflow-auto"
+          style={{
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            width: `${position.width}px`,
+            height: '260px',
+          }}
+        >
           {albums && albums.length > 0 ? (
             albums.map((album, index) => (
               <div
@@ -65,6 +92,14 @@ function DropDown() {
           )}
         </div>
       )}
+      
+      {/* 오버레이 배경 추가 */}
+      {/* {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )} */}
     </div>
   );
 }
