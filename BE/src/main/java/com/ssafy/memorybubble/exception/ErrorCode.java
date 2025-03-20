@@ -16,7 +16,8 @@ public enum ErrorCode {
 
     // family
     ALREADY_FAMILY_EXIST(BAD_REQUEST, "이미 그룹에 가입되어 있습니다."),
-    FAMILY_NOT_FOUND(NOT_FOUND, "해당 그룹에 가입되어 있지 않습니다."),
+    FAMILY_NOT_FOUND(FORBIDDEN, "해당 그룹에 가입되어 있지 않습니다."),
+    INVITE_CODE_NOT_FOUND(BAD_REQUEST, "유효하지 않은 코드입니다."),
 
     // user
     USER_NOT_FOUND(NOT_FOUND, "사용자를 찾을 수 없습니다.");

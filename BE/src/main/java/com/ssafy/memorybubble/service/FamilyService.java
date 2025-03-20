@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.service;
 
 import com.ssafy.memorybubble.domain.Family;
+import com.ssafy.memorybubble.dto.CodeDto;
 import com.ssafy.memorybubble.dto.CodeResponse;
 import com.ssafy.memorybubble.dto.FamilyRequest;
 import com.ssafy.memorybubble.dto.FamilyResponse;
@@ -56,7 +57,7 @@ public class FamilyService {
                 .build();
     }
 
-    public CodeResponse getInviteCode(Long userId, Long familyId) {
+    public CodeDto getInviteCode(Long userId, Long familyId) {
         // family가 없으면 예외 반환
         Family family = Optional.ofNullable(userService.getFamily(userId))
                 .orElseThrow(() -> new FamilyException(FAMILY_NOT_FOUND));
@@ -67,8 +68,15 @@ public class FamilyService {
         }
 
         // redis에 familyId 있으면 반환, 없으면 familyId로 code 만들어서 redis에 저장
-        return CodeResponse.builder()
+        return CodeDto.builder()
                 .code(codeService.getInviteCode(familyId))
+                .build();
+    }
+
+    public CodeResponse getFamilyIdByCode(CodeDto codeDto) {
+        // code를 Redis에서 찾아서 familyId 반환
+        return CodeResponse.builder()
+                .familyId(codeService.getFamilyIdByCode(codeDto.getCode()))
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.controller;
 
+import com.ssafy.memorybubble.dto.CodeDto;
 import com.ssafy.memorybubble.dto.CodeResponse;
 import com.ssafy.memorybubble.dto.FamilyRequest;
 import com.ssafy.memorybubble.dto.FamilyResponse;
@@ -48,13 +49,30 @@ public class FamilyController {
             description = "body에 familyName을 전달하고 가족(그룹)을 생성합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공 (초대 코드 8자리 반환)"),
-                    @ApiResponse(responseCode = "404", description = "해당 그룹에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 그룹에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             }
     )
     @GetMapping("/{familyId}/invite")
-    public ResponseEntity<CodeResponse> getInvite(@AuthenticationPrincipal UserDetails userDetails,
-                                                  @PathVariable Long familyId) {
-        // 요청 코드 생성
+    public ResponseEntity<CodeDto> getInvite(@AuthenticationPrincipal UserDetails userDetails,
+                                             @PathVariable Long familyId) {
+        // 요청 코드 반환
         return ResponseEntity.ok(familyService.getInviteCode(Long.valueOf(userDetails.getUsername()), familyId));
+    }
+
+    @Operation(
+            summary = "가족 초대코드 확인 API",
+            description = "body에 code를 전달하고 familyId를 받습니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공 (familyId 반환)"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "유효하지 않은 코드입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    @PostMapping("/code")
+    public ResponseEntity<CodeResponse> confirmCode(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @RequestBody CodeDto codeDto) {
+        // 유효한 code인지 확인하고 familyId 반환
+       return ResponseEntity.ok(familyService.getFamilyIdByCode(codeDto));
     }
 }
