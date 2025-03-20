@@ -66,7 +66,7 @@ function MainPage() {
               {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
                 // src={currentAlbum?.imageUrl || "./assets/album-1.png"}
-                src={"../assets/album-1.png"}
+                src={"../../public/assets/album-1.png"}
                 className='w-[94%] object-cover cursor-pointer'
                 onClick={handleAlbumClick}
               />
