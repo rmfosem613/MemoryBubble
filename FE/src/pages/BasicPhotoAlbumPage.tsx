@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Title from "@/components/common/Title"
 import album1 from "/assets/album-1.png"
 import album2 from "/assets/album-2.png"
@@ -9,11 +9,16 @@ import { useModal } from '@/hooks/useModal'
 import InputImg from "@/components/common/Modal/InputImg"
 import DropDown from "@/components/common/Modal/DropDown"
 import Alert from "@/components/common/Alert"
+import InfiniteScroll from "@/components/photoAlbum/InfiniteScroll"
 
 import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
 
 function BasicPhotoAlbumPage() {
   const allPhotos = [
+    album1, album2, album3, album4, album5,
+    album2, album3, album4, album5, album1,
+    album3, album4, album5, album1, album2,
+    album4, album5, album1, album2, album3,
     album1, album2, album3, album4, album5,
     album2, album3, album4, album5, album1,
     album3, album4, album5, album1, album2,
@@ -31,10 +36,6 @@ function BasicPhotoAlbumPage() {
   const [page, setPage] = useState(1);
   // 모든 사진이 로드되었는지 확인
   const [hasMore, setHasMore] = useState(true);
-  
-  // Intersection Observer를 위한 ref
-  const observerRef = useRef<HTMLDivElement>(null);
-  const loadingRef = useRef<HTMLDivElement>(null);
 
   // 사진 선택 상태 관리
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([]);
@@ -75,29 +76,6 @@ function BasicPhotoAlbumPage() {
   useEffect(() => {
     loadMorePhotos();
   }, []);
-
-  // Intersection Observer 설정
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          loadMorePhotos();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentLoadingRef = loadingRef.current;
-    if (currentLoadingRef) {
-      observer.observe(currentLoadingRef);
-    }
-
-    return () => {
-      if (currentLoadingRef) {
-        observer.unobserve(currentLoadingRef);
-      }
-    };
-  }, [loadMorePhotos, hasMore]);
 
   // 썸네일 모드 진입 함수
   const enterThumbnailMode = () => {
@@ -233,6 +211,25 @@ function BasicPhotoAlbumPage() {
     }
   };
 
+  // InfiniteScroll 컴포넌트를 위한 renderItem 함수
+  const renderPhoto = (photo: string, index: number) => (
+    <div
+      className={`relative aspect-square overflow-hidden cursor-pointer ${selectedPhotos.includes(index) ? 'ring-4 ring-blue-500' : ''}`}
+      onClick={() => handlePhotoClick(photo, index)}
+    >
+      <img
+        src={photo}
+        alt={`Photo ${index + 1}`}
+        className="w-full h-full object-cover"
+      />
+      {isSelectionMode && selectedPhotos.includes(index) && (
+        <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white">
+          ✓
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
       {showAlert && (
@@ -339,37 +336,13 @@ function BasicPhotoAlbumPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 mt-6">
-        {photos.map((photo, index) => (
-          <div
-            key={index}
-            className={`relative aspect-square overflow-hidden cursor-pointer ${selectedPhotos.includes(index) ? 'ring-4 ring-blue-500' : ''}`}
-            onClick={() => handlePhotoClick(photo, index)}
-            ref={index === photos.length - 5 ? observerRef : null}
-          >
-            <img
-              src={photo}
-              alt={`Photo ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-            {isSelectionMode && selectedPhotos.includes(index) && (
-              <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                ✓
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* 로딩 표시기 및 Intersection Observer 타겟 */}
-      {hasMore && (
-        <div 
-          ref={loadingRef}
-          className="flex justify-center items-center p-4 h-20"
-        >
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
+      {/* 무한 스크롤 컴포넌트로 변경 */}
+      <InfiniteScroll 
+        items={photos}
+        renderItem={renderPhoto}
+        loadMoreItems={loadMorePhotos}
+        hasMore={hasMore}
+      />
 
       {/* 확대된 사진 모달 */}
       {enlargedPhoto && (
