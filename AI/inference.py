@@ -17,6 +17,7 @@ from torchvision import transforms
 from base.dataset import render, read_font, get_filtered_chars, sample
 from base.utils import save_tensor_to_image, load_reference, load_primals, load_decomposition
 
+from get_unicode_from_filename import get_unicode
 
 TRANSFORM = transforms.Compose([
     transforms.Resize((128, 128)),
@@ -126,7 +127,8 @@ def infer_DM(gen, save_dir, gen_chars, key_ref_dict, load_img, decomposition, ba
             if return_img:
                 outs.setdefault(key, []).append(out)
 
-            path = save_dir / key / f"{char}.png"
+            code_point = get_unicode(char)
+            path = save_dir / key / f"{code_point}.png"
             save_tensor_to_image(out, path)
 
     return outs
