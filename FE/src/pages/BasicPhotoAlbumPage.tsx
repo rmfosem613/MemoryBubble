@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Title from "@/components/common/Title"
 import album1 from "/assets/album-1.png"
 import album2 from "/assets/album-2.png"
@@ -12,14 +12,29 @@ import Alert from "@/components/common/Alert"
 
 import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
 
-
 function BasicPhotoAlbumPage() {
-  const photos = [
+  const allPhotos = [
+    album1, album2, album3, album4, album5,
+    album2, album3, album4, album5, album1,
+    album3, album4, album5, album1, album2,
+    album4, album5, album1, album2, album3,
     album1, album2, album3, album4, album5,
     album2, album3, album4, album5, album1,
     album3, album4, album5, album1, album2,
     album4, album5, album1, album2, album3,
   ];
+
+  // 현재 화면에 보여줄 사진 상태
+  const [photos, setPhotos] = useState<string[]>([]);
+  // 한 번에 로드할 아이템 수와 현재 페이지
+  const photosPerPage = 10; // 한 번에 2줄(10개) 로드
+  const [page, setPage] = useState(1);
+  // 모든 사진이 로드되었는지 확인
+  const [hasMore, setHasMore] = useState(true);
+  
+  // Intersection Observer를 위한 ref
+  const observerRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef<HTMLDivElement>(null);
 
   // 사진 선택 상태 관리
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([]);
@@ -36,6 +51,53 @@ function BasicPhotoAlbumPage() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
+
+  // 이미지 로드 함수
+  const loadMorePhotos = useCallback(() => {
+    if (!hasMore) return;
+    
+    const startIndex = (page - 1) * photosPerPage;
+    const endIndex = startIndex + photosPerPage;
+    const newPhotos = allPhotos.slice(startIndex, endIndex);
+    
+    if (newPhotos.length > 0) {
+      setPhotos(prev => [...prev, ...newPhotos]);
+      setPage(prev => prev + 1);
+    }
+    
+    // 모든 사진을 다 불러왔는지 확인
+    if (endIndex >= allPhotos.length) {
+      setHasMore(false);
+    }
+  }, [page, hasMore, allPhotos]);
+
+  // 초기 이미지 로드
+  useEffect(() => {
+    loadMorePhotos();
+  }, []);
+
+  // Intersection Observer 설정
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          loadMorePhotos();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentLoadingRef = loadingRef.current;
+    if (currentLoadingRef) {
+      observer.observe(currentLoadingRef);
+    }
+
+    return () => {
+      if (currentLoadingRef) {
+        observer.unobserve(currentLoadingRef);
+      }
+    };
+  }, [loadMorePhotos, hasMore]);
 
   // 썸네일 모드 진입 함수
   const enterThumbnailMode = () => {
@@ -283,6 +345,7 @@ function BasicPhotoAlbumPage() {
             key={index}
             className={`relative aspect-square overflow-hidden cursor-pointer ${selectedPhotos.includes(index) ? 'ring-4 ring-blue-500' : ''}`}
             onClick={() => handlePhotoClick(photo, index)}
+            ref={index === photos.length - 5 ? observerRef : null}
           >
             <img
               src={photo}
@@ -297,6 +360,16 @@ function BasicPhotoAlbumPage() {
           </div>
         ))}
       </div>
+
+      {/* 로딩 표시기 및 Intersection Observer 타겟 */}
+      {hasMore && (
+        <div 
+          ref={loadingRef}
+          className="flex justify-center items-center p-4 h-20"
+        >
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
 
       {/* 확대된 사진 모달 */}
       {enlargedPhoto && (
