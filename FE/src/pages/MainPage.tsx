@@ -2,7 +2,6 @@ import SlidingAlbumList from "@/components/album/SlidingAlbumList"
 import useAlbumStore from "@/stores/useAlbumStore";
 import { useModal } from '@/hooks/useModal';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
 
 // 모달창 관련 컴포넌트
 import InputText from "@/components/common/Modal/InputText";
@@ -12,53 +11,14 @@ import DropDown from "@/components/common/Modal/DropDown";
 function MainPage() {
   const { currentAlbum } = useAlbumStore();
   const navigate = useNavigate();
-  const titleRef = useRef<HTMLParagraphElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  // const [titleFontSize, setTitleFontSize] = useState<string>('text-album-1-lg');
 
   // 모달 관련
   const { openModal } = useModal();
 
-  // 앨범 제목 길이에 따라 글자 크기 조절
-  // useEffect(() => {
-  //   const checkAndResizeTitle = () => {
-  //     if (titleRef.current && containerRef.current) {
-  //       const titleElement = titleRef.current;
-  //       const containerElement = containerRef.current;
-
-  //       // 원래 글자 크기로 시작
-  //       titleElement.className = 'absolute text-album-1-lg font-p-800 bg-clip-text w-[94%] drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]';
-
-  //       // 텍스트가 컨테이너를 벗어나는지 확인
-  //       if (titleElement.scrollWidth > containerElement.clientWidth) {
-  //         // 글자 크기 단계적으로 줄이기
-  //         if (titleElement.scrollWidth > containerElement.clientWidth * 1.5) {
-  //           setTitleFontSize('text-h3-lg');
-  //         } else if (titleElement.scrollWidth > containerElement.clientWidth * 1.2) {
-  //           setTitleFontSize('text-h2-lg');
-  //         } else {
-  //           setTitleFontSize('text-h1-lg');
-  //         }
-  //       } else {
-  //         setTitleFontSize('text-album-3-lg');
-  //       }
-  //     }
-  //   };
-
-  //   // 앨범이 변경될 때마다 확인
-  //   checkAndResizeTitle();
-
-  //   // 창 크기가 변경될 때도 확인
-  //   window.addEventListener('resize', checkAndResizeTitle);
-  //   return () => {
-  //     window.removeEventListener('resize', checkAndResizeTitle);
-  //   };
-  // }, [currentAlbum]);
-
   // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
   const handleAlbumClick = () => {
     if (!currentAlbum) return;
-
+    
     // 앨범 ID가 1인 경우 BasicPhotoAlbumPage로 이동
     if (currentAlbum.id === 1) {
       navigate('/album/basic');
@@ -85,13 +45,11 @@ function MainPage() {
 
               {/* 앨범 제목 */}
               <div className={`absolute z-10 w-full bg-p-800 ${currentAlbum?.bgColor || 'bg-album-200'} transition-colors duration-500`}>
-                <div ref={containerRef} className='relative h-[180px] w-full bg-transparent text-left z-10 overflow-hidden'>
+                <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
                   <p
-                    ref={titleRef}
-                    className={`absolute text-album-1-lg font-p-800 bg-clip-text w-[100%]
+                    className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
                     drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]
-                    text-ellipsis
-                    `}
+                    '
                     style={{
                       color: "transparent",
                       WebkitBackgroundClip: "text",
