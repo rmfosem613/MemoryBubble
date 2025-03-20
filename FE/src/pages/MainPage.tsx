@@ -54,7 +54,7 @@ function MainPage() {
                       color: "transparent",
                       WebkitBackgroundClip: "text",
                       // WebkitTextStroke:"1px rgba(0, 0, 0, 0.1)", // 글자 stroke 버전
-                      backgroundImage: `url('${currentAlbum?.imageUrl || "public/assets/album-1.png"}')`,
+                      backgroundImage: `url('${currentAlbum?.imageUrl || "/assets/album-1.png"}')`,
                       backgroundSize: "100%"
                     }}>
                     {currentAlbum?.title || "추억보관함"}
@@ -64,7 +64,7 @@ function MainPage() {
 
               {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
-                src={currentAlbum?.imageUrl || "public/assets/album-1.png"}
+                src={currentAlbum?.imageUrl || "/assets/album-1.png"}
                 className='w-[94%] object-cover cursor-pointer'
                 onClick={handleAlbumClick}
               />

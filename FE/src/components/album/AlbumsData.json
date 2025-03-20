@@ -3,7 +3,7 @@
     "id": 1,
     "title": "추억보관함",
     "description": "이것은 기본 앨범 입니다. 추억을 담아보세요!",
-    "imageUrl": "public/assets/album-1.png",
+    "imageUrl": "/assets/album-1.png",
     "bgColor": "bg-album-200",
     "photoCount": "22장의 순간"
   },
