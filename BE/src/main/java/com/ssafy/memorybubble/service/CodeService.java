@@ -6,11 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.ssafy.memorybubble.exception.ErrorCode.FAMILY_NOT_FOUND;
 import static com.ssafy.memorybubble.exception.ErrorCode.INVITE_CODE_NOT_FOUND;
 
 @Service
