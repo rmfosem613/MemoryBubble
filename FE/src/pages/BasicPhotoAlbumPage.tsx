@@ -1,6 +1,6 @@
 import { useState } from "react"
 import Title from "@/components/common/Title"
-import album1 from "@/assets/images/album-1.png"
+import album1 from "/assets/album-1.png"
 import album2 from "@/assets/images/album-2.png"
 import album3 from "@/assets/images/album-3.png"
 import album4 from "@/assets/images/album-4.png"
