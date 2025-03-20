@@ -63,3 +63,19 @@ export const useLetterStore = create<LetterState>((set) => ({
     cassetteData: { ...state.cassetteData, ...data }
   }))
 }));
+
+
+// 편지 보관함 타입
+type StorageType = 'new' | 'received';
+
+// 편지 보관함 인터페이스
+interface StorageState {
+  
+  // 편지 타입
+  storageType: StorageType;
+}
+
+export const useBoxStore = create<StorageState>((set) => ({
+  // 텍스트 편지 초기값
+  storageType: 'new',
+}));

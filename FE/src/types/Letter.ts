@@ -48,3 +48,15 @@ export interface LetterState {
   setLetterType: (type: LetterType) => void;
   updateCassetteData: (data: Partial<CassetteData>) => void;
 }
+
+// 편지 보관함 편지 타입 정의
+export interface LetterData {
+  type: 'letter' | 'cassette'
+  color: 'spring' | 'summer' | 'autumn' | 'winter'
+  name: string
+  state: '읽음' | '안읽음'
+  date: string
+}
+
+// 편지 보관함 타입
+export type StorageType = 'new' | 'received'
