@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import useAlbumStore from '@/stores/useAlbumStore';
-import image1 from '@/assets/images/album-1.png';
+import image1 from '/assets/album-1.png';
 import image2 from '@/assets/images/album-2.png';
 import image3 from '@/assets/images/album-3.png';
 import image4 from '@/assets/images/album-4.png';
