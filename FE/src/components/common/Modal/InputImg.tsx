@@ -17,7 +17,7 @@ function InputImg() {
     // 이미지 파일 미리보기 URL 생성
     const newImages = files.map(file => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file as Blob)
     }));
 
     setSelectedImages(prev => [...prev, ...newImages]);
