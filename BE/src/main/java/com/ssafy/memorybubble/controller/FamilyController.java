@@ -27,7 +27,7 @@ public class FamilyController {
     @PostMapping
     @Operation(
             summary = "가족 생성 API",
-            description = "body에 familyName을 전달하고 가족(그룹)을 생성합니다.",
+            description = "body에 가족 이름을 전달하고 가족(그룹)을 생성합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공 (업로드 Presigned Url 반환)"),
                     @ApiResponse(responseCode = "400", description = "이미 가족(그룹)에 가입되어 있는 사용자입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -43,7 +43,7 @@ public class FamilyController {
 
     @Operation(
             summary = "가족 초대코드 발급 API",
-            description = "body에 familyName을 전달하고 가족(그룹)을 생성합니다.",
+            description = "body에 가족 id를 전달하고 가족에 가입할 수 있는 초대 코드를 생성합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공 (초대 코드 8자리 반환)"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -59,7 +59,7 @@ public class FamilyController {
 
     @Operation(
             summary = "가족 초대코드 확인 API",
-            description = "body에 code를 전달하고 familyId를 받습니다.",
+            description = "body에 초대코드를 전달하고 가족 id를 받습니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공 (familyId 반환)"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -73,6 +73,16 @@ public class FamilyController {
         return ResponseEntity.ok(familyService.getFamilyIdByCode(codeDto));
     }
 
+    @Operation(
+            summary = "가족 가입 후 유저 정보 등록 API",
+            description = "body에 유저 정보와 가족 id를 전달하여 가족에 가입하고 유저 정보를 업데이트 합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공 (presigned Url 반환)"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "이미 다른 가족에 가입되어 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "이미 가족 정보가 등록되어 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
     @PostMapping("/join")
     public ResponseEntity<FileResponse> joinFamily(@AuthenticationPrincipal UserDetails userDetails,
                                            @RequestBody JoinRequest joinRequest) {
