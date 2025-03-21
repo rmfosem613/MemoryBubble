@@ -29,6 +29,8 @@ public class FamilyService {
     @Transactional
     public FamilyCreateResponse addFamily(Long userId, FamilyRequest familyRequest) {
         User user = userService.getUser(userId);
+        log.info("user: {}", user);
+
         // 유저가 이미 가족이 있으면 예외 반환
         if (user.getFamily() != null) {
             throw new FamilyException(ALREADY_FAMILY_EXIST);
@@ -43,6 +45,7 @@ public class FamilyService {
                 .name(familyRequest.getFamilyName())
                 .thumbnail(key)
                 .build());
+        log.info("family created: {}", family);
 
         // 유저 정보에 가족 업데이트
         userService.updateUserFamily(user, family);
@@ -61,6 +64,8 @@ public class FamilyService {
 
     public CodeDto getInviteCode(Long userId, Long familyId) {
         User user = userService.getUser(userId);
+        log.info("user: {}", user);
+
         // 요청을 한 user가 가입된 family가 없으면 예외 반환
         Family family = user.getFamily();
         if(family == null) {
@@ -88,6 +93,7 @@ public class FamilyService {
     @Transactional
     public FileResponse join(Long userId, JoinRequest joinRequest) {
         User user = userService.getUser(userId);
+        log.info("user: {}", user);
 
         // 유저가 이미 다른 그룹에 가입되어 있으면 예외 반환
         Family existingFamily = user.getFamily();
@@ -107,6 +113,7 @@ public class FamilyService {
 
         // 유저의 가족 정보 업데이트
         userService.updateUserFamily(user, family);
+        log.info("family joined: {}", family);
 
         // UUID로 presigendUrl 생성, 프로필 이미지 업로드 용 presigned Url 반환
         String key = "user/" + UUID.randomUUID();
@@ -114,6 +121,7 @@ public class FamilyService {
 
         // 유저의 정보 업데이트
         userService.updateUser(user, joinRequest, key);
+        log.info("user info updated: {}", user);
 
         return FileResponse.builder()
                 .fileName(key)
@@ -124,6 +132,7 @@ public class FamilyService {
     public FamilyResponse getFamily(Long userId, Long familyId) {
         User user = userService.getUser(userId);
         Family family = user.getFamily();
+        log.info("family: {}", family);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
         if (family == null || !family.getId().equals(familyId)) {
@@ -135,11 +144,13 @@ public class FamilyService {
                 .stream()
                 .filter(member->!member.getId().equals(userId))
                 .toList();
+        log.info("family members: {}", familyMembers);
 
         // Dto로 변환
         List<UserInfoDto> familyMembersDto = familyMembers.stream()
                 .map(userService::convertToDto)
                 .toList();
+        log.info("family members dto: {}", familyMembersDto);
 
         // 가족의 썸네일 presignd Url 반환
         String thumbnailUrl = fileService.getDownloadPresignedURL(family.getThumbnail());
