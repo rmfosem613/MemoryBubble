@@ -1,9 +1,6 @@
 package com.ssafy.memorybubble.controller;
 
-import com.ssafy.memorybubble.dto.CodeDto;
-import com.ssafy.memorybubble.dto.CodeResponse;
-import com.ssafy.memorybubble.dto.FamilyRequest;
-import com.ssafy.memorybubble.dto.FamilyResponse;
+import com.ssafy.memorybubble.dto.*;
 import com.ssafy.memorybubble.exception.ErrorResponse;
 import com.ssafy.memorybubble.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +51,7 @@ public class FamilyController {
             }
     )
     @GetMapping("/{familyId}/invite")
-    public ResponseEntity<CodeDto> getInvite(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<CodeDto> getCode(@AuthenticationPrincipal UserDetails userDetails,
                                              @PathVariable Long familyId) {
         // 요청 코드 반환
         return ResponseEntity.ok(familyService.getInviteCode(Long.valueOf(userDetails.getUsername()), familyId));
@@ -73,6 +70,13 @@ public class FamilyController {
     public ResponseEntity<CodeResponse> confirmCode(@AuthenticationPrincipal UserDetails userDetails,
                                                     @RequestBody CodeDto codeDto) {
         // 유효한 code인지 확인하고 familyId 반환
-       return ResponseEntity.ok(familyService.getFamilyIdByCode(codeDto));
+        return ResponseEntity.ok(familyService.getFamilyIdByCode(codeDto));
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<FileResponse> joinFamily(@AuthenticationPrincipal UserDetails userDetails,
+                                           @RequestBody JoinRequest joinRequest) {
+        // 그룹 가입
+        return ResponseEntity.ok().body(familyService.join(Long.valueOf(userDetails.getUsername()), joinRequest));
     }
 }

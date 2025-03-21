@@ -1,12 +1,11 @@
 package com.ssafy.memorybubble.service;
 
 import com.ssafy.memorybubble.domain.Family;
-import com.ssafy.memorybubble.dto.CodeDto;
-import com.ssafy.memorybubble.dto.CodeResponse;
-import com.ssafy.memorybubble.dto.FamilyRequest;
-import com.ssafy.memorybubble.dto.FamilyResponse;
+import com.ssafy.memorybubble.domain.User;
+import com.ssafy.memorybubble.dto.*;
 import com.ssafy.memorybubble.exception.FamilyException;
 import com.ssafy.memorybubble.repository.FamilyRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,8 @@ public class FamilyService {
 
     public FamilyResponse addFamily(Long userId, FamilyRequest familyRequest) {
         // 유저가 이미 그룹이 있으면 예외 반환
-        if (userService.isFamilyExist(userId)) {
+        User user = userService.getUser(userId);
+        if (user.getFamily() != null) {
             throw new FamilyException(ALREADY_FAMILY_EXIST);
         }
 
@@ -43,7 +43,7 @@ public class FamilyService {
                 .build());
 
         // 유저 정보에 가족 업데이트
-        userService.updateUserFamily(userId, family);
+        userService.updateUserFamily(user, family);
 
         // 기본 그룹 앨범 생성(추억보관함), 앨범 썸네일에 가족 썸네일 넣음
         albumService.addAlbum(family, "추억 보관함", "이것은 기본 앨범입니다. 추억을 담아보세요!",
@@ -77,6 +77,42 @@ public class FamilyService {
         // code를 Redis에서 찾아서 familyId 반환
         return CodeResponse.builder()
                 .familyId(codeService.getFamilyIdByCode(codeDto.getCode()))
+                .build();
+    }
+
+    @Transactional
+    public FileResponse join(Long userId, JoinRequest joinRequest) {
+        User user = userService.getUser(userId);
+        Family existingFamily = user.getFamily();
+
+        // 유저가 이미 다른 그룹에 가입되어 있으면 예외 반환
+        if (existingFamily != null && !existingFamily.getId().equals(joinRequest.getFamilyId())) {
+            throw new FamilyException(ALREADY_FAMILY_EXIST);
+        }
+
+        //유저의 정보가 이미 기입되어 있으면 가입한 것
+        if (user.getProfile() != null || user.getBirth() != null || user.getPhoneNumber() != null || user.getGender() != null) {
+           throw new FamilyException(ALREADY_JOINED);
+        }
+
+        // joinRequest의 familyId로 family 찾기, 없으면 예외 반환
+        Long familyId = joinRequest.getFamilyId();
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> new FamilyException(FAMILY_NOT_FOUND));
+
+        // 유저의 가족 정보 업데이트
+        userService.updateUserFamily(user, family);
+
+        // UUID로 presigendUrl 생성, 프로필 이미지 업로드 용 presigned Url 반환
+        String key = "user/" + UUID.randomUUID();
+        String presignedUrl = fileService.getUploadPresignedUrl(key);
+
+        // 유저의 정보 업데이트
+        userService.updateUser(userId, joinRequest, key);
+
+        return FileResponse.builder()
+                .fileName(key)
+                .presignedUrl(presignedUrl)
                 .build();
     }
 }
