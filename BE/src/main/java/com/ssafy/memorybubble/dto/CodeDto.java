@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Builder
-@AllArgsConstructor
 @Getter
-public class CodeResponse {
-    Long familyId;
+@AllArgsConstructor
+public class CodeDto {
+    String code;
 }

@@ -39,8 +39,16 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean active;
 
-    public void updateFamily(Family family) {
+    public void updateUserFamily(Family family) {
         this.family = family;
+    }
+
+    public void updateUser(String name, String profile, String phoneNumber, Gender gender, LocalDate birth) {
+        this.name = name;
+        this.profile = profile;
+        this.phoneNumber = phoneNumber;
+        this.gender = gender;
+        this.birth = birth;
     }
 
     @Builder
