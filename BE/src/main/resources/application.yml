@@ -1,11 +1,6 @@
-# 포트 설정
-server:
-  port: 8081
-  ssl:
-    enabled: false
 spring:
   profiles:
-    include: private
+    include: dev
   application:
     name: MemoryBubble
   datasource:
@@ -14,16 +9,16 @@ spring:
     username: ${mysql.username}
     password: ${mysql.password}
   jpa:
-    hibernate:
-      ddl-auto: update
+#    hibernate:
+#      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-  data:
-    redis:
-      host: localhost
-      port: 6379
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
   security:
     oauth2:
       client:
@@ -38,7 +33,7 @@ spring:
             client-id: ${oauth2.client-id}
             client-secret: ${oauth2.client-secret}
             client-authentication-method: client_secret_post
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao # spring security에서 만든 redirect-uri
+#            redirect-uri: http://localhost:8080/login/oauth2/code/kakao # spring security에서 만든 redirect-uri
             authorization-grant-type: authorization_code
             client-name: kakao
             scope:
