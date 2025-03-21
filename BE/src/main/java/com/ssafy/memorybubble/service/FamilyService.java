@@ -5,12 +5,11 @@ import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.dto.*;
 import com.ssafy.memorybubble.exception.FamilyException;
 import com.ssafy.memorybubble.repository.FamilyRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.ssafy.memorybubble.exception.ErrorCode.*;
@@ -18,6 +17,7 @@ import static com.ssafy.memorybubble.exception.ErrorCode.*;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class FamilyService {
     private final FamilyRepository familyRepository;
     private final FileService fileService;
@@ -25,9 +25,10 @@ public class FamilyService {
     private final UserService userService;
     private final CodeService codeService;
 
+    @Transactional
     public FamilyResponse addFamily(Long userId, FamilyRequest familyRequest) {
-        // 유저가 이미 그룹이 있으면 예외 반환
         User user = userService.getUser(userId);
+        // 유저가 이미 가족이 있으면 예외 반환
         if (user.getFamily() != null) {
             throw new FamilyException(ALREADY_FAMILY_EXIST);
         }
@@ -58,11 +59,14 @@ public class FamilyService {
     }
 
     public CodeDto getInviteCode(Long userId, Long familyId) {
-        // family가 없으면 예외 반환
-        Family family = Optional.ofNullable(userService.getFamily(userId))
-                .orElseThrow(() -> new FamilyException(FAMILY_NOT_FOUND));
+        User user = userService.getUser(userId);
+        // 요청을 한 user가 가입된 family가 없으면 예외 반환
+        Family family = user.getFamily();
+        if(family == null) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
 
-        // 요청 한 user가 가진 family와 familyId가 맞지 않으면 예외 반환
+        // 요청 한 user가 가입된 family와 familyId가 일치하지 않으면 예외 반환
         if(!familyId.equals(family.getId())) {
             throw new FamilyException(FAMILY_NOT_FOUND);
         }
@@ -83,14 +87,14 @@ public class FamilyService {
     @Transactional
     public FileResponse join(Long userId, JoinRequest joinRequest) {
         User user = userService.getUser(userId);
-        Family existingFamily = user.getFamily();
 
         // 유저가 이미 다른 그룹에 가입되어 있으면 예외 반환
+        Family existingFamily = user.getFamily();
         if (existingFamily != null && !existingFamily.getId().equals(joinRequest.getFamilyId())) {
             throw new FamilyException(ALREADY_FAMILY_EXIST);
         }
 
-        //유저의 정보가 이미 기입되어 있으면 가입한 것
+        //유저의 정보가 이미 기입되어 있으면 가입한 것이므로 예외 반환
         if (user.getProfile() != null || user.getBirth() != null || user.getPhoneNumber() != null || user.getGender() != null) {
            throw new FamilyException(ALREADY_JOINED);
         }
@@ -108,7 +112,7 @@ public class FamilyService {
         String presignedUrl = fileService.getUploadPresignedUrl(key);
 
         // 유저의 정보 업데이트
-        userService.updateUser(userId, joinRequest, key);
+        userService.updateUser(user, joinRequest, key);
 
         return FileResponse.builder()
                 .fileName(key)
