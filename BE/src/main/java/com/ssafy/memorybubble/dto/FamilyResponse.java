@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
+@Builder
 public class FamilyResponse {
-    Long familyId;
-    String presignedUrl;
-    String fileName;
+    String familyName;
+    String thumbnailUrl;
+    List<UserInfoDto> familyMembers;
 }

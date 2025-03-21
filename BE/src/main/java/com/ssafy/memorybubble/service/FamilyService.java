@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.ssafy.memorybubble.exception.ErrorCode.*;
@@ -26,7 +27,7 @@ public class FamilyService {
     private final CodeService codeService;
 
     @Transactional
-    public FamilyResponse addFamily(Long userId, FamilyRequest familyRequest) {
+    public FamilyCreateResponse addFamily(Long userId, FamilyRequest familyRequest) {
         User user = userService.getUser(userId);
         // 유저가 이미 가족이 있으면 예외 반환
         if (user.getFamily() != null) {
@@ -51,7 +52,7 @@ public class FamilyService {
                 "#FFFFFF", key);
 
         // presignedURL 반환
-        return FamilyResponse.builder()
+        return FamilyCreateResponse.builder()
                 .familyId(family.getId())
                 .fileName(key)
                 .presignedUrl(presignedUrl)
@@ -117,6 +118,36 @@ public class FamilyService {
         return FileResponse.builder()
                 .fileName(key)
                 .presignedUrl(presignedUrl)
+                .build();
+    }
+
+    public FamilyResponse getFamily(Long userId, Long familyId) {
+        User user = userService.getUser(userId);
+        Family family = user.getFamily();
+
+        // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
+        if (family == null || !family.getId().equals(familyId)) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
+
+        // 해당 가족에 소속된 user 목록 찾기 -> 자기 자신은 포함 x
+        List<User> familyMembers = userService.getUsersByFamilyId(familyId)
+                .stream()
+                .filter(member->!member.getId().equals(userId))
+                .toList();
+
+        // Dto로 변환
+        List<UserInfoDto> familyMembersDto = familyMembers.stream()
+                .map(userService::convertToDto)
+                .toList();
+
+        // 가족의 썸네일 presignd Url 반환
+        String thumbnailUrl = fileService.getDownloadPresignedURL(family.getThumbnail());
+
+        return FamilyResponse.builder()
+                .familyName(family.getName())
+                .thumbnailUrl(thumbnailUrl)
+                .familyMembers(familyMembersDto)
                 .build();
     }
 }
