@@ -1,5 +1,7 @@
 package com.ssafy.memorybubble.service;
 
+import static com.ssafy.memorybubble.exception.ErrorCode.INVALID_TOKEN;
+import com.ssafy.memorybubble.exception.TokenException;
 import com.ssafy.memorybubble.repository.TokenRepository;
 import com.ssafy.memorybubble.security.dto.RefreshToken;
 import com.ssafy.memorybubble.security.jwt.TokenProvider;
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class TokenService {
     private final TokenRepository tokenRepository;
     private final TokenProvider tokenProvider;
+    private final BlacklistService blacklistService;
 
     // 로그인 시 refresh token을 새로 저장
     public void saveRefreshToken(String id, String accessToken, String refreshToken) {
@@ -24,10 +27,20 @@ public class TokenService {
 
     // 로그아웃 시 refresh token 삭제
     public void deleteRefreshToken(String id) {
+        // refresh token 삭제
         RefreshToken token = tokenRepository.findById(id).orElse(null);
         if (token != null) {
-            log.info("Deleting refresh token {}", id);
+            String accessToken = token.getAccessToken();
+            // accessToken이 유효기간이 남아있으면 blacklist에 등록
+            blacklistService.addBlacklist(accessToken);
+            log.info("add blacklist access token: {}", accessToken);
+
+            // refreshToken의 유효기간이 남아있으면 blacklist에 등록
+            blacklistService.addBlacklist(token.getRefreshToken());
+            log.info("add blacklist refresh token: {}", token.getRefreshToken());
+
             tokenRepository.deleteById(id);
+            log.info("Deleting refresh token {}", id);
         }
     }
 
@@ -43,13 +56,20 @@ public class TokenService {
 
             if(token.isPresent()) {
                 RefreshToken resultToken = token.get();
-                resultToken.updateAccessToken(newAccessToken);
-                tokenRepository.save(resultToken);
+                String accessToken = resultToken.getAccessToken();
+                if(!blacklistService.isBlacklisted(accessToken)) {
+                    // 기존 accessToken이 만료되지 않았다면 블랙리스트에 넣음
+                    blacklistService.addBlacklist(accessToken);
+                    // 새로운 accessToken으로 업데이트
+                    resultToken.updateAccessToken(newAccessToken);
+                    tokenRepository.save(resultToken);
+                }
             }
             return newAccessToken;
         }
-        return null;
-
+        else {
+            throw new TokenException(INVALID_TOKEN);
+        }
         // accessToken으로 refreshToken의 유효성 검증 후 accessToken 재발급
         /*Optional<RefreshToken> token = tokenRepository.findByAccessToken(accessToken);
 

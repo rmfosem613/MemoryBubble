@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.security.jwt;
 
 import com.ssafy.memorybubble.exception.TokenException;
+import com.ssafy.memorybubble.service.BlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import static com.ssafy.memorybubble.exception.ErrorCode.TOKEN_EXPIRED;
 @Slf4j
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
+    private final BlacklistService blacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -31,7 +33,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         // accessToken 검증
         if (StringUtils.hasText(accessToken)) {
-            if (tokenProvider.validateToken(accessToken)) {
+            if (tokenProvider.validateToken(accessToken) && !blacklistService.isBlacklisted(accessToken)) {
                 log.info("Access token validated");
                 // 토큰이 유효할 경우, Authentication 객체를 가지고 와서 Security Context에 저장
                 Authentication authentication = tokenProvider.getAuthentication(accessToken);

@@ -122,8 +122,13 @@ public class TokenProvider {
     }
 
     // 토큰에서 userId 꺼냄
-    public String getUserIdFromToken(String token) {
+    public String getUserId(String token) {
         Claims claims = parseClaims(token);
         return claims.getSubject();
+    }
+
+    public Long getExpiration(String token) {
+        Claims claims = parseClaims(token);
+        return claims.getExpiration().getTime();
     }
 }
