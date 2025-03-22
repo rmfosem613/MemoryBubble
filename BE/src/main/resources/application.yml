@@ -1,0 +1,53 @@
+spring:
+  profiles:
+    include: dev
+  application:
+    name: MemoryBubble
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${mysql.url}
+    username: ${mysql.username}
+    password: ${mysql.password}
+  jpa:
+#    hibernate:
+#      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+        registration:
+          kakao:
+            client-id: ${oauth2.client-id}
+            client-secret: ${oauth2.client-secret}
+            client-authentication-method: client_secret_post
+#            redirect-uri: http://localhost:8080/login/oauth2/code/kakao # spring security에서 만든 redirect-uri
+            authorization-grant-type: authorization_code
+            client-name: kakao
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+  cloud:
+    aws:
+      region:
+        static: ${aws.region}
+      credentials:
+        access-key: ${aws.access-key}
+        secret-key: ${aws.secret-key}
+      s3:
+        bucket: ${aws.bucket}
+jwt:
+  secret: ${jwt.secret}
