@@ -34,11 +34,11 @@ public class FamilyController {
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<FamilyResponse> addFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @RequestBody FamilyRequest familyRequest) {
+    public ResponseEntity<FamilyCreateResponse> addFamily(@AuthenticationPrincipal UserDetails userDetails,
+                                                          @RequestBody FamilyRequest familyRequest) {
         // 그룹 생성
-        FamilyResponse familyResponse = familyService.addFamily(Long.valueOf(userDetails.getUsername()), familyRequest);
-        return ResponseEntity.ok(familyResponse);
+        FamilyCreateResponse familyCreateResponse = familyService.addFamily(Long.valueOf(userDetails.getUsername()), familyRequest);
+        return ResponseEntity.ok(familyCreateResponse);
     }
 
     @Operation(
@@ -85,8 +85,23 @@ public class FamilyController {
     )
     @PostMapping("/join")
     public ResponseEntity<FileResponse> joinFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                           @RequestBody JoinRequest joinRequest) {
+                                                   @RequestBody JoinRequest joinRequest) {
         // 그룹 가입
         return ResponseEntity.ok().body(familyService.join(Long.valueOf(userDetails.getUsername()), joinRequest));
+    }
+
+    @Operation(
+            summary = "가족 정보 반환 API",
+            description = "가족 id로 가족 정보 및 가족에 포함된 유저 정보를 반환합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공 (가족 정보 반환)"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    @GetMapping("/{familyId}")
+    public ResponseEntity<FamilyResponse> getFamily(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @PathVariable Long familyId) {
+        return ResponseEntity.ok().body(familyService.getFamily(Long.valueOf(userDetails.getUsername()), familyId));
     }
 }
