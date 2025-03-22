@@ -1,36 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { CirclePlus, Link, Trash2, PenLine } from 'lucide-react';
 import { useCalendarStore } from '@/stores/useCalendarStore';
+import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 
 function CalendarEventRender() {
   const { selectDate } = useCalendarStore();
+  const { events } = useCalendarEventStore();
   const [openEvents, setOpenEvents] = useState<Record<number, boolean>>({});
 
-  // 임시 이벤트 데이터
-  const events = [
-    {
-      scheduleId: 101,
-      scheduleContent: '제주도 여행',
-      startDate: '2025-03-01',
-      endDate: '2025-03-03',
-      albumId: 201,
-    },
-    {
-      scheduleId: 103,
-      scheduleContent: '생일 파티 준비',
-      startDate: '2025-03-08',
-      endDate: '2025-03-08',
-      albumId: 202,
-    },
-    {
-      scheduleId: 104,
-      scheduleContent: '웹 개발 컨퍼런스',
-      startDate: '2025-03-08',
-      endDate: '2025-03-12',
-      albumId: null,
-    },
-  ];
-
+  // 토글 이벤트 함수
   const toggleEvent = (scheduleId: number) => {
     setOpenEvents((prev) => ({
       ...prev,
@@ -44,7 +22,6 @@ function CalendarEventRender() {
       const startDate = new Date(event.startDate + 'T00:00:00');
       const endDate = new Date(event.endDate + 'T00:00:00');
 
-      // 선택된 날짜가 이벤트 기간 내에 있는지 확인
       return startDate <= selectDate && selectDate <= endDate;
     });
   }, [events, selectDate]);
