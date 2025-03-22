@@ -5,19 +5,19 @@ import CalendarEvent from '@/components/calendar/CalendarEvent';
 
 function CalendarPage() {
   return (
-    <div className="w-full h-screen pt-[65px] grid grid-cols-[1fr_660px_366px_1fr]">
+    <div className="w-full h-screen grid grid-cols-[1fr_660px_366px_1fr]">
       {/* 영역 1 */}
       <div className="border flex items-center justify-center">
         <CalendarHeader />
       </div>
 
       {/* 영역 2 */}
-      <div className="border flex items-center justify-center">
+      <div className="border flex items-center justify-center pt-[65px]">
         <Calendar />
       </div>
 
       {/* 영역 3 */}
-      <div className="border flex items-center justify-center">
+      <div className="border flex items-center justify-center h-[60vh] pt-[65px] bg-winter-100 shadow-md">
         <CalendarEvent />
       </div>
 

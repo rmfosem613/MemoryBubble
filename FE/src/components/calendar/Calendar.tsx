@@ -2,9 +2,13 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCalendar } from '@/hooks/useCalendar';
+import { useCalendarStore } from '@/stores/useCalendarStore';
 
 const Calendar = () => {
-  const { currentDate, dayNames, days, nextMonth, prevMonth } = useCalendar();
+  const { dayNames, days } = useCalendar();
+
+  const { currentDate, selectDate, nextMonth, prevMonth, setSelectDate } =
+    useCalendarStore();
 
   return (
     <div className="flex flex-col w-full h-full p-4 border">
@@ -33,7 +37,7 @@ const Calendar = () => {
           <div
             key={index}
             className={`text-h5-lg font-p-700 text-end px-3
-              ${day === '일' ? 'text-red-300' : day === '토'? 'text-blue-700' : ''}
+              ${day === '일' ? 'text-red-300' : day === '토' ? 'text-blue-700' : ''}
             `}>
             {day}
           </div>
@@ -45,9 +49,17 @@ const Calendar = () => {
         {days.map((day, index) => (
           <div
             key={index}
+            onClick={() =>
+              day.date &&
+              setSelectDate(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                day.date,
+              )
+            }
             className={`
-            relative min-h-20 flex items-center justify-center rounded-[4px] border-2 border-winter-100 transition-colors duration-300 ease-in-out 
-              ${!day.date ? 'invisible' : 'cursor-pointer'}
+            relative min-h-20 flex items-center justify-center rounded-[4px] border-2 transition-colors duration-300 ease-in-out 
+              ${!day.date ? 'invisible' : 'cursor-pointer'} ${day.isSelect ? 'border-winter-200' : 'border-winter-100'}
             `}>
             {/* 날짜(일) 표시 */}
             <div className="absolute top-1 right-2">
