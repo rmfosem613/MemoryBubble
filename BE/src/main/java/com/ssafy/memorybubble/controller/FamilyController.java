@@ -34,11 +34,10 @@ public class FamilyController {
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<FamilyCreateResponse> addFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                                          @RequestBody FamilyRequest familyRequest) {
-        // 그룹 생성
-        FamilyCreateResponse familyCreateResponse = familyService.addFamily(Long.valueOf(userDetails.getUsername()), familyRequest);
-        return ResponseEntity.ok(familyCreateResponse);
+    public ResponseEntity<FamilyResponse> addFamily(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @RequestBody FamilyRequest familyRequest) {
+        // 가족 생성
+        return ResponseEntity.ok(familyService.addFamily(Long.valueOf(userDetails.getUsername()), familyRequest));
     }
 
     @Operation(
@@ -86,7 +85,7 @@ public class FamilyController {
     @PostMapping("/join")
     public ResponseEntity<FileResponse> joinFamily(@AuthenticationPrincipal UserDetails userDetails,
                                                    @RequestBody JoinRequest joinRequest) {
-        // 그룹 가입
+        // 가족 가입
         return ResponseEntity.ok().body(familyService.join(Long.valueOf(userDetails.getUsername()), joinRequest));
     }
 
@@ -100,8 +99,27 @@ public class FamilyController {
             }
     )
     @GetMapping("/{familyId}")
-    public ResponseEntity<FamilyResponse> getFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @PathVariable Long familyId) {
+    public ResponseEntity<FamilyInfoResponse> getFamily(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @PathVariable Long familyId) {
         return ResponseEntity.ok().body(familyService.getFamily(Long.valueOf(userDetails.getUsername()), familyId));
+    }
+
+    @Operation(
+            summary = "가족 정보 수정 API",
+            description = "가족 id로 가족의 정보(이름, 사진)을 수정합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공 (가족 정보 반환)"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    @PatchMapping("/{familyId}")
+    public ResponseEntity<FamilyResponse> updateFamily(@AuthenticationPrincipal UserDetails userDetails,
+                                         @PathVariable Long familyId,
+                                         @RequestBody FamilyRequest familyRequest) {
+        // 가족 수정
+        return ResponseEntity.ok().body(
+                familyService.updateFamily(Long.valueOf(userDetails.getUsername()), familyId, familyRequest)
+        );
     }
 }
