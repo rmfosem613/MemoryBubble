@@ -3,7 +3,7 @@ import { CalendarStore } from '@/types/CalendarType';
 
 export const useCalendarStore = create<CalendarStore>((set) => ({
   currentDate: new Date(),
-  selectDate: new Date(),
+  selectDate: new Date(new Date().setHours(0, 0, 0, 0)),
 
   nextMonth: () =>
     set((state) => {
