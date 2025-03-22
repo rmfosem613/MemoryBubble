@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Title from "@/components/common/Title"
 import album1 from "/assets/album-1.png"
 import album2 from "/assets/album-2.png"
@@ -9,14 +9,33 @@ import { useModal } from '@/hooks/useModal'
 import InputImg from "@/components/common/Modal/InputImg"
 import DropDown from "@/components/common/Modal/DropDown"
 import Alert from "@/components/common/Alert"
+import InfiniteScroll from "@/components/photoAlbum/InfiniteScroll"
+
+import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
 
 function BasicPhotoAlbumPage() {
-  const photos = [
+  const allPhotos = [
+    album1, album2, album3, album4, album5,
+    album2, album3, album4, album5, album1,
+    album3, album4, album5, album1, album2,
+    album4, album5, album1, album2, album3,
+    album1, album2, album3, album4, album5,
+    album2, album3, album4, album5, album1,
+    album3, album4, album5, album1, album2,
+    album4, album5, album1, album2, album3,
     album1, album2, album3, album4, album5,
     album2, album3, album4, album5, album1,
     album3, album4, album5, album1, album2,
     album4, album5, album1, album2, album3,
   ];
+
+  // 현재 화면에 보여줄 사진 상태
+  const [photos, setPhotos] = useState<string[]>([]);
+  // 한 번에 로드할 아이템 수와 현재 페이지
+  const photosPerPage = 10; // 한 번에 2줄(10개) 로드
+  const [page, setPage] = useState(1);
+  // 모든 사진이 로드되었는지 확인
+  const [hasMore, setHasMore] = useState(true);
 
   // 사진 선택 상태 관리
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([]);
@@ -33,6 +52,30 @@ function BasicPhotoAlbumPage() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
+
+  // 이미지 로드 함수
+  const loadMorePhotos = useCallback(() => {
+    if (!hasMore) return;
+    
+    const startIndex = (page - 1) * photosPerPage;
+    const endIndex = startIndex + photosPerPage;
+    const newPhotos = allPhotos.slice(startIndex, endIndex);
+    
+    if (newPhotos.length > 0) {
+      setPhotos(prev => [...prev, ...newPhotos]);
+      setPage(prev => prev + 1);
+    }
+    
+    // 모든 사진을 다 불러왔는지 확인
+    if (endIndex >= allPhotos.length) {
+      setHasMore(false);
+    }
+  }, [page, hasMore, allPhotos]);
+
+  // 초기 이미지 로드
+  useEffect(() => {
+    loadMorePhotos();
+  }, []);
 
   // 썸네일 모드 진입 함수
   const enterThumbnailMode = () => {
@@ -168,6 +211,25 @@ function BasicPhotoAlbumPage() {
     }
   };
 
+  // InfiniteScroll 컴포넌트를 위한 renderItem 함수
+  const renderPhoto = (photo: string, index: number) => (
+    <div
+      className={`relative aspect-square overflow-hidden cursor-pointer ${selectedPhotos.includes(index) ? 'ring-4 ring-blue-500' : ''}`}
+      onClick={() => handlePhotoClick(photo, index)}
+    >
+      <img
+        src={photo}
+        alt={`Photo ${index + 1}`}
+        className="w-full h-full object-cover"
+      />
+      {isSelectionMode && selectedPhotos.includes(index) && (
+        <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white">
+          ✓
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
       {showAlert && (
@@ -185,6 +247,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={toggleSelectionMode}
                 >
+                  <CircleCheck strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-300"></div>
                   <p className="font-p-500 text-subtitle-1-lg">선택하기</p>
                 </div>
@@ -192,6 +256,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={enterThumbnailMode}
                 >
+                  <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
                   <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
                 </div>
@@ -199,6 +265,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={openAddPhotoModal}
                 >
+                  <CirclePlus strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200"></div>
                   <p className="font-p-500 text-subtitle-1-lg">사진 추가</p>
                 </div>
@@ -210,6 +278,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={toggleSelectionMode}
                 >
+                  <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
                   <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
                 </div>
@@ -217,6 +287,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={openMoveAlbumModal}
                 >
+                  <FolderUp strokeWidth={1} className="absolute z-30 ml-[-5pX] mt-[2px]" size={'22px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-400"></div>
                   <p className="font-p-500 text-subtitle-1-lg">앨범 이동하기</p>
                 </div>
@@ -224,6 +296,8 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={deleteSelectedPhotos}
                 >
+                  <Trash2 strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[1px]" size={'22px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-red-200 opacity-[70%]"></div>
                   <p className="font-p-500 text-subtitle-1-lg">삭제하기</p>
                 </div>
@@ -235,10 +309,13 @@ function BasicPhotoAlbumPage() {
                   className="flex space-x-1 cursor-pointer"
                   onClick={cancelAllModes}
                 >
+                  <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
+
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
                   <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
                 </div>
                 <div className="flex space-x-1">
+                  <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
                   <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
                 </div>
@@ -259,26 +336,13 @@ function BasicPhotoAlbumPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 mt-6">
-        {photos.map((photo, index) => (
-          <div
-            key={index}
-            className={`relative aspect-square overflow-hidden cursor-pointer ${selectedPhotos.includes(index) ? 'ring-4 ring-blue-500' : ''}`}
-            onClick={() => handlePhotoClick(photo, index)}
-          >
-            <img
-              src={photo}
-              alt={`Photo ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-            {isSelectionMode && selectedPhotos.includes(index) && (
-              <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                ✓
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* 무한 스크롤 컴포넌트로 변경 */}
+      <InfiniteScroll 
+        items={photos}
+        renderItem={renderPhoto}
+        loadMoreItems={loadMorePhotos}
+        hasMore={hasMore}
+      />
 
       {/* 확대된 사진 모달 */}
       {enlargedPhoto && (
