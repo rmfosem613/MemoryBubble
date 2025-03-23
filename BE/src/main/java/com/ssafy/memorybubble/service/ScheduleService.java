@@ -104,16 +104,6 @@ public class ScheduleService {
         }
         log.info("family: {}", family);
 
-        // albumId가 있으면 album 찾음
-        Album album = null;
-        if (scheduleRequest.getAlbumId() != null) {
-            album = albumService.getAlbum(scheduleRequest.getAlbumId());
-            // 앨범의 family가 familyId와 다르면 예외 반환
-            if (!family.getId().equals(album.getFamily().getId())) {
-                throw new AlbumException(ALBUM_ACCESS_DENIED);
-            }
-        }
-
         // 날짜 검증 - 시작, 끝 날짜 모두 수정하는 경우
         if (scheduleRequest.getStartDate() != null && scheduleRequest.getEndDate() != null && scheduleRequest.getEndDate().isBefore(scheduleRequest.getStartDate())) {
             throw new ScheduleException(SCHEDULE_DATE_INVALID);
@@ -129,6 +119,34 @@ public class ScheduleService {
             throw new ScheduleException(SCHEDULE_DATE_INVALID);
         }
 
-        schedule.update(scheduleRequest.getStartDate(), scheduleRequest.getEndDate(), scheduleRequest.getContent(), album);
+        schedule.update(scheduleRequest.getStartDate(), scheduleRequest.getEndDate(), scheduleRequest.getContent());
+    }
+
+    @Transactional
+    public void linkSchedule(Long userId, Long scheduleId, Long albumId) {
+        User user = userService.getUser(userId);
+        log.info("user: {}", user);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(SCHEDULE_NOT_FOUND));
+        log.info("schedule: {}", schedule);
+
+        // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
+        Family family = user.getFamily();
+        if (family == null || !family.getId().equals(schedule.getFamily().getId())) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
+        log.info("family: {}", family);
+
+        if(albumId == null) {
+            schedule.update(null);
+        } else {
+            // 앨범 연결
+            Album album = albumService.getAlbum(albumId);
+            // user의 가족이 접근할 수 있는 앨범인지 확인
+            if (!family.getId().equals(album.getFamily().getId())) {
+                throw new AlbumException(ALBUM_ACCESS_DENIED);
+            }
+            schedule.update(album);
+        }
     }
 }

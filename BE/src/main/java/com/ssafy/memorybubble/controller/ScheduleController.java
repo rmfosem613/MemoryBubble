@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.controller;
 
+import com.ssafy.memorybubble.dto.LinkRequest;
 import com.ssafy.memorybubble.dto.ScheduleRequest;
 import com.ssafy.memorybubble.exception.ErrorResponse;
 import com.ssafy.memorybubble.service.ScheduleService;
@@ -67,7 +68,6 @@ public class ScheduleController {
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = "일정을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "400", description = "잘못된 날짜입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
@@ -75,6 +75,25 @@ public class ScheduleController {
                                                @PathVariable Long scheduleId,
                                                @RequestBody ScheduleRequest scheduleRequest) {
         scheduleService.updateSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, scheduleRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{scheduleId}/link")
+    @Operation(
+            summary = "일정과 앨범 연결 API",
+            description = "일정 id와 앨범 id로 일정을 앨범에 연결합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "일정을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    public ResponseEntity<Void> linkSchedule(@AuthenticationPrincipal UserDetails userDetails,
+                                             @PathVariable Long scheduleId,
+                                             @RequestBody LinkRequest linkRequest) {
+        scheduleService.linkSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, linkRequest.getAlbumId());
         return ResponseEntity.ok().build();
     }
 }
