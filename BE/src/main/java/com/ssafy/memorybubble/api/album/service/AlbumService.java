@@ -1,12 +1,13 @@
-package com.ssafy.memorybubble.service;
+package com.ssafy.memorybubble.api.album.service;
 
 import com.ssafy.memorybubble.domain.Album;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
-import com.ssafy.memorybubble.dto.AlbumRequest;
-import com.ssafy.memorybubble.exception.AlbumException;
+import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
+import com.ssafy.memorybubble.api.album.exception.AlbumException;
 import com.ssafy.memorybubble.exception.FamilyException;
-import com.ssafy.memorybubble.repository.AlbumRepository;
+import com.ssafy.memorybubble.api.album.repository.AlbumRepository;
+import com.ssafy.memorybubble.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,8 @@
-package com.ssafy.memorybubble.controller;
+package com.ssafy.memorybubble.api.album.controller;
 
-import com.ssafy.memorybubble.dto.AlbumRequest;
+import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
-import com.ssafy.memorybubble.service.AlbumService;
+import com.ssafy.memorybubble.api.album.service.AlbumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

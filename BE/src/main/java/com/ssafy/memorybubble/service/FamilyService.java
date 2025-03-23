@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.service;
 
+import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.dto.*;
