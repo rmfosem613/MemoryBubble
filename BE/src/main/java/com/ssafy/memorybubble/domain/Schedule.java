@@ -40,6 +40,13 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDate endDate;
 
+    public void update(LocalDate startDate, LocalDate endDate, String content, Album album) {
+        if (startDate != null) this.startDate = startDate;
+        if (endDate != null) this.endDate = endDate;
+        if (content != null) this.content = content;
+        this.album = album; // album이 null이면 기존 연결을 해제
+    }
+
     @Builder
     public Schedule(Family family, Album album, String content, LocalDateTime createdAt, LocalDate startDate, LocalDate endDate) {
         this.family = family;

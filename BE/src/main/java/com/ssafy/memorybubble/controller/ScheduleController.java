@@ -31,7 +31,7 @@ public class ScheduleController {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "400", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "앨범을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "400", description = "잘못된 날짜입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
@@ -48,13 +48,33 @@ public class ScheduleController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "400", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = "일정을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             }
     )
     public ResponseEntity<Void> deleteSchedule(@AuthenticationPrincipal UserDetails userDetails,
                                                @PathVariable("scheduleId") Long scheduleId) {
         scheduleService.deleteSchedule(Long.valueOf(userDetails.getUsername()), scheduleId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{scheduleId}")
+    @Operation(
+            summary = "일정 수정 API",
+            description = "일정 id로 일정을 수정합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "일정을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "잘못된 날짜입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<Void> updateSchedule(@AuthenticationPrincipal UserDetails userDetails,
+                                               @PathVariable Long scheduleId,
+                                               @RequestBody ScheduleRequest scheduleRequest) {
+        scheduleService.updateSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, scheduleRequest);
         return ResponseEntity.ok().build();
     }
 }
