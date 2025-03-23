@@ -17,6 +17,7 @@ export const usePhotoAlbum = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const { id } = useParams();
   const { albums } = useAlbumStore();
@@ -44,16 +45,22 @@ export const usePhotoAlbum = () => {
     console.log('썸네일 수정');
   };
 
+  const toggleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
+
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? photos.length - 1 : prevIndex - 1,
     );
+    setIsFlipped(false);
   };
 
   const goToNext = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === photos.length - 1 ? 0 : prevIndex + 1,
     );
+    setIsFlipped(false);
   };
 
   // 키보드 이벤트 처리 (왼쪽/오른쪽 화살표)
@@ -78,6 +85,8 @@ export const usePhotoAlbum = () => {
     currentIndex === photos.length - 1 ? 0 : currentIndex + 1;
 
   return {
+    isFlipped,
+    toggleFlip,
     currentAlbum,
     photos,
     isLoading,

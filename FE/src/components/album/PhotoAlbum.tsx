@@ -1,10 +1,36 @@
 import Title from '../common/Title';
-import { PencilLine, ImageUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import PostCardTemplate from './common/PostCardTemplate';
+import {
+  PencilLine,
+  ImageUp,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  FolderUp,
+  Mic,
+  CirclePlay,
+  CirclePause,
+} from 'lucide-react';
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 import { useModal } from '@/hooks/useModal';
+import DropDown from '../common/Modal/DropDown';
+import { usePhotoMessages } from '@/hooks/usePhotoMessages ';
 
 function PhotoAlbum() {
   const {
+    postcardMessage,
+    setPostcardMessage,
+    isRecording,
+    messageInputRef,
+    handleSaveMessage,
+    toggleAudioPlayback,
+    handleRecordButtonClick,
+    sortedMessages,
+  } = usePhotoMessages();
+
+  const {
+    isFlipped,
+    toggleFlip,
     currentAlbum,
     photos,
     isLoading,
@@ -26,21 +52,23 @@ function PhotoAlbum() {
   return (
     <div className="container">
       <div className="flex justify-between items-baseline mb-6">
-        <Title text={currentAlbum?.title || '앨범'} />
+        <Title text={currentAlbum.title} />
         <div className="flex justify-end gap-4">
           <div
             className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
             onClick={() =>
               openModal({
-                title: '앨범 명 수정',
+                title: '앨범명 수정',
                 content: (
                   <div>
-                    <p>앨범 명을 수정해주세요</p>
+                    <p className="text-subtitle-1-lg font-p-500">
+                      앨범명을 수정해주세요
+                    </p>
                     <form className="py-4">
                       <label
                         htmlFor="album_name"
-                        className="block mb-2 text-sm font-medium text-black dark:text-white">
-                        앨범 명
+                        className="block mb-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
+                        앨범명
                       </label>
                       <input
                         type="text"
@@ -57,7 +85,7 @@ function PhotoAlbum() {
             }>
             <div className="absolute bg-gray-600 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <PencilLine size={18} />
-            <p className="text-sm">앨범 명 수정</p>
+            <p className="text-subtitle-1-lg">앨범명 수정</p>
           </div>
           <div
             className="relative flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors"
@@ -84,7 +112,7 @@ function PhotoAlbum() {
             }>
             <div className="absolute bg-blue-400 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <ImageUp size={18} />
-            <p className="text-sm">썸네일 변경</p>
+            <p className="text-subtitle-1-lg">썸네일 변경</p>
           </div>
         </div>
       </div>
@@ -104,13 +132,171 @@ function PhotoAlbum() {
             </div>
           )}
 
-          {/* 현재 이미지 (가운데 큰 이미지) */}
-          <div className="relative z-20">
-            <img
-              src={photos[currentIndex].src}
-              alt={photos[currentIndex].alt}
-              className="h-auto max-h-[500px] w-auto max-w-2xl object-contain transition-all duration-300"
-            />
+          {/* 현재 이미지 (가운데 큰 이미지) - 3D 뒤집기 효과 추가 */}
+          <div
+            className="relative z-20 perspective-1000 cursor-pointer"
+            style={{ perspective: '1000px' }}>
+            <div
+              className="relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[500px]"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                transition: 'transform 0.6s',
+              }}>
+              {/* 앞면 - 사진 */}
+              <img
+                src={photos[currentIndex].src}
+                alt={photos[currentIndex].alt}
+                className="w-full h-full object-cover absolute backface-hidden"
+                style={{
+                  backfaceVisibility: 'hidden',
+                  position: 'relative',
+                }}
+                onClick={toggleFlip}
+              />
+
+              {/* 뒷면 - 엽서 형태 */}
+              <div
+                className="absolute w-full h-full inset-0 bg-white p-4 rounded-lg shadow-lg flex flex-col justify-between backface-hidden"
+                style={{
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)',
+                }}>
+                {/* 상단 버튼 영역 */}
+                <div className="flex justify-end gap-2">
+                  <div className="flex gap-2">
+                    <button
+                      className="flex p-1 hover:text-blue-500 gap-1"
+                      onClick={() =>
+                        openModal({
+                          title: '사진 삭제하기',
+                          content: (
+                            <div className="py-2">
+                              <p className="mb-4">사진을 삭제하시겠습니까?</p>
+                            </div>
+                          ),
+                          confirmButtonText: '삭제하기',
+                          cancelButtonText: '취소하기',
+                        })
+                      }>
+                      <Trash2 size={20} />
+                      삭제하기
+                    </button>
+                    <button
+                      className="flex p-1 hover:text-blue-500 gap-1"
+                      onClick={() =>
+                        openModal({
+                          title: '앨범 이동하기',
+                          content: (
+                            <div className="py-2">
+                              <p className="mb-4">
+                                이동할 앨범을 선택해주세요.
+                              </p>
+                              <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
+                                앨범 선택하기
+                              </p>
+                              <DropDown />
+                              <div className="h-[130px]"></div>
+                            </div>
+                          ),
+                          confirmButtonText: '이동하기',
+                          cancelButtonText: '취소하기',
+                        })
+                      }>
+                      <FolderUp size={20} />
+                      앨범 이동하기
+                    </button>
+                    <p
+                      onClick={toggleFlip}
+                      className="flex px-4 text-gray-600 items-center justify-end cursor-pointer hover:text-blue-500 transition-colors">
+                      사진으로 가기
+                    </p>
+                  </div>
+                </div>
+
+                {/* 메시지 표시 영역 - 통합된 메시지 목록 */}
+                <div className="flex-1 overflow-y-auto px-2 mt-2 z-10">
+                  {sortedMessages.map((message) => (
+                    <div key={message.id} className="mb-4 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-p-700 text-h4-lg">
+                          현재 유저 이름
+                        </h4>
+
+                        <div>
+                          {message.type === 'audio' ? (
+                            <div className="relative">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleAudioPlayback(message.id);
+                                }}
+                                className="p-2 bg-blue-100 rounded-full ">
+                                {message.isPlaying ? (
+                                  <CirclePause size={24} />
+                                ) : (
+                                  <CirclePlay size={24} />
+                                )}
+                                <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
+                              </button>
+                            </div>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </div>
+
+                      {message.type === 'text' && (
+                        <p className="text-gray-700 mt-1 text-subtitle-1-lg font-p-500">
+                          {message.content}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* 하단 입력 영역 - 이벤트 버블링 방지 적용 */}
+                <div
+                  className="mt-4 flex items-end gap-2"
+                  onClick={(e) => e.stopPropagation()}>
+                  <div className="flex-1 relative">
+                    <input
+                      ref={messageInputRef}
+                      type="text"
+                      className="w-full p-2 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      placeholder="공유할 수 있는 추억의 글귀를 추가해보세요."
+                      value={postcardMessage}
+                      onChange={(e) => setPostcardMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveMessage(e);
+                        }
+                      }}
+                    />
+                  </div>
+                  <button
+                    className="bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors z-10"
+                    onClick={handleSaveMessage}>
+                    글 남기기
+                  </button>
+                  {!isRecording ? (
+                    <button
+                      className="bg-white text-black h-full px-4 py-2 rounded-lg border z-10 hover:bg-gray-100 transition-colors"
+                      onClick={handleRecordButtonClick}>
+                      <Mic size={20} />
+                    </button>
+                  ) : (
+                    <button
+                      className="bg-red-500 text-white h-full px-4 py-2 rounded-lg border hover:bg-red-600 transition-colors z-10"
+                      onClick={handleRecordButtonClick}>
+                      <Mic size={20} />
+                    </button>
+                  )}
+                </div>
+                {/* 엽서 템플릿 */}
+                <PostCardTemplate />
+              </div>
+            </div>
           </div>
 
           {/* 다음 이미지 (오른쪽에 약간 보이는 이미지) */}
