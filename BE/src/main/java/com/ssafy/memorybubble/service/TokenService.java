@@ -1,6 +1,6 @@
 package com.ssafy.memorybubble.service;
 
-import static com.ssafy.memorybubble.exception.ErrorCode.INVALID_TOKEN;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.INVALID_TOKEN;
 import com.ssafy.memorybubble.exception.TokenException;
 import com.ssafy.memorybubble.repository.TokenRepository;
 import com.ssafy.memorybubble.security.dto.RefreshToken;

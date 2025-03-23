@@ -2,7 +2,7 @@ package com.ssafy.memorybubble.service;
 
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
-import static com.ssafy.memorybubble.exception.ErrorCode.USER_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.ssafy.memorybubble.dto.JoinRequest;
 import com.ssafy.memorybubble.dto.UserInfoDto;

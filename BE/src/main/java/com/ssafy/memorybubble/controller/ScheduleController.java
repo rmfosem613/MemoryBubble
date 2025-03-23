@@ -2,7 +2,7 @@ package com.ssafy.memorybubble.controller;
 
 import com.ssafy.memorybubble.dto.LinkRequest;
 import com.ssafy.memorybubble.dto.ScheduleRequest;
-import com.ssafy.memorybubble.exception.ErrorResponse;
+import com.ssafy.memorybubble.common.exception.ErrorResponse;
 import com.ssafy.memorybubble.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

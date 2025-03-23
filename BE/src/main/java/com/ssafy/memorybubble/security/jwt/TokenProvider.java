@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ssafy.memorybubble.exception.ErrorCode.INVALID_JWT_SIGNATURE;
-import static com.ssafy.memorybubble.exception.ErrorCode.INVALID_TOKEN;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.INVALID_JWT_SIGNATURE;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.INVALID_TOKEN;
 
 @Slf4j
 @Component

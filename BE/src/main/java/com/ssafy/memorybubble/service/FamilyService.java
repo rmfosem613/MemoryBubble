@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static com.ssafy.memorybubble.exception.ErrorCode.*;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
 @Slf4j
 @RequiredArgsConstructor

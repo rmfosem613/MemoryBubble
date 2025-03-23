@@ -1,7 +1,7 @@
 package com.ssafy.memorybubble.controller;
 
 import com.ssafy.memorybubble.dto.*;
-import com.ssafy.memorybubble.exception.ErrorResponse;
+import com.ssafy.memorybubble.common.exception.ErrorResponse;
 import com.ssafy.memorybubble.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

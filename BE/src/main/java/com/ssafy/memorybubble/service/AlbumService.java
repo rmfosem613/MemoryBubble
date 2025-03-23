@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ssafy.memorybubble.exception.ErrorCode.ALBUM_NOT_FOUND;
-import static com.ssafy.memorybubble.exception.ErrorCode.FAMILY_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.FAMILY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

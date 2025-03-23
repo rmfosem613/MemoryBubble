@@ -17,7 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static com.ssafy.memorybubble.exception.ErrorCode.TOKEN_EXPIRED;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.TOKEN_EXPIRED;
 
 @RequiredArgsConstructor
 @Component

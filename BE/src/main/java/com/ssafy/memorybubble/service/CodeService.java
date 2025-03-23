@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.ssafy.memorybubble.exception.ErrorCode.INVITE_CODE_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.INVITE_CODE_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
