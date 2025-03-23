@@ -27,9 +27,8 @@ public class ScheduleService {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
-        // 요청을 한 user가 가입된 family가 없으면 예외 반환
-        Family family = user.getFamily();
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
+        Family family = user.getFamily();
         if (family == null || !family.getId().equals(scheduleRequest.getFamilyId())) {
             throw new FamilyException(FAMILY_NOT_FOUND);
         }
@@ -63,5 +62,22 @@ public class ScheduleService {
 
         scheduleRepository.save(schedule);
         log.info("schedule: {}", schedule);
+    }
+
+    public void deleteSchedule(Long userId, Long scheduleId) {
+        User user = userService.getUser(userId);
+        log.info("user: {}", user);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(SCHEDULE_NOT_FOUND));
+        log.info("schedule: {}", schedule);
+
+        // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
+        Family family = user.getFamily();
+        if (family == null || !family.getId().equals(schedule.getFamily().getId())) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
+        log.info("family: {}", family);
+
+        scheduleRepository.delete(schedule);
     }
 }

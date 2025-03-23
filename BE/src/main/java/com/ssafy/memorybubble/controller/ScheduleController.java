@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -41,6 +38,23 @@ public class ScheduleController {
     public ResponseEntity<Void> addSchedule(@AuthenticationPrincipal UserDetails userDetails,
                                             @RequestBody ScheduleRequest scheduleRequest) {
         scheduleService.addSchedule(Long.valueOf(userDetails.getUsername()), scheduleRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{scheduleId}")
+    @Operation(
+            summary = "일정 삭제 API",
+            description = "일정 id로 일정을 삭제합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "일정을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    public ResponseEntity<Void> deleteSchedule(@AuthenticationPrincipal UserDetails userDetails,
+                                               @PathVariable("scheduleId") Long scheduleId) {
+        scheduleService.deleteSchedule(Long.valueOf(userDetails.getUsername()), scheduleId);
         return ResponseEntity.ok().build();
     }
 }
