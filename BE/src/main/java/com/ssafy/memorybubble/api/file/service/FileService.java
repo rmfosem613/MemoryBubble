@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.service;
+package com.ssafy.memorybubble.api.file.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;

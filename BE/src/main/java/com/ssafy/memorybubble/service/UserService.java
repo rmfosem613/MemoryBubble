@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.service;
 
+import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;

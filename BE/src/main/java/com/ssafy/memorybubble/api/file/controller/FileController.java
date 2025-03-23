@@ -1,6 +1,6 @@
-package com.ssafy.memorybubble.controller;
+package com.ssafy.memorybubble.api.file.controller;
 
-import com.ssafy.memorybubble.service.FileService;
+import com.ssafy.memorybubble.api.file.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,7 +1,7 @@
 package com.ssafy.memorybubble.api.family.controller;
 
 import com.ssafy.memorybubble.api.family.dto.*;
-import com.ssafy.memorybubble.dto.*;
+import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
 import com.ssafy.memorybubble.api.family.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
