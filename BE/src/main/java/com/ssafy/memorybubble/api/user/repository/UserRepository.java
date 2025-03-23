@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.repository;
+package com.ssafy.memorybubble.api.user.repository;
 
 import com.ssafy.memorybubble.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;

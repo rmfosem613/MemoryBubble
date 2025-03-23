@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.service;
+package com.ssafy.memorybubble.api.user.service;
 
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.domain.Family;
@@ -6,9 +6,9 @@ import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.ssafy.memorybubble.api.family.dto.JoinRequest;
-import com.ssafy.memorybubble.dto.UserInfoDto;
-import com.ssafy.memorybubble.exception.UserException;
-import com.ssafy.memorybubble.repository.UserRepository;
+import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
+import com.ssafy.memorybubble.api.user.exception.UserException;
+import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

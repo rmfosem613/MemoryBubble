@@ -1,7 +1,7 @@
 package com.ssafy.memorybubble.api.auth.service;
 
 import com.ssafy.memorybubble.domain.User;
-import com.ssafy.memorybubble.repository.UserRepository;
+import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import com.ssafy.memorybubble.api.auth.security.dto.OAuth2UserInfo;
 import com.ssafy.memorybubble.api.auth.security.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;

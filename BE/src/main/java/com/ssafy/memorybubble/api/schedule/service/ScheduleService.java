@@ -10,7 +10,7 @@ import com.ssafy.memorybubble.api.album.exception.AlbumException;
 import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.schedule.exception.ScheduleException;
 import com.ssafy.memorybubble.api.schedule.repository.ScheduleRepository;
-import com.ssafy.memorybubble.service.UserService;
+import com.ssafy.memorybubble.api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

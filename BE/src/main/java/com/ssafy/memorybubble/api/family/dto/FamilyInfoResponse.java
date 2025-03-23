@@ -1,6 +1,6 @@
 package com.ssafy.memorybubble.api.family.dto;
 
-import com.ssafy.memorybubble.dto.UserInfoDto;
+import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

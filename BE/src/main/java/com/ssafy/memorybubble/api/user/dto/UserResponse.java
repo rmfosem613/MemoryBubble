@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.dto;
+package com.ssafy.memorybubble.api.user.dto;
 
 import com.ssafy.memorybubble.domain.Gender;
 import lombok.Getter;
