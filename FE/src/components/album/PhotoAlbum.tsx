@@ -1,5 +1,5 @@
 import Title from '../common/Title';
-import PostCardTemplate from './common/PostCardTemplate';
+import PostCardTemplate from './common/PostcardTemplate';
 import {
   PencilLine,
   ImageUp,
