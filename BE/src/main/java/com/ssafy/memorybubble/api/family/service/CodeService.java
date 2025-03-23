@@ -1,6 +1,6 @@
-package com.ssafy.memorybubble.service;
+package com.ssafy.memorybubble.api.family.service;
 
-import com.ssafy.memorybubble.exception.FamilyException;
+import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

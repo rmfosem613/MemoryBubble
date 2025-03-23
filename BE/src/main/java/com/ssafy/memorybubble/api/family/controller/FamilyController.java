@@ -1,8 +1,9 @@
-package com.ssafy.memorybubble.controller;
+package com.ssafy.memorybubble.api.family.controller;
 
+import com.ssafy.memorybubble.api.family.dto.*;
 import com.ssafy.memorybubble.dto.*;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
-import com.ssafy.memorybubble.service.FamilyService;
+import com.ssafy.memorybubble.api.family.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,7 +52,7 @@ public class FamilyController {
     )
     @GetMapping("/{familyId}/invite")
     public ResponseEntity<CodeDto> getCode(@AuthenticationPrincipal UserDetails userDetails,
-                                             @PathVariable Long familyId) {
+                                           @PathVariable Long familyId) {
         // 요청 코드 반환
         return ResponseEntity.ok(familyService.getInviteCode(Long.valueOf(userDetails.getUsername()), familyId));
     }

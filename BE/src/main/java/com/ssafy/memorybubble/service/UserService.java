@@ -4,7 +4,7 @@ import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
-import com.ssafy.memorybubble.dto.JoinRequest;
+import com.ssafy.memorybubble.api.family.dto.JoinRequest;
 import com.ssafy.memorybubble.dto.UserInfoDto;
 import com.ssafy.memorybubble.exception.UserException;
 import com.ssafy.memorybubble.repository.UserRepository;

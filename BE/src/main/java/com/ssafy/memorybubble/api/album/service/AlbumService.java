@@ -5,7 +5,7 @@ import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
 import com.ssafy.memorybubble.api.album.exception.AlbumException;
-import com.ssafy.memorybubble.exception.FamilyException;
+import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.album.repository.AlbumRepository;
 import com.ssafy.memorybubble.service.UserService;
 import lombok.RequiredArgsConstructor;

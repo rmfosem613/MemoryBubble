@@ -7,7 +7,7 @@ import com.ssafy.memorybubble.domain.Schedule;
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.dto.ScheduleRequest;
 import com.ssafy.memorybubble.api.album.exception.AlbumException;
-import com.ssafy.memorybubble.exception.FamilyException;
+import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.exception.ScheduleException;
 import com.ssafy.memorybubble.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
