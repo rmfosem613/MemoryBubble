@@ -27,7 +27,7 @@ public class FamilyService {
     private final CodeService codeService;
 
     @Transactional
-    public FamilyCreateResponse addFamily(Long userId, FamilyRequest familyRequest) {
+    public FamilyResponse addFamily(Long userId, FamilyRequest familyRequest) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
@@ -55,7 +55,7 @@ public class FamilyService {
                 "#FFFFFF", key);
 
         // presignedURL 반환
-        return FamilyCreateResponse.builder()
+        return FamilyResponse.builder()
                 .familyId(family.getId())
                 .fileName(key)
                 .presignedUrl(presignedUrl)
@@ -129,7 +129,7 @@ public class FamilyService {
                 .build();
     }
 
-    public FamilyResponse getFamily(Long userId, Long familyId) {
+    public FamilyInfoResponse getFamily(Long userId, Long familyId) {
         User user = userService.getUser(userId);
         Family family = user.getFamily();
         log.info("family: {}", family);
@@ -155,10 +155,38 @@ public class FamilyService {
         // 가족의 썸네일 presignd Url 반환
         String thumbnailUrl = fileService.getDownloadPresignedURL(family.getThumbnail());
 
-        return FamilyResponse.builder()
+        return FamilyInfoResponse.builder()
                 .familyName(family.getName())
                 .thumbnailUrl(thumbnailUrl)
                 .familyMembers(familyMembersDto)
+                .build();
+    }
+
+    @Transactional
+    public FamilyResponse updateFamily(Long userId, Long familyId, FamilyRequest familyRequest) {
+        User user = userService.getUser(userId);
+        log.info("user: {}", user);
+        Family family = user.getFamily();
+        log.info("family: {}", family);
+
+        // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
+        if (family == null || !family.getId().equals(familyId)) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
+
+        // 가족 이름 수정
+        family.updateFamilyName(familyRequest.getFamilyName());
+        log.info("updated family: {}", family);
+
+        // 기존 thumbnail(fileName)으로 가족 이미지 업로드용 presigned Url 반환
+        String key = family.getThumbnail();
+        String presignedUrl = fileService.getUploadPresignedUrl(key);
+
+        // presignedURL 반환
+        return FamilyResponse.builder()
+                .familyId(family.getId())
+                .fileName(key)
+                .presignedUrl(presignedUrl)
                 .build();
     }
 }

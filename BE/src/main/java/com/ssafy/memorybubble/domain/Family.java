@@ -28,6 +28,10 @@ public class Family {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    public void updateFamilyName(String name) {
+        this.name = name;
+    }
+
     @Builder
     public Family(String name, String thumbnail, LocalDateTime createdAt) {
         this.name = name;
