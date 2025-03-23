@@ -1,8 +1,8 @@
-package com.ssafy.memorybubble.security.handler;
+package com.ssafy.memorybubble.api.auth.security.handler;
 
-import com.ssafy.memorybubble.dto.TokenDto;
-import com.ssafy.memorybubble.security.jwt.TokenProvider;
-import com.ssafy.memorybubble.service.TokenService;
+import com.ssafy.memorybubble.api.auth.dto.TokenDto;
+import com.ssafy.memorybubble.api.auth.security.jwt.TokenProvider;
+import com.ssafy.memorybubble.api.auth.service.TokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

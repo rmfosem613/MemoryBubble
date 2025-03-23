@@ -1,8 +1,8 @@
-package com.ssafy.memorybubble.controller;
+package com.ssafy.memorybubble.api.auth.controller;
 
-import com.ssafy.memorybubble.dto.TokenRequest;
-import com.ssafy.memorybubble.dto.TokenResponse;
-import com.ssafy.memorybubble.service.TokenService;
+import com.ssafy.memorybubble.api.auth.dto.TokenRequest;
+import com.ssafy.memorybubble.api.auth.dto.TokenResponse;
+import com.ssafy.memorybubble.api.auth.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

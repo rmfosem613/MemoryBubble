@@ -1,10 +1,10 @@
 package com.ssafy.memorybubble.common.config;
 
-import com.ssafy.memorybubble.security.handler.OAuth2FailureHandler;
-import com.ssafy.memorybubble.security.handler.OAuth2SuccessHandler;
-import com.ssafy.memorybubble.security.jwt.TokenAuthenticationFilter;
-import com.ssafy.memorybubble.security.jwt.TokenExceptionFilter;
-import com.ssafy.memorybubble.service.CustomOAuth2UserService;
+import com.ssafy.memorybubble.api.auth.security.handler.OAuth2FailureHandler;
+import com.ssafy.memorybubble.api.auth.security.handler.OAuth2SuccessHandler;
+import com.ssafy.memorybubble.api.auth.security.jwt.TokenAuthenticationFilter;
+import com.ssafy.memorybubble.api.auth.security.jwt.TokenExceptionFilter;
+import com.ssafy.memorybubble.api.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

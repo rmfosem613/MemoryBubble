@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.security.dto;
+package com.ssafy.memorybubble.api.auth.security.dto;
 
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;

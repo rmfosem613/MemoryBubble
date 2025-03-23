@@ -1,7 +1,7 @@
-package com.ssafy.memorybubble.security.jwt;
+package com.ssafy.memorybubble.api.auth.security.jwt;
 
-import com.ssafy.memorybubble.dto.TokenDto;
-import com.ssafy.memorybubble.exception.TokenException;
+import com.ssafy.memorybubble.api.auth.dto.TokenDto;
+import com.ssafy.memorybubble.api.auth.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

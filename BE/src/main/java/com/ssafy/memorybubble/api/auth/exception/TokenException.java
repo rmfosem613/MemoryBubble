@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.exception;
+package com.ssafy.memorybubble.api.auth.exception;
 
 import com.ssafy.memorybubble.common.exception.CustomException;
 import com.ssafy.memorybubble.common.exception.ErrorCode;

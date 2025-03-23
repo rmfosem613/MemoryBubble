@@ -1,9 +1,9 @@
-package com.ssafy.memorybubble.service;
+package com.ssafy.memorybubble.api.auth.service;
 
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.repository.UserRepository;
-import com.ssafy.memorybubble.security.dto.OAuth2UserInfo;
-import com.ssafy.memorybubble.security.dto.PrincipalDetails;
+import com.ssafy.memorybubble.api.auth.security.dto.OAuth2UserInfo;
+import com.ssafy.memorybubble.api.auth.security.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

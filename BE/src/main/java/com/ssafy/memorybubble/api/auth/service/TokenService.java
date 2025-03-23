@@ -1,10 +1,10 @@
-package com.ssafy.memorybubble.service;
+package com.ssafy.memorybubble.api.auth.service;
 
 import static com.ssafy.memorybubble.common.exception.ErrorCode.INVALID_TOKEN;
-import com.ssafy.memorybubble.exception.TokenException;
-import com.ssafy.memorybubble.repository.TokenRepository;
-import com.ssafy.memorybubble.security.dto.RefreshToken;
-import com.ssafy.memorybubble.security.jwt.TokenProvider;
+import com.ssafy.memorybubble.api.auth.exception.TokenException;
+import com.ssafy.memorybubble.api.auth.repository.TokenRepository;
+import com.ssafy.memorybubble.api.auth.security.dto.RefreshToken;
+import com.ssafy.memorybubble.api.auth.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

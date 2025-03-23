@@ -1,6 +1,6 @@
-package com.ssafy.memorybubble.repository;
+package com.ssafy.memorybubble.api.auth.repository;
 
-import com.ssafy.memorybubble.security.dto.RefreshToken;
+import com.ssafy.memorybubble.api.auth.security.dto.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

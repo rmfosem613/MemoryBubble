@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.security.dto;
+package com.ssafy.memorybubble.api.auth.security.dto;
 
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;

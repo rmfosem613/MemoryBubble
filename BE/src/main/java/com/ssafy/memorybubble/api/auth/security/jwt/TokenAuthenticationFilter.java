@@ -1,7 +1,7 @@
-package com.ssafy.memorybubble.security.jwt;
+package com.ssafy.memorybubble.api.auth.security.jwt;
 
-import com.ssafy.memorybubble.exception.TokenException;
-import com.ssafy.memorybubble.service.BlacklistService;
+import com.ssafy.memorybubble.api.auth.exception.TokenException;
+import com.ssafy.memorybubble.api.auth.service.BlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

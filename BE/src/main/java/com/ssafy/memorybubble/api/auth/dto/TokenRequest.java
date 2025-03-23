@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.dto;
+package com.ssafy.memorybubble.api.auth.dto;
 
 import lombok.*;
 

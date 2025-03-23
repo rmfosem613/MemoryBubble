@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.security.handler;
+package com.ssafy.memorybubble.api.auth.security.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
