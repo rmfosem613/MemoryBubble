@@ -1,9 +1,9 @@
-package com.ssafy.memorybubble.controller;
+package com.ssafy.memorybubble.api.schedule.controller;
 
-import com.ssafy.memorybubble.dto.LinkRequest;
-import com.ssafy.memorybubble.dto.ScheduleRequest;
+import com.ssafy.memorybubble.api.schedule.dto.LinkRequest;
+import com.ssafy.memorybubble.api.schedule.dto.ScheduleRequest;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
-import com.ssafy.memorybubble.service.ScheduleService;
+import com.ssafy.memorybubble.api.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
