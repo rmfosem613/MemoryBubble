@@ -56,6 +56,7 @@ export interface LetterData {
   name: string
   state: '읽음' | '안읽음'
   date: string
+  contents?: string
 }
 
 // 편지 보관함 타입
