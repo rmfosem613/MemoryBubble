@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,13 +35,13 @@ public class Schedule {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(nullable = false)
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @Builder
-    public Schedule(Family family, Album album, String content, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime endDate) {
+    public Schedule(Family family, Album album, String content, LocalDateTime createdAt, LocalDate startDate, LocalDate endDate) {
         this.family = family;
         this.album = album;
         this.content = content;
