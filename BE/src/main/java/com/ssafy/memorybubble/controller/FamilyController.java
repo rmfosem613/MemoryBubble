@@ -108,7 +108,7 @@ public class FamilyController {
             summary = "가족 정보 수정 API",
             description = "가족 id로 가족의 정보(이름, 사진)을 수정합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "요청 성공 (가족 정보 반환)"),
+                    @ApiResponse(responseCode = "200", description = "요청 성공 (presigned Url 반환)"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "400", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
