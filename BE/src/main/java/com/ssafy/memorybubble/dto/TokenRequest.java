@@ -3,6 +3,6 @@ package com.ssafy.memorybubble.dto;
 import lombok.*;
 
 @Data
-public class TokenRequestDto {
+public class TokenRequest {
     String refreshToken;
 }

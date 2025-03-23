@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.controller;
 
-import com.ssafy.memorybubble.dto.TokenRequestDto;
+import com.ssafy.memorybubble.dto.TokenRequest;
+import com.ssafy.memorybubble.dto.TokenResponse;
 import com.ssafy.memorybubble.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,7 +56,8 @@ public class AuthController {
             description = "/api/auth/login에서 소셜 로그인 후 Authorize에서 AccessToken을 입력하고 로그아웃 합니다",
             responses = {
                 @ApiResponse(responseCode = "200", description = "요청 성공 (반환 값 x)"),
-                @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.")
+                @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다."),
+                @ApiResponse(responseCode = "400", description = "올바르지 않은 토큰입니다.")
             }
     )
     public ResponseEntity<?> logout(@AuthenticationPrincipal UserDetails userDetails) {
@@ -73,13 +75,11 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "새로운 accessToken 반환")
             }
     )
-    public ResponseEntity<?> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+    public ResponseEntity<TokenResponse> reissue(@RequestBody TokenRequest tokenRequest) {
         // refresh Token 만료 조회 후 재발급
-        String newAccessToken = tokenService.reissueAccessToken(tokenRequestDto.getRefreshToken());
+        String newAccessToken = tokenService.reissueAccessToken(tokenRequest.getRefreshToken());
         if (StringUtils.hasText(newAccessToken)) {
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("accessToken", newAccessToken);
-            return ResponseEntity.ok(responseData);
+            return ResponseEntity.ok(TokenResponse.builder().accessToken(newAccessToken).build());
         }
         return ResponseEntity.badRequest().build();
     }
