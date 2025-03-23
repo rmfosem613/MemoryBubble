@@ -30,7 +30,7 @@ public class TokenExceptionFilter extends OncePerRequestFilter {
 
             // 응답 본문 작성 -> ErrorResponse 추가 시 수정
             String errorResponse = "{ \"error\": \"" + e.getMessage() + "\" }";
-            response.getWriter().write(errorResponse);;
+            response.getWriter().write(errorResponse);
         }
     }
 }
