@@ -24,7 +24,11 @@ public enum ErrorCode {
     USER_NOT_FOUND(NOT_FOUND, "사용자를 찾을 수 없습니다."),
 
     // album
-    ALBUM_NOT_FOUND(NOT_FOUND, "앨범을 찾을 수 없습니다.");
+    ALBUM_NOT_FOUND(NOT_FOUND, "앨범을 찾을 수 없습니다."),
+    ALBUM_ACCESS_DENIED(FORBIDDEN, "해당 앨범에 접근할 수 없습니다."),
+
+    // schedule
+    SCHEDULE_DATE_INVALID(BAD_REQUEST, "잘못된 날짜입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
