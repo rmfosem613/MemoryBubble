@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.security.config;
+package com.ssafy.memorybubble.common.config;
 
 import com.ssafy.memorybubble.security.handler.OAuth2FailureHandler;
 import com.ssafy.memorybubble.security.handler.OAuth2SuccessHandler;

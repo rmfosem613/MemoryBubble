@@ -1,4 +1,4 @@
-package com.ssafy.memorybubble.config;
+package com.ssafy.memorybubble.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
