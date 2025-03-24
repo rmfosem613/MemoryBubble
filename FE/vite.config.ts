@@ -22,5 +22,5 @@ export default defineConfig({
   },
   // 퍼블릭 디렉토리와 에셋 설정
   publicDir: 'public',
-  base: './',
+  base: '/',
 })
