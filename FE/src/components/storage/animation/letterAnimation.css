@@ -11,7 +11,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 50;
+  /* z-index: 5; */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -37,7 +37,7 @@
   height: 150px; /* 봉투 높이 증가 */
   position: relative;
   animation: letter 2s ease infinite;
-  z-index: 20; /* 봉투 z-index */
+  z-index: 6; /* 봉투 z-index */
 }
 
 /* 편지 봉투 앞면 */
@@ -49,7 +49,7 @@
   bottom: 0;
   width: 100%;
   height: 100px; /* 봉투 높이에 맞게 조정 */
-  z-index: 1;
+  z-index: 20;
 }
 
 /* 편지 봉투 앞면의 양 옆 */
@@ -87,22 +87,23 @@
   animation: shadow 2s ease infinite;
 }
 
+/* 여기에서 편지 위치 변경 가능 */
 #unsubscribe .letter .body {
   padding: 25px; /* 패딩 증가 */
   display: flex;
   flex-direction: column;
-  bottom: 60px;
+  bottom: 30px;
   left: -290px; /* 위치 조정 */
   border-radius: 12px; /* 모서리 반경 증가 */
   background: white; /* 카세트 타입은 transparent로 덮어씀 */
   position: absolute;
   /* Initial state: horizontal (already rotated 90deg) */
-  transform: translateY(36%) translateZ(0) scale(.2, .16) rotate(90deg);
+  transform: translateY(48%) translateZ(0) scale(.2, .16) rotate(90deg);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* 그림자 강화 */
-  z-index: 30; /* 편지 본문 z-index 증가 */
+  z-index: 5; /* 편지 본문 z-index 증가 */
 }
 
-/* 캐서트 타입일 경우 위치 조정 */
+/* 캐서트 타입일 우 위치 조정 */
 #unsubscribe .letter .body[style*="width: 650px"] {
   left: -225px;
   bottom: 70px;
@@ -164,21 +165,22 @@
 
 #unsubscribe.show-game .letter {
   animation-play-state: paused;
-  z-index: 20; /* 봉투 z-index 유지 */
+  z-index: 5; /* 봉투 z-index 유지 */
   position: relative;
 }
 
+/* 편지가 뒤로감 */
 #unsubscribe.show-game .letter .body {
   animation: paper .8s linear forwards;
-  z-index: 30; /* 편지 본문 z-index 유지 */
+  z-index: 5; /* 편지 본문 z-index 유지 */
 }
 
 /* 카세트 타입 애니메이션 */
 #unsubscribe.show-game .letter .body[style*="width: 650px"] {
   animation: paper-cassette .8s linear forwards;
   z-index: 30;
-  background-color: transparent;
-  /* background-color: white; */
+  /* background-color: transparent; */
+  background-color: white;
 }
 
 #unsubscribe.show-game .letter .shadow {
@@ -205,13 +207,14 @@
 #unsubscribe.hide-game .letter .body[style*="width: 650px"] {
   animation: paper-cassette-back .8s linear forwards;
   z-index: 30;
-  background-color: transparent;
+  /* background-color: transparent; */
+  background-color: white;
 }
 
 @keyframes paper {
   30% {
     z-index: 30; /* 편지 본문 z-index 유지 */
-    transform: translateY(18%) translateZ(0) scale(.2, .16) rotate(90deg);
+    transform: translateY(30%) translateZ(0) scale(.2, .16) rotate(90deg);
   }
 
   60%,
@@ -224,7 +227,7 @@
   }
 
   100% {
-    transform: translateY(50%) translateZ(0) scale(0.7, 0.7) rotate(0deg); /* 최종 크기 증가 */
+    transform: translateY(45%) translateZ(0) scale(0.75, 0.75) rotate(0deg); /* 최종 크기 증가 */
   }
 }
 
@@ -266,7 +269,7 @@
   }
 
   100% {
-    z-index: 30; /* 편지 본문 z-index 유지 */
+    z-index: 5; /* 편지 본문 z-index 유지 */
     transform: translateY(36%) translateZ(0) scale(.2, .16) rotate(90deg);
   }
 }
@@ -274,7 +277,7 @@
 /* 카세트 타입 닫기 애니메이션 */
 @keyframes paper-cassette-back {
   0% {
-    transform: translateY(50%) translateZ(0) scale(0.75, 0.75) rotate(0deg);
+    transform: translateY(30%) translateZ(0) scale(0.75, 0.75) rotate(0deg);
     z-index: 30;
   }
 
@@ -285,11 +288,11 @@
 
   60% {
     z-index: 30;
-    transform: translateY(18%) translateZ(0) scale(.2, .16) rotate(90deg);
+    transform: translateY(10%) translateZ(0) scale(.2, .16) rotate(90deg);
   }
 
   100% {
-    z-index: 30;
+    z-index: 5;
     transform: translateY(36%) translateZ(0) scale(.2, .16) rotate(90deg);
   }
 }

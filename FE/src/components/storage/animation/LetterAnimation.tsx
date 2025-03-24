@@ -276,9 +276,9 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({ letter, onClose, isOp
                   </div>
 
                   {/* 날짜 표시 */}
-                  <div className="absolute bottom-4 right-4 text-base text-gray-500">
+                  {/* <div className="absolute bottom-4 right-4 text-base text-gray-500">
                     <p>{letter.date}</p>
-                  </div>
+                  </div> */}
                 </div>
               ) : (
                 // 카세트 타입인 경우
