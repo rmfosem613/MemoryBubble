@@ -24,7 +24,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final TokenService tokenService;
     // 클라이언트에서 임의의 callback 페이지 만들어서 accessToken, refreshToken 저장
     //private static final String URI = "http://localhost:5173/oauth/callback"; // "/api/auth/success";
-    private static final String URI = "/";
+    private static final String URI = "/api/auth/success";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
