@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.api.photo.service;
 
-import com.ssafy.memorybubble.api.album.exception.AlbumException;
+import com.ssafy.memorybubble.api.album.dto.MoveRequest;
+import com.ssafy.memorybubble.api.album.dto.MoveResponse;
 import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
@@ -11,6 +12,7 @@ import com.ssafy.memorybubble.api.photo.exception.PhotoException;
 import com.ssafy.memorybubble.api.photo.repository.PhotoRepository;
 import com.ssafy.memorybubble.api.photo.repository.ReviewRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
+import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_ACCESS_DENIED;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.PHOTO_NOT_FOUND;
 
 @Service
@@ -36,6 +37,7 @@ public class PhotoService {
     private final UserService userService;
     private final ReviewRepository reviewRepository;
 
+    // 사진 업로드
     @Transactional
     public List<FileResponse> addPhoto(Long userId, PhotoRequest photoRequest) {
         User user = userService.getUser(userId);
@@ -45,19 +47,19 @@ public class PhotoService {
         log.info("Add photo for user {} and album {}", userId, album);
 
         // 앨범에 접근할 수 있는지 확인
-        validateAlbumAccess(user, album);
+        Validator.validateAlbumAccess(user, album);
 
         return generateFileResponses(photoRequest.getPhotoLength(), album);
     }
 
+    // 감상평 작성
     @Transactional
     public Object addReview(Long userId, Long photoId, ReviewRequest reviewRequest) {
         User user = userService.getUser(userId);
-
-        Photo photo = photoRepository.findById(photoId).orElseThrow(() -> new PhotoException(PHOTO_NOT_FOUND));
+        Photo photo = getPhoto(photoId);
 
         // 앨범에 접근할 수 있는지 확인
-        validateAlbumAccess(user, photo.getAlbum());
+        Validator.validateAlbumAccess(user, photo.getAlbum());
 
         if (reviewRequest.getType().equals(Type.AUDIO)) {
             // 음성 메세지를 올릴 presigned 주소 생성
@@ -77,17 +79,42 @@ public class PhotoService {
         }
     }
 
+    // 사진(감상평) 조회
     public List<ReviewDto> getPhotoReviews(Long userId, Long photoId) {
         User user = userService.getUser(userId);
-        Photo photo = photoRepository.findById(photoId).orElseThrow(() -> new PhotoException(PHOTO_NOT_FOUND));
+        Photo photo = getPhoto(photoId);
 
         // 앨범에 접근할 수 있는지 확인
-        validateAlbumAccess(user, photo.getAlbum());
+        Validator.validateAlbumAccess(user, photo.getAlbum());
 
         List<Review> reviews = reviewRepository.findByPhotoId(photo.getId());
         return reviews.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    // 사진의 앨범 위치 변경
+    @Transactional
+    public MoveResponse movePhotos(Long userId, Long albumId, MoveRequest moveRequest) {
+        User user = userService.getUser(userId);
+
+        Album moveFromAlbum = albumService.getAlbum(albumId); // 기존 앨범
+        // 기존 앨범에 유저가 접근할 수 있는지 확인
+        Validator.validateAlbumAccess(user, moveFromAlbum);
+
+        Album moveToAlbum = albumService.getAlbum(moveRequest.getAlbumId()); // 이동하려는 앨범
+        // 이동하려는 앨범에 유저가 접근할 수 있는지 확인
+        Validator.validateAlbumAccess(user, moveToAlbum);
+
+        List<Long> photos = moveRequest.getPhotoList();
+        for (Long photoId : photos) {
+            Photo photo = getPhoto(photoId);
+            // 앨범 id 업데이트
+            photo.updateAlbum(moveToAlbum);
+        }
+        return MoveResponse.builder()
+                .albumId(moveToAlbum.getId())
+                .build();
     }
 
     private List<FileResponse> generateFileResponses(int photoLength, Album album) {
@@ -111,12 +138,6 @@ public class PhotoService {
             fileResponses.add(fileResponse);
         }
         return fileResponses;
-    }
-
-    private void validateAlbumAccess(User user, Album album) {
-        if (!album.getFamily().getId().equals(user.getFamily().getId())) {
-            throw new AlbumException(ALBUM_ACCESS_DENIED);
-        }
     }
 
     private void saveReview(ReviewRequest reviewRequest, Photo photo, User user, String content) {
@@ -144,5 +165,9 @@ public class PhotoService {
                 .createdAt(review.getCreatedAt())
                 .writer(review.getWriter().getName())
                 .build();
+    }
+
+    public Photo getPhoto(Long photoId) {
+        return photoRepository.findById(photoId).orElseThrow(() -> new PhotoException(PHOTO_NOT_FOUND));
     }
 }
