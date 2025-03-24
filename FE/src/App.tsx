@@ -14,6 +14,9 @@ import JoinPage from './pages/JoinPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import Header from './components/header/Header';
 
+// 관리자 페이지
+import AdminPage from './pages/AdminPage'
+
 function App() {
   return (
     <div className='font-pretendard font-normal min-w-80'>
@@ -33,6 +36,7 @@ function App() {
           <Route path='/enter' element={<EnterPage />} />
           <Route path='/join' element={<JoinPage />} />
           <Route path='/create' element={<CreateGroupPage />} />
+          <Route path='/admin' element={<AdminPage />} />
         </Routes>
         <Modal />
       </BrowserRouter>
