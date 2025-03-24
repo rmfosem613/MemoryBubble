@@ -2,6 +2,7 @@ package com.ssafy.memorybubble.api.schedule.controller;
 
 import com.ssafy.memorybubble.api.schedule.dto.LinkRequest;
 import com.ssafy.memorybubble.api.schedule.dto.ScheduleRequest;
+import com.ssafy.memorybubble.api.schedule.dto.ScheduleResponse;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
 import com.ssafy.memorybubble.api.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -36,10 +39,10 @@ public class ScheduleController {
                     @ApiResponse(responseCode = "400", description = "잘못된 날짜입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<Void> addSchedule(@AuthenticationPrincipal UserDetails userDetails,
-                                            @RequestBody ScheduleRequest scheduleRequest) {
-        scheduleService.addSchedule(Long.valueOf(userDetails.getUsername()), scheduleRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ScheduleResponse> addSchedule(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @RequestBody ScheduleRequest scheduleRequest) {
+        ScheduleResponse scheduleResponse = scheduleService.addSchedule(Long.valueOf(userDetails.getUsername()), scheduleRequest);
+        return ResponseEntity.ok().body(scheduleResponse);
     }
 
     @DeleteMapping("/{scheduleId}")
@@ -71,11 +74,11 @@ public class ScheduleController {
                     @ApiResponse(responseCode = "400", description = "잘못된 날짜입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<Void> updateSchedule(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<ScheduleResponse> updateSchedule(@AuthenticationPrincipal UserDetails userDetails,
                                                @PathVariable Long scheduleId,
                                                @RequestBody ScheduleRequest scheduleRequest) {
-        scheduleService.updateSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, scheduleRequest);
-        return ResponseEntity.ok().build();
+        ScheduleResponse scheduleResponse = scheduleService.updateSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, scheduleRequest);
+        return ResponseEntity.ok().body(scheduleResponse);
     }
 
     @PostMapping("/{scheduleId}/link")
@@ -90,10 +93,28 @@ public class ScheduleController {
                     @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             }
     )
-    public ResponseEntity<Void> linkSchedule(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<ScheduleResponse> linkSchedule(@AuthenticationPrincipal UserDetails userDetails,
                                              @PathVariable Long scheduleId,
                                              @RequestBody LinkRequest linkRequest) {
-        scheduleService.linkSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, linkRequest.getAlbumId());
-        return ResponseEntity.ok().build();
+        ScheduleResponse scheduleResponse =scheduleService.linkSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, linkRequest.getAlbumId());
+        return ResponseEntity.ok().body(scheduleResponse);
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "일정 목록 API",
+            description = "해당 년도, 월에 포함되어 있는 가족 일정 목록을 반환합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공(일정 목록)"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "해당 가족에 가입되어 있지 않습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    public ResponseEntity<List<ScheduleResponse>> getSchedules(@AuthenticationPrincipal UserDetails userDetails,
+                                                               @RequestParam("family_id") Long familyId,
+                                                               @RequestParam("year") int year,
+                                                               @RequestParam("month") int month) {
+        List<ScheduleResponse> schedules = scheduleService.getSchedules(Long.valueOf(userDetails.getUsername()), familyId, year, month);
+        return ResponseEntity.ok().body(schedules);
     }
 }
