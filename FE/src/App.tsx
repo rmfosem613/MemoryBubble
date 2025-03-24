@@ -12,11 +12,13 @@ import LetterStoragePage from './pages/LetterStoragePage';
 import EnterPage from './pages/EnterPage';
 import JoinPage from './pages/JoinPage';
 import CreateGroupPage from './pages/CreateGroupPage';
+import Header from './components/header/Header';
 
 function App() {
   return (
     <div className='font-pretendard font-normal min-w-80'>
       <BrowserRouter>
+        <Header />
         <Routes>
           {/* 메인 페이지로 이동 전에 Loading 페이지 보임 */}
           <Route index path='/' element={<MainWithLoading />} />
@@ -32,8 +34,8 @@ function App() {
           <Route path='/join' element={<JoinPage />} />
           <Route path='/create' element={<CreateGroupPage />} />
         </Routes>
+        <Modal />
       </BrowserRouter>
-      <Modal />
     </div>
   );
 }
