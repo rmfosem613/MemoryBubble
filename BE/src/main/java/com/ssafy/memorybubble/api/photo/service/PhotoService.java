@@ -5,11 +5,13 @@ import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.photo.dto.PhotoRequest;
+import com.ssafy.memorybubble.api.photo.dto.ReviewRequest;
+import com.ssafy.memorybubble.api.photo.exception.PhotoException;
 import com.ssafy.memorybubble.api.photo.repository.PhotoRepository;
+import com.ssafy.memorybubble.api.photo.repository.ReviewRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
-import com.ssafy.memorybubble.domain.Album;
-import com.ssafy.memorybubble.domain.Photo;
-import com.ssafy.memorybubble.domain.User;
+import com.ssafy.memorybubble.common.exception.ErrorCode;
+import com.ssafy.memorybubble.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_ACCESS_DENIED;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.PHOTO_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class PhotoService {
     private final FileService fileService;
     private final AlbumService albumService;
     private final UserService userService;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public List<FileResponse> addPhoto(Long userId, PhotoRequest photoRequest) {
@@ -39,16 +43,44 @@ public class PhotoService {
         Album album = albumService.getAlbum(photoRequest.getAlbumId());
         log.info("Add photo for user {} and album {}", userId, album);
 
-        // user가 album에 접근할 수 있는지
+        // 앨범에 접근할 수 있는지 확인
         validateAlbumAccess(user, album);
 
         return generateFileResponses(photoRequest.getPhotoLength(), album);
     }
 
+    @Transactional
+    public Object addReview(Long userId, Long photoId, ReviewRequest reviewRequest) {
+        User user = userService.getUser(userId);
+
+        Photo photo = photoRepository.findById(photoId).orElseThrow(() -> new PhotoException(PHOTO_NOT_FOUND));
+
+        // 앨범에 접근할 수 있는지 확인
+        validateAlbumAccess(user, photo.getAlbum());
+
+        if (reviewRequest.getType().equals(Type.AUDIO)) {
+            // 음성 메세지를 올릴 presigned 주소 생성
+            String key = String.format("album/%d/review/%s", user.getFamily().getId(), UUID.randomUUID());
+            String presignedUrl = fileService.getUploadPresignedUrl(key);
+
+            saveReview(reviewRequest, photo, user, key);
+
+            return FileResponse.builder()
+                    .fileName(key)
+                    .presignedUrl(presignedUrl)
+                    .build();
+        }
+        else {
+            saveReview(reviewRequest, photo, user, reviewRequest.getContent());
+            return null;
+        }
+    }
+
     private List<FileResponse> generateFileResponses(int photoLength, Album album) {
         List<FileResponse> fileResponses = new ArrayList<>();
         for(int i=0;i<photoLength;i++) {
-            String key = String.format("album/%d/%s", album.getId(), UUID.randomUUID());
+            // 가족 id로 앨범 밑에 폴더를 만듦
+            String key = String.format("album/%d/%s", album.getFamily().getId(), UUID.randomUUID());
             String presignedUrl = fileService.getUploadPresignedUrl(key);
 
             Photo photo = Photo.builder()
@@ -71,5 +103,15 @@ public class PhotoService {
         if (!album.getFamily().getId().equals(user.getFamily().getId())) {
             throw new AlbumException(ALBUM_ACCESS_DENIED);
         }
+    }
+
+    private void saveReview(ReviewRequest reviewRequest, Photo photo, User user, String content) {
+        Review review = Review.builder()
+                .photo(photo)
+                .type(reviewRequest.getType())
+                .content(content)
+                .writer(user)
+                .build();
+        reviewRepository.save(review);
     }
 }
