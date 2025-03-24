@@ -87,6 +87,7 @@ public class LetterService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public LetterDetailDto getLetter(Long userId, Long letterId) {
         User user = userService.getUser(userId);
         Letter letter = letterRepository.findById(letterId).orElseThrow(()-> new LetterException(LETTER_NOT_FOUND));
@@ -100,6 +101,7 @@ public class LetterService {
         }
         // isRead 변경
         letter.updateIsRead(true);
+        log.info("Letter updated: {}", letter);
         return converToDetailDto(letter);
     }
 
