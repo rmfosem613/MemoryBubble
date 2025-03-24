@@ -5,12 +5,12 @@ import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.photo.dto.PhotoRequest;
+import com.ssafy.memorybubble.api.photo.dto.ReviewDto;
 import com.ssafy.memorybubble.api.photo.dto.ReviewRequest;
 import com.ssafy.memorybubble.api.photo.exception.PhotoException;
 import com.ssafy.memorybubble.api.photo.repository.PhotoRepository;
 import com.ssafy.memorybubble.api.photo.repository.ReviewRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
-import com.ssafy.memorybubble.common.exception.ErrorCode;
 import com.ssafy.memorybubble.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_ACCESS_DENIED;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.PHOTO_NOT_FOUND;
@@ -76,6 +77,19 @@ public class PhotoService {
         }
     }
 
+    public List<ReviewDto> getPhotoReviews(Long userId, Long photoId) {
+        User user = userService.getUser(userId);
+        Photo photo = photoRepository.findById(photoId).orElseThrow(() -> new PhotoException(PHOTO_NOT_FOUND));
+
+        // 앨범에 접근할 수 있는지 확인
+        validateAlbumAccess(user, photo.getAlbum());
+
+        List<Review> reviews = reviewRepository.findByPhotoId(photo.getId());
+        return reviews.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     private List<FileResponse> generateFileResponses(int photoLength, Album album) {
         List<FileResponse> fileResponses = new ArrayList<>();
         for(int i=0;i<photoLength;i++) {
@@ -113,5 +127,22 @@ public class PhotoService {
                 .writer(user)
                 .build();
         reviewRepository.save(review);
+    }
+
+    public ReviewDto convertToDto(Review review) {
+        String content = review.getContent();
+
+        // AUDIO인 경우 내용을 음성 파일 presigned url로 전달
+        if(review.getType().equals(Type.AUDIO)) {
+            String key = review.getContent();
+            content = fileService.getDownloadPresignedURL(key);
+        }
+
+        return ReviewDto.builder()
+                .type(review.getType())
+                .content(content)
+                .createdAt(review.getCreatedAt())
+                .writer(review.getWriter().getName())
+                .build();
     }
 }
