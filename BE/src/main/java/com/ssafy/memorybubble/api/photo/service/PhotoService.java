@@ -2,7 +2,6 @@ package com.ssafy.memorybubble.api.photo.service;
 
 import com.ssafy.memorybubble.api.album.dto.MoveRequest;
 import com.ssafy.memorybubble.api.album.dto.MoveResponse;
-import com.ssafy.memorybubble.api.album.exception.AlbumException;
 import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
@@ -15,7 +14,6 @@ import com.ssafy.memorybubble.api.photo.repository.ReviewRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.*;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_ACCESS_DENIED;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.PHOTO_NOT_FOUND;
 
 @Service
