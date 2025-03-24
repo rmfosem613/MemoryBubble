@@ -31,9 +31,9 @@ function MainPage() {
   return (
     <>
       {/* 임시 헤더 영역 */}
-      <div className="w-full h-[65px] z-50 fixed top-0 left-0 bg-white opacity-[80%]">
+      {/* <div className="w-full h-[65px] z-50 fixed top-0 left-0 bg-white opacity-[80%]">
         <p className="text-h-logo-lg font-p-800 p-[16px]">추억방울</p>
-      </div>
+      </div> */}
 
       {/* 여기서부터 MainPage */}
       <div className={`${currentAlbum?.bgColor || 'bg-p-800'} h-screen transition-colors duration-500`}>
