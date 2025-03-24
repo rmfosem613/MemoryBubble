@@ -29,7 +29,10 @@ public enum ErrorCode {
 
     // schedule
     SCHEDULE_DATE_INVALID(BAD_REQUEST, "잘못된 날짜입니다."),
-    SCHEDULE_NOT_FOUND(NOT_FOUND, "일정을 찾을 수 없습니다.");
+    SCHEDULE_NOT_FOUND(NOT_FOUND, "일정을 찾을 수 없습니다."),
+
+    // letter
+    LETTER_RECEIVER_FORBIDDEN(FORBIDDEN, "가족이 아닌 사용자에게는 편지를 보낼 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
