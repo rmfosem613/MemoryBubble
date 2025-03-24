@@ -32,7 +32,10 @@ public enum ErrorCode {
     SCHEDULE_NOT_FOUND(NOT_FOUND, "일정을 찾을 수 없습니다."),
 
     // letter
-    LETTER_RECEIVER_FORBIDDEN(FORBIDDEN, "가족이 아닌 사용자에게는 편지를 보낼 수 없습니다.");
+    LETTER_RECEIVER_FORBIDDEN(FORBIDDEN, "가족이 아닌 사용자에게는 편지를 보낼 수 없습니다."),
+    LETTER_NOT_FOUND(NOT_FOUND, "편지를 찾을 수 없습니다."),
+    LETTER_ACCESS_DENIED(FORBIDDEN, "해당 편지를 열람할 수 없습니다."),
+    LETTER_OPEN_DENIED(FORBIDDEN, "아직 열람할 수 없는 편지입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

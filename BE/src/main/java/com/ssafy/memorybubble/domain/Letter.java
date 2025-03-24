@@ -49,6 +49,10 @@ public class Letter {
     @Column(length = 30)
     private String backgroundColor;
 
+    public void updateIsRead(Boolean isRead) {
+        this.isRead = isRead;
+    }
+
     @Builder
     public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDate openAt, Boolean isRead, String backgroundColor) {
         this.receiver = receiver;
