@@ -70,8 +70,7 @@ const tempFamilyInfo: FamilyInfo = {
     },
     {
       name: '동생',
-      profileUrl:
-        'https://search.pstatic.net/common?quality=75&direct=true&src=https%3A%2F%2Fmovie-phinf.pstatic.net%2F20240613_80%2F17182694165734L0aD_JPEG%2Fmovie_image.jpg',
+      profileUrl: '',
       birth: '1992-07-08',
       phoneNumber: '010-2222-2222',
     },
