@@ -22,7 +22,7 @@ public enum ErrorCode {
 
     // user
     USER_NOT_FOUND(NOT_FOUND, "사용자를 찾을 수 없습니다."),
-    USER_ACCESS_DENIED(FORBIDDEN, "다른 사용자의 프로필은 볼 수 없습니다."),
+    USER_ACCESS_DENIED(FORBIDDEN, "다른 사용자의 프로필은 접근할 수 없습니다."),
 
     // album
     ALBUM_NOT_FOUND(NOT_FOUND, "앨범을 찾을 수 없습니다."),

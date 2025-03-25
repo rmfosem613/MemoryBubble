@@ -1,8 +1,10 @@
 package com.ssafy.memorybubble.api.user.service;
 
+import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.user.dto.ProfileDto;
 import com.ssafy.memorybubble.api.user.dto.UserDto;
+import com.ssafy.memorybubble.api.user.dto.UserRequest;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
@@ -43,6 +45,18 @@ public class UserService {
         log.info("Updating user {}", user);
         user.updateUser(joinRequest.getName(), profile, joinRequest.getPhoneNumber(),
                 joinRequest.getGender(), joinRequest.getBirth());
+    }
+
+    @Transactional
+    public FileResponse updateUser(Long userId, UserRequest userRequest) {
+        User user = getUser(userId);
+        // 프로필 이미지를 바꿀 수 있는 url 반환
+        String presignedUrl = fileService.getUploadPresignedUrl(user.getProfile());
+        user.updateUser(userRequest.getName(), user.getProfile(), userRequest.getPhoneNumber(), userRequest.getGender(), userRequest.getBirth());
+        return FileResponse.builder()
+                .fileName(user.getProfile())
+                .presignedUrl(presignedUrl)
+                .build();
     }
 
     public ProfileDto getUserProfile (Long userId) {
