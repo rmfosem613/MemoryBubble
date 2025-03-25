@@ -38,7 +38,8 @@ public enum ErrorCode {
     LETTER_OPEN_DENIED(FORBIDDEN, "아직 열람할 수 없는 편지입니다."),
 
     // photo
-    PHOTO_NOT_FOUND(NOT_FOUND, "사진을 찾을 수 없습니다.");
+    PHOTO_NOT_FOUND(NOT_FOUND, "사진을 찾을 수 없습니다."),
+    PHOTO_ALBUM_INVALID(BAD_REQUEST, "앨범에 포함되지 않은 사진입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

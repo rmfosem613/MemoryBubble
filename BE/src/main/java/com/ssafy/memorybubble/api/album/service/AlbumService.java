@@ -1,16 +1,15 @@
 package com.ssafy.memorybubble.api.album.service;
 
-import com.ssafy.memorybubble.api.album.dto.AlbumDetailDto;
-import com.ssafy.memorybubble.api.album.dto.AlbumDto;
+import com.ssafy.memorybubble.api.album.dto.*;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.photo.dto.PhotoDto;
+import com.ssafy.memorybubble.api.photo.exception.PhotoException;
 import com.ssafy.memorybubble.api.photo.repository.PhotoRepository;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Album;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.Photo;
 import com.ssafy.memorybubble.domain.User;
-import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
 import com.ssafy.memorybubble.api.album.exception.AlbumException;
 import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.album.repository.AlbumRepository;
@@ -24,8 +23,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_NOT_FOUND;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FAMILY_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +108,47 @@ public class AlbumService {
 
         // 앨범과 앨범에 포함된 사진 dto로 변환 후 반환
         return convertToDto(album, photos);
+    }
+
+    @Transactional
+    public void updateAlbumThumbnail(Long userId, Long albumId, Long photoId) {
+        User user = userService.getUser(userId);
+        Album album = getAlbum(albumId);
+
+        // 사용자가 접근할 수 있는 앨범인지 확인
+        Validator.validateAlbumAccess(user, album);
+
+        // 썸네일을 변경 하려는 사진 id
+        Photo photo = photoRepository.findById(photoId).orElseThrow(()->new PhotoException(PHOTO_NOT_FOUND));
+
+        // 앨범에 포함되어 있지 않은 사진인 경우 예외 발생
+        if (!photo.getAlbum().equals(album)) {
+            throw(new PhotoException(PHOTO_ALBUM_INVALID));
+        }
+
+        album.updateThumbnail(photo.getPath());
+        log.info("update album thumbnail: {}", album.getThumbnail());
+    }
+
+    @Transactional
+    public void updateAlbumName(Long userId, Long albumId, UpdateRequest updateRequest) {
+        User user = userService.getUser(userId);
+        Album album = getAlbum(albumId);
+
+        // 사용자가 접근할 수 있는 앨범인지 확인
+        Validator.validateAlbumAccess(user, album);
+
+        // 이름이 있으면 이름 업데이트
+        if (StringUtils.hasText(updateRequest.getAlbumName())) {
+            album.updateName(updateRequest.getAlbumName());
+            log.info("update album name: {}", album.getName());
+        }
+
+        // 내용이 있으면 내용 업데이트
+        if (StringUtils.hasText(updateRequest.getAlbumContent())) {
+            album.updateContent(updateRequest.getAlbumContent());
+            log.info("update album content: {}", album.getContent());
+        }
     }
 
     public Album getAlbum(Long id) {
