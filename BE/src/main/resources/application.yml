@@ -51,6 +51,7 @@ spring:
         bucket: ${aws.bucket}
 jwt:
   secret: ${jwt.secret}
+baseUrl: ${url}
 
 #logging:
 #  level:

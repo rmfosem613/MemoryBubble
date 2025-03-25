@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -23,8 +24,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final TokenProvider tokenProvider;
     private final TokenService tokenService;
     // 클라이언트에서 임의의 callback 페이지 만들어서 accessToken, refreshToken 저장
-    //private static final String URI = "http://localhost:5173/oauth/callback"; // "/api/auth/success";
-    private static final String URI = "/api/auth/success";
+    @Value("${baseUrl}")
+    private String URI;
+    //private static final String URI = "/api/auth/success";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -38,7 +40,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         log.info("Saved token");
 
         // 토큰 전달을 위한 redirect URI -> 추후 클라이언트로 redirect
-        String redirectUrl = UriComponentsBuilder.fromUriString(URI)
+        String redirectUrl = UriComponentsBuilder.fromUriString(URI+"/oauth/callback")
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
                 .build().toUriString();
