@@ -6,7 +6,7 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   cancelButtonText?: string;
-  confirmButtonText: string;
+  confirmButtonText?: string;
   onClose: () => void; // 모달을 닫기 위한 기본 함수
   onCancel?: () => void; // 취소 버튼 클릭 시 추가 로직을 위한 함수
   onConfirm?: () => void; // 확인 버튼 클릭 시 추가 로직을 위한 함수
@@ -17,7 +17,7 @@ function Modal({
   title,
   children,
   cancelButtonText,
-  confirmButtonText,
+  confirmButtonText = '확인하기',
   onClose,
   onCancel,
   onConfirm,
