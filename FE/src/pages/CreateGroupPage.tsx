@@ -5,7 +5,8 @@ import Button from "@/components/common/Button/Button";
 import InputGroupName from "@/components/join/InputGroupName";
 import InputGroupPic from "@/components/join/InputGroupPic";
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import apiClient from "@/apis/apiClient";
 
 import Title from "@/components/common/Title";
 
@@ -35,16 +36,34 @@ const CircleCheck = () => {
 };
 
 function CreateGroupPage() {
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [groupName, setGroupName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < 2) {
       setCurrentStep(currentStep + 1);
     } else {
-      // 완료 버튼을 눌렀을 때 메인 페이지로 이동
-      navigate('/join');
+      // 완료 버튼을 눌렀을 때 가족 그룹 생성 API 호출
+      try {
+        setIsLoading(true);
+        setError("");
+
+        // API 호출로 가족 그룹 생성
+        await apiClient.post('/api/family', {
+          familyName: groupName
+        });
+
+        // 성공 시 메인 페이지로 이동
+        navigate('/');
+      } catch (err) {
+        console.error("가족 그룹 생성 실패:", err);
+        setError("가족 그룹 생성에 실패했습니다. 다시 시도해주세요.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -61,14 +80,16 @@ function CreateGroupPage() {
     return "text-gray-500";
   };
 
+  const handleGroupNameChange = (name) => {
+    setGroupName(name);
+  };
+
   return (
     <>
       <div className="container">
         <Title text="그룹 생성하기" />
       </div>
       <div className="flex justify-center mt-[10px]">
-
-
 
         {/* 앞에 흰 div */}
         <div className="px-10 py-[40px] w-[440px] h-[550px] border border-gray-300 bg-white rounded-[8px] flex flex-col z-30">
@@ -93,22 +114,17 @@ function CreateGroupPage() {
                 )}
                 <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(2)}`}>사진 등록</p>
               </div>
-
-              {/* <ChevronRight color="#4B4B51" size={20} />
-
-            <div className="flex justify-center items-center">
-              <CircleNumber number={3} isActive={currentStep >= 3} />
-              <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(3)}`}>사진등록</p>
-            </div> */}
             </div>
 
             <hr className="my-8" />
 
             {/* Content based on current step */}
             <div className="transition-opacity duration-300">
-              {currentStep === 1 && <InputGroupName />}
+              {currentStep === 1 && <InputGroupName onChangeGroupName={handleGroupNameChange} value={groupName} />}
               {currentStep === 2 && <InputGroupPic />}
             </div>
+
+            {error && <p className="text-red-500 mt-2">{error}</p>}
           </div>
 
           {/* Buttons fixed to bottom */}
@@ -117,7 +133,11 @@ function CreateGroupPage() {
               {currentStep > 1 && (
                 <Button name="이전" color="white" onClick={handlePrev} />
               )}
-              <Button name={currentStep === 2 ? "완료" : "다음"} color="blue" onClick={handleNext} />
+              <Button
+                name={currentStep === 2 ? (isLoading ? "처리 중..." : "완료") : "다음"}
+                color="blue"
+                onClick={handleNext}
+              />
             </div>
           </div>
         </div>
@@ -125,10 +145,8 @@ function CreateGroupPage() {
         {/* 세번째 파란색 div */}
         <div className="absolute ml-[60px] px-8 py-[40px] w-[440px] h-[510px] bg-blue-500 rounded-[8px] flex flex-col z-10px" />
 
-
         {/* 두번째 하늘색 div */}
         <div className="absolute ml-[30px] px-8 py-[40px] w-[440px] h-[530px] bg-blue-300 rounded-[8px] flex flex-col z-20px" />
-
 
       </div>
     </>
