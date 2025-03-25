@@ -44,9 +44,7 @@ function App() {
           
           {/* OAuth 콜백 경로들 */}
           <Route path='/oauth/callback' element={<OAuthCallback />} />
-
-          {/* 전체 URL 패턴 처리를 위한 경로 */}
-          <Route path='http://memorybubble.site/api/auth/success' element={<OAuthCallback />} />
+          
         </Routes>
         <Modal />
       </BrowserRouter>
