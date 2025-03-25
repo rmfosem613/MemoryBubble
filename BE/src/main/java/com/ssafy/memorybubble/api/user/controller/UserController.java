@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.api.user.controller;
 
 import com.ssafy.memorybubble.api.user.dto.ProfileDto;
+import com.ssafy.memorybubble.api.user.dto.UserDto;
 import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
@@ -47,5 +48,18 @@ public class UserController {
             throw new UserException(USER_ACCESS_DENIED);
         }
         return ResponseEntity.ok(userService.getUserProfile(Long.valueOf(userDetails.getUsername())));
+    }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "사용자 조회 API",
+            description = "사용자 id, 가족 id를 반환합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    public ResponseEntity<UserDto> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUserDto(Long.valueOf(userDetails.getUsername())));
     }
 }

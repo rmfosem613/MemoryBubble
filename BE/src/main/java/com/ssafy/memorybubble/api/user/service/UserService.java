@@ -2,6 +2,7 @@ package com.ssafy.memorybubble.api.user.service;
 
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.user.dto.ProfileDto;
+import com.ssafy.memorybubble.api.user.dto.UserDto;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
@@ -61,6 +62,13 @@ public class UserService {
         return userRepository.findByFamilyId(familyId);
     }
 
+    public UserDto getUserDto (Long userId) {
+        User user = getUser(userId);
+        return UserDto.builder()
+                .familyId(user.getFamily() != null ? user.getFamily().getId() : null)
+                .userId(userId)
+                .build();
+    }
     public UserInfoDto convertToDto(User user) {
         // 유저 프로필 presigned url로 반환
         String profileUrl = fileService.getDownloadPresignedURL(user.getProfile());
