@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Mail,
   UserRound,
@@ -20,6 +20,19 @@ const Header = () => {
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('A43DG650');
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate()
+  const [accessToken, setAccessToken] = useState('')
+
+  // accessToken이 없으면 다른 화면에 접근 못하고, 로그인 화면이 보이도록
+  useEffect(() => {
+    setAccessToken(localStorage.getItem('accessToken'))
+    if (!accessToken) {
+      navigate('/kakao')
+    }
+  }, [navigate])
+
+
   // const handleOpenProfileModal = () => {
   //   openModal({
   //     title: '내 프로필',
@@ -85,7 +98,7 @@ const Header = () => {
           추억방울
         </Link>
 
-        {user?.familyId && (
+        {accessToken && (
           <div className="flex items-center space-x-3">
             <Link
               to="/font"
@@ -250,7 +263,7 @@ const Header = () => {
                   {/* 로그아웃 */}
                   <button
                     className="p-2 w-full flex items-center space-x-2 text-sm text-red-600 hover:text-red-700"
-                    onClick={() => {}}>
+                    onClick={() => { }}>
                     <LogOut size={18} />
                     <p>로그아웃</p>
                   </button>
