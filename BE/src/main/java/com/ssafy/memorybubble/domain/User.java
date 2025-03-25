@@ -3,6 +3,7 @@ package com.ssafy.memorybubble.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 
@@ -44,11 +45,11 @@ public class User {
     }
 
     public void updateUser(String name, String profile, String phoneNumber, Gender gender, LocalDate birth) {
-        this.name = name;
-        this.profile = profile;
-        this.phoneNumber = phoneNumber;
-        this.gender = gender;
-        this.birth = birth;
+        if(StringUtils.hasText(name)) this.name = name;
+        if(StringUtils.hasText(profile)) this.profile = profile;
+        if(StringUtils.hasText(phoneNumber)) this.phoneNumber = phoneNumber;
+        if(gender != null) this.gender = gender;
+        if(birth != null) this.birth = birth;
     }
 
     @Builder

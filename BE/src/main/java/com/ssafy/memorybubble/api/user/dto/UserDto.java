@@ -4,14 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
-
 @Builder
 @AllArgsConstructor
 @Getter
-public class UserInfoDto {
-    String name;
-    String profileUrl;
-    LocalDate birth;
-    String phoneNumber;
+public class UserDto {
+    Long userId;
+    Long familyId;
 }
