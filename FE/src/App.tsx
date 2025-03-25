@@ -15,6 +15,8 @@ import Header from './components/header/Header';
 
 // 관리자 페이지
 import AdminPage from './pages/AdminPage'
+import TestKakaoLogin from './pages/TestKakaoLogin';
+import OAuthCallback from './components/login/OAuthCallback';
 
 function App() {
   return (
@@ -36,6 +38,12 @@ function App() {
           <Route path='/join' element={<JoinPage />} />
           <Route path='/create' element={<CreateGroupPage />} />
           <Route path='/admin' element={<AdminPage />} />
+          
+          <Route path='/kakao' element={<TestKakaoLogin />} />
+          
+          {/* OAuth 콜백 경로들 */}
+          <Route path='/oauth/callback' element={<OAuthCallback />} />
+          
         </Routes>
       </BrowserRouter>
     </div>
