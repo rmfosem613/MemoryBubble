@@ -53,6 +53,13 @@ jwt:
   secret: ${jwt.secret}
 baseUrl: ${url}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health # health 엔드포인트만 활성화
+        exclude: '*'
+
 #logging:
 #  level:
 #    org.springframework.security: DEBUG
