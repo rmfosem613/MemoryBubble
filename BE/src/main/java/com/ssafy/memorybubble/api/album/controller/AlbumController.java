@@ -90,6 +90,23 @@ public class AlbumController {
         return ResponseEntity.ok(albumService.getAlbumDetail(Long.valueOf(userDetails.getUsername()), albumId));
     }
 
+    @PatchMapping("/{albumId}")
+    @Operation(
+            summary = "앨범 정보 변경 API",
+            description = "앨범의 이름, 내용을 변경합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<Void> updateAlbum(@AuthenticationPrincipal UserDetails userDetails,
+                                            @PathVariable Long albumId,
+                                            @RequestBody UpdateRequest updateRequest) {
+        albumService.updateAlbumName(Long.valueOf(userDetails.getUsername()), albumId, updateRequest);
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/{albumId}/thumbnail")
     @Operation(
             summary = "앨범 대표 이미지 변경 API",
@@ -105,7 +122,7 @@ public class AlbumController {
     public ResponseEntity<Void> updateAlbumThumbnail(@AuthenticationPrincipal UserDetails userDetails,
                                                      @PathVariable Long albumId,
                                                      @RequestBody ThumbnailRequest thumbnailRequest) {
-        albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, thumbnailRequest);
+        albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, thumbnailRequest.getPhotoId());
         return ResponseEntity.ok().build();
     }
 }

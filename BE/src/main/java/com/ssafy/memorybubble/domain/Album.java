@@ -42,6 +42,10 @@ public class Album {
         this.thumbnail = thumbnail;
     }
 
+    public void updateName(String name) { this.name = name; }
+
+    public void updateContent(String content) { this.content = content; }
+    
     @Builder
     public Album(Family family, String name, String content, String thumbnail, String backgroundColor, LocalDateTime createdAt) {
         this.family = family;
