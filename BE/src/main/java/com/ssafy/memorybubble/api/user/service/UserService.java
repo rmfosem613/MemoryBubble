@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.api.user.service;
 
 import com.ssafy.memorybubble.api.file.service.FileService;
+import com.ssafy.memorybubble.api.user.dto.ProfileDto;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
@@ -41,6 +42,19 @@ public class UserService {
         log.info("Updating user {}", user);
         user.updateUser(joinRequest.getName(), profile, joinRequest.getPhoneNumber(),
                 joinRequest.getGender(), joinRequest.getBirth());
+    }
+
+    public ProfileDto getUserProfile (Long userId) {
+        User user = getUser(userId);
+        UserInfoDto userInfoDto = convertToDto(user);
+        return ProfileDto.builder()
+                .name(userInfoDto.getName())
+                .phoneNumber(userInfoDto.getPhoneNumber())
+                .profileUrl(userInfoDto.getProfileUrl())
+                .birth(userInfoDto.getBirth())
+                .familyId(user.getFamily() != null ? user.getFamily().getId() : null)
+                .gender(user.getGender())
+                .build();
     }
 
     public List<User> getUsersByFamilyId(Long familyId) {
