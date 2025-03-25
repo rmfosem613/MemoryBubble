@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Mail,
   UserRound,
@@ -20,8 +20,10 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('A43DG650');
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const dropdownRef = useRef(null);
   const { openModal } = useModal();
+  const navigate = useNavigate();
 
   const handleOpenProfileModal = () => {
     openModal({
@@ -43,10 +45,10 @@ const Header = () => {
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target)
       ) {
         setIsDropdownOpen(false);
         setShowInviteCode(false);
@@ -79,6 +81,18 @@ const Header = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  // 로그인 확인 및 리다이렉션 처리
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setAccessToken(urlParams.get("accessToken"));
+    const refreshToken = urlParams.get("refreshToken");
+
+    if (!accessToken) {
+      navigate('/kakao');
+    }
+  })
+
+
   return (
     <header className="fixed top-0 h-[65px] w-full bg-white/70 backdrop-blur-sm flex items-center z-[45]">
       <div className="container flex justify-between items-center">
@@ -88,7 +102,7 @@ const Header = () => {
           추억방울
         </Link>
 
-        {user?.familyId && (
+        {accessToken ? (
           <div className="flex items-center space-x-3">
             <Link
               to="/font"
@@ -255,7 +269,12 @@ const Header = () => {
                   {/* 로그아웃 */}
                   <button
                     className="p-2 w-full flex items-center space-x-2 text-sm text-red-600 hover:text-red-700"
-                    onClick={() => {}}>
+                    onClick={() => {
+                      localStorage.removeItem("accessToken");
+                      localStorage.removeItem("refreshToken");
+                      setAccessToken(null);
+                      navigate('/kakao');
+                    }}>
                     <LogOut size={18} />
                     <p>로그아웃</p>
                   </button>
@@ -263,7 +282,7 @@ const Header = () => {
               )}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </header>
   );
