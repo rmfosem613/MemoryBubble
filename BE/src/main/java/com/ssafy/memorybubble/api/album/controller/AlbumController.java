@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.api.album.controller;
 
+import com.ssafy.memorybubble.api.album.dto.AlbumDetailDto;
 import com.ssafy.memorybubble.api.album.dto.AlbumDto;
 import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
 import com.ssafy.memorybubble.api.album.dto.MoveRequest;
@@ -20,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/albums")
@@ -77,5 +77,11 @@ public class AlbumController {
     public ResponseEntity<List<AlbumDto>> getAlbums(@AuthenticationPrincipal UserDetails userDetails,
                                                     @RequestParam(value="name", required=false) String name) {
         return ResponseEntity.ok(albumService.getAlbums(Long.valueOf(userDetails.getUsername()), name));
+    }
+
+    @GetMapping("/{albumId}")
+    public ResponseEntity<AlbumDetailDto> getAlbum(@AuthenticationPrincipal UserDetails userDetails,
+                                                   @PathVariable Long albumId) {
+        return ResponseEntity.ok(albumService.getAlbumDetail(Long.valueOf(userDetails.getUsername()), albumId));
     }
 }
