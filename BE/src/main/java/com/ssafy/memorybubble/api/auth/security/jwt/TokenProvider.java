@@ -39,7 +39,7 @@ public class TokenProvider {
     private String secret;
     private SecretKey secretKey; // 설정 파일의 secret은 Base64로 인코딩된 문자
     private static final String GRANT_TYPE = "Bearer";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 3; // 3분
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 2; // 2시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3; // 3일
 
     @PostConstruct
