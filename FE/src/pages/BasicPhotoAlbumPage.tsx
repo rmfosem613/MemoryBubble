@@ -9,7 +9,7 @@ import InputImg from "@/components/common/Modal/InputImg"
 import DropDown from "@/components/common/Modal/DropDown"
 import Alert from "@/components/common/Alert"
 import InfiniteScroll from "@/components/photoAlbum/InfiniteScroll"
-import LocalModal from "@/components/common/Modal/Modal"
+import Modal from "@/components/common/Modal/Modal"
 import useModal from "@/hooks/useModal"
 
 import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
@@ -313,7 +313,7 @@ function BasicPhotoAlbumPage() {
       )}
 
       {/* 대표 이미지 변경 모달 */}
-      <LocalModal
+      <Modal
         isOpen={thumbnailModal.isOpen}
         onClose={thumbnailModal.close}
         title="대표 이미지 변경하기"
@@ -332,10 +332,10 @@ function BasicPhotoAlbumPage() {
             )}
           </div>
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 사진 추가 모달 */}
-      <LocalModal
+      <Modal
         isOpen={addPhotoModal.isOpen}
         onClose={addPhotoModal.close}
         title="추억 보관하기"
@@ -348,10 +348,10 @@ function BasicPhotoAlbumPage() {
           </p>
           <InputImg />
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 앨범 이동 모달 */}
-      <LocalModal
+      <Modal
         isOpen={moveAlbumModal.isOpen}
         onClose={moveAlbumModal.close}
         title="앨범 이동하기"
@@ -366,10 +366,10 @@ function BasicPhotoAlbumPage() {
           <DropDown />
           <div className="h-[130px]"></div>
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 사진 삭제 모달 */}
-      <LocalModal
+      <Modal
         isOpen={deletePhotoModal.isOpen}
         onClose={deletePhotoModal.close}
         title="사진 삭제하기"
@@ -379,7 +379,7 @@ function BasicPhotoAlbumPage() {
         <div className="py-2">
           <p className="mb-4">사진을 삭제하시겠습니까?</p>
         </div>
-      </LocalModal>
+      </Modal>
     </>
   );
 }

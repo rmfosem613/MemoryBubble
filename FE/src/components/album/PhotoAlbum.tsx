@@ -14,7 +14,7 @@ import {
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 import DropDown from '../common/Modal/DropDown';
 import { usePhotoMessages } from '@/hooks/usePhotoMessages ';
-import LocalModal from '../common/Modal/Modal';
+import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
 
 function PhotoAlbum() {
@@ -257,7 +257,7 @@ function PhotoAlbum() {
       </div>
 
       {/* 앨범명 수정 모달 */}
-      <LocalModal
+      <Modal
         isOpen={editAlbumModal.isOpen}
         onClose={editAlbumModal.close}
         title="앨범명 수정"
@@ -279,10 +279,10 @@ function PhotoAlbum() {
             />
           </form>
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 썸네일 변경 모달 */}
-      <LocalModal
+      <Modal
         isOpen={changeThumbnailModal.isOpen}
         onClose={changeThumbnailModal.close}
         title="썸네일 변경"
@@ -299,10 +299,10 @@ function PhotoAlbum() {
             />
           </div>
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 사진 삭제 모달 */}
-      <LocalModal
+      <Modal
         isOpen={deletePhotoModal.isOpen}
         onClose={deletePhotoModal.close}
         title="사진 삭제하기"
@@ -311,10 +311,10 @@ function PhotoAlbum() {
         <div className="py-2">
           <p className="mb-4">사진을 삭제하시겠습니까?</p>
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 앨범 이동 모달 */}
-      <LocalModal
+      <Modal
         isOpen={movePhotoModal.isOpen}
         onClose={movePhotoModal.close}
         title="앨범 이동하기"
@@ -328,7 +328,7 @@ function PhotoAlbum() {
           <DropDown />
           <div className="h-[130px]"></div>
         </div>
-      </LocalModal>
+      </Modal>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import SlidingAlbumList from "@/components/album/SlidingAlbumList"
 import useAlbumStore from "@/stores/useAlbumStore";
 import { useNavigate } from 'react-router-dom';
-import LocalModal from "@/components/common/Modal/Modal";
+import Modal from "@/components/common/Modal/Modal";
 import useModal from "@/hooks/useModal";
 
 // 모달창 관련 컴포넌트
@@ -101,7 +101,7 @@ function MainPage() {
       </div>
 
       {/* 앨범 생성 모달 */}
-      <LocalModal
+      <Modal
         isOpen={createAlbumModal.isOpen}
         onClose={createAlbumModal.close}
         title="앨범 생성"
@@ -125,10 +125,10 @@ function MainPage() {
             <div className="w-[35px] h-[35px] rounded-full bg-album-600"></div>
           </div>
         </div>
-      </LocalModal>
+      </Modal>
 
       {/* 사진 추가 모달 */}
-      <LocalModal
+      <Modal
         isOpen={addPhotoModal.isOpen}
         onClose={addPhotoModal.close}
         title="추억 보관하기"
@@ -141,7 +141,7 @@ function MainPage() {
                       <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
           <DropDown />
         </div>
-      </LocalModal>
+      </Modal>
     </>
   )
 }
