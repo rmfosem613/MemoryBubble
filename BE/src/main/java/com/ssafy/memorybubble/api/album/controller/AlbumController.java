@@ -1,10 +1,6 @@
 package com.ssafy.memorybubble.api.album.controller;
 
-import com.ssafy.memorybubble.api.album.dto.AlbumDetailDto;
-import com.ssafy.memorybubble.api.album.dto.AlbumDto;
-import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
-import com.ssafy.memorybubble.api.album.dto.MoveRequest;
-import com.ssafy.memorybubble.api.album.dto.MoveResponse;
+import com.ssafy.memorybubble.api.album.dto.*;
 import com.ssafy.memorybubble.api.photo.service.PhotoService;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
 import com.ssafy.memorybubble.api.album.service.AlbumService;
@@ -61,7 +57,7 @@ public class AlbumController {
     public ResponseEntity<MoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
                                                         @PathVariable Long albumId,
                                                         @RequestBody MoveRequest moveRequest) {
-        return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()) ,albumId ,moveRequest));
+        return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()), albumId, moveRequest));
     }
 
     @GetMapping
@@ -92,5 +88,24 @@ public class AlbumController {
     public ResponseEntity<AlbumDetailDto> getAlbum(@AuthenticationPrincipal UserDetails userDetails,
                                                    @PathVariable Long albumId) {
         return ResponseEntity.ok(albumService.getAlbumDetail(Long.valueOf(userDetails.getUsername()), albumId));
+    }
+
+    @PatchMapping("/{albumId}/thumbnail")
+    @Operation(
+            summary = "앨범 대표 이미지 변경 API",
+            description = "앨범의 대표 이미지를 변경합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "앨범에 포함되지 않은 사진입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "사진을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<Void> updateAlbumThumbnail(@AuthenticationPrincipal UserDetails userDetails,
+                                                     @PathVariable Long albumId,
+                                                     @RequestBody ThumbnailRequest thumbnailRequest) {
+        albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, thumbnailRequest);
+        return ResponseEntity.ok().build();
     }
 }

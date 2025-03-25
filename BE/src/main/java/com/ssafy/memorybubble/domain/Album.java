@@ -38,6 +38,10 @@ public class Album {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
     @Builder
     public Album(Family family, String name, String content, String thumbnail, String backgroundColor, LocalDateTime createdAt) {
         this.family = family;

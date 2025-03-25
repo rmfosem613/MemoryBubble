@@ -2,8 +2,10 @@ package com.ssafy.memorybubble.api.album.service;
 
 import com.ssafy.memorybubble.api.album.dto.AlbumDetailDto;
 import com.ssafy.memorybubble.api.album.dto.AlbumDto;
+import com.ssafy.memorybubble.api.album.dto.ThumbnailRequest;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.photo.dto.PhotoDto;
+import com.ssafy.memorybubble.api.photo.exception.PhotoException;
 import com.ssafy.memorybubble.api.photo.repository.PhotoRepository;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Album;
@@ -24,8 +26,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.ALBUM_NOT_FOUND;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FAMILY_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +111,26 @@ public class AlbumService {
 
         // 앨범과 앨범에 포함된 사진 dto로 변환 후 반환
         return convertToDto(album, photos);
+    }
+
+    @Transactional
+    public void updateAlbumThumbnail(Long userId, Long albumId, ThumbnailRequest thumbnailRequest) {
+        User user = userService.getUser(userId);
+        Album album = getAlbum(albumId);
+
+        // 사용자가 접근할 수 있는 앨범인지 확인
+        Validator.validateAlbumAccess(user, album);
+
+        // 썸네일을 변경 하려는 사진 id
+        Photo photo = photoRepository.findById(thumbnailRequest.getPhotoId()).orElseThrow(()->new PhotoException(PHOTO_NOT_FOUND));
+
+        // 앨범에 포함되어 있지 않은 사진인 경우 예외 발생
+        if (!photo.getAlbum().equals(album)) {
+            throw(new PhotoException(PHOTO_ALBUM_INVALID));
+        }
+
+        album.updateThumbnail(photo.getPath());
+        log.info("update album thumbnail: {}", album.getThumbnail());
     }
 
     public Album getAlbum(Long id) {
