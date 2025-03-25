@@ -80,6 +80,15 @@ public class AlbumController {
     }
 
     @GetMapping("/{albumId}")
+    @Operation(
+            summary = "앨범 상세 조회 API",
+            description = "앨범에 포함된 사진 id와 url을 반환합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
     public ResponseEntity<AlbumDetailDto> getAlbum(@AuthenticationPrincipal UserDetails userDetails,
                                                    @PathVariable Long albumId) {
         return ResponseEntity.ok(albumService.getAlbumDetail(Long.valueOf(userDetails.getUsername()), albumId));

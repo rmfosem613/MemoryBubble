@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,6 +82,11 @@ public class AlbumService {
     public List<AlbumDto> getAlbums(Long userId, String name) {
         User user = userService.getUser(userId);
         Family family = user.getFamily();
+
+        // 요청을 한 user가 가입된 family가 없으면 예외 반환
+        if(family == null) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
 
         // name이 없거나 빈 문자열이면 family로 album을 찾고 name이 있으면 포함된 album 찾음
         List<Album> albums = StringUtils.hasText(name)
