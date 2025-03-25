@@ -5,11 +5,12 @@ import album2 from "/assets/album-2.png"
 import album3 from "/assets/album-3.png"
 import album4 from "/assets/album-4.png"
 import album5 from "/assets/album-5.png"
-import { useModal } from '@/hooks/useModal'
 import InputImg from "@/components/common/Modal/InputImg"
 import DropDown from "@/components/common/Modal/DropDown"
 import Alert from "@/components/common/Alert"
 import InfiniteScroll from "@/components/photoAlbum/InfiniteScroll"
+import LocalModal from "@/components/common/Modal/Modal"
+import useModal from "@/hooks/useModal"
 
 import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
 
@@ -43,7 +44,10 @@ function BasicPhotoAlbumPage() {
   const [isThumbnailMode, setIsThumbnailMode] = useState(false);
 
   // 모달 관련
-  const { openModal } = useModal();
+  const thumbnailModal = useModal();
+  const addPhotoModal = useModal();
+  const moveAlbumModal = useModal();
+  const deletePhotoModal = useModal();
 
   // 확대해서 보기 위한 상태
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
@@ -56,16 +60,16 @@ function BasicPhotoAlbumPage() {
   // 이미지 로드 함수
   const loadMorePhotos = useCallback(() => {
     if (!hasMore) return;
-    
+
     const startIndex = (page - 1) * photosPerPage;
     const endIndex = startIndex + photosPerPage;
     const newPhotos = allPhotos.slice(startIndex, endIndex);
-    
+
     if (newPhotos.length > 0) {
       setPhotos(prev => [...prev, ...newPhotos]);
       setPage(prev => prev + 1);
     }
-    
+
     // 모든 사진을 다 불러왔는지 확인
     if (endIndex >= allPhotos.length) {
       setHasMore(false);
@@ -103,26 +107,7 @@ function BasicPhotoAlbumPage() {
     } else if (isThumbnailMode) {
       // 썸네일 모드에서는 한 장만 선택하고 모달 열기
       setSelectedPhotos([index]);
-
-      // 대표 이미지 변경 모달 열기
-      openModal({
-        title: "대표 이미지 변경하기",
-        content: (
-          <div className="py-2">
-            {/* 선택한 이미지 보이기 */}
-            <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
-            <div className="w-full flex justify-center">
-              <img
-                src={photo}
-                alt="Selected thumbnail"
-                className="h-64 object-cover"
-              />
-            </div>
-          </div>
-        ),
-        confirmButtonText: "변경하기",
-        cancelButtonText: "취소하기",
-      });
+      thumbnailModal.open();
     } else {
       // 일반 모드에서는 사진 확대
       setEnlargedPhoto(photo);
@@ -139,21 +124,6 @@ function BasicPhotoAlbumPage() {
     }
   };
 
-  // 사진 추가 모달 열기
-  const openAddPhotoModal = () => {
-    openModal({
-      title: "추억 보관하기",
-      content: (
-        <div className="py-2">
-          <p className="mb-4">사진은 최대 5장까지 한 번에 추가할 수 있습니다.</p>
-          <InputImg />
-        </div>
-      ),
-      confirmButtonText: "보관하기",
-      cancelButtonText: "취소하기",
-    });
-  };
-
   // 앨범 이동 모달 열기
   const openMoveAlbumModal = () => {
     if (selectedPhotos.length === 0) {
@@ -162,20 +132,7 @@ function BasicPhotoAlbumPage() {
       setShowAlert(true);
       return;
     }
-
-    openModal({
-      title: "앨범 이동하기",
-      content: (
-        <div className="py-2">
-          <p className="mb-4">이동할 앨범을 선택해주세요.</p>
-          <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
-          <DropDown />
-          <div className="h-[130px]"></div>
-        </div>
-      ),
-      confirmButtonText: "이동하기",
-      cancelButtonText: "취소하기",
-    });
+    moveAlbumModal.open();
   };
 
   // 선택한 사진 삭제
@@ -186,18 +143,7 @@ function BasicPhotoAlbumPage() {
       setShowAlert(true);
       return;
     }
-
-    // 모달을 열고 확인 버튼에 대한 콜백 함수를 제공
-    openModal({
-      title: "사진 삭제하기",
-      content: (
-        <div className="py-2">
-          <p className="mb-4">사진을 삭제하시겠습니까?</p>
-        </div>
-      ),
-      confirmButtonText: "삭제하기",
-      cancelButtonText: "취소하기",
-    });
+    deletePhotoModal.open();
   };
 
   // 선택된 사진 수에 따른 메시지 표시
@@ -263,8 +209,8 @@ function BasicPhotoAlbumPage() {
                 </div>
                 <div
                   className="flex space-x-1 cursor-pointer"
-                  onClick={openAddPhotoModal}
-                >
+                  onClick={addPhotoModal.open}
+                  >
                   <CirclePlus strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
 
                   <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200"></div>
@@ -337,7 +283,7 @@ function BasicPhotoAlbumPage() {
       </div>
 
       {/* 무한 스크롤 컴포넌트로 변경 */}
-      <InfiniteScroll 
+      <InfiniteScroll
         items={photos}
         renderItem={renderPhoto}
         loadMoreItems={loadMorePhotos}
@@ -365,8 +311,77 @@ function BasicPhotoAlbumPage() {
           </div>
         </div>
       )}
+
+      {/* 대표 이미지 변경 모달 */}
+      <LocalModal
+        isOpen={thumbnailModal.isOpen}
+        onClose={thumbnailModal.close}
+        title="대표 이미지 변경하기"
+        confirmButtonText="변경하기"
+        cancelButtonText="취소하기"
+      >
+        <div className="py-2">
+          <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
+          <div className="w-full flex justify-center">
+            {selectedPhotos.length > 0 && (
+              <img
+                src={photos[selectedPhotos[0]]}
+                alt="Selected thumbnail"
+                className="h-64 object-cover"
+              />
+            )}
+          </div>
+        </div>
+      </LocalModal>
+
+      {/* 사진 추가 모달 */}
+      <LocalModal
+        isOpen={addPhotoModal.isOpen}
+        onClose={addPhotoModal.close}
+        title="추억 보관하기"
+        confirmButtonText="보관하기"
+        cancelButtonText="취소하기"
+      >
+        <div className="py-2">
+          <p className="mb-4">
+            사진은 최대 5장까지 한 번에 추가할 수 있습니다.
+          </p>
+          <InputImg />
+        </div>
+      </LocalModal>
+
+      {/* 앨범 이동 모달 */}
+      <LocalModal
+        isOpen={moveAlbumModal.isOpen}
+        onClose={moveAlbumModal.close}
+        title="앨범 이동하기"
+        confirmButtonText="이동하기"
+        cancelButtonText="취소하기"
+      >
+        <div className="py-2">
+          <p className="mb-4">이동할 앨범을 선택해주세요.</p>
+          <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
+            앨범 선택하기
+          </p>
+          <DropDown />
+          <div className="h-[130px]"></div>
+        </div>
+      </LocalModal>
+
+      {/* 사진 삭제 모달 */}
+      <LocalModal
+        isOpen={deletePhotoModal.isOpen}
+        onClose={deletePhotoModal.close}
+        title="사진 삭제하기"
+        confirmButtonText="삭제하기"
+        cancelButtonText="취소하기"
+      >
+        <div className="py-2">
+          <p className="mb-4">사진을 삭제하시겠습니까?</p>
+        </div>
+      </LocalModal>
     </>
-  )
+  );
 }
 
-export default BasicPhotoAlbumPage
+export default BasicPhotoAlbumPage;

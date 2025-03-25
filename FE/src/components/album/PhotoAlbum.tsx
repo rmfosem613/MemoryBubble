@@ -12,9 +12,10 @@ import {
   CirclePause,
 } from 'lucide-react';
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
-import { useModal } from '@/hooks/useModal';
 import DropDown from '../common/Modal/DropDown';
 import { usePhotoMessages } from '@/hooks/usePhotoMessages ';
+import LocalModal from '../common/Modal/Modal';
+import useModal from '@/hooks/useModal';
 
 function PhotoAlbum() {
   const {
@@ -43,7 +44,11 @@ function PhotoAlbum() {
     goToNext,
   } = usePhotoAlbum();
 
-  const { openModal } = useModal();
+  // 각 모달별로 useModal() 훅 사용하여 상태 관리
+  const editAlbumModal = useModal();
+  const changeThumbnailModal = useModal();
+  const deletePhotoModal = useModal();
+  const movePhotoModal = useModal();
 
   if (isLoading) {
     return <div className="text-center p-8">사진을 불러오는 중...</div>;
@@ -56,60 +61,14 @@ function PhotoAlbum() {
         <div className="flex justify-end gap-4">
           <div
             className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
-            onClick={() =>
-              openModal({
-                title: '앨범명 수정',
-                content: (
-                  <div>
-                    <p className="text-subtitle-1-lg font-p-500">
-                      앨범명을 수정해주세요
-                    </p>
-                    <form className="py-4">
-                      <label
-                        htmlFor="album_name"
-                        className="block mb-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
-                        앨범명
-                      </label>
-                      <input
-                        type="text"
-                        id="album_name"
-                        className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      />
-                    </form>
-                  </div>
-                ),
-                confirmButtonText: '저장하기',
-                cancelButtonText: '취소하기',
-                onConfirmClick: handleChangeTitle,
-              })
-            }>
+            onClick={editAlbumModal.open}>
             <div className="absolute bg-gray-600 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <PencilLine size={18} />
             <p className="text-subtitle-1-lg">앨범명 수정</p>
           </div>
           <div
             className="relative flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors"
-            onClick={() =>
-              openModal({
-                title: '썸네일 변경',
-                content: (
-                  <div className="py-2">
-                    {/* 선택한 이미지 보이기 */}
-                    <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
-                    <div className="w-full flex justify-center">
-                      <img
-                        src={photos[currentIndex].src}
-                        alt="Selected thumbnail"
-                        className="h-64 object-cover"
-                      />
-                    </div>
-                  </div>
-                ),
-                confirmButtonText: '저장하기',
-                cancelButtonText: '취소하기',
-                onConfirmClick: handleChangeThumnail,
-              })
-            }>
+            onClick={changeThumbnailModal.open}>
             <div className="absolute bg-blue-400 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <ImageUp size={18} />
             <p className="text-subtitle-1-lg">썸네일 변경</p>
@@ -167,42 +126,13 @@ function PhotoAlbum() {
                   <div className="flex gap-2">
                     <button
                       className="flex p-1 hover:text-blue-500 gap-1"
-                      onClick={() =>
-                        openModal({
-                          title: '사진 삭제하기',
-                          content: (
-                            <div className="py-2">
-                              <p className="mb-4">사진을 삭제하시겠습니까?</p>
-                            </div>
-                          ),
-                          confirmButtonText: '삭제하기',
-                          cancelButtonText: '취소하기',
-                        })
-                      }>
+                      onClick={deletePhotoModal.open}>
                       <Trash2 size={20} />
                       삭제하기
                     </button>
                     <button
                       className="flex p-1 hover:text-blue-500 gap-1"
-                      onClick={() =>
-                        openModal({
-                          title: '앨범 이동하기',
-                          content: (
-                            <div className="py-2">
-                              <p className="mb-4">
-                                이동할 앨범을 선택해주세요.
-                              </p>
-                              <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
-                                앨범 선택하기
-                              </p>
-                              <DropDown />
-                              <div className="h-[130px]"></div>
-                            </div>
-                          ),
-                          confirmButtonText: '이동하기',
-                          cancelButtonText: '취소하기',
-                        })
-                      }>
+                      onClick={movePhotoModal.open}>
                       <FolderUp size={20} />
                       앨범 이동하기
                     </button>
@@ -325,6 +255,80 @@ function PhotoAlbum() {
           <ChevronRight size={20} />
         </button>
       </div>
+
+      {/* 앨범명 수정 모달 */}
+      <LocalModal
+        isOpen={editAlbumModal.isOpen}
+        onClose={editAlbumModal.close}
+        title="앨범명 수정"
+        confirmButtonText="저장하기"
+        cancelButtonText="취소하기"
+        onConfirm={handleChangeTitle}>
+        <div>
+          <p className="text-subtitle-1-lg font-p-500">앨범명을 수정해주세요</p>
+          <form className="py-4">
+            <label
+              htmlFor="album_name"
+              className="block mb-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
+              앨범명
+            </label>
+            <input
+              type="text"
+              id="album_name"
+              className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            />
+          </form>
+        </div>
+      </LocalModal>
+
+      {/* 썸네일 변경 모달 */}
+      <LocalModal
+        isOpen={changeThumbnailModal.isOpen}
+        onClose={changeThumbnailModal.close}
+        title="썸네일 변경"
+        confirmButtonText="저장하기"
+        cancelButtonText="취소하기"
+        onConfirm={handleChangeThumnail}>
+        <div className="py-2">
+          <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
+          <div className="w-full flex justify-center">
+            <img
+              src={photos[currentIndex].src}
+              alt="Selected thumbnail"
+              className="h-64 object-cover"
+            />
+          </div>
+        </div>
+      </LocalModal>
+
+      {/* 사진 삭제 모달 */}
+      <LocalModal
+        isOpen={deletePhotoModal.isOpen}
+        onClose={deletePhotoModal.close}
+        title="사진 삭제하기"
+        confirmButtonText="삭제하기"
+        cancelButtonText="취소하기">
+        <div className="py-2">
+          <p className="mb-4">사진을 삭제하시겠습니까?</p>
+        </div>
+      </LocalModal>
+
+      {/* 앨범 이동 모달 */}
+      <LocalModal
+        isOpen={movePhotoModal.isOpen}
+        onClose={movePhotoModal.close}
+        title="앨범 이동하기"
+        confirmButtonText="이동하기"
+        cancelButtonText="취소하기">
+        <div className="py-2">
+          <p className="mb-4">이동할 앨범을 선택해주세요.</p>
+          <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
+            앨범 선택하기
+          </p>
+          <DropDown />
+          <div className="h-[130px]"></div>
+        </div>
+      </LocalModal>
     </div>
   );
 }

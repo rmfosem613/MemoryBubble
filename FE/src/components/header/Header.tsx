@@ -11,9 +11,8 @@ import {
   Edit2,
 } from 'lucide-react';
 import { useUserStore } from '@/stores/useUserStroe';
-import { useModal } from '@/hooks/useModal';
-import GroupNameModal from './GroupNameModal';
-import ProfileComponent from './ProfileModal';
+// import GroupNameModal from './GroupNameModal';
+// import ProfileComponent from './ProfileModal';
 
 const Header = () => {
   const { user, familyInfo } = useUserStore();
@@ -21,25 +20,23 @@ const Header = () => {
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('A43DG650');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { openModal } = useModal();
+  // const handleOpenProfileModal = () => {
+  //   openModal({
+  //     title: '내 프로필',
+  //     content: <ProfileComponent />,
+  //     confirmButtonText: '저장하기',
+  //     cancelButtonText: '취소하기',
+  //   });
+  // };
 
-  const handleOpenProfileModal = () => {
-    openModal({
-      title: '내 프로필',
-      content: <ProfileComponent />,
-      confirmButtonText: '저장하기',
-      cancelButtonText: '취소하기',
-    });
-  };
-
-  const handleOpenGroupNameModal = () => {
-    openModal({
-      title: '그룹명 수정하기',
-      content: <GroupNameModal />,
-      confirmButtonText: '저장하기',
-      cancelButtonText: '취소하기',
-    });
-  };
+  // const handleOpenGroupNameModal = () => {
+  //   openModal({
+  //     title: '그룹명 수정하기',
+  //     content: <GroupNameModal />,
+  //     confirmButtonText: '저장하기',
+  //     cancelButtonText: '취소하기',
+  //   });
+  // };
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -162,8 +159,7 @@ const Header = () => {
                         {familyInfo?.familyName}
                       </div>
                       <div
-                        className="text-gray-500 hover:text-gray-700"
-                        onClick={handleOpenGroupNameModal}>
+                        className="text-gray-500 hover:text-gray-700">
                         <Edit2 size={16} />
                       </div>
                     </div>
@@ -211,8 +207,7 @@ const Header = () => {
                         <div className="flex justify-between">
                           <p className="text-sm">{user?.name}</p>
                           <div
-                            className="text-gray-500 hover:text-gray-700"
-                            onClick={handleOpenProfileModal}>
+                            className="text-gray-500 hover:text-gray-700">
                             <Settings size={18} />
                           </div>
                         </div>

@@ -5,7 +5,6 @@ import FontPage from './pages/FontPage';
 import LoginPage from './pages/LoginPage';
 import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
-import Modal from './components/common/Modal/Modal';
 import CalendarPage from './pages/CalendarPage';
 import MainWithLoading from './pages/MainWithLoading';
 import LetterStoragePage from './pages/LetterStoragePage';
@@ -38,7 +37,6 @@ function App() {
           <Route path='/create' element={<CreateGroupPage />} />
           <Route path='/admin' element={<AdminPage />} />
         </Routes>
-        <Modal />
       </BrowserRouter>
     </div>
   );
