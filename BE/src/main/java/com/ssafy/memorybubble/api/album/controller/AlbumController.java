@@ -2,6 +2,9 @@ package com.ssafy.memorybubble.api.album.controller;
 
 import com.ssafy.memorybubble.api.album.dto.AlbumDto;
 import com.ssafy.memorybubble.api.album.dto.AlbumRequest;
+import com.ssafy.memorybubble.api.album.dto.MoveRequest;
+import com.ssafy.memorybubble.api.album.dto.MoveResponse;
+import com.ssafy.memorybubble.api.photo.service.PhotoService;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
 import com.ssafy.memorybubble.api.album.service.AlbumService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/albums")
@@ -25,6 +29,7 @@ import java.util.List;
 @Tag(name = "Album Controller", description = "앨범 관련 Controller 입니다.")
 public class AlbumController {
     private final AlbumService albumService;
+    private final PhotoService photoService;
 
     @PostMapping
     @Operation(
@@ -40,6 +45,23 @@ public class AlbumController {
                                          @RequestBody AlbumRequest albumRequest) {
         albumService.addAlbum(Long.valueOf(userDetails.getUsername()), albumRequest);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{albumId}/move")
+    @Operation(
+            summary = "앨범 이동 API",
+            description = "body에 이동할 앨범 정보를 전달받아 사진을 다른 앨범으로 이동합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공(이동하는 앨범 id 반환)"),
+                    @ApiResponse(responseCode = "403", description = "해당 앨범에 접근할 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "사진을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<MoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @PathVariable Long albumId,
+                                                        @RequestBody MoveRequest moveRequest) {
+        return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()) ,albumId ,moveRequest));
     }
 
     @GetMapping
