@@ -14,61 +14,57 @@ import {
 } from 'lucide-react';
 import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
+import useUserStore, { User, Family } from '@/stores/useUserStore';
 
 // 임시 데이터
 import tempUser from './tempUser.json';
 import tempFamily from './tempFamily.json';
 
-interface User {
-  user_id: number;
-  name: string;
-  profileUrl: string;
-  birth: string;
-  phoneNumber: string;
-  gender: string;
-  familyId: number;
-}
-
-interface Family {
-  familyName: string;
-  thumbnailUrl: string;
-  familyMembers: FamilyMember[];
-}
-
-interface FamilyMember {
-  name: string;
-  profileUrl: string;
-  birth: string;
-  phoneNumber: string;
-}
-
 const Header = () => {
-  const [user, setUser] = useState<User>(tempUser);
-  const [family, setFamily] = useState<Family>(tempFamily);
-  const [showLetter] = useState(false);
+  // 스토어 관련 상태
+  const {
+    user,
+    family,
+    isUnread,
+    setUser,
+    setFamily,
+    updateUser,
+    updateFamilyName,
+    setIsUnread,
+  } = useUserStore();
+
+  // Header 관련 상태
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('A43DG650');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // 모달 관련 상태
   const GroupNameEditModal = useModal();
   const [newGroupName, setNewGroupName] = useState(family.familyName);
 
   const ProfileEditModal = useModal();
-  const [updatedUser, setUpdatedUser] = useState<User>(user);
+  const [newUser, setNewUser] = useState(user);
   const [phonePrefix, setPhonePrefix] = useState('010');
   const [phoneMiddle, setPhoneMiddle] = useState('');
   const [phoneSuffix, setPhoneSuffix] = useState('');
 
+  useEffect(() => {
+    setUser(tempUser as User);
+    setFamily(tempFamily as Family);
+  }, []);
+
+  // 프로필 모달 열기
   const handleOpenProfileModal = () => {
     const parts = user.phoneNumber.split('-');
     setPhonePrefix(parts[0] || '010');
     setPhoneMiddle(parts[1] || '');
     setPhoneSuffix(parts[2] || '');
-    setUpdatedUser(user);
+    setNewUser(user);
     ProfileEditModal.open();
   };
 
+  //  프로필 모달 입력
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     field: string,
@@ -83,8 +79,8 @@ const Header = () => {
     } else if (field === 'phoneSuffix') {
       setPhoneSuffix(value);
     } else {
-      // 일반 필드는 updatedUser 객체에 직접 업데이트
-      setUpdatedUser((prev) => ({
+      // 일반 필드는 newUser 객체에 직접 업데이트
+      setNewUser((prev) => ({
         ...prev,
         [field]: value,
       }));
@@ -95,8 +91,8 @@ const Header = () => {
   const handleProfileUpdate = () => {
     const formattedPhoneNumber = `${phonePrefix}-${phoneMiddle}-${phoneSuffix}`;
 
-    setUser({
-      ...updatedUser,
+    updateUser({
+      ...newUser,
       phoneNumber: formattedPhoneNumber,
     });
 
@@ -121,7 +117,7 @@ const Header = () => {
     };
   }, []);
 
-  // 초대 코드 복사 함수
+  // 초대 코드 복사
   const copyInviteCode = () => {
     navigator.clipboard
       .writeText(inviteCode)
@@ -178,7 +174,7 @@ const Header = () => {
                   className="w-6 h-6 md:w-[26px] md:h-[26px] lg:w-7 lg:h-7"
                   strokeWidth={1.3}
                 />
-                {showLetter && (
+                {isUnread && (
                   <span className="absolute top-[5px] right-[2px]  h-2.5 w-2.5 bg-red-500 rounded-full"></span>
                 )}
               </Link>
@@ -332,6 +328,8 @@ const Header = () => {
           )}
         </div>
       </header>
+
+      {/* 그룹명 수정 모달 */}
       <Modal
         isOpen={GroupNameEditModal.isOpen}
         onClose={GroupNameEditModal.close}
@@ -340,10 +338,7 @@ const Header = () => {
         cancelButtonText="취소하기"
         onConfirm={() => {
           // axios 요청 추가
-          setFamily({
-            ...family,
-            familyName: newGroupName,
-          });
+          updateFamilyName(newGroupName);
         }}>
         <div className="mb-3">
           <p className="pb-2">수정할 그룹명을 입력해주세요.</p>
@@ -367,7 +362,7 @@ const Header = () => {
           {/* 프로필 이미지 */}
           <div className="relative w-24 h-24 mx-auto">
             <img
-              src={updatedUser?.profileUrl}
+              src={newUser?.profileUrl}
               alt="프로필 이미지"
               className="w-24 h-24 rounded-full object-cover"
             />
@@ -385,7 +380,7 @@ const Header = () => {
               <input
                 type="text"
                 name="name"
-                value={updatedUser?.name || ''}
+                value={newUser?.name || ''}
                 onChange={(e) => handleInputChange(e, 'name')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
@@ -401,7 +396,7 @@ const Header = () => {
               <input
                 type="text"
                 name="birth"
-                value={updatedUser?.birth || ''}
+                value={newUser?.birth || ''}
                 onChange={(e) => handleInputChange(e, 'birth')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
@@ -456,7 +451,7 @@ const Header = () => {
             <div className="flex-1">
               <select
                 name="gender"
-                value={updatedUser?.gender}
+                value={newUser?.gender}
                 onChange={(e) => handleInputChange(e, 'gender')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md">
                 <option value="F">여자</option>
