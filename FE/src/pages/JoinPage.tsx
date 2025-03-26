@@ -47,6 +47,7 @@ function JoinPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [birth, setBirth] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -216,6 +217,15 @@ function JoinPage() {
 
   const handleImageChange = (file) => {
     setProfileImage(file);
+
+    if(file) {
+      const fileReader = new FileReader()
+      fileReader.onload = () => {
+        setProfileImagePreview(fileReader.result)
+      }
+      fileReader.readAsDataURL(file)
+    }
+
     setImageError("");
   };
 
@@ -271,18 +281,24 @@ function JoinPage() {
                   nameError={nameError}
                   genderError={genderError}
                   phoneError={phoneError}
+                  initialName={name}
+                  initialGender={gender}
+                  initialPhone={phoneNumber}
                 />
               )}
               {currentStep === 2 && (
                 <InputBirth
                   onBirthChange={handleBirthChange}
                   birthError={birthError}
+                  initialBirth={birth}
                 />
               )}
               {currentStep === 3 && (
                 <InputPic
                   onImageChange={handleImageChange}
                   imageError={imageError}
+                  initialImage={profileImage}
+                  initialPreviewUrl={profileImagePreview}
                 />
               )}
             </div>

@@ -1,11 +1,27 @@
 import { useState, useEffect } from "react";
 import { ChevronDown } from 'lucide-react';
 
-function InputInfo({ onNameChange, onGenderChange, onPhoneChange, nameError, genderError, phoneError }) {
+function InputInfo({
+  onNameChange,
+  onGenderChange,
+  onPhoneChange,
+  nameError,
+  genderError,
+  phoneError,
+  initialName = "",
+  initialGender = "",
+  initialPhone = ""
+}) {
   const [name, setName] = useState(""); // 이름 상태
   const [gender, setGender] = useState(""); // 성별 상태
   const [phoneNumber, setPhoneNumber] = useState(""); // 전화번호 상태
   const [isDropDown, setIsDropDown] = useState(false); // 드롭다운 상태
+
+  useEffect(() => {
+    setName(initialName)
+    setGender(initialGender)
+    setPhoneNumber((initialPhone))
+  }, [initialName, initialGender, initialPhone])
 
   // 드롭다운 토글 함수
   const toggleDropDown = () => {
