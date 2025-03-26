@@ -2,15 +2,13 @@ package com.ssafy.memorybubble.api.user.service;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
-import com.ssafy.memorybubble.api.user.dto.ProfileDto;
-import com.ssafy.memorybubble.api.user.dto.UserDto;
-import com.ssafy.memorybubble.api.user.dto.UserRequest;
+import com.ssafy.memorybubble.api.letter.repository.LetterRepository;
+import com.ssafy.memorybubble.api.user.dto.*;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.ssafy.memorybubble.api.family.dto.JoinRequest;
-import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
 import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +25,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final LetterRepository letterRepository;
 
     public User getUser (Long userId){
         return userRepository.findById(userId).orElseThrow(()->new UserException(USER_NOT_FOUND));
@@ -59,6 +58,12 @@ public class UserService {
                 .build();
     }
 
+    public UnreadLetterResponse getUnreadLetter(Long userId) {
+        User user = getUser(userId);
+        return UnreadLetterResponse.builder()
+                        .isUnread(letterRepository.existsByReceiverIdAndIsReadFalse(user.getId()))
+                .build();
+    }
     public ProfileDto getUserProfile (Long userId) {
         User user = getUser(userId);
         UserInfoDto userInfoDto = convertToDto(user);
