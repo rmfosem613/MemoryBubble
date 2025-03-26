@@ -104,12 +104,11 @@ public class UserService {
     }
 
     public UserInfoDto convertToDto(User user) {
-        // 유저 프로필 presigned url로 반환
-        String profileUrl = fileService.getDownloadPresignedURL(user.getProfile());
+        // 유저 프로필이 있으면 유저 프로필 presigned url로 반환
         return UserInfoDto.builder()
                 .userId(user.getId())
                 .name(user.getName())
-                .profileUrl(profileUrl)
+                .profileUrl(user.getProfile() !=null ? fileService.getDownloadPresignedURL(user.getProfile()) : null)
                 .birth(user.getBirth())
                 .phoneNumber(user.getPhoneNumber())
                 .build();
