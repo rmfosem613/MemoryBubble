@@ -28,19 +28,31 @@ public class Font {
     @Column(name = "font_name_eng", nullable = false, length = 50)
     private String nameEng;
 
-    @Column(name = "font_path", nullable = false)
+    @Column(name = "font_path")
     private String path;
 
     @Column(nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FontStatus fontStatus; // 폰트 생성 상태
+
     @Builder
-    public Font(User user, String name, String nameEng, String path, LocalDateTime createdAt) {
+    public Font(User user, String name, String nameEng) {
         this.user = user;
         this.name = name;
         this.nameEng = nameEng;
-        this.path = path;
-        this.createdAt = createdAt;
+        this.fontStatus = FontStatus.REQUESTED;
     }
+
+//    @Builder
+//    public Font(User user, String name, String nameEng, String path, LocalDateTime createdAt) {
+//        this.user = user;
+//        this.name = name;
+//        this.nameEng = nameEng;
+//        this.path = path;
+//        this.createdAt = createdAt;
+//    }
 }

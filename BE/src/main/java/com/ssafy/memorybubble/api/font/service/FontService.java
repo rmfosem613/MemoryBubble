@@ -1,0 +1,116 @@
+package com.ssafy.memorybubble.api.font.service;
+
+import com.ssafy.memorybubble.api.file.dto.FileResponse;
+import com.ssafy.memorybubble.api.file.service.FileService;
+import com.ssafy.memorybubble.api.font.dto.FontRequest;
+import com.ssafy.memorybubble.api.font.dto.FontResponse;
+import com.ssafy.memorybubble.api.font.exception.FontException;
+import com.ssafy.memorybubble.api.font.repository.FontRepository;
+import com.ssafy.memorybubble.api.user.service.UserService;
+import com.ssafy.memorybubble.common.util.Validator;
+import com.ssafy.memorybubble.domain.Font;
+import com.ssafy.memorybubble.domain.FontStatus;
+import com.ssafy.memorybubble.domain.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class FontService {
+    private final FontRepository fontRepository;
+    private final UserService userService;
+    private final FileService fileService;
+
+    private final static String TEMPLATE_FILE = "template/fontTemplate.zip";
+    private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png";
+    private final static int TEMPLATE_FILE_COUNT = 8; // 템플릿 파일의 개수
+
+    // 사용자 - 폰트 조회
+    @Transactional(readOnly = true)
+    public FontResponse getFont(Long userId) {
+        User user = userService.getUser(userId);
+        log.info("user={}", user);
+
+        Font font = fontRepository.findByUser(user).orElse(null);
+        // 만들어진 폰트가 없거나 폰트가 완성되지 않은 경우
+        if (font == null || font.getFontStatus().equals(FontStatus.REQUESTED)) {
+            return FontResponse.builder().build();
+        }
+        log.info("font={}", font);
+
+        return convertToDto(font);
+    }
+
+    // 사용자 - 폰트 삭제
+    public void deleteFont(Long userId, Long fontId) {
+        User user = userService.getUser(userId);
+        Font font = fontRepository.findById(fontId)
+                .orElseThrow(() -> new FontException(FONT_NOT_FOUND));
+
+        // 삭제하려는 폰트가 삭제를 요청한 사용자의 폰트인지 검사
+        Validator.validateFontOwnership(user, font);
+
+        fontRepository.deleteById(fontId);
+    }
+
+    // 사용자 - 폰트 템플릿 다운로드
+    @Transactional(readOnly = true)
+    public FileResponse getFontTemplate() {
+        return FileResponse.builder()
+                .presignedUrl(fileService.getDownloadPresignedURL(TEMPLATE_FILE))
+                .fileName(TEMPLATE_FILE)
+                .build();
+    }
+
+    // 사용자 - 폰트 생성 요청
+    public List<FileResponse> createFont(Long userId, FontRequest fontRequest) {
+        User user = userService.getUser(userId);
+
+        // 폰트 정보 저장
+        Font font = Font.builder()
+                .user(user)
+                .name(fontRequest.getFontName())
+                .nameEng(fontRequest.getFontNameEng())
+                .build();
+        fontRepository.save(font);
+        log.info("font={}", font);
+
+        // 작성한 템플릿을 올릴 Presigned URL 목록
+        List<FileResponse> fileResponseList = IntStream.rangeClosed(1, TEMPLATE_FILE_COUNT)
+                .mapToObj(i -> {
+                    String templateFile = String.format(TEMPLATE_FILE_NAME, userId, i);
+                    return FileResponse.builder()
+                            .presignedUrl(fileService.getUploadPresignedUrl(templateFile))
+                            .fileName(templateFile)
+                            .build();
+                })
+                .collect(Collectors.toList());
+        log.info("fileResponseList={}", fileResponseList);
+
+        // TODO: 관리자에게 폰트 생성 요청 알림(FCM) 보내기
+
+        return fileResponseList;
+    }
+
+    // Font to FontResponse
+    private FontResponse convertToDto(Font font) {
+        return FontResponse.builder()
+                .fontId(font.getId())
+                .fontName(font.getName())
+                .fileName(font.getPath())
+                .fontNameEng(font.getNameEng())
+                .createdAt(font.getCreatedAt())
+                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+                .build();
+    }
+}
