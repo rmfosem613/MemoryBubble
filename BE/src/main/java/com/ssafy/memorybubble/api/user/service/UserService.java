@@ -107,6 +107,7 @@ public class UserService {
         // 유저 프로필 presigned url로 반환
         String profileUrl = fileService.getDownloadPresignedURL(user.getProfile());
         return UserInfoDto.builder()
+                .userId(user.getId())
                 .name(user.getName())
                 .profileUrl(profileUrl)
                 .birth(user.getBirth())
