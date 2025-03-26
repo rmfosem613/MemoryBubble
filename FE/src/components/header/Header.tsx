@@ -10,12 +10,40 @@ import {
   RotateCcw,
   Edit2,
 } from 'lucide-react';
-import { useUserStore } from '@/stores/useUserStroe';
 // import GroupNameModal from './GroupNameModal';
 // import ProfileComponent from './ProfileModal';
 
+// 임시 데이터
+import tempUser from './tempUser.json';
+import tempFamily from './tempFamily.json';
+
+interface User {
+  user_id: number;
+  name: string;
+  profileUrl: string;
+  birth: string;
+  phoneNumber: string;
+  gender: string;
+  familyId: number;
+}
+
+interface Family {
+  familyName: string;
+  thumbnailUrl: string;
+  familyMembers: FamilyMember[];
+}
+
+interface FamilyMember {
+  name: string;
+  profileUrl: string;
+  birth: string;
+  phoneNumber: string;
+}
+
 const Header = () => {
-  const { user, familyInfo } = useUserStore();
+  const [user, setUser] = useState<User>(tempUser);
+  const [family, setFamily] = useState<Family>(tempFamily);
+  const [showLetter] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('A43DG650');
@@ -85,7 +113,7 @@ const Header = () => {
           추억방울
         </Link>
 
-        {user?.familyId && (
+        {user.familyId && (
           <div className="flex items-center space-x-3">
             <Link
               to="/font"
@@ -112,7 +140,7 @@ const Header = () => {
                 className="w-6 h-6 md:w-[26px] md:h-[26px] lg:w-7 lg:h-7"
                 strokeWidth={1.3}
               />
-              {user?.ismail && (
+              {showLetter && (
                 <span className="absolute top-[5px] right-[2px]  h-2.5 w-2.5 bg-red-500 rounded-full"></span>
               )}
             </Link>
@@ -121,9 +149,9 @@ const Header = () => {
               <div
                 onClick={toggleDropdown}
                 className="relative h-9 w-9 md:h-10 md:w-10 lg:h-11 lg:w-11 rounded-full overflow-hidden flex justify-center items-center bg-gray-200 cursor-pointer hover:opacity-90 transition-opacity">
-                {familyInfo?.thumbnailUrl ? (
+                {family.thumbnailUrl ? (
                   <img
-                    src={familyInfo.thumbnailUrl}
+                    src={family.thumbnailUrl}
                     alt="그룹 프로필 이미지"
                     className="h-full w-full object-cover"
                   />
@@ -141,9 +169,9 @@ const Header = () => {
                   {/*  그룹 */}
                   <div className="p-3 flex flex-col items-center space-y-2 bg-blue-50">
                     {/* 그룹 이미지 */}
-                    {familyInfo?.thumbnailUrl ? (
+                    {family.thumbnailUrl ? (
                       <img
-                        src={familyInfo.thumbnailUrl}
+                        src={family.thumbnailUrl}
                         alt="그룹 이미지"
                         className="h-24 w-24 rounded-full object-cover"
                       />
@@ -156,10 +184,9 @@ const Header = () => {
                     {/* 그룹 이름 */}
                     <div className="flex items-center space-x-2">
                       <div className="text-h5-lg font-p-700">
-                        {familyInfo?.familyName}
+                        {family.familyName}
                       </div>
-                      <div
-                        className="text-gray-500 hover:text-gray-700">
+                      <div className="text-gray-500 hover:text-gray-700">
                         <Edit2 size={16} />
                       </div>
                     </div>
@@ -192,7 +219,7 @@ const Header = () => {
                   <div className="max-h-60 overflow-y-auto mb-2">
                     {/* 현재 사용자 */}
                     <div className="flex items-center space-x-3 p-3 border-b border-gray-200">
-                      {user?.profileUrl ? (
+                      {user.profileUrl ? (
                         <img
                           src={user.profileUrl}
                           alt="프로필 이미지"
@@ -205,21 +232,20 @@ const Header = () => {
                       )}
                       <div className="flex-1">
                         <div className="flex justify-between">
-                          <p className="text-sm">{user?.name}</p>
-                          <div
-                            className="text-gray-500 hover:text-gray-700">
+                          <p className="text-sm">{user.name}</p>
+                          <div className="text-gray-500 hover:text-gray-700">
                             <Settings size={18} />
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500">{user?.birth}</p>
+                        <p className="text-xs text-gray-500">{user.birth}</p>
                         <p className="text-xs text-gray-500">
-                          {user?.phoneNumber}
+                          {user.phoneNumber}
                         </p>
                       </div>
                     </div>
 
                     {/* 그룹 멤버 */}
-                    {familyInfo?.familyMembers.map((member, index) => (
+                    {family.familyMembers.map((member, index) => (
                       <div
                         key={index}
                         className="flex items-center space-x-3 p-3 border-b border-gray-200">
