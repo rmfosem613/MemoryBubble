@@ -15,8 +15,9 @@ interface ProfileEditModalProps {
 const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, updateUser } = useUserStore();
+
   const [newUser, setNewUser] = useState(user);
-  const [profileImage, setProfileImage] = useState(user.profileUrl);
+  const [profileImage, setProfileImage] = useState(user?.profileUrl || '');
   const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [phonePrefix, setPhonePrefix] = useState('010');
   const [phoneMiddle, setPhoneMiddle] = useState('');
@@ -34,7 +35,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      const parts = user.phoneNumber.split('-');
+      const parts = user.phoneNumber?.split('-') || ['010', '', ''];
       setNewUser(user);
       setProfileImage(user.profileUrl);
       // 전화번호 분리
@@ -207,7 +208,9 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
 
     // 프로필 업데이트
     const phoneNumber = `${phonePrefix}-${phoneMiddle}-${phoneSuffix}`;
-    const birth = `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
+    const birth = birthDate
+      ? `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`
+      : '';
 
     // axios 요청
 
@@ -240,7 +243,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
               accept="image/*"
               className="hidden"
             />
-            <div className=" relative rounded-full border-4 border-white shadow-md transition-all duration-300 hover:border-blue-300">
+            <div className="relative rounded-full border-4 border-white shadow-md transition-all duration-300 hover:border-blue-300 cursor-pointer">
               <img
                 src={profileImage}
                 alt="프로필 이미지"
@@ -288,7 +291,10 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
               className={`${STYLES.input} w-full`}
               maxDate={new Date()}
               locale={ko}
-              open={false}
+              showMonthDropdown
+              showYearDropdown
+              scrollableYearDropdown
+              yearDropdownItemNumber={100}
             />
             {errors.birth && <p className={STYLES.errorText}>{errors.birth}</p>}
           </div>

@@ -37,6 +37,7 @@ const Header = () => {
 
   // 초기화
   useEffect(() => {
+    // axios 요청
     setUser(tempUser as User);
     setFamily(tempFamily as Family);
   }, []);
@@ -44,6 +45,11 @@ const Header = () => {
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // 모달이 열려있는 경우에는 드롭다운을 닫지 않음
+      if (groupNameModal.isOpen || profileEditModal.isOpen) {
+        return;
+      }
+
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
@@ -57,7 +63,7 @@ const Header = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [groupNameModal.isOpen, profileEditModal.isOpen]);
 
   // 초대 코드 복사
   const copyInviteCode = () => {
@@ -125,18 +131,11 @@ const Header = () => {
                 <div
                   onClick={toggleDropdown}
                   className="relative h-9 w-9 md:h-10 md:w-10 lg:h-11 lg:w-11 rounded-full overflow-hidden flex justify-center items-center bg-gray-200 cursor-pointer hover:opacity-90 transition-opacity">
-                  {family.thumbnailUrl ? (
-                    <img
-                      src={family.thumbnailUrl}
-                      alt="그룹 프로필 이미지"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <UserRound
-                      className="w-6 h-6 md:w-[26px] md:h-[26px] lg:w-7 lg:h-7"
-                      strokeWidth={1.3}
-                    />
-                  )}
+                  <img
+                    src={family.thumbnailUrl}
+                    alt="그룹 프로필 이미지"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
 
                 {/* 드롭다운 메뉴 */}
@@ -235,17 +234,11 @@ const Header = () => {
                         <div
                           key={index}
                           className="flex items-center space-x-3 p-3 border-b border-gray-200">
-                          {member.profileUrl ? (
-                            <img
-                              src={member.profileUrl}
-                              alt={`${member.name} 프로필 이미지`}
-                              className="h-11 w-11 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-11 w-11 rounded-full bg-gray-200 flex items-center justify-center">
-                              <UserRound />
-                            </div>
-                          )}
+                          <img
+                            src={member.profileUrl}
+                            alt={`프로필 이미지`}
+                            className="h-11 w-11 rounded-full object-cover"
+                          />
                           <div>
                             <p className="text-sm">{member.name}</p>
                             <p className="text-xs text-gray-500">
