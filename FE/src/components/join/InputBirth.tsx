@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 function InputBirth({ onBirthChange, birthError, initialBirth = "" }) {
   const [birthDate, setBirthDate] = useState(""); // 생일 상태
+  const today = new Date().toISOString().split('T')[0]; // 오늘 날짜를 YYYY-MM-DD 형식으로 변환
 
   useEffect(() => {
     setBirthDate(initialBirth)
@@ -22,6 +23,7 @@ function InputBirth({ onBirthChange, birthError, initialBirth = "" }) {
         type="date"
         value={birthDate} // 생일 입력 값
         onChange={handleDateChange} // 생일 변경 처리
+        max={today} // 오늘 날짜를 최대값으로 설정하여 미래 날짜 선택 방지
         className="w-full h-14 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
       {/* 생일 입력 오류 메시지 */}
