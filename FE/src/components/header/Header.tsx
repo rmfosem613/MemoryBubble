@@ -12,9 +12,10 @@ import {
   Camera,
   Calendar,
 } from 'lucide-react';
+import useUserStore, { User, Family } from '@/stores/useUserStore';
 import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
-import useUserStore, { User, Family } from '@/stores/useUserStore';
+import GroupNameEditModal from './GroupNameEditModal';
 
 // 임시 데이터
 import tempUser from './tempUser.json';
@@ -29,7 +30,6 @@ const Header = () => {
     setUser,
     setFamily,
     updateUser,
-    updateFamilyName,
     setIsUnread,
   } = useUserStore();
 
@@ -40,8 +40,7 @@ const Header = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 모달 관련 상태
-  const GroupNameEditModal = useModal();
-  const [newGroupName, setNewGroupName] = useState(family.familyName);
+  const groupNameModalControl = useModal();
 
   const ProfileEditModal = useModal();
   const [newUser, setNewUser] = useState(user);
@@ -222,7 +221,7 @@ const Header = () => {
                         </div>
                         <div
                           className="text-gray-500 hover:text-gray-700"
-                          onClick={GroupNameEditModal.open}>
+                          onClick={groupNameModalControl.open}>
                           <Edit2 size={16} />
                         </div>
                       </div>
@@ -330,27 +329,11 @@ const Header = () => {
       </header>
 
       {/* 그룹명 수정 모달 */}
-      <Modal
-        isOpen={GroupNameEditModal.isOpen}
-        onClose={GroupNameEditModal.close}
-        title="그룹명 수정"
-        confirmButtonText="저장하기"
-        cancelButtonText="취소하기"
-        onConfirm={() => {
-          // axios 요청 추가
-          updateFamilyName(newGroupName);
-        }}>
-        <div className="mb-3">
-          <p className="pb-2">수정할 그룹명을 입력해주세요.</p>
-          <input
-            type="text"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-            className="w-full py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="그룹명을 입력하세요"
-          />
-        </div>
-      </Modal>
+      <GroupNameEditModal
+        isOpen={groupNameModalControl.isOpen}
+        onClose={groupNameModalControl.close}
+      />
+
       <Modal
         isOpen={ProfileEditModal.isOpen}
         onClose={ProfileEditModal.close}
