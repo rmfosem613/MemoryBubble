@@ -12,6 +12,7 @@ export interface User {
 }
 
 interface FamilyMember {
+  user_id: number;
   name: string;
   profileUrl: string;
   birth: string;
