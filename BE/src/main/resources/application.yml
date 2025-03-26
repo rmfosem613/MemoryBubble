@@ -57,8 +57,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health # health 엔드포인트만 활성화
-        exclude: '*'
+        include: health
 
 #logging:
 #  level:
