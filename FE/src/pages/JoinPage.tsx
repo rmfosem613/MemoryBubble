@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import Button from "@/components/common/Button/Button";
 
@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from "@/apis/apiClient";
 
 import Title from "@/components/common/Title";
+import Alert from "@/components/common/Alert";
 
 import { useUserStore } from "@/stores/useUserStroe";
 
@@ -50,6 +51,7 @@ function JoinPage() {
   const [profileImagePreview, setProfileImagePreview] = useState(null)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
 
   // 폼 유효성 검사 상태
   const [nameError, setNameError] = useState("");
@@ -57,6 +59,15 @@ function JoinPage() {
   const [phoneError, setPhoneError] = useState("");
   const [birthError, setBirthError] = useState("");
   const [imageError, setImageError] = useState("");
+
+  useEffect(() => {
+    const shouldShowAlert = sessionStorage.getItem('showJoinAlert');
+    if (shouldShowAlert === 'true') {
+      setShowAlert(true);
+      // 한 번 표시한 후에는 알림 표시 제거
+      sessionStorage.removeItem('showJoinAlert');
+    }
+  }, []);
 
   // 다음 버튼 클릭 시 실행되는 함수
   const handleNext = async () => {
@@ -218,7 +229,7 @@ function JoinPage() {
   const handleImageChange = (file) => {
     setProfileImage(file);
 
-    if(file) {
+    if (file) {
       const fileReader = new FileReader()
       fileReader.onload = () => {
         setProfileImagePreview(fileReader.result)
@@ -231,6 +242,10 @@ function JoinPage() {
 
   return (
     <>
+      {showAlert && (
+        <Alert message="그룹 생성을 완료해주세요." color="red" />
+      )}
+
       <div className="container">
         <Title text="그룹 가입하기" />
       </div>

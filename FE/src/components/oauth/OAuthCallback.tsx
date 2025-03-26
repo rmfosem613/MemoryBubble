@@ -45,6 +45,8 @@ function OAuthCallback() {
                 if (!familyId) {
                     navigate("/enter")  // 가족 정보 입력 페이지로 이동
                 } else if (!userDetails.birth) {
+                    // alert창 열기
+                    sessionStorage.setItem('showJoinAlert', 'true');
                     navigate("/join")  // 추가 회원 가입 페이지로 이동
                 } else {
                     navigate("/")  // 메인 페이지로 이동
