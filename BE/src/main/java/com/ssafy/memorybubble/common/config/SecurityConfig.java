@@ -44,6 +44,8 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/api/auth/success", "/api/auth/login", "/api/auth/reissue")
                                 .permitAll()
+                                .requestMatchers("/actuator/health")
+                                .permitAll()
                                 .anyRequest().authenticated()
                 )
                 // oauth 설정
