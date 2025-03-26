@@ -40,7 +40,11 @@ public enum ErrorCode {
 
     // photo
     PHOTO_NOT_FOUND(NOT_FOUND, "사진을 찾을 수 없습니다."),
-    PHOTO_ALBUM_INVALID(BAD_REQUEST, "앨범에 포함되지 않은 사진입니다.");
+    PHOTO_ALBUM_INVALID(BAD_REQUEST, "앨범에 포함되지 않은 사진입니다."),
+
+    // font
+    FONT_NOT_FOUND(NOT_FOUND, "폰트를 찾을 수 없습니다"),
+    FONT_ACCESS_DENIED(FORBIDDEN, "다른 사용자의 폰트를 삭제할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
