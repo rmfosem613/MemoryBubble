@@ -238,8 +238,8 @@ function InputPic({ onImageChange, imageError, initialImage = null, initialPrevi
 
       {/* 이미지 크롭 모달 */}
       {showCropper && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div className="fixed bg-black bg-opacity-50 z-50 flex items-center justify-center w-full h-full top-[37px]">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] mt-[-60px] overflow-auto">
             <h3 className="text-xl font-bold mb-4 text-center">이미지 크롭</h3>
             
             <div className="text-blue-500 font-semibold mb-2 text-center">1:1 비율로 이미지를 자르세요</div>

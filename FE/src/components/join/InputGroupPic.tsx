@@ -36,9 +36,9 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
 
   // 이미지 선택 시 실행되는 함수
   const handleImageChange = (e) => {
-    const file = e.target.files[0] 
+    const file = e.target.files[0]
     if (file && file.type.startsWith('image/')) {
-      setImage(file) 
+      setImage(file)
 
       // 미리보기 생성
       const fileReader = new FileReader()
@@ -47,19 +47,19 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         setPreviewUrl(previewResult)
         // 크롭 화면 보여주기
         setShowCropper(true)
-      } 
+      }
       fileReader.readAsDataURL(file)
     }
-  } 
+  }
 
   const handleButtonClick = () => {
     fileInputRef.current.click()
-  } 
+  }
 
   // 드래그 허용
   const handleDragOver = (e) => {
     e.preventDefault()
-  } 
+  }
 
   // 파일 드롭
   const handleDrop = (e) => {
@@ -75,7 +75,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         setPreviewUrl(previewResult)
         // 크롭 화면 보여주기
         setShowCropper(true)
-      } 
+      }
       fileReader.readAsDataURL(file)
     }
   }
@@ -95,7 +95,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
     canvas.width = completedCrop.width
     canvas.height = completedCrop.height
     const ctx = canvas.getContext('2d')
-    
+
     ctx.drawImage(
       imgRef.current,
       completedCrop.x * scaleX,
@@ -116,15 +116,15 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
           type: 'image/jpeg',
           lastModified: Date.now()
         })
-        
+
         // 크롭된 이미지 URL 생성
         const croppedUrl = URL.createObjectURL(blob)
-        
+
         // 상태 업데이트
         setImage(croppedFile)
         setPreviewUrl(croppedUrl)
         setShowCropper(false)
-        
+
         // 부모 컴포넌트로 크롭된 이미지 전달
         onImageChange(croppedFile, croppedUrl)
       }
@@ -137,29 +137,29 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
     setImage(null)
     setPreviewUrl(null)
   }
-  
+
   // 크롭 영역 초기화 버튼 클릭 시 실행되는 함수
   const handleResetCrop = () => {
     // 이미지 전체에 대한 4:3 비율의 크롭 영역 계산
     if (imgRef.current) {
       const { width, height } = imgRef.current;
-      
+
       let newWidth, newHeight, newX, newY;
-      
-      if (width / height > 4/3) {
+
+      if (width / height > 4 / 3) {
         // 이미지가 더 넓은 경우
         newHeight = height;
-        newWidth = height * (4/3);
+        newWidth = height * (4 / 3);
         newX = (width - newWidth) / 2;
         newY = 0;
       } else {
         // 이미지가 더 좁거나 비율이 같은 경우
         newWidth = width;
-        newHeight = width * (3/4);
+        newHeight = width * (3 / 4);
         newX = 0;
         newY = (height - newHeight) / 2;
       }
-      
+
       // 퍼센트로 변환
       const percentCrop = {
         unit: '%',
@@ -169,7 +169,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         y: (newY / height) * 100,
         aspect: 4 / 3
       } as Crop;
-      
+
       setCrop(percentCrop);
     } else {
       // imgRef.current가 없는 경우 기본값으로 설정
@@ -205,6 +205,13 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
                 alt="Profile Preview"
                 className="object-cover w-full h-full"
               />
+
+              <button
+                onClick={handleButtonClick}
+                className="absolute z-50 bg-white text-blue-500 border border-blue-500 font-p-500 py-2 px-4 rounded-[8px] bottom-[10px] right-[10px]"
+              >
+                이미지 재업로드
+              </button>
             </div>
           ) : (
             <div
@@ -218,15 +225,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
             </div>
           )}
 
-          {/* 이미지 선택 안내 또는 재업로드 버튼 */}
-          {previewUrl ? (
-            <button
-              onClick={handleButtonClick}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors"
-            >
-              이미지 재업로드
-            </button>
-          ) : (
+          {!previewUrl && (
             <p className="font-p-500 text-subtitle-1-lg text-gray-500 mb-2">
               그룹을 대표할 사진을 선택해주세요
             </p>
@@ -236,20 +235,20 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
 
       {/* 이미지 크롭 모달 */}
       {showCropper && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div className="fixed bg-black bg-opacity-50 z-50 flex items-center justify-center w-full h-full top-[37px]">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] mt-[-60px] overflow-auto">
             <h3 className="text-xl font-bold mb-4 text-center">이미지 크롭</h3>
-            
+
             <div className="text-blue-500 font-semibold mb-2 text-center">4:3 비율로 이미지를 자르세요</div>
             <p className="text-gray-500 text-sm mb-4 text-center">영역을 드래그하여 조절할 수 있습니다</p>
-            
+
             <div className="flex justify-center mb-6">
               <div className="max-w-full" style={{ maxHeight: 'calc(90vh - 250px)' }}>
                 <ReactCrop
                   crop={crop}
                   onChange={(newCrop) => setCrop(newCrop as Crop)}
                   onComplete={handleCropComplete}
-                  aspect={4/3}
+                  aspect={4 / 3}
                   className="max-w-full"
                 >
                   <img
@@ -262,7 +261,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
                 </ReactCrop>
               </div>
             </div>
-            
+
             <div className="flex justify-center space-x-4">
               <button
                 onClick={handleApplyCrop}
@@ -287,7 +286,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         </div>
       )}
     </div>
-  ) 
+  )
 }
 
 export default InputGroupPic
