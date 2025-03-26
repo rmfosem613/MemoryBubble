@@ -9,10 +9,11 @@ import {
   Copy,
   RotateCcw,
   Edit2,
+  Camera,
+  Calendar,
 } from 'lucide-react';
 import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
-// import ProfileComponent from './ProfileModal';
 
 // 임시 데이터
 import tempUser from './tempUser.json';
@@ -49,9 +50,58 @@ const Header = () => {
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('A43DG650');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const GroupNameEditModal = useModal();
   const [newGroupName, setNewGroupName] = useState(family.familyName);
+
+  const ProfileEditModal = useModal();
+  const [updatedUser, setUpdatedUser] = useState<User>(user);
+  const [phonePrefix, setPhonePrefix] = useState('010');
+  const [phoneMiddle, setPhoneMiddle] = useState('');
+  const [phoneSuffix, setPhoneSuffix] = useState('');
+
+  const handleOpenProfileModal = () => {
+    const parts = user.phoneNumber.split('-');
+    setPhonePrefix(parts[0] || '010');
+    setPhoneMiddle(parts[1] || '');
+    setPhoneSuffix(parts[2] || '');
+    setUpdatedUser(user);
+    ProfileEditModal.open();
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    field: string,
+  ) => {
+    const { value } = e.target;
+
+    // 필드에 따라 다른 상태 업데이트
+    if (field === 'phonePrefix') {
+      setPhonePrefix(value);
+    } else if (field === 'phoneMiddle') {
+      setPhoneMiddle(value);
+    } else if (field === 'phoneSuffix') {
+      setPhoneSuffix(value);
+    } else {
+      // 일반 필드는 updatedUser 객체에 직접 업데이트
+      setUpdatedUser((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
+  // 프로필 업데이트
+  const handleProfileUpdate = () => {
+    const formattedPhoneNumber = `${phonePrefix}-${phoneMiddle}-${phoneSuffix}`;
+
+    setUser({
+      ...updatedUser,
+      phoneNumber: formattedPhoneNumber,
+    });
+
+    ProfileEditModal.close();
+  };
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -223,7 +273,12 @@ const Header = () => {
                         <div className="flex-1">
                           <div className="flex justify-between">
                             <p className="text-sm">{user.name}</p>
-                            <div className="text-gray-500 hover:text-gray-700">
+                            <div
+                              className="text-gray-500 hover:text-gray-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenProfileModal();
+                              }}>
                               <Settings size={18} />
                             </div>
                           </div>
@@ -299,6 +354,116 @@ const Header = () => {
             className="w-full py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="그룹명을 입력하세요"
           />
+        </div>
+      </Modal>
+      <Modal
+        isOpen={ProfileEditModal.isOpen}
+        onClose={ProfileEditModal.close}
+        title="프로필 수정"
+        confirmButtonText="저장하기"
+        cancelButtonText="취소하기"
+        onConfirm={handleProfileUpdate}>
+        <div className="w-full p-2 flex flex-col justify-center space-y-4">
+          {/* 프로필 이미지 */}
+          <div className="relative w-24 h-24 mx-auto">
+            <img
+              src={updatedUser?.profileUrl}
+              alt="프로필 이미지"
+              className="w-24 h-24 rounded-full object-cover"
+            />
+            <div className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow-sm cursor-pointer">
+              <Camera />
+            </div>
+          </div>
+
+          {/* 이름 입력 */}
+          <div className="flex items-center">
+            <label className="text-subtitle-1-lg font-p-500 w-24">
+              이름(별명)
+            </label>
+            <div className="flex-1">
+              <input
+                type="text"
+                name="name"
+                value={updatedUser?.name || ''}
+                onChange={(e) => handleInputChange(e, 'name')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+
+          {/* 생년월일 입력 */}
+          <div className="flex items-center">
+            <label className="text-subtitle-1-lg font-p-500 w-24">
+              생년월일
+            </label>
+            <div className="relative flex-1">
+              <input
+                type="text"
+                name="birth"
+                value={updatedUser?.birth || ''}
+                onChange={(e) => handleInputChange(e, 'birth')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Calendar />
+              </span>
+            </div>
+          </div>
+
+          {/* 전화번호 입력 */}
+          <div className="flex items-center">
+            <label className="text-subtitle-1-lg font-p-500 w-24">
+              전화번호
+            </label>
+            <div className="flex items-center space-x-2 flex-1">
+              <select
+                name="phonePrefix"
+                value={phonePrefix}
+                onChange={(e) => handleInputChange(e, 'phonePrefix')}
+                className="px-3 py-2 border border-gray-300 rounded-md w-1/4">
+                <option value="010">010</option>
+                <option value="011">011</option>
+                <option value="016">016</option>
+                <option value="017">017</option>
+                <option value="018">018</option>
+                <option value="019">019</option>
+              </select>
+              <span className="text-gray-500">-</span>
+              <input
+                type="text"
+                name="phoneMiddle"
+                value={phoneMiddle}
+                onChange={(e) => handleInputChange(e, 'phoneMiddle')}
+                className="px-3 py-2 border border-gray-300 rounded-md w-1/3"
+                maxLength={4}
+              />
+              <span className="text-gray-500">-</span>
+              <input
+                type="text"
+                name="phoneSuffix"
+                value={phoneSuffix}
+                onChange={(e) => handleInputChange(e, 'phoneSuffix')}
+                className="px-3 py-2 border border-gray-300 rounded-md w-1/3"
+                maxLength={4}
+              />
+            </div>
+          </div>
+
+          {/* 성별 선택 */}
+          <div className="flex items-center">
+            <label className="text-subtitle-1-lg font-p-500 w-24">성별</label>
+            <div className="flex-1">
+              <select
+                name="gender"
+                value={updatedUser?.gender}
+                onChange={(e) => handleInputChange(e, 'gender')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="F">여자</option>
+                <option value="M">남자</option>
+              </select>
+            </div>
+          </div>
         </div>
       </Modal>
     </>
