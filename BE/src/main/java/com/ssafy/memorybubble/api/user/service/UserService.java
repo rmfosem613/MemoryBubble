@@ -62,8 +62,23 @@ public class UserService {
         User user = getUser(userId);
         return UnreadLetterResponse.builder()
                         .isUnread(letterRepository.existsByReceiverIdAndIsReadFalse(user.getId()))
+                        .build();
+    }
+
+    public JoinResponse getJoinAvailable(Long userId) {
+        User user = getUser(userId);
+        //유저의 정보가 이미 기입되어 있으면 가입한 것이므로 false 반환 -> 가입 페이지 접근 불가
+        if (user.getProfile() != null || user.getBirth() != null || user.getPhoneNumber() != null || user.getGender() != null) {
+            return JoinResponse.builder()
+                    .isJoinAvailable(false)
+                    .build();
+        }
+        // 가입 페이지 접근 가능
+        return JoinResponse.builder()
+                .isJoinAvailable(true)
                 .build();
     }
+
     public ProfileDto getUserProfile (Long userId) {
         User user = getUser(userId);
         UserInfoDto userInfoDto = convertToDto(user);
@@ -80,7 +95,6 @@ public class UserService {
     public List<User> getUsersByFamilyId(Long familyId) {
         return userRepository.findByFamilyId(familyId);
     }
-
     public UserDto getUserDto (Long userId) {
         User user = getUser(userId);
         return UserDto.builder()
@@ -88,6 +102,7 @@ public class UserService {
                 .userId(userId)
                 .build();
     }
+
     public UserInfoDto convertToDto(User user) {
         // 유저 프로필 presigned url로 반환
         String profileUrl = fileService.getDownloadPresignedURL(user.getProfile());
