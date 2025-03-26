@@ -2,6 +2,7 @@ package com.ssafy.memorybubble.api.user.controller;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.user.dto.ProfileDto;
+import com.ssafy.memorybubble.api.user.dto.UnreadLetterResponse;
 import com.ssafy.memorybubble.api.user.dto.UserDto;
 import com.ssafy.memorybubble.api.user.dto.UserRequest;
 import com.ssafy.memorybubble.api.user.exception.UserException;
@@ -80,5 +81,19 @@ public class UserController {
             throw new UserException(USER_ACCESS_DENIED);
         }
         return ResponseEntity.ok(userService.updateUser(Long.valueOf(userDetails.getUsername()), userRequest));
+    }
+
+    @GetMapping("/letter")
+    @Operation(
+            summary = "사용자가 읽지 않은 편지 존재 여부 반환 API",
+            description = "사용자의 정보(생일, 성별, 이름, 휴대폰 번호)를 수정합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
+    public ResponseEntity<UnreadLetterResponse> isUnreadLetter(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUnreadLetter(Long.valueOf(userDetails.getUsername())));
     }
 }
