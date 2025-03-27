@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_BAD_REQUEST;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
 
 @Slf4j
@@ -75,6 +76,12 @@ public class FontService {
     public List<FileResponse> createFont(Long userId, FontRequest fontRequest) {
         User user = userService.getUser(userId);
         String fontPath = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
+
+        Font savedFont = fontRepository.findByUser(user).orElse(null);
+        // 이미 생성된 폰트가 있는 경우
+        if (savedFont != null) {
+            throw new FontException(FONT_BAD_REQUEST);
+        }
 
         // 폰트 정보 저장
         Font font = Font.builder()

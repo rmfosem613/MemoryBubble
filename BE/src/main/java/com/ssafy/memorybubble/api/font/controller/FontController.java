@@ -75,7 +75,8 @@ public class FontController {
             description = "폰트 이름과 작성한 폰트 템플릿 이미지를 올릴 링크를 제공합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
-                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "이미 생성된 토큰이 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
     public ResponseEntity<List<FileResponse>> createFont(@AuthenticationPrincipal UserDetails userDetails,
