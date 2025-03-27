@@ -22,23 +22,27 @@ public class FcmService {
     private final RedisTemplate<String, String> redisTemplate;
     private final UserService userService;
 
+    private static String getKey(User user) {
+        return "fcm:" + user.getId();
+    }
+
     public void saveToken(Long userId, FcmDto fcmDto) {
         log.info("fcmDto.getToken(): {}", fcmDto.getToken());
         User user = userService.getUser(userId);
         // fcm token을 redis에 저장
-        String key = "fcm:" + user.getId();
+        String key = getKey(user);
         redisTemplate.opsForValue().set(key, fcmDto.getToken());
     }
 
     public void deleteToken(Long userId) {
         User user = userService.getUser(userId);
-        String key = "fcm:" + user.getId();
+        String key = getKey(user);
         redisTemplate.delete(key);
     }
 
     public String getToken(Long userId) {
         User user = userService.getUser(userId);
-        String key = "fcm:" + user.getId();
+        String key = getKey(user);
         return redisTemplate.opsForValue().get(key);
     }
 
