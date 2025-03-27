@@ -43,7 +43,7 @@ const CircleCheck = () => {
 function JoinPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -68,6 +68,17 @@ function JoinPage() {
       // 한 번 표시한 후에는 알림 표시 제거
       sessionStorage.removeItem('showJoinAlert');
     }
+
+    // users/me에서 한 번 더 familyId 호출해야 join 가능
+    async () => {
+      const userResponse = await apiClient.get("/api/users/me")
+      const { familyId } = userResponse.data
+      console.log("join: " + familyId)
+      setUser({
+        familyId
+      })
+    }
+
   }, []);
 
   // 다음 버튼 클릭 시 실행되는 함수
