@@ -1,20 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '@/stores/useUserStroe';
+// import { useUserStore } from '@/stores/useUserStroe';
 import apiClient from '@/apis/apiClient';
 
 function TestKakaoLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { user } = useUserStore();
+  // const { user } = useUserStore();
 
   // 이미 로그인된 경우 메인 페이지로 리다이렉트
+  // useEffect(() => {
+  //   const accessToken = localStorage.getItem('accessToken');
+  //   if (accessToken && user) {
+  //     navigate('/');
+  //   }
+  // }, [navigate, user]);
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
-    if (accessToken && user) {
+    if (accessToken) {
       navigate('/');
     }
-  }, [navigate, user]);
+  }, [navigate]);
 
   const kakaoLoginHandler = async () => {
     try {

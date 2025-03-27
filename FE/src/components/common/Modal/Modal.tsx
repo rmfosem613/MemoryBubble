@@ -8,8 +8,8 @@ interface ModalProps {
   cancelButtonText?: string;
   confirmButtonText?: string;
   onClose: () => void; // 모달을 닫기 위한 기본 함수
-  onCancel?: () => void; // 취소 버튼 클릭 시 추가 로직을 위한 함수
-  onConfirm?: () => void; // 확인 버튼 클릭 시 추가 로직을 위한 함수
+  onCancel?: () => void | boolean; // 취소 버튼 클릭 시 추가 로직을 위한 함수
+  onConfirm?: () => void | boolean; // 확인 버튼 클릭 시 추가 로직을 위한 함수
 }
 
 function Modal({
@@ -33,20 +33,26 @@ function Modal({
 
   // 취소 버튼 클릭 핸들러
   const handleCancelClick = () => {
-    // 취소 콜백이 제공된 경우 실행
     if (onCancel) {
-      onCancel();
+      const shouldClose = onCancel();
+      if (shouldClose !== false) {
+        onClose();
+      }
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   // 확인 버튼 클릭 핸들러
   const handleConfirmClick = () => {
-    // 확인 콜백이 제공된 경우 실행
     if (onConfirm) {
-      onConfirm();
+      const shouldClose = onConfirm();
+      if (shouldClose !== false) {
+        onClose();
+      }
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   return (
@@ -62,7 +68,7 @@ function Modal({
         </h1>
 
         {/* 본문 영역 */}
-        <div className="flex-1 px-5 py-3 md:px-6 lg:px-8 overflow-auto font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg text-gray-600">
+        <div className="flex-1 px-5 py-3 md:px-6 lg:px-8 overflow-auto font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">
           {children}
         </div>
 
