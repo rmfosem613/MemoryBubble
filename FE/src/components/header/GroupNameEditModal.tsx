@@ -9,8 +9,8 @@ interface GroupNameEditModalProps {
 
 const GroupNameEditModal = ({ isOpen, onClose }: GroupNameEditModalProps) => {
   const familyName = useUserStore((state) => state.family.familyName);
-  const updateFamilyName = useUserStore((state) => state.updateFamilyName);
-
+  const setFamily = useUserStore((state) => state.setFamily);
+  
   const [groupName, setGroupName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -35,7 +35,7 @@ const GroupNameEditModal = ({ isOpen, onClose }: GroupNameEditModalProps) => {
     // axios 처리
 
     // 저장 처리
-    updateFamilyName(groupName);
+    setFamily({familyName: groupName});
   };
 
   // 입력 변경 시 에러 메시지 초기화

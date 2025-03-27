@@ -14,7 +14,7 @@ interface ProfileEditModalProps {
 
 const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user, updateUser } = useUserStore();
+  const { user, setUser } = useUserStore();
 
   const [newUser, setNewUser] = useState(user);
   const [profileImage, setProfileImage] = useState(user?.profileUrl || '');
@@ -214,7 +214,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
 
     // axios 요청
 
-    updateUser({
+    setUser({
       ...newUser,
       phoneNumber: phoneNumber,
       profileUrl: profileImage,

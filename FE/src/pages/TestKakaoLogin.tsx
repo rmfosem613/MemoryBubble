@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react' 
 import { useNavigate } from 'react-router-dom' 
-import { useUserStore } from '@/stores/useUserStroe' 
+// import { useUserStore } from '@/stores/useUserStroe' 
+import useUserStore from '@/stores/useUserStore'
 import apiClient from '@/apis/apiClient' 
 
 // API 기본 URL 설정

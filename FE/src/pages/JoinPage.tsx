@@ -12,7 +12,8 @@ import apiClient from "@/apis/apiClient";
 import Title from "@/components/common/Title";
 import Alert from "@/components/common/Alert";
 
-import { useUserStore } from "@/stores/useUserStroe";
+// import { useUserStore } from "@/stores/useUserStroe";
+import useUserStore from "@/stores/useUserStore";
 
 // react-icons를 대신할 커스텀 컴포넌트
 const CircleNumber = ({ number, isActive }) => {
