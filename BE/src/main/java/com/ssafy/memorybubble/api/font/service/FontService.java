@@ -2,6 +2,8 @@ package com.ssafy.memorybubble.api.font.service;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
+import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
+import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
 import com.ssafy.memorybubble.api.font.exception.FontException;
@@ -9,6 +11,7 @@ import com.ssafy.memorybubble.api.font.repository.FontRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Font;
+import com.ssafy.memorybubble.domain.FontStatus;
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +35,9 @@ public class FontService {
     private final FileService fileService;
 
     private final static String TEMPLATE_FILE = "template/추억방울_템플릿.zip";
-    private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png";
+    private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png"; // template/{userId}/{templateNumber}.png
     private final static int TEMPLATE_FILE_COUNT = 8; // 템플릿 파일의 개수
+    private final static String FONT_PATH = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
 
     // 사용자 - 폰트 조회
     @Transactional(readOnly = true)
@@ -48,7 +52,19 @@ public class FontService {
         }
         log.info("font={}", font);
 
-        return convertToDto(font);
+        return convertToFontResponse(font);
+    }
+
+    // Font to FontResponse
+    private FontResponse convertToFontResponse(Font font) {
+        return FontResponse.builder()
+                .fontId(font.getId())
+                .fontName(font.getName())
+                .fileName(font.getPath())
+                .fontNameEng(font.getNameEng())
+                .createdAt(font.getCreatedAt())
+                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+                .build();
     }
 
     // 사용자 - 폰트 삭제
@@ -75,7 +91,6 @@ public class FontService {
     // 사용자 - 폰트 생성 요청
     public List<FileResponse> addFont(Long userId, FontRequest fontRequest) {
         User user = userService.getUser(userId);
-        String fontPath = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
 
         Font savedFont = fontRepository.findByUser(user).orElse(null);
         // 이미 생성된 폰트가 있는 경우
@@ -88,7 +103,7 @@ public class FontService {
                 .user(user)
                 .name(fontRequest.getFontName())
                 .nameEng(fontRequest.getFontNameEng())
-                .path(String.format(fontPath, userId, fontRequest.getFontName()))
+                .path(String.format(FONT_PATH, userId, fontRequest.getFontName()))
                 .build();
         fontRepository.save(font);
         log.info("font={}", font);
@@ -110,15 +125,52 @@ public class FontService {
         return fileResponseList;
     }
 
-    // Font to FontResponse
-    private FontResponse convertToDto(Font font) {
-        return FontResponse.builder()
-                .fontId(font.getId())
-                .fontName(font.getName())
-                .fileName(font.getPath())
-                .fontNameEng(font.getNameEng())
-                .createdAt(font.getCreatedAt())
-                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+    // 관리자 - 폰트 생성 요청 목록
+    public List<FontAdminResponse> fontRequestList() {
+        return fontRepository.findAllByFontStatus(FontStatus.REQUESTED)
+                .stream()
+                .map(font -> {
+                    User user = userService.getUser(font.getUser().getId());
+                    return convertToFontAdminDto(user, font.getName());
+                })
+                .toList();
+    }
+
+    private FontAdminResponse convertToFontAdminDto(User user, String fontName) {
+        List<FileResponse> files = IntStream.rangeClosed(1, TEMPLATE_FILE_COUNT)
+                .mapToObj(i -> {
+                    String templateFile = String.format(TEMPLATE_FILE_NAME, user.getId(), i);
+                    return FileResponse.builder()
+                            .presignedUrl(fileService.getDownloadPresignedURL(templateFile))
+                            .fileName(templateFile)
+                            .build();
+                })
+                .toList();
+
+        return FontAdminResponse.builder()
+                .userId(user.getId())
+                .userName(user.getName())
+                .fontName(fontName)
+                .files(files)
+                .build();
+    }
+
+    // 관리자 - 폰트 생성 완료
+    public FileResponse makeFont(FontAdminRequest fontAdminRequest) {
+        User user = userService.getUser(fontAdminRequest.getUserId());
+        Font font = fontRepository.findByUser(user)
+                .orElseThrow(() -> new FontException(FONT_NOT_FOUND));
+
+        // 폰트 생성 상태 업데이트
+        font.updateStatus();
+
+        // TODO: 사용자에게 폰트 생성 완료 알림 보내기
+
+        // ttf 파일 업로드할 Presigned URL 리턴
+        String fontPath = String.format(FONT_PATH, user.getId(), font.getName());
+        return FileResponse.builder()
+                .presignedUrl(fileService.getUploadPresignedUrl(fontPath))
+                .fileName(fontPath)
                 .build();
     }
 }

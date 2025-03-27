@@ -47,4 +47,8 @@ public class Font {
         this.path = path;
         this.fontStatus = FontStatus.REQUESTED;
     }
+
+    public void updateStatus() {
+        this.fontStatus = FontStatus.DONE;
+    }
 }
