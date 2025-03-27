@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import apiClient from '@/apis/apiClient';
+import axios from 'axios';
+
 import test1 from '@/assets/images/test1.png';
 import test2 from '@/assets/images/test2.png';
 import test3 from '@/assets/images/test3.png';
@@ -32,8 +35,48 @@ function Step1() {
     setCurrentPage((prev) => (prev === totalPages - 1 ? 0 : prev + 1));
   };
 
-  const handleDownloadPDF = () => {
-    console.log('PDF가 다운로드 되었습니다.');
+  const handleDownloadPDF = async () => {
+    try {
+      // 1. API에서 presigned URL 가져오기
+      const response = await apiClient.get('/api/fonts/template');
+      console.log('응답 데이터:', response.data);
+
+      if (response?.data?.presignedUrl) {
+        // 2. presigned URL로 파일 다운로드 요청
+        const downloadResponse = await axios({
+          url: response.data.presignedUrl,
+          method: 'GET',
+          responseType: 'blob',
+        });
+
+        // 3. 파일 다운로드를 위한 임시 링크 생성
+        const downloadUrl = window.URL.createObjectURL(
+          new Blob([downloadResponse.data]),
+        );
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+
+        // 4. 받은 fileName에서 실제 파일명만 추출
+        // "template/fontTemplate.zip" -> "fontTemplate.zip"
+        const fullPath = response.data.fileName;
+        const actualFileName = fullPath.split('/').pop();
+
+        link.setAttribute('download', actualFileName);
+
+        document.body.appendChild(link);
+        link.click();
+
+        // 임시 요소 및 URL 정리
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        console.log('템플릿 다운로드 완료');
+      } else {
+        console.error('presigned URL이 응답에 포함되어 있지 않습니다.');
+      }
+    } catch (error) {
+      console.error('템플릿 다운로드 중 오류 발생:', error);
+    }
   };
 
   return (
@@ -46,7 +89,7 @@ function Step1() {
                 이제 템플릿을 다운로드 받아주세요!
                 <br />
                 나만의 손글씨로 템플릿을 작성하여 폰트를 만들어보세요.
-              </p> 
+              </p>
               <button
                 onClick={handleDownloadPDF}
                 className="px-8 py-3 bg-blue-500 text-white rounded-md transition-colors text-lg mt-4">
