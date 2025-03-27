@@ -6,7 +6,7 @@ import Alert from "@/components/common/Alert"
 import InfiniteScroll from "@/components/photoAlbum/InfiniteScroll"
 import Modal from "@/components/common/Modal/Modal"
 import useModal from "@/hooks/useModal"
-import { getBasicAlbumPhotos, getPhotoUploadUrls, convertToWebP, uploadImageToS3, updateAlbumThumbnail } from "@/apis/photoApi"
+import { getBasicAlbumPhotos, getPhotoUploadUrls, convertToWebP, uploadImageToS3, updateAlbumThumbnail, movePhotosToAlbum } from "@/apis/photoApi"
 import { fetchAlbums } from "@/apis/albumApi"
 
 import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
@@ -48,6 +48,11 @@ function BasicPhotoAlbumPage() {
   const addPhotoModal = useModal();
   const moveAlbumModal = useModal();
 
+  // 앨범 이동 관련 상태
+  const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
+  const [albums, setAlbums] = useState<{ id: number; title: string }[]>([]);
+
+
   // 확대해서 보기 위한 상태
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
 
@@ -68,6 +73,25 @@ function BasicPhotoAlbumPage() {
       console.error("앨범 ID 가져오기 실패:", error);
       throw error;
     }
+  }, []);
+
+  // 모든 앨범 목록 가져오기
+  useEffect(() => {
+    const getAllAlbums = async () => {
+      try {
+        const albumsData = await fetchAlbums();
+        // API 응답을 간소화된 형태로 변환
+        const formattedAlbums = albumsData.map(album => ({
+          id: album.albumId,
+          title: album.albumName
+        }));
+        setAlbums(formattedAlbums);
+      } catch (error) {
+        console.error("앨범 목록 가져오기 실패:", error);
+      }
+    };
+
+    getAllAlbums();
   }, []);
 
   // 앨범 사진 데이터 가져오기
@@ -395,6 +419,69 @@ function BasicPhotoAlbumPage() {
     }
   };
 
+  // 앨범 이동 처리 함수
+  const handleMovePhotos = () => {
+    if (selectedPhotos.length === 0) {
+      setAlertMessage("이동할 사진을 먼저 선택해주세요.");
+      setAlertColor("red");
+      setShowAlert(true);
+      return false;
+    }
+
+    if (!albumId) {
+      setAlertMessage("앨범 정보를 가져오는 중 오류가 발생했습니다.");
+      setAlertColor("red");
+      setShowAlert(true);
+      return false;
+    }
+
+    if (!targetAlbumId || targetAlbumId === albumId) {
+      setAlertMessage("이동할 대상 앨범을 선택해주세요.");
+      setAlertColor("red");
+      setShowAlert(true);
+      return false;
+    }
+
+    // 앨범 이동 프로세스 시작 (비동기 처리)
+    movePhotosProcess(targetAlbumId);
+
+    return false; // 모달 닫기 방지 (프로세스 완료 후 수동으로 닫을 예정)
+  };
+
+  // 앨범 선택 핸들러 - 이동할 대상 앨범 ID 설정
+  const handleTargetAlbumSelect = (selectedAlbumId: number) => {
+    setTargetAlbumId(selectedAlbumId);
+  };
+
+  // 실제 사진 이동 프로세스 (비동기)
+  const movePhotosProcess = async (targetAlbumId: number) => {
+    try {
+      // 선택된 사진들의 ID 목록 생성
+      const photoIds = selectedPhotos.map(index => photos[index].photoId);
+
+      // 사진 이동 API 호출
+      await movePhotosToAlbum(albumId!, targetAlbumId, photoIds);
+
+      // 성공 메시지 표시
+      setAlertMessage("선택한 사진이 성공적으로 이동되었습니다.");
+      setAlertColor("green");
+      setShowAlert(true);
+
+      // 앨범 정보 새로고침
+      await fetchAlbumPhotos();
+
+      // 모달 닫고 선택 모드 초기화
+      moveAlbumModal.close();
+      setIsSelectionMode(false);
+      setSelectedPhotos([]);
+    } catch (error) {
+      console.error("사진 이동 실패:", error);
+      setAlertMessage("사진 이동 중 오류가 발생했습니다.");
+      setAlertColor("red");
+      setShowAlert(true);
+    }
+  };
+
   // 로딩 중 표시
   if (isLoading) {
     return <Loading message="사진을 불러오는 중..." />;
@@ -659,14 +746,34 @@ function BasicPhotoAlbumPage() {
         title="앨범 이동하기"
         confirmButtonText="이동하기"
         cancelButtonText="취소하기"
+        onConfirm={handleMovePhotos}
       >
         <div className="py-2">
           <p className="mb-4">이동할 앨범을 선택해주세요.</p>
           <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
             앨범 선택하기
           </p>
-          <DropDown />
-          <div className="h-[130px]"></div>
+          {/* DropDown 컴포넌트를 사용하는 대신 일반 select로 대체 */}
+          <div className="relative w-full mb-4">
+            <select
+              className="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
+              value={targetAlbumId || ""}
+              onChange={(e) => handleTargetAlbumSelect(Number(e.target.value))}
+            >
+              <option value="" disabled>앨범을 선택해주세요</option>
+              {albums.map((album) => (
+                // 현재 앨범은 선택 목록에서 제외
+                album.id !== albumId && (
+                  <option key={album.id} value={album.id}>
+                    {album.title}
+                  </option>
+                )
+              ))}
+            </select>
+          </div>
+          <div className="text-sm text-gray-500 mt-2">
+            선택된 사진 {selectedPhotos.length}장을 이동합니다.
+          </div>
         </div>
       </Modal>
     </>

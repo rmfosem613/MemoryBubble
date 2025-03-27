@@ -8,8 +8,8 @@ import apiClient from './apiClient';
  */
 export const updateAlbumThumbnail = async (albumId: number, photoId: number): Promise<boolean> => {
   try {
-    const response = await apiClient.patch(`/api/albums/${albumId}/thumbnail`, 
-      { photoId }, 
+    const response = await apiClient.patch(`/api/albums/${albumId}/thumbnail`,
+      { photoId },
       { params: { albumId } }
     );
     console.log("썸네일 변경 성공:", response.data);
@@ -58,11 +58,11 @@ export const getBasicAlbumPhotos = async (): Promise<AlbumDetailResponse> => {
     const albums = await apiClient.get('/api/albums', {
       params: { name: '' }
     });
-    
+
     if (!albums.data || albums.data.length === 0) {
       throw new Error('앨범 목록이 비어있습니다.');
     }
-    
+
     // 첫 번째 앨범의 ID를 사용하여 상세 정보 요청
     const firstAlbumId = albums.data[0].albumId;
     return await getAlbumDetail(firstAlbumId);
@@ -100,9 +100,9 @@ export const getPhotoUploadUrls = async (payload: PhotoUploadRequest): Promise<P
 };
 
 /**
- * 이미지를 WebP 형식으로 변환하는 함수
+ * 이미지를 4:3 비율로 잘라내고 WebP 형식으로 변환하는 함수
  * @param file 변환할 이미지 파일
- * @returns WebP 형식의 Blob 객체 Promise
+ * @returns 4:3 비율로 잘린 WebP 형식의 Blob 객체 Promise
  */
 export const convertToWebP = async (file: File): Promise<Blob> => {
   return new Promise((resolve, reject) => {
@@ -110,18 +110,45 @@ export const convertToWebP = async (file: File): Promise<Blob> => {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
+        // 원본 이미지 크기
+        const originalWidth = img.width;
+        const originalHeight = img.height;
+
+        // 4:3 비율에 맞는 크기 계산
+        let cropWidth, cropHeight, startX, startY;
+
+        if (originalWidth / originalHeight > 4 / 3) {
+          // 이미지가 너무 넓은 경우, 높이를 기준으로 너비를 계산
+          cropHeight = originalHeight;
+          cropWidth = cropHeight * (4 / 3);
+          startY = 0;
+          startX = (originalWidth - cropWidth) / 2;
+        } else {
+          // 이미지가 너무 높은 경우, 너비를 기준으로 높이를 계산
+          cropWidth = originalWidth;
+          cropHeight = cropWidth * (3 / 4);
+          startX = 0;
+          startY = (originalHeight - cropHeight) / 2;
+        }
+
+        // 캔버스 생성 및 4:3 비율로 이미지 그리기
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
         const ctx = canvas.getContext('2d');
-        
+
         if (!ctx) {
           reject(new Error('Canvas context 생성 실패'));
           return;
         }
-        
-        ctx.drawImage(img, 0, 0);
-        
+
+        // 원본 이미지에서 계산된 부분만 캔버스에 그리기
+        ctx.drawImage(
+          img,
+          startX, startY, cropWidth, cropHeight, // 원본 이미지에서 자를 부분
+          0, 0, cropWidth, cropHeight // 캔버스에 그릴 위치 및 크기
+        );
+
         // WebP 형식으로 변환 (품질 0.9)
         canvas.toBlob(
           (blob) => {
@@ -158,14 +185,43 @@ export const uploadImageToS3 = async (presignedUrl: string, imageBlob: Blob): Pr
         'Content-Type': 'image/webp',
       },
     });
-    
+
     if (!uploadResponse.ok) {
       throw new Error(`Upload failed: ${uploadResponse.status}`);
     }
-    
+
     return true;
   } catch (error) {
     console.error('S3 이미지 업로드 실패:', error);
     return false;
+  }
+};
+
+/**
+ * 사진을 다른 앨범으로 이동하는 함수
+ * @param currentAlbumId 현재 앨범 ID
+ * @param targetAlbumId 이동할 대상 앨범 ID
+ * @param photoIds 이동할 사진 ID 목록
+ * @returns 성공 여부
+ */
+export const movePhotosToAlbum = async (
+  currentAlbumId: number,
+  targetAlbumId: number,
+  photoIds: number[]
+): Promise<boolean> => {
+  try {
+    const response = await apiClient.patch(
+      `/api/albums/${currentAlbumId}/move`,
+      {
+        albumId: targetAlbumId,
+        photoList: photoIds
+      },
+      { params: { albumId: currentAlbumId } }
+    );
+    console.log("사진 이동 성공:", response.data);
+    return true;
+  } catch (error) {
+    console.error('사진 이동 실패:', error);
+    throw error;
   }
 };
