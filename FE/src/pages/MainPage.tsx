@@ -13,13 +13,14 @@ import Loading from "./LoadingPage";
 
 import useUserStore from "@/stores/useUserStore";
 import { createAlbum } from "@/apis/albumApi";
+import { getPhotoUploadUrls, convertToWebP, uploadImageToS3, getAlbumDetail } from "@/apis/photoApi";
 
 // 기본 앨범 이미지 불러오기
 import defaultAlbumImage from "@/assets/album/blank.svg";
 import apiClient from "@/apis/apiClient";
 
 function MainPage() {
-  const { currentAlbum, fetchAlbumsData, isLoading, error } = useAlbumStore();
+  const { currentAlbum, fetchAlbumsData, albums, isLoading, error } = useAlbumStore();
   const navigate = useNavigate();
   const { user, setUser } = useUserStore();
 
@@ -28,6 +29,12 @@ function MainPage() {
   const [albumDescription, setAlbumDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState("#f4e2dc"); // 기본 색상
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false);
+
+  // 사진 업로드 관련 상태
+  const [selectedImages, setSelectedImages] = useState<{ file: File; preview: string }[]>([]);
+  const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // 업로드 진행 상태 (0-100%)
 
   // 색상 옵션
   const colorOptions = [
@@ -44,6 +51,13 @@ function MainPage() {
     fetchAlbumsData();
   }, [fetchAlbumsData]);
 
+  // 앨범 로드 후 초기 선택 앨범 설정
+  useEffect(() => {
+    if (currentAlbum && currentAlbum.id) {
+      setSelectedAlbumId(currentAlbum.id);
+    }
+  }, [currentAlbum]);
+
   // familyId를 store에서 불러오지 못해서 추가함
   useEffect(() => {
     // users/me에서 한 번 더 familyId 호출해야 join 가능
@@ -57,20 +71,35 @@ function MainPage() {
     }
 
     handle()
-  }, [])
+  }, []);
 
   // 모달 관련
   const createAlbumModal = useModal();
   const addPhotoModal = useModal();
 
-  console.log("familyId : " + user.familyId);
+  // 이미지 선택 핸들러
+  const handleImagesSelected = (images: { file: File; preview: string }[]) => {
+    setSelectedImages(images);
+  };
+
+  // 앨범 선택 핸들러
+  const handleAlbumSelect = (albumId: number) => {
+    setSelectedAlbumId(albumId);
+  };
 
   // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
   const handleAlbumClick = () => {
     if (!currentAlbum) return;
-
-    // 앨범 ID가 확인되면 해당 페이지로 이동
-    navigate(`/album/${currentAlbum.id}`);
+    
+    // 앨범 리스트의 인덱스 확인
+    const { activeIndex } = useAlbumStore.getState();
+    
+    // 첫 번째 앨범(인덱스 0)인 경우 BasicPhotoAlbumPage로, 그 외에는 PhotoAlbumPage로 이동
+    if (activeIndex === 0) {
+      navigate('/album/basic');
+    } else {
+      navigate(`/album/${currentAlbum.id}`);
+    }
   };
 
   // 앨범 이미지 URL 체크 함수
@@ -134,6 +163,100 @@ function MainPage() {
       alert("앨범 생성에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsCreatingAlbum(false);
+    }
+  };
+
+  // 사진 업로드 시작 함수
+  const handlePhotoUploadStart = () => {
+    if (selectedImages.length === 0) {
+      alert("업로드할 사진을 선택해주세요.");
+      return false;
+    }
+
+    if (!selectedAlbumId) {
+      alert("사진을 업로드할 앨범을 선택해주세요.");
+      return false;
+    }
+
+    if (isUploadingPhotos) {
+      return false; // 이미 업로드 중이면 중복 실행 방지
+    }
+
+    setIsUploadingPhotos(true);
+    setUploadProgress(0);
+
+    // 비동기 업로드 프로세스 시작
+    uploadPhotosProcess();
+
+    return false; // 업로드 완료 후 수동으로 모달 닫기
+  };
+
+  // 실제 사진 업로드 프로세스 (비동기)
+  const uploadPhotosProcess = async () => {
+    try {
+      if (!selectedAlbumId || selectedImages.length === 0) {
+        throw new Error("앨범 또는 이미지가 선택되지 않았습니다.");
+      }
+
+      // 1. Presigned URL 요청
+      const urlsResponse = await getPhotoUploadUrls({
+        albumId: selectedAlbumId,
+        photoLength: selectedImages.length
+      });
+
+      if (!urlsResponse || urlsResponse.length !== selectedImages.length) {
+        throw new Error("업로드 URL 수신 오류");
+      }
+
+      // 2. 각 이미지를 WebP로 변환하고 S3에 업로드
+      const totalImages = selectedImages.length;
+      let successCount = 0;
+
+      for (let i = 0; i < totalImages; i++) {
+        try {
+          // 이미지를 WebP로 변환
+          const imageBlob = await convertToWebP(selectedImages[i].file);
+          
+          // S3에 업로드
+          const uploadSuccess = await uploadImageToS3(
+            urlsResponse[i].presignedUrl,
+            imageBlob
+          );
+
+          if (uploadSuccess) {
+            successCount++;
+          }
+
+          // 진행률 업데이트
+          setUploadProgress(Math.floor((successCount / totalImages) * 100));
+        } catch (error) {
+          console.error(`이미지 ${i + 1} 업로드 실패:`, error);
+        }
+      }
+
+      // 3. 완료 메시지 및 정리
+      if (successCount === 0) {
+        alert("모든 이미지 업로드에 실패했습니다. 다시 시도해주세요.");
+      } else if (successCount < totalImages) {
+        alert(`${successCount}/${totalImages} 이미지가 업로드되었습니다.`);
+      } else {
+        alert("모든 이미지가 성공적으로 업로드되었습니다.");
+        
+        // 앨범 데이터 새로고침 (사진 수 업데이트를 위해)
+        await fetchAlbumsData();
+        
+        // 입력 초기화
+        setSelectedImages([]);
+        
+        // 모달 닫기
+        addPhotoModal.close();
+      }
+    } catch (error) {
+      console.error("사진 업로드 오류:", error);
+      alert("사진 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setIsUploadingPhotos(false);
+      setUploadProgress(0);
     }
   };
 
@@ -342,20 +465,54 @@ function MainPage() {
       {/* 사진 추가 모달 */}
       <Modal
         isOpen={addPhotoModal.isOpen}
-        onClose={addPhotoModal.close}
+        onClose={isUploadingPhotos ? undefined : addPhotoModal.close} // 업로드 중에는 닫기 비활성화
         title="추억 보관하기"
-        confirmButtonText="보관하기"
-        cancelButtonText="취소하기"
+        confirmButtonText={isUploadingPhotos ? `업로드 중... ${uploadProgress}%` : "보관하기"}
+        cancelButtonText={isUploadingPhotos ? undefined : "취소하기"}
+        onConfirm={handlePhotoUploadStart}
       >
         <div className="py-2">
           <p className="mb-4">사진은 최대 5장까지 한 번에 추가할 수 있습니다.</p>
-          <InputImg />
+          
+          {/* 업로드 진행 상태 표시 */}
+          {isUploadingPhotos && (
+            <div className="mb-4">
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full" 
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+              <p className="text-sm text-gray-500 mt-1 text-center">
+                {uploadProgress}% 완료
+              </p>
+            </div>
+          )}
+          
+          {/* 이미지 선택 컴포넌트 */}
+          <InputImg onImagesSelected={handleImagesSelected} />
+          
+          {/* 앨범 선택 */}
           <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
-          <DropDown />
+          <div className="relative w-full mb-4">
+            <select
+              className="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
+              value={selectedAlbumId || ""}
+              onChange={(e) => setSelectedAlbumId(Number(e.target.value))}
+              disabled={isUploadingPhotos}
+            >
+              <option value="" disabled>앨범을 선택해주세요</option>
+              {albums.map((album) => (
+                <option key={album.id} value={album.id}>
+                  {album.title}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </Modal>
     </>
-  )
+  );
 }
 
 export default MainPage
