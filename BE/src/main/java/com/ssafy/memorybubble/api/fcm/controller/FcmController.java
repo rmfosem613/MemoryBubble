@@ -42,6 +42,14 @@ public class FcmController {
     }
 
     @DeleteMapping
+    @Operation(
+            summary = "Fcm 토큰 삭제 API",
+            description = "user id로 저장된 fcm 토큰을 서버에서 삭제합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
     public ResponseEntity<Void> deleteToken(@AuthenticationPrincipal UserDetails userDetails) {
         // 로그아웃 시 fcm 토큰 삭제
         fcmService.deleteToken(Long.valueOf(userDetails.getUsername()));

@@ -1,5 +1,8 @@
 package com.ssafy.memorybubble.api.letter.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
+import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.letter.dto.LetterDetailDto;
@@ -31,10 +34,13 @@ public class LetterService {
     private final LetterRepository letterRepository;
     private final UserService userService;
     private final FileService fileService;
+    private final FcmService fcmService;
 
     @Transactional
     public Object sendLetter(Long userId, LetterRequest letterRequest) {
+        // 보내는 user
         User sender = userService.getUser(userId);
+        // 받는 user
         User receiver = userService.getUser(letterRequest.getReceiverId());
 
         // 가족 관계 검증
@@ -71,6 +77,31 @@ public class LetterService {
 
         letterRepository.save(letter);
         log.info("Letter saved: {}", letter);
+
+        sendLetterMessage(receiver);
+    }
+
+    private void sendLetterMessage(User receiver) {
+        // 받는 user에게 알림 전송
+        FcmMessage.Notification notification = FcmMessage.Notification.builder()
+                .title("추억 방울")
+                .body("새로운 편지가 도착했습니다.")
+                .build();
+
+        FcmMessage.Message message = FcmMessage.Message.builder()
+                .notification(notification)
+                .build();
+
+        FcmMessage fcmMessage = FcmMessage.builder()
+                .validateOnly(false)  // 실제 전송 여부 설정
+                .message(message)
+                .build();
+
+        try {
+            fcmService.sendMessage(receiver.getId(), fcmMessage);
+        } catch (FirebaseMessagingException e) {
+            log.warn("Failed to send FCM message to user {}: {}", receiver.getId(), e.getMessage());
+        }
     }
 
     private void validateFamilyRelationship(User sender, User receiver) {
