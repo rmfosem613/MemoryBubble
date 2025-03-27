@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import apiClient from '@/apis/apiClient';
+import axios from 'axios';
 
 // FileItem 인터페이스 정의
 interface FileItem {
@@ -109,26 +110,21 @@ const useFontStore = create<FontState>((set, get) => ({
           const urlData = fontResponse.data[i] as PresignedUrlData;
 
           if (fileItem && urlData && urlData.presignedUrl) {
-            // 각 파일을 해당 presignedUrl로 업로드
+            // 각 파일을 해당 presignedUrl로 업로드 (axios 사용)
             const uploadPromise = (async () => {
               try {
                 console.log(
                   `파일 "${fileItem.name}"을 "${urlData.fileName}"으로 업로드 시작`,
                 );
 
-                const uploadResponse = await fetch(urlData.presignedUrl, {
+                const uploadResponse = await axios({
+                  url: urlData.presignedUrl,
                   method: 'PUT',
-                  body: fileItem.file,
+                  data: fileItem.file,
                   headers: {
                     'Content-Type': fileItem.file.type,
                   },
                 });
-
-                if (!uploadResponse.ok) {
-                  throw new Error(
-                    `파일 업로드 실패: ${uploadResponse.statusText}`,
-                  );
-                }
 
                 console.log(
                   `파일 "${fileItem.name}"을 "${urlData.fileName}"으로 업로드 성공`,
