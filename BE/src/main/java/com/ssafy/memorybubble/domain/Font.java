@@ -28,7 +28,7 @@ public class Font {
     @Column(name = "font_name_eng", nullable = false, length = 50)
     private String nameEng;
 
-    @Column(name = "font_path")
+    @Column(name = "font_path", nullable = false)
     private String path;
 
     @Column(nullable = false)
@@ -40,19 +40,11 @@ public class Font {
     private FontStatus fontStatus; // 폰트 생성 상태
 
     @Builder
-    public Font(User user, String name, String nameEng) {
+    public Font(User user, String name, String nameEng, String path) {
         this.user = user;
         this.name = name;
         this.nameEng = nameEng;
+        this.path = path;
         this.fontStatus = FontStatus.REQUESTED;
     }
-
-//    @Builder
-//    public Font(User user, String name, String nameEng, String path, LocalDateTime createdAt) {
-//        this.user = user;
-//        this.name = name;
-//        this.nameEng = nameEng;
-//        this.path = path;
-//        this.createdAt = createdAt;
-//    }
 }

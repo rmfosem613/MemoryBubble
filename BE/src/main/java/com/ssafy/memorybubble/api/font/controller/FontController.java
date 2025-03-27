@@ -27,8 +27,8 @@ public class FontController {
 
     @GetMapping("/fonts")
     @Operation(
-            summary = "폰트 조회 API",
-            description = "생성된 폰트를 조회하고 폰트 다운로드 링크를 제공합니다. 생성된 폰트가 없다면 컬럼 값이 null 입니다.",
+            summary = "폰트 조회 API (사용자용)",
+            description = "생성된 폰트를 조회하고 폰트 다운로드 링크를 제공합니다. 생성된 폰트가 없다면 컬럼 값이 null 입니다. 아직 폰트가 생성되지 않았다면 status 필드가 REQUESTED 입니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
@@ -40,7 +40,7 @@ public class FontController {
 
     @DeleteMapping("/fonts/{font_id}")
     @Operation(
-            summary = "폰트 삭제 API",
+            summary = "폰트 삭제 API (사용자용)",
             description = "생성한 폰트를 삭제합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
@@ -58,7 +58,7 @@ public class FontController {
 
     @GetMapping("/fonts/template")
     @Operation(
-            summary = "폰트 템플릿 다운로드 API",
+            summary = "폰트 템플릿 다운로드 API (사용자용)",
             description = "폰트 생성에 필요한 템플릿 다운로드 링크를 제공합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
@@ -71,7 +71,7 @@ public class FontController {
 
     @PostMapping("/fonts")
     @Operation(
-            summary = "폰트 생성 요청 API",
+            summary = "폰트 생성 요청 API (사용자용)",
             description = "폰트 이름과 작성한 폰트 템플릿 이미지를 올릴 링크를 제공합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),

@@ -9,7 +9,6 @@ import com.ssafy.memorybubble.api.font.repository.FontRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Font;
-import com.ssafy.memorybubble.domain.FontStatus;
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ public class FontService {
     private final UserService userService;
     private final FileService fileService;
 
-    private final static String TEMPLATE_FILE = "template/fontTemplate.zip";
+    private final static String TEMPLATE_FILE = "template/추억방울_템플릿.zip";
     private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png";
     private final static int TEMPLATE_FILE_COUNT = 8; // 템플릿 파일의 개수
 
@@ -42,8 +41,8 @@ public class FontService {
         log.info("user={}", user);
 
         Font font = fontRepository.findByUser(user).orElse(null);
-        // 만들어진 폰트가 없거나 폰트가 완성되지 않은 경우
-        if (font == null || font.getFontStatus().equals(FontStatus.REQUESTED)) {
+        // 만들어진 폰트가 없는 경우
+        if (font == null) {
             return FontResponse.builder().build();
         }
         log.info("font={}", font);
@@ -75,12 +74,14 @@ public class FontService {
     // 사용자 - 폰트 생성 요청
     public List<FileResponse> createFont(Long userId, FontRequest fontRequest) {
         User user = userService.getUser(userId);
+        String fontPath = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
 
         // 폰트 정보 저장
         Font font = Font.builder()
                 .user(user)
                 .name(fontRequest.getFontName())
                 .nameEng(fontRequest.getFontNameEng())
+                .path(String.format(fontPath, userId, fontRequest.getFontName()))
                 .build();
         fontRepository.save(font);
         log.info("font={}", font);
