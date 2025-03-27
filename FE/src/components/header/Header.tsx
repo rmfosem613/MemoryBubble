@@ -89,10 +89,12 @@ const Header = () => {
     <>
       <header className="fixed top-0 h-[65px] w-full bg-white/70 backdrop-blur-sm flex items-center z-[45]">
         <div className="container flex justify-between items-center">
-          <Link
-            to="/"
-            className="text-h-logo-sm md:text-h-logo-md lg:text-h-logo-lg font-p-800">
-            추억방울
+          <Link to="/" className="">
+            <img
+              src="/logo-3.svg"
+              alt="추억방울"
+              className="h-8 md:h-9 lg:h-10"
+            />
           </Link>
 
           {user.familyId && (
