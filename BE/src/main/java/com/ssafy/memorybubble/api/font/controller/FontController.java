@@ -1,6 +1,8 @@
 package com.ssafy.memorybubble.api.font.controller;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
+import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
+import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
 import com.ssafy.memorybubble.api.font.service.FontService;
@@ -80,7 +82,36 @@ public class FontController {
             }
     )
     public ResponseEntity<List<FileResponse>> addFont(@AuthenticationPrincipal UserDetails userDetails,
-                                                         @RequestBody FontRequest fontRequest) {
+                                                      @RequestBody FontRequest fontRequest) {
         return ResponseEntity.ok(fontService.addFont(Long.parseLong(userDetails.getUsername()), fontRequest));
+    }
+
+    //    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/fonts")
+    @Operation(
+            summary = "폰트 생성 요청 목록 API (관리자)",
+            description = "관리자가 생성해야 할 폰트 목록을 제공합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<List<FontAdminResponse>> fontRequestList(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(fontService.fontRequestList());
+    }
+
+    //    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/fonts")
+    @Operation(
+            summary = "폰트 생성 완료 API (관리자)",
+            description = "관리자가 폰트 생성을 완료합니다. ttf 파일을 올릴 링크를 제공합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "해당 폰트를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<FileResponse> makeFont(@RequestBody FontAdminRequest fontAdminRequest) {
+        return ResponseEntity.ok(fontService.makeFont(fontAdminRequest));
     }
 }
