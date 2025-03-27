@@ -73,7 +73,7 @@ public class FontService {
     }
 
     // 사용자 - 폰트 생성 요청
-    public List<FileResponse> createFont(Long userId, FontRequest fontRequest) {
+    public List<FileResponse> addFont(Long userId, FontRequest fontRequest) {
         User user = userService.getUser(userId);
         String fontPath = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
 
