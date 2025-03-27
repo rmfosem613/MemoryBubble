@@ -12,7 +12,7 @@ interface ThumbnailSelectorProps {
   onError?: (message: string) => void;
 }
 
-const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
+function ThumbnailSelector({
   isOpen,
   onClose,
   albumId,
@@ -20,7 +20,7 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
   photoUrl,
   onUpdateComplete,
   onError
-}) => {
+}: ThumbnailSelectorProps) {
   // 썸네일 변경 처리 함수
   const handleUpdateThumbnail = () => {
     if (!selectedPhotoId) {

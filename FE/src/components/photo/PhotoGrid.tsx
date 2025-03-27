@@ -16,7 +16,7 @@ interface PhotoGridProps {
   hasMore: boolean;
 }
 
-const PhotoGrid: React.FC<PhotoGridProps> = ({
+function PhotoGrid({
   photos,
   selectedPhotoIndices,
   isSelectionMode,
@@ -24,7 +24,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
   onPhotoClick,
   onLoadMore,
   hasMore
-}) => {
+}: PhotoGridProps) {
   // InfiniteScroll 컴포넌트를 위한 renderItem 함수
   const renderPhoto = (photo: Photo, index: number) => (
     <div

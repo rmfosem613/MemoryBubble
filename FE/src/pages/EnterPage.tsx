@@ -36,7 +36,7 @@ function EnterPage() {
 
         <div className="flex items-center justify-center gap-2">
           <p className="text-gray-600">아직 그룹이 없으신가요?</p>
-          <p className="text-blue-500 font-medium cursor-pointer hover:underline cursor-pointer" onClick={handleGroupCreateClick}>그룹을 생성해보세요!</p>
+          <p className="text-blue-500 font-medium cursor-pointer hover:underline" onClick={handleGroupCreateClick}>그룹을 생성해보세요!</p>
         </div>
       </div>
     </div>

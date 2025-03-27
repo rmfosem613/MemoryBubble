@@ -5,7 +5,7 @@ interface PhotoModalProps {
   onClose: () => void;
 }
 
-const PhotoModal: React.FC<PhotoModalProps> = ({ photoUrl, onClose }) => {
+function PhotoModal({ photoUrl, onClose }: PhotoModalProps) {
   if (!photoUrl) return null;
 
   return (

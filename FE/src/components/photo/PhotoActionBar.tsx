@@ -13,7 +13,7 @@ interface PhotoActionBarProps {
   selectionCount?: number;
 }
 
-const PhotoActionBar: React.FC<PhotoActionBarProps> = ({
+function PhotoActionBar({
   mode,
   onToggleSelectionMode,
   onEnterThumbnailMode,
@@ -21,19 +21,19 @@ const PhotoActionBar: React.FC<PhotoActionBarProps> = ({
   onAddPhoto,
   onMovePhotos,
   selectionCount = 0
-}) => {
+}: PhotoActionBarProps) {
   const renderSelectionMessage = () => {
     if (mode !== 'selection') return null;
 
     if (selectionCount === 0) {
       return (
-        <p className="text-red-200 font-p-500 text-subtitle-1-lg">
+        <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-187px] top-[42px] ">
           사진을 선택해주세요
         </p>
       );
     } else {
       return (
-        <p className="text-red-200 font-p-500 text-subtitle-1-lg">
+        <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-187px] top-[42px]">
           사진 <span className="font-bold">{selectionCount}</span>장이 선택되었습니다.
         </p>
       );
@@ -44,7 +44,7 @@ const PhotoActionBar: React.FC<PhotoActionBarProps> = ({
     if (mode !== 'thumbnail') return null;
 
     return (
-      <p className="text-red-200 font-p-500 text-subtitle-1-lg">
+      <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-187px] top-[42px]">
         대표 이미지로 설정할 사진을 선택해주세요.
       </p>
     );
@@ -122,12 +122,12 @@ const PhotoActionBar: React.FC<PhotoActionBarProps> = ({
           </>
         )}
       </div>
-      
+
       {mode === 'selection' && renderSelectionMessage()}
       {mode === 'thumbnail' && renderThumbnailMessage()}
       {mode === 'normal' && <p className="text-transparent h-[24px] text-subtitle-1-lg"></p>}
     </div>
   );
-};
+}
 
 export default PhotoActionBar;

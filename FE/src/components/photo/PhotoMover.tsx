@@ -18,7 +18,7 @@ interface PhotoMoverProps {
   onError?: (message: string) => void;
 }
 
-const PhotoMover: React.FC<PhotoMoverProps> = ({
+function PhotoMover({
   isOpen,
   onClose,
   sourceAlbumId,
@@ -26,7 +26,7 @@ const PhotoMover: React.FC<PhotoMoverProps> = ({
   albums,
   onMoveComplete,
   onError
-}) => {
+}: PhotoMoverProps) {
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
 
   // 앨범 이동 처리 함수

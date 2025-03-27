@@ -286,9 +286,9 @@ function BasicPhotoAlbumPage() {
       )}
 
       <div className="container">
-        <div className="flex space-x-6 mb-3">
+        <div className="flex space-x-6 mb-6 ">
           <Title text={albumName} />
-          <div className="flex mt-auto space-x-5 justify-end w-3/4">
+          <div className="flex space-x-5 h-[40px] justify-end w-3/4 relative mt-[100px]">
             {/* 사진 액션 바 컴포넌트 */}
             <PhotoActionBar
               mode={isSelectionMode ? 'selection' : (isThumbnailMode ? 'thumbnail' : 'normal')}
