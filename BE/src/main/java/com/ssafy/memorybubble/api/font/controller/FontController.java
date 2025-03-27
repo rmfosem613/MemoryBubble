@@ -27,7 +27,7 @@ public class FontController {
 
     @GetMapping("/fonts")
     @Operation(
-            summary = "폰트 조회 API (사용자용)",
+            summary = "폰트 조회 API (사용자)",
             description = "생성된 폰트를 조회하고 폰트 다운로드 링크를 제공합니다. 생성된 폰트가 없다면 컬럼 값이 null 입니다. 아직 폰트가 생성되지 않았다면 status 필드가 REQUESTED 입니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
@@ -40,7 +40,7 @@ public class FontController {
 
     @DeleteMapping("/fonts/{font_id}")
     @Operation(
-            summary = "폰트 삭제 API (사용자용)",
+            summary = "폰트 삭제 API (사용자)",
             description = "생성한 폰트를 삭제합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
@@ -58,7 +58,7 @@ public class FontController {
 
     @GetMapping("/fonts/template")
     @Operation(
-            summary = "폰트 템플릿 다운로드 API (사용자용)",
+            summary = "폰트 템플릿 다운로드 API (사용자)",
             description = "폰트 생성에 필요한 템플릿 다운로드 링크를 제공합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
@@ -71,7 +71,7 @@ public class FontController {
 
     @PostMapping("/fonts")
     @Operation(
-            summary = "폰트 생성 요청 API (사용자용)",
+            summary = "폰트 생성 요청 API (사용자)",
             description = "폰트 이름과 작성한 폰트 템플릿 이미지를 올릴 링크를 제공합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
@@ -79,8 +79,8 @@ public class FontController {
                     @ApiResponse(responseCode = "400", description = "이미 생성된 폰트가 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<List<FileResponse>> createFont(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<List<FileResponse>> addFont(@AuthenticationPrincipal UserDetails userDetails,
                                                          @RequestBody FontRequest fontRequest) {
-        return ResponseEntity.ok(fontService.createFont(Long.parseLong(userDetails.getUsername()), fontRequest));
+        return ResponseEntity.ok(fontService.addFont(Long.parseLong(userDetails.getUsername()), fontRequest));
     }
 }
