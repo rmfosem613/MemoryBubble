@@ -44,6 +44,7 @@ public enum ErrorCode {
 
     // font
     FONT_NOT_FOUND(NOT_FOUND, "폰트를 찾을 수 없습니다"),
+    FONT_BAD_REQUEST(BAD_REQUEST, "이미 생성된 폰트가 있습니다."),
     FONT_ACCESS_DENIED(FORBIDDEN, "다른 사용자의 폰트를 삭제할 수 없습니다.");
 
     private final HttpStatus httpStatus;
