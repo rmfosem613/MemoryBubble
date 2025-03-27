@@ -16,14 +16,9 @@ import useModal from '@/hooks/useModal';
 import GroupNameEditModal from './GroupNameEditModal';
 import ProfileEditModal from './ProfileEditModal';
 
-// 임시 데이터
-import tempUser from './tempUser.json';
-import tempFamily from './tempFamily.json';
-
 const Header = () => {
   // 스토어 관련 상태
-  const { user, family, isUnread, setUser, setFamily, setIsUnread } =
-    useUserStore();
+  const { user, family, isUnread } = useUserStore();
 
   // Header 관련 상태
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -34,13 +29,6 @@ const Header = () => {
   // 모달 관련 상태
   const groupNameModal = useModal();
   const profileEditModal = useModal();
-
-  // 초기화
-  useEffect(() => {
-    // axios 요청
-    setUser(tempUser as User);
-    setFamily(tempFamily as Family);
-  }, []);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -97,7 +85,8 @@ const Header = () => {
             />
           </Link>
 
-          {user.familyId && (
+          {/* 그룹 가입 + 사용자 정보 등록 확인 */}
+          {user.familyId && user.birth && (
             <div className="flex items-center space-x-3">
               <Link
                 to="/font"
@@ -146,18 +135,11 @@ const Header = () => {
                     {/*  그룹 */}
                     <div className="p-3 flex flex-col items-center space-y-2 bg-blue-50">
                       {/* 그룹 이미지 */}
-                      {family.thumbnailUrl ? (
-                        <img
-                          src={family.thumbnailUrl}
-                          alt="그룹 이미지"
-                          className="h-24 w-24 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-24 w-24 rounded-full border-2 border-blue-300 text-blue-300 flex items-center justify-center">
-                          <Image size={40} />
-                        </div>
-                      )}
-
+                      <img
+                        src={family.thumbnailUrl}
+                        alt="그룹 이미지"
+                        className="h-24 w-24 rounded-full object-cover"
+                      />
                       {/* 그룹 이름 */}
                       <div className="flex items-center space-x-2">
                         <div className="text-h5-lg font-p-700">
@@ -201,17 +183,11 @@ const Header = () => {
                     <div className="max-h-60 overflow-y-auto mb-2">
                       {/* 현재 사용자 */}
                       <div className="flex items-center space-x-3 p-3 border-b border-gray-200">
-                        {user.profileUrl ? (
-                          <img
-                            src={user.profileUrl}
-                            alt="프로필 이미지"
-                            className="h-11 w-11 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-11 w-11 rounded-full bg-gray-200 flex items-center justify-center">
-                            <UserRound />
-                          </div>
-                        )}
+                        <img
+                          src={user.profileUrl}
+                          alt="프로필 이미지"
+                          className="h-11 w-11 rounded-full object-cover"
+                        />
                         <div className="flex-1">
                           <div className="flex justify-between">
                             <p className="text-sm">{user.name}</p>
