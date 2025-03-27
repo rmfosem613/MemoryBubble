@@ -13,5 +13,5 @@ export interface SlidingAlbumListProps {
   onAlbumChange?: (album: AlbumData) => void;
 }
 
-// ??
+// id 제거한 albumData 인터페이스
 export type MainAlbumProps = Omit<AlbumData, 'id'>;
