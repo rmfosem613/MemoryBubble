@@ -11,7 +11,7 @@ const API_BASE_URL = 'http://localhost:8080'
 function TestKakaoLogin() {
   const [isLoading, setIsLoading] = useState(false) 
   const navigate = useNavigate() 
-  const { user } = useUserStore() 
+  const { user, setUser } = useUserStore() 
 
   // 이미 로그인된 경우 메인 페이지로 리다이렉트
   // useEffect(() => {
@@ -37,11 +37,12 @@ function TestKakaoLogin() {
           const userDetails = userDetailsResponse.data 
 
           // 전역 상태 관리
-          useUserStore.getState().setUser({
+          setUser({
             userId,
             familyId,
             ...userDetails
           })
+          console.log("TESTKAKAOLOGIN" + userId + " , " + familyId)
 
           // 사용자가 이미 로그인되어 있다면 페이지 이동
           if (familyId) {
@@ -59,7 +60,7 @@ function TestKakaoLogin() {
     } 
 
     checkLogin() 
-  }, [navigate]) 
+  }, [navigate, setUser]) 
 
   const kakaoLoginHandler = async () => {
     try {
