@@ -753,24 +753,12 @@ function BasicPhotoAlbumPage() {
           <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
             앨범 선택하기
           </p>
-          {/* DropDown 컴포넌트를 사용하는 대신 일반 select로 대체 */}
-          <div className="relative w-full mb-4">
-            <select
-              className="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
-              value={targetAlbumId || ""}
-              onChange={(e) => handleTargetAlbumSelect(Number(e.target.value))}
-            >
-              <option value="" disabled>앨범을 선택해주세요</option>
-              {albums.map((album) => (
-                // 현재 앨범은 선택 목록에서 제외
-                album.id !== albumId && (
-                  <option key={album.id} value={album.id}>
-                    {album.title}
-                  </option>
-                )
-              ))}
-            </select>
-          </div>
+          <DropDown
+            albums={albums}
+            currentAlbumId={albumId}
+            onSelectAlbum={handleTargetAlbumSelect}
+            placeholder="앨범을 선택해주세요"
+          />
           <div className="text-sm text-gray-500 mt-2">
             선택된 사진 {selectedPhotos.length}장을 이동합니다.
           </div>
