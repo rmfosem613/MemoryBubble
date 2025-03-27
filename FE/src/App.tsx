@@ -16,7 +16,7 @@ import Header from './components/header/Header';
 // 관리자 페이지
 import AdminPage from './pages/AdminPage'
 import TestKakaoLogin from './pages/TestKakaoLogin';
-import OAuthCallback from './components/login/OAuthCallback';
+import OAuthCallback from './components/oauth/OAuthCallback';
 
 function App() {
   return (
