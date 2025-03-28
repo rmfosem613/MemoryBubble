@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  // baseURL: 'https://memorybubble.site', // API 서버 주소
-  baseURL: 'http://localhost:8080'
+  baseURL: 'https://memorybubble.site', // API 서버 주소
+  // baseURL: 'http://localhost:8080'
 });
 
 // API 요청 시 모든 요청 헤더에 access token 포함
