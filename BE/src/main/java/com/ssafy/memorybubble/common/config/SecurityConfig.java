@@ -59,12 +59,6 @@ public class SecurityConfig {
                 )
                 // 인증/권한 예외 처리 설정
                 .exceptionHandling(handling -> handling
-                        // 인증 X
-                        .authenticationEntryPoint(((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"error\":\"인증이 필요합니다.\"}");
-                        }))
                         // 인증 O, 권한 X
                         .accessDeniedHandler(((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
