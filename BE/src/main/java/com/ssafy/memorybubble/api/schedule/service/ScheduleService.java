@@ -33,23 +33,20 @@ public class ScheduleService {
     private final AlbumService albumService;
 
     @Transactional
-    public ScheduleResponse addSchedule(Long userId, ScheduleRequest scheduleRequest) {
-        log.info("schedule request: {}", scheduleRequest);
+    public ScheduleResponse addSchedule(Long userId, ScheduleRequest request) {
+        log.info("schedule request: {}", request);
 
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = user.getFamily();
-        if (family == null || !family.getId().equals(scheduleRequest.getFamilyId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = validateFamily(user, request.getFamilyId());
         log.info("family: {}", family);
 
         // albumId가 있으면 album 찾음
         Album album = null;
-        if (scheduleRequest.getAlbumId() != null) {
-            album = albumService.getAlbum(scheduleRequest.getAlbumId());
+        if (request.getAlbumId() != null) {
+            album = albumService.getAlbum(request.getAlbumId());
             // 앨범의 family가 familyId와 다르면 예외 반환
             if (!family.getId().equals(album.getFamily().getId())) {
                 throw new AlbumException(ALBUM_ACCESS_DENIED);
@@ -57,17 +54,12 @@ public class ScheduleService {
         }
 
         // 날짜 검증
-        if (scheduleRequest.getStartDate() == null || scheduleRequest.getEndDate() == null) {
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
-        if (scheduleRequest.getEndDate().isBefore(scheduleRequest.getStartDate())) {
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
+        validateDates(request.getStartDate(), request.getEndDate());
 
         Schedule schedule = Schedule.builder()
-                .startDate(scheduleRequest.getStartDate())
-                .endDate(scheduleRequest.getEndDate())
-                .content(scheduleRequest.getContent())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .content(request.getContent())
                 .family(family)
                 .album(album)
                 .build();
@@ -75,13 +67,7 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
         log.info("schedule: {}", schedule);
 
-        return ScheduleResponse.builder()
-                .scheduleId(schedule.getId())
-                .scheduleContent(schedule.getContent())
-                .startDate(schedule.getStartDate())
-                .endDate(schedule.getEndDate())
-                .albumId(schedule.getAlbum() != null ? schedule.getAlbum().getId() : null)
-                .build();
+        return convertToScheduleResponse(schedule);
     }
 
     @Transactional
@@ -93,18 +79,15 @@ public class ScheduleService {
         log.info("schedule: {}", schedule);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = user.getFamily();
-        if (family == null || !family.getId().equals(schedule.getFamily().getId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
-        log.info("family: {}", family);
+        validateFamily(user, schedule.getFamily().getId());
+        log.info("family: {}", user.getFamily());
 
         scheduleRepository.delete(schedule);
     }
 
     @Transactional
-    public ScheduleResponse updateSchedule(Long userId, Long scheduleId, ScheduleRequest scheduleRequest) {
-        log.info("scheduleRequest: {}", scheduleRequest);
+    public ScheduleResponse updateSchedule(Long userId, Long scheduleId, ScheduleRequest request) {
+        log.info("request: {}", request);
 
         User user = userService.getUser(userId);
         log.info("user: {}", user);
@@ -113,36 +96,13 @@ public class ScheduleService {
         log.info("schedule: {}", schedule);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = user.getFamily();
-        if (family == null || !family.getId().equals(schedule.getFamily().getId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
-        log.info("family: {}", family);
+        validateFamily(user, schedule.getFamily().getId());
+        log.info("family: {}", user.getFamily());
 
-        // 날짜 검증 - 시작, 끝 날짜 모두 수정하는 경우
-        if (scheduleRequest.getStartDate() != null && scheduleRequest.getEndDate() != null && scheduleRequest.getEndDate().isBefore(scheduleRequest.getStartDate())) {
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
+        validateUpdateDates(request, schedule);
+        schedule.update(request.getStartDate(), request.getEndDate(), request.getContent());
 
-        // 시작 날짜만 수정하는 경우 - 기존의 끝 날짜보다 늦으면 예외처리
-        if (scheduleRequest.getStartDate() != null && scheduleRequest.getEndDate() == null && scheduleRequest.getStartDate().isAfter(schedule.getEndDate())){
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
-
-        // 끝 날짜만 수정하는 경우 - 기존의 시작 날짜보다 이르면 예외 처리
-        if(scheduleRequest.getStartDate() == null && scheduleRequest.getEndDate() != null && scheduleRequest.getEndDate().isBefore(schedule.getStartDate())){
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
-
-        schedule.update(scheduleRequest.getStartDate(), scheduleRequest.getEndDate(), scheduleRequest.getContent());
-
-        return ScheduleResponse.builder()
-                .scheduleId(schedule.getId())
-                .scheduleContent(schedule.getContent())
-                .startDate(schedule.getStartDate())
-                .endDate(schedule.getEndDate())
-                .albumId(schedule.getAlbum() != null ? schedule.getAlbum().getId() : null)
-                .build();
+        return convertToScheduleResponse(schedule);
     }
 
     @Transactional
@@ -154,10 +114,7 @@ public class ScheduleService {
         log.info("schedule: {}", schedule);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = user.getFamily();
-        if (family == null || !family.getId().equals(schedule.getFamily().getId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = validateFamily(user, schedule.getFamily().getId());
         log.info("family: {}", family);
 
         if(albumId == null) {
@@ -172,13 +129,7 @@ public class ScheduleService {
             schedule.update(album);
         }
 
-        return ScheduleResponse.builder()
-                .scheduleId(schedule.getId())
-                .scheduleContent(schedule.getContent())
-                .startDate(schedule.getStartDate())
-                .endDate(schedule.getEndDate())
-                .albumId(schedule.getAlbum() != null ? schedule.getAlbum().getId() : null)
-                .build();
+        return convertToScheduleResponse(schedule);
     }
 
     public List<ScheduleResponse> getSchedules(Long userId, Long familyId, int year, int month) {
@@ -201,6 +152,33 @@ public class ScheduleService {
         return schedules.stream()
                 .map(this::convertToScheduleResponse)
                 .toList();
+    }
+
+    // user의 가족이 없거나, 가족이 familyId로 찾은 가족과 다르면 예외 반환
+    private Family validateFamily(User user, Long familyId) {
+        Family family = user.getFamily();
+        if (family == null || !family.getId().equals(familyId)) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
+        return family;
+    }
+
+    private void validateDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
+            throw new ScheduleException(SCHEDULE_DATE_INVALID);
+        }
+    }
+
+    private void validateUpdateDates(ScheduleRequest request, Schedule schedule) {
+        if (request.getStartDate() != null && request.getEndDate() != null) {
+            validateDates(request.getStartDate(), request.getEndDate());
+        }
+        if (request.getStartDate() != null && request.getStartDate().isAfter(schedule.getEndDate())) {
+            throw new ScheduleException(SCHEDULE_DATE_INVALID);
+        }
+        if (request.getEndDate() != null && request.getEndDate().isBefore(schedule.getStartDate())) {
+            throw new ScheduleException(SCHEDULE_DATE_INVALID);
+        }
     }
 
     public ScheduleResponse convertToScheduleResponse(Schedule schedule) {
