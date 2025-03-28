@@ -27,13 +27,13 @@ function PhotoActionBar({
 
     if (selectionCount === 0) {
       return (
-        <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-187px] top-[42px] ">
+        <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-220px] top-[38px] ">
           사진을 선택해주세요
         </p>
       );
     } else {
       return (
-        <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-187px] top-[42px]">
+        <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-220px] top-[38px]">
           사진 <span className="font-bold">{selectionCount}</span>장이 선택되었습니다.
         </p>
       );
@@ -44,7 +44,7 @@ function PhotoActionBar({
     if (mode !== 'thumbnail') return null;
 
     return (
-      <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-187px] top-[42px]">
+      <p className="text-red-200 font-p-500 text-subtitle-1-lg absolute left-[-220px] top-[38px]">
         대표 이미지로 설정할 사진을 선택해주세요.
       </p>
     );
@@ -52,7 +52,7 @@ function PhotoActionBar({
 
   return (
     <div>
-      <div className="flex space-x-5 justify-end">
+      <div className="flex space-x-2 md:space-x-3 lg:space-x-5 justify-end">
         {mode === 'normal' ? (
           <>
             {/* 일반 모드 버튼들 */}
@@ -60,25 +60,25 @@ function PhotoActionBar({
               className="flex space-x-1 cursor-pointer"
               onClick={onToggleSelectionMode}
             >
-              <CircleCheck strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
-              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-300"></div>
-              <p className="font-p-500 text-subtitle-1-lg">선택하기</p>
+              <CircleCheck strokeWidth={1} className="absolute z-10 ml-[-3pX] mt-[2px]" size={'21px'} />
+              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-700 opacity-15"></div>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">선택하기</p>
             </div>
             <div
               className="flex space-x-1 cursor-pointer"
               onClick={onEnterThumbnailMode}
             >
-              <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
-              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
-              <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
+              <ImageUp strokeWidth={1} className="absolute z-10 ml-[-4px] mt-[2px]" size={'21px'} />
+              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">썸네일 변경</p>
             </div>
             <div
               className="flex space-x-1 cursor-pointer"
               onClick={onAddPhoto}
             >
-              <CirclePlus strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
-              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200"></div>
-              <p className="font-p-500 text-subtitle-1-lg">사진 추가</p>
+              <CirclePlus strokeWidth={1} className="absolute z-10 ml-[-3pX] mt-[2px]" size={'21px'} />
+              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200 opacity-65"></div>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">사진 추가</p>
             </div>
           </>
         ) : mode === 'selection' ? (
@@ -88,18 +88,18 @@ function PhotoActionBar({
               className="flex space-x-1 cursor-pointer"
               onClick={onCancelMode}
             >
-              <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
-              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
-              <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
+              <X strokeWidth={1} className="absolute z-10 ml-[-3pX] mt-[2px]" size={'23px'} />
+              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-700 opacity-15"></div>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">취소하기</p>
             </div>
             {onMovePhotos && (
               <div
                 className="flex space-x-1 cursor-pointer"
                 onClick={onMovePhotos}
               >
-                <FolderUp strokeWidth={1} className="absolute z-30 ml-[-5pX] mt-[2px]" size={'22px'} />
-                <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-400"></div>
-                <p className="font-p-500 text-subtitle-1-lg">앨범 이동하기</p>
+                <FolderUp strokeWidth={1} className="absolute z-10 ml-[-5pX] mt-[2px]" size={'22px'} />
+                <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
+                <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">앨범 이동하기</p>
               </div>
             )}
           </>
@@ -110,14 +110,14 @@ function PhotoActionBar({
               className="flex space-x-1 cursor-pointer"
               onClick={onCancelMode}
             >
-              <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
-              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
-              <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
+              <X strokeWidth={1} className="absolute z-10 ml-[-3pX] mt-[2px]" size={'23px'} />
+              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-700 opacity-15"></div>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">취소하기</p>
             </div>
             <div className="flex space-x-1">
-              <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
-              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
-              <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
+              <ImageUp strokeWidth={1} className="absolute z-10 ml-[-4px] mt-[2px]" size={'21px'} />
+              <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">썸네일 변경</p>
             </div>
           </>
         )}
