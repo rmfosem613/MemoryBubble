@@ -32,7 +32,6 @@ import OAuthCallback from './components/oauth/OAuthCallback';
 
 function App() {
   const { isLoading, checkAuthAndFetchUserData } = useUser();
-  const { user } = useUserStore();
 
   // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청
   useEffect(() => {
