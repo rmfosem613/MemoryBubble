@@ -37,7 +37,7 @@ const CircleCheck = () => {
 
 function CreateGroupPage() {
   const navigate = useNavigate()
-  const { setUser } = useUserStore() // useUserStore에서 setUser 가져오기
+  const { setUser, setFamily } = useUserStore()
   const { createFamily, uploadImageWithPresignedUrl } = useUserApi() // useUserApi 사용
   const [currentStep, setCurrentStep] = useState(1)
   const [groupName, setGroupName] = useState("")
@@ -87,6 +87,10 @@ function CreateGroupPage() {
         setUser({
           familyId: data.familyId
         })
+        setFamily({
+          familyName: groupName,
+          thumbnailUrl: data.presignedUrl
+        });
 
         // 이미지가 있는 경우 presignedUrl을 사용하여 S3에 이미지 업로드
         if (groupImage && data.presignedUrl) {
@@ -98,7 +102,7 @@ function CreateGroupPage() {
             await uploadImageWithPresignedUrl(
               data.presignedUrl, 
               new File([imageBlob], data.fileName, { type: 'image/webp' })
-            )
+            ) 
           } catch (uploadError) {
             console.error("이미지 업로드 실패:", uploadError)
             // 이미지 업로드 실패해도 그룹은 생성되었으므로 계속 진행
