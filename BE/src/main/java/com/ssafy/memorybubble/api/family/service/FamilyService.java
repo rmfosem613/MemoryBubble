@@ -127,16 +127,11 @@ public class FamilyService {
 
         // UUID로 presigendUrl 생성, 프로필 이미지 업로드 용 presigned Url 반환
         String key = "user/" + UUID.randomUUID();
-        String presignedUrl = fileService.getUploadPresignedUrl(key);
-
         // 유저의 정보 업데이트
         userService.updateUser(user, request, key);
         log.info("user info updated: {}", user);
 
-        return FileResponse.builder()
-                .fileName(key)
-                .presignedUrl(presignedUrl)
-                .build();
+        return fileService.createUploadFileResponse(key);
     }
 
     public FamilyInfoResponse getFamily(Long userId, Long familyId) {

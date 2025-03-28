@@ -3,7 +3,6 @@ package com.ssafy.memorybubble.api.letter.service;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
-import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.letter.dto.LetterDetailDto;
 import com.ssafy.memorybubble.api.letter.dto.LetterDto;
@@ -49,14 +48,10 @@ public class LetterService {
         if (letterRequest.getType().equals(Type.AUDIO)) {
             // 음성 메세지를 올릴 presigned 주소 생성
             String key = "letter/" + UUID.randomUUID();
-            String presignedUrl = fileService.getUploadPresignedUrl(key);
 
             saveLetter(letterRequest, sender, receiver, key);
 
-            return FileResponse.builder()
-                    .fileName(key)
-                    .presignedUrl(presignedUrl)
-                    .build();
+            return fileService.createUploadFileResponse(key);
         } else {
             // 텍스트 보내는 경우
             saveLetter(letterRequest, sender, receiver, letterRequest.getContent());

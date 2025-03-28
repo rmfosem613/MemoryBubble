@@ -39,23 +39,19 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(User user, JoinRequest joinRequest, String profile) {
+    public void updateUser(User user, JoinRequest request, String profile) {
         // 이름, 프로필, 휴대폰번호, 성별, 생일 업데이트
         log.info("Updating user {}", user);
-        user.updateUser(joinRequest.getName(), profile, joinRequest.getPhoneNumber(),
-                joinRequest.getGender(), joinRequest.getBirth());
+        user.updateUser(request.getName(), profile, request.getPhoneNumber(),
+                request.getGender(), request.getBirth());
     }
 
     @Transactional
-    public FileResponse updateUser(Long userId, UserRequest userRequest) {
+    public FileResponse updateUser(Long userId, UserRequest request) {
         User user = getUser(userId);
         // 프로필 이미지를 바꿀 수 있는 url 반환
-        String presignedUrl = fileService.getUploadPresignedUrl(user.getProfile());
-        user.updateUser(userRequest.getName(), user.getProfile(), userRequest.getPhoneNumber(), userRequest.getGender(), userRequest.getBirth());
-        return FileResponse.builder()
-                .fileName(user.getProfile())
-                .presignedUrl(presignedUrl)
-                .build();
+        user.updateUser(request.getName(), user.getProfile(), request.getPhoneNumber(), request.getGender(), request.getBirth());
+        return fileService.createUploadFileResponse(user.getProfile());
     }
 
     public UnreadLetterResponse getUnreadLetter(Long userId) {
