@@ -39,18 +39,18 @@ function MainPage() {
   }, [currentAlbum]);
 
   // familyId를 store에서 불러오기
-  useEffect(() => {
-    const handle = async () => {
-      const userResponse = await apiClient.get("/api/users/me")
-      const { familyId } = userResponse.data
-      console.log("main : " + familyId)
-      setUser({
-        familyId
-      })
-    }
+  // useEffect(() => {
+  //   const handle = async () => {
+  //     const userResponse = await apiClient.get("/api/users/me")
+  //     const { familyId } = userResponse.data
+  //     console.log("main : " + familyId)
+  //     setUser({
+  //       familyId
+  //     })
+  //   }
 
-    handle()
-  }, [setUser]);
+  //   handle()
+  // }, [setUser]);
 
   // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
   const handleAlbumClick = () => {
