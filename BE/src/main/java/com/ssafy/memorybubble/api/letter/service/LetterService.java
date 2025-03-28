@@ -3,7 +3,6 @@ package com.ssafy.memorybubble.api.letter.service;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
-import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.letter.dto.LetterDetailDto;
 import com.ssafy.memorybubble.api.letter.dto.LetterDto;
