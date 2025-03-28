@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.api.file.service;
 
+import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,20 @@ public class FileService {
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
+
+    public FileResponse createDownloadFileResponse(String key) {
+        return FileResponse.builder()
+                .fileName(key)
+                .presignedUrl(getDownloadPresignedURL(key))
+                .build();
+    }
+
+    public FileResponse createUploadFileResponse(String key) {
+        return FileResponse.builder()
+                .fileName(key)
+                .presignedUrl(getUploadPresignedUrl(key))
+                .build();
+    }
 
     // S3에 업로드
     public String getUploadPresignedUrl(String key) {

@@ -82,10 +82,7 @@ public class FontService {
     // 사용자 - 폰트 템플릿 다운로드
     @Transactional(readOnly = true)
     public FileResponse getFontTemplate() {
-        return FileResponse.builder()
-                .presignedUrl(fileService.getDownloadPresignedURL(TEMPLATE_FILE))
-                .fileName(TEMPLATE_FILE)
-                .build();
+        return fileService.createDownloadFileResponse(TEMPLATE_FILE);
     }
 
     // 사용자 - 폰트 생성 요청
@@ -112,10 +109,7 @@ public class FontService {
         List<FileResponse> fileResponseList = IntStream.rangeClosed(1, TEMPLATE_FILE_COUNT)
                 .mapToObj(i -> {
                     String templateFile = String.format(TEMPLATE_FILE_NAME, userId, i);
-                    return FileResponse.builder()
-                            .presignedUrl(fileService.getUploadPresignedUrl(templateFile))
-                            .fileName(templateFile)
-                            .build();
+                    return fileService.createUploadFileResponse(templateFile);
                 })
                 .collect(Collectors.toList());
         log.info("fileResponseList={}", fileResponseList);
@@ -140,10 +134,7 @@ public class FontService {
         List<FileResponse> files = IntStream.rangeClosed(1, TEMPLATE_FILE_COUNT)
                 .mapToObj(i -> {
                     String templateFile = String.format(TEMPLATE_FILE_NAME, user.getId(), i);
-                    return FileResponse.builder()
-                            .presignedUrl(fileService.getDownloadPresignedURL(templateFile))
-                            .fileName(templateFile)
-                            .build();
+                    return fileService.createDownloadFileResponse(templateFile);
                 })
                 .toList();
 
@@ -168,9 +159,6 @@ public class FontService {
 
         // ttf 파일 업로드할 Presigned URL 리턴
         String fontPath = String.format(FONT_PATH, user.getId(), font.getName());
-        return FileResponse.builder()
-                .presignedUrl(fileService.getUploadPresignedUrl(fontPath))
-                .fileName(fontPath)
-                .build();
+        return fileService.createUploadFileResponse(fontPath);
     }
 }

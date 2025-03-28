@@ -39,42 +39,38 @@ public class PhotoService {
 
     // 사진 업로드
     @Transactional
-    public List<FileResponse> addPhoto(Long userId, PhotoRequest photoRequest) {
+    public List<FileResponse> addPhoto(Long userId, PhotoRequest request) {
         User user = userService.getUser(userId);
 
         // 앨범에 사진을 업로드
-        Album album = albumService.getAlbum(photoRequest.getAlbumId());
+        Album album = albumService.getAlbum(request.getAlbumId());
         log.info("Add photo for user {} and album {}", userId, album);
 
         // 앨범에 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, album);
 
-        return generateFileResponses(photoRequest.getPhotoLength(), album);
+        return generateFileResponses(request.getPhotoLength(), album);
     }
 
     // 감상평 작성
     @Transactional
-    public Object addReview(Long userId, Long photoId, ReviewRequest reviewRequest) {
+    public Object addReview(Long userId, Long photoId, ReviewRequest request) {
         User user = userService.getUser(userId);
         Photo photo = getPhoto(photoId);
 
         // 앨범에 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, photo.getAlbum());
 
-        if (reviewRequest.getType().equals(Type.AUDIO)) {
+        if (request.getType().equals(Type.AUDIO)) {
             // 음성 메세지를 올릴 presigned 주소 생성
             String key = String.format("album/%d/review/%s", user.getFamily().getId(), UUID.randomUUID());
-            String presignedUrl = fileService.getUploadPresignedUrl(key);
 
-            saveReview(reviewRequest, photo, user, key);
+            saveReview(request, photo, user, key);
 
-            return FileResponse.builder()
-                    .fileName(key)
-                    .presignedUrl(presignedUrl)
-                    .build();
+            return fileService.createUploadFileResponse(key);
         }
         else {
-            saveReview(reviewRequest, photo, user, reviewRequest.getContent());
+            saveReview(request, photo, user, request.getContent());
             return null;
         }
     }
@@ -95,18 +91,18 @@ public class PhotoService {
 
     // 사진의 앨범 위치 변경
     @Transactional
-    public MoveResponse movePhotos(Long userId, Long albumId, MoveRequest moveRequest) {
+    public MoveResponse movePhotos(Long userId, Long albumId, MoveRequest request) {
         User user = userService.getUser(userId);
 
         Album moveFromAlbum = albumService.getAlbum(albumId); // 기존 앨범
         // 기존 앨범에 유저가 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, moveFromAlbum);
 
-        Album moveToAlbum = albumService.getAlbum(moveRequest.getAlbumId()); // 이동하려는 앨범
+        Album moveToAlbum = albumService.getAlbum(request.getAlbumId()); // 이동하려는 앨범
         // 이동하려는 앨범에 유저가 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, moveToAlbum);
 
-        List<Long> photos = moveRequest.getPhotoList();
+        List<Long> photos = request.getPhotoList();
         for (Long photoId : photos) {
             Photo photo = getPhoto(photoId);
             // 앨범 id 업데이트
@@ -122,7 +118,6 @@ public class PhotoService {
         for(int i=0;i<photoLength;i++) {
             // 가족 id로 앨범 밑에 폴더를 만듦
             String key = String.format("album/%d/%s", album.getFamily().getId(), UUID.randomUUID());
-            String presignedUrl = fileService.getUploadPresignedUrl(key);
 
             Photo photo = Photo.builder()
                     .album(album)
@@ -130,20 +125,15 @@ public class PhotoService {
                     .build();
             photoRepository.save(photo);
 
-            FileResponse fileResponse = FileResponse
-                    .builder()
-                    .fileName(key)
-                    .presignedUrl(presignedUrl)
-                    .build();
-            fileResponses.add(fileResponse);
+            fileResponses.add(fileService.createUploadFileResponse(key));
         }
         return fileResponses;
     }
 
-    private void saveReview(ReviewRequest reviewRequest, Photo photo, User user, String content) {
+    private void saveReview(ReviewRequest request, Photo photo, User user, String content) {
         Review review = Review.builder()
                 .photo(photo)
-                .type(reviewRequest.getType())
+                .type(request.getType())
                 .content(content)
                 .writer(user)
                 .build();

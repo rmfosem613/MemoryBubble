@@ -51,7 +51,7 @@ public class AlbumService {
 
     // 요청이 들어온 앨범 생성
     @Transactional
-    public void addAlbum(Long userId, AlbumRequest albumRequest) {
+    public void addAlbum(Long userId, AlbumRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
         Family family = user.getFamily();
@@ -63,15 +63,15 @@ public class AlbumService {
         }
 
         // 요청 한 user가 가입된 family와 albumRequest의 familyId가 일치하지 않으면 예외 반환
-        if(!albumRequest.getFamilyId().equals(family.getId())) {
+        if(!request.getFamilyId().equals(family.getId())) {
             throw new FamilyException(FAMILY_NOT_FOUND);
         }
 
         Album album = Album.builder()
                 .family(family)
-                .name(albumRequest.getAlbumName())
-                .content(albumRequest.getAlbumContent())
-                .backgroundColor(albumRequest.getBackgroundColor())
+                .name(request.getAlbumName())
+                .content(request.getAlbumContent())
+                .backgroundColor(request.getBackgroundColor())
                 .build();
         log.info("Add album: {}", album);
         albumRepository.save(album);
@@ -131,7 +131,7 @@ public class AlbumService {
     }
 
     @Transactional
-    public void updateAlbumName(Long userId, Long albumId, UpdateRequest updateRequest) {
+    public void updateAlbumName(Long userId, Long albumId, UpdateRequest request) {
         User user = userService.getUser(userId);
         Album album = getAlbum(albumId);
 
@@ -139,14 +139,14 @@ public class AlbumService {
         Validator.validateAlbumAccess(user, album);
 
         // 이름이 있으면 이름 업데이트
-        if (StringUtils.hasText(updateRequest.getAlbumName())) {
-            album.updateName(updateRequest.getAlbumName());
+        if (StringUtils.hasText(request.getAlbumName())) {
+            album.updateName(request.getAlbumName());
             log.info("update album name: {}", album.getName());
         }
 
         // 내용이 있으면 내용 업데이트
-        if (StringUtils.hasText(updateRequest.getAlbumContent())) {
-            album.updateContent(updateRequest.getAlbumContent());
+        if (StringUtils.hasText(request.getAlbumContent())) {
+            album.updateContent(request.getAlbumContent());
             log.info("update album content: {}", album.getContent());
         }
     }
@@ -180,11 +180,9 @@ public class AlbumService {
 
     public PhotoDto convertToDto(Photo photo) {
         // 사진을 dto로 변환
-        String photoUrl = fileService.getDownloadPresignedURL(photo.getPath());
-
         return PhotoDto.builder()
                 .photoId(photo.getId())
-                .photoUrl(photoUrl)
+                .photoUrl(fileService.getDownloadPresignedURL(photo.getPath()))
                 .build();
     }
 }
