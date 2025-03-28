@@ -6,7 +6,7 @@ import apiClient from '@/apis/apiClient'
 
 // API 기본 URL 설정
 import axios from 'axios' 
-const API_BASE_URL = 'http://localhost:8080' 
+// const API_BASE_URL = 'http://localhost:8080' 
 
 function TestKakaoLogin() {
   const [isLoading, setIsLoading] = useState(false) 
@@ -26,8 +26,8 @@ function TestKakaoLogin() {
       if (accessToken) {
         try {
           // 토큰이 유효한지 확인하기 위해 사용자 데이터 가져오기
-          // const response = await apiClient.get('/api/users/me') 
-          const response = await axios.get(`${API_BASE_URL}/api/users/me`) 
+          const response = await apiClient.get('/api/users/me') 
+          // const response = await axios.get(`${API_BASE_URL}/api/users/me`) 
 
           // const userData = response.data 
           const { userId, familyId } = response.data 
@@ -66,8 +66,10 @@ function TestKakaoLogin() {
     try {
       setIsLoading(true) 
       // 카카오 로그인 API 호출
-      console.log(API_BASE_URL) 
-      const response = await axios.get(`${API_BASE_URL}/api/auth/login`) 
+      // console.log(API_BASE_URL) 
+     
+      const response = await  apiClient.get('/api/users/me') 
+      // const response = await axios.get(`${API_BASE_URL}/api/auth/login`) 
 
       if (response.data && response.data.redirectUrl) {
         // 카카오 인증 페이지로 리다이렉트
@@ -76,7 +78,7 @@ function TestKakaoLogin() {
     } catch (error) {
       console.error('로그인 요청 중 오류 발생:', error) 
       // 오류 발생 시에도 전체 URL 사용
-      window.location.href = `${API_BASE_URL}/api/auth/login` 
+      // window.location.href = `${API_BASE_URL}/api/auth/login` 
     } finally {
       setIsLoading(false) 
     }
