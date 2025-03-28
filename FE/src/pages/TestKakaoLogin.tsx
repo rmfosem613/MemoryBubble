@@ -27,7 +27,7 @@ function TestKakaoLogin() {
         try {
           // 토큰이 유효한지 확인하기 위해 사용자 데이터 가져오기
           // const response = await apiClient.get('/api/users/me');
-          const response = await axios.get(`${API_BASE_URL}/api/users/me`)
+          const response = await axios.get(`${API_BASE_URL}/api/users/me`);
 
           // const userData = response.data
           const { userId, familyId } = response.data;
@@ -72,6 +72,9 @@ function TestKakaoLogin() {
 
       // const response = await apiClient.get('/api/users/me');
       const response = await axios.get(`${API_BASE_URL}/api/auth/login`);
+      console.log('API_BASE_URL : ', API_BASE_URL);
+
+      console.log('response.data 확인 : ', response.data);
 
       if (response.data && response.data.redirectUrl) {
         // 카카오 인증 페이지로 리다이렉트
