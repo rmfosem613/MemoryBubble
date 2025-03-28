@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
@@ -31,8 +32,10 @@ public class FamilyService {
     private final UserService userService;
     private final CodeService codeService;
 
+    private final String[] colors = {"#F4E2DC", "#F3D1B2", "#F7F0D5", "#BFDAAB", "#C5DFE6", "#B3C6E3"};
+
     @Transactional
-    public FamilyResponse addFamily(Long userId, FamilyRequest familyRequest) {
+    public FamilyResponse addFamily(Long userId, FamilyRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
@@ -47,7 +50,7 @@ public class FamilyService {
 
         // familyRequest에 있는 familyName으로 family 생성
         Family family = familyRepository.save(Family.builder()
-                .name(familyRequest.getFamilyName())
+                .name(request.getFamilyName())
                 .thumbnail(key)
                 .build());
         log.info("family created: {}", family);
@@ -55,9 +58,11 @@ public class FamilyService {
         // 유저 정보에 가족 업데이트
         userService.updateUserFamily(user, family);
 
+        // 랜덤한 배경색 선택
+        String randomColor = colors[ThreadLocalRandom.current().nextInt(colors.length)];
+
         // 기본 그룹 앨범 생성(추억보관함), 앨범 썸네일에 가족 썸네일 넣음
-        albumService.addAlbum(family, "추억 보관함", "이것은 기본 앨범입니다. 추억을 담아보세요!",
-                "#FFFFFF", key);
+        albumService.addAlbum(family, "추억 보관함", "이것은 기본 앨범입니다. 추억을 담아보세요!", randomColor, key);
 
         // presignedURL 반환
         return FamilyResponse.builder()
@@ -96,13 +101,13 @@ public class FamilyService {
     }
 
     @Transactional
-    public FileResponse join(Long userId, JoinRequest joinRequest) {
+    public FileResponse join(Long userId, JoinRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
         // 유저가 이미 다른 그룹에 가입되어 있으면 예외 반환
         Family existingFamily = user.getFamily();
-        if (existingFamily != null && !existingFamily.getId().equals(joinRequest.getFamilyId())) {
+        if (existingFamily != null && !existingFamily.getId().equals(request.getFamilyId())) {
             throw new FamilyException(ALREADY_FAMILY_EXIST);
         }
 
@@ -112,7 +117,7 @@ public class FamilyService {
         }
 
         // joinRequest의 familyId로 family 찾기, 없으면 예외 반환
-        Long familyId = joinRequest.getFamilyId();
+        Long familyId = request.getFamilyId();
         Family family = familyRepository.findById(familyId)
                 .orElseThrow(() -> new FamilyException(FAMILY_NOT_FOUND));
 
@@ -125,7 +130,7 @@ public class FamilyService {
         String presignedUrl = fileService.getUploadPresignedUrl(key);
 
         // 유저의 정보 업데이트
-        userService.updateUser(user, joinRequest, key);
+        userService.updateUser(user, request, key);
         log.info("user info updated: {}", user);
 
         return FileResponse.builder()
@@ -168,7 +173,7 @@ public class FamilyService {
     }
 
     @Transactional
-    public FamilyResponse updateFamily(Long userId, Long familyId, FamilyRequest familyRequest) {
+    public FamilyResponse updateFamily(Long userId, Long familyId, FamilyRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
         Family family = user.getFamily();
@@ -180,7 +185,7 @@ public class FamilyService {
         }
 
         // 가족 이름 수정
-        family.updateFamilyName(familyRequest.getFamilyName());
+        family.updateFamilyName(request.getFamilyName());
         log.info("updated family: {}", family);
 
         // 기존 thumbnail(fileName)으로 가족 이미지 업로드용 presigned Url 반환
