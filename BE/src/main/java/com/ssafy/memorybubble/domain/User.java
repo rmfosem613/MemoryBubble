@@ -40,6 +40,9 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean active;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     public void updateUserFamily(Family family) {
         this.family = family;
     }
@@ -53,7 +56,7 @@ public class User {
     }
 
     @Builder
-    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Boolean active) {
+    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Boolean active, Role role) {
         this.family = family;
         this.email = email;
         this.name = name;
@@ -62,5 +65,6 @@ public class User {
         this.gender = gender;
         this.birth = birth;
         this.active = active;
+        this.role = role;
     }
 }
