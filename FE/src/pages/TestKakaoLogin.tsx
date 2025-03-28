@@ -26,8 +26,8 @@ function TestKakaoLogin() {
       if (accessToken) {
         try {
           // 토큰이 유효한지 확인하기 위해 사용자 데이터 가져오기
-          const response = await apiClient.get('/api/users/me');
-          // const response = await axios.get(`${API_BASE_URL}/api/users/me`)
+          // const response = await apiClient.get('/api/users/me');
+          const response = await axios.get(`${API_BASE_URL}/api/users/me`)
 
           // const userData = response.data
           const { userId, familyId } = response.data;
