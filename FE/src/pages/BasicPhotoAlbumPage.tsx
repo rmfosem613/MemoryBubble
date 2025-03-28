@@ -14,12 +14,16 @@ import PhotoModal from "@/components/photo/PhotoModal";
 import PhotoMover from "@/components/photo/PhotoMover";
 import PhotoGrid from "@/components/photo/PhotoGrid";
 
+import useUserStore from "@/stores/useUserStore";
+
 interface Photo {
   photoId: number;
   photoUrl: string;
 }
 
 function BasicPhotoAlbumPage() {
+  const { user } = useUserStore()
+
   // 앨범 정보 상태
   const [albumName, setAlbumName] = useState<string>("추억보관함");
   const [albumId, setAlbumId] = useState<number | null>(null);
@@ -29,7 +33,7 @@ function BasicPhotoAlbumPage() {
 
   // 현재 화면에 보여줄 사진 상태와 무한스크롤을 위한 페이징
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const initialPhotosCount = 25; // 초기에 보여줄 사진 수 (25개)
+  const initialPhotosCount = 15; // 초기에 보여줄 사진 수 (25개)
   const photosPerPage = 10; // 그 이후 추가로 로드할 사진 수 (10개씩)
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -100,7 +104,9 @@ function BasicPhotoAlbumPage() {
 
       const albumData = await getBasicAlbumPhotos();
       setAlbumName(albumData.albumName || "추억보관함");
-      setAllPhotos(albumData.photoList || []);
+      
+      const photoList = albumData.photoList || [];
+      setAllPhotos(photoList);
 
       // 첫 번째 앨범 ID 가져와서 저장
       const firstAlbumId = await getFirstAlbumId();
@@ -109,7 +115,13 @@ function BasicPhotoAlbumPage() {
       // 초기 페이지 설정
       setPage(1);
       setPhotos([]);
-      setHasMore(albumData.photoList.length > initialPhotosCount); // 초기 로드 이후에도 더 로드할 사진이 있는지
+
+      // 강제 리렌더링을 위한 약간의 딜레이 추가
+      setTimeout(() => {
+        setPhotos(photoList.slice(0, initialPhotosCount));
+        setHasMore(photoList.length > initialPhotosCount);
+        setIsLoading(false);
+      }, 0);
     } catch (err) {
       console.error("앨범 사진 로드 실패:", err);
       setError("앨범 사진을 불러오는 중 오류가 발생했습니다.");
@@ -118,7 +130,7 @@ function BasicPhotoAlbumPage() {
     }
   }, [getFirstAlbumId]);
 
-  // 앨범 사진 새로고침
+  // 강제 리렌더링
   const refreshPhotos = useCallback(async () => {
     try {
       const albumData = await getBasicAlbumPhotos();
@@ -142,14 +154,14 @@ function BasicPhotoAlbumPage() {
       // 초기에 25개 사진 로드
       const initialPhotos = allPhotos.slice(0, initialPhotosCount);
       setPhotos(initialPhotos);
-      
+
       // 초기 25개 이후에 더 불러올 사진이 있는지 확인
       setHasMore(allPhotos.length > initialPhotosCount);
-      
+
       // 다음 페이지는 25개 이후부터 시작
       setPage(Math.ceil(initialPhotosCount / photosPerPage) + 1);
     }
-  }, [allPhotos, isLoading]);
+  }, [allPhotos, isLoading, initialPhotosCount, photosPerPage]);
 
   // 더 많은 이미지 로드 함수 (스크롤 시 10개씩 추가)
   const loadMorePhotos = useCallback(() => {
@@ -158,9 +170,9 @@ function BasicPhotoAlbumPage() {
     // 이미 로드된 사진 수를 기준으로 다음 인덱스 계산
     const startIndex = photos.length;
     const endIndex = startIndex + photosPerPage;
-    
+
     console.log(`Loading more photos: ${startIndex} to ${endIndex} of ${allPhotos.length}`);
-    
+
     // 새로운 사진들 가져오기
     const newPhotos = allPhotos.slice(startIndex, endIndex);
 
@@ -229,7 +241,7 @@ function BasicPhotoAlbumPage() {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
-    
+
     // 자동으로 사라지도록 설정
     setTimeout(() => {
       setShowAlert(false);
