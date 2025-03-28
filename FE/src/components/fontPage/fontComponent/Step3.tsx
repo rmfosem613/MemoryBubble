@@ -1,8 +1,7 @@
 import React from 'react';
-import useFontStore from '@/stores/useFontStore'; // 경로는 실제 위치에 맞게 조정
+import useFontStore from '@/stores/useFontStore';
 
 function Step3() {
-  // Zustand 스토어에서 필요한 상태와 함수 가져오기
   const {
     fontNameKo,
     fontNameEn,
@@ -63,6 +62,7 @@ function Step3() {
                 value={fontNameEn}
                 onChange={(e) => setFontNameEn(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
+                required
               />
               <p>체</p>
             </div>
@@ -83,9 +83,7 @@ function Step3() {
 
           {/* 에러 메시지 표시 */}
           {submitError && (
-            <div className="mb-6 p-3 bg-red-100 text-red-700 rounded-md">
-              {submitError}
-            </div>
+            <p className="text-red-500 mt-1 text-sm">{submitError}</p>
           )}
 
           <div className="mt-6">
