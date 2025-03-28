@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiClient = axios.create({
   // baseURL: 'https://memorybubble.site', // API 서버 주소
-  baseURL: 'http://localhost:8080'
+  baseURL: 'http://localhost:8080',
 });
 
 // API 요청 시 모든 요청 헤더에 access token 포함
@@ -26,22 +26,24 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        const { data } = await apiClient.post(
-          '/api/auth/reissue',
-          {},
-          {
-            headers: { refreshToken: refreshToken },
-          },
+        const { data } = await axios.post(
+          'http://localhost:8080/api/auth/reissue',
+          { refreshToken: refreshToken },
         );
 
         localStorage.setItem('accessToken', data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
 
-        return apiClient(originalRequest);
+        return axios(originalRequest);
       } catch (refreshError) {
         console.error('토큰 갱신 샐패 : ', refreshError);
-        localStorage.clear();
-        // Todo: 새 access token 갱신 실패 시 로직 처리하기
+
+        // 모든 인증 관련 데이터 제거
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+
+        // 로그인 페이지로 리다이렉트
+        window.location.href = '/kakao';
         return Promise.reject(refreshError);
       }
     }

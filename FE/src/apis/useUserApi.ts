@@ -1,5 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import apiClient from './apiClient';
+import { useCallback } from 'react';
 
 // 가족 생성 요청 타입
 interface CreateFamilyRequest {
@@ -96,94 +97,126 @@ interface UpdateWithImageResponse {
 
 export const useUserApi = () => {
   // 가족 생성
-  const createFamily = async (
-    data: CreateFamilyRequest,
-  ): Promise<CreateFamilyResponse> => {
-    const response = await apiClient.post('/api/family', data);
-    console.log('가족 생성(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const createFamily = useCallback(
+    async (
+      data: CreateFamilyRequest,
+    ): Promise<AxiosResponse<CreateFamilyResponse>> => {
+      const response = await apiClient.post<CreateFamilyResponse>(
+        '/api/family',
+        data,
+      );
+      return response;
+    },
+    [],
+  );
 
   // 가족 초대코드 확인
-  const verifyFamilyCode = async (
-    data: VerifyFamilyCodeRequest,
-  ): Promise<VerifyFamilyCodeResponse> => {
-    const response = await apiClient.post('/api/family/code', data);
-    console.log('초대코드 확인(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const verifyFamilyCode = useCallback(
+    async (
+      data: VerifyFamilyCodeRequest,
+    ): Promise<AxiosResponse<VerifyFamilyCodeResponse>> => {
+      const response = await apiClient.post<VerifyFamilyCodeResponse>(
+        '/api/family/code',
+        data,
+      );
+      return response;
+    },
+    [],
+  );
 
   // 가족 초대코드 발급
-  const getFamilyInviteCode = async (
-    familyId: number,
-  ): Promise<GetInviteCodeResponse> => {
-    const response = await apiClient.get(`/api/family/${familyId}/invite`);
-    console.log('초대코드 발급(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const getFamilyInviteCode = useCallback(
+    async (familyId: number): Promise<AxiosResponse<GetInviteCodeResponse>> => {
+      const response = await apiClient.get<GetInviteCodeResponse>(
+        `/api/family/${familyId}/invite`,
+      );
+      return response;
+    },
+    [],
+  );
 
   // 가족 정보 조회
-  const fetchFamilyInfo = async (familyId: number): Promise<Family> => {
-    const response = await apiClient.get(`/api/family/${familyId}`);
-    console.log('가족 정보 조회(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const fetchFamilyInfo = useCallback(
+    async (familyId: number): Promise<AxiosResponse<Family>> => {
+      const response = await apiClient.get<Family>(`/api/family/${familyId}`);
+      return response;
+    },
+    [],
+  );
 
   // 가족 정보 수정
-  const updateFamilyInfo = async (
-    familyId: number,
-    data: UpdateFamilyRequest,
-  ): Promise<UpdateWithImageResponse> => {
-    const response = await apiClient.patch(`/api/family/${familyId}`, data);
-    console.log('가족 정보 수정(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const updateFamilyInfo = useCallback(
+    async (
+      familyId: number,
+      data: UpdateFamilyRequest,
+    ): Promise<AxiosResponse<UpdateWithImageResponse>> => {
+      const response = await apiClient.patch<UpdateWithImageResponse>(
+        `/api/family/${familyId}`,
+        data,
+      );
+      return response;
+    },
+    [],
+  );
 
   // 유저 정보 등록 (가족 가입 후)
-  const joinFamily = async (
-    data: JoinFamilyRequest,
-  ): Promise<JoinFamilyResponse> => {
-    const response = await apiClient.post('/api/family/join', data);
-    console.log('유저 정보 등록(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const joinFamily = useCallback(
+    async (
+      data: JoinFamilyRequest,
+    ): Promise<AxiosResponse<JoinFamilyResponse>> => {
+      const response = await apiClient.post<JoinFamilyResponse>(
+        '/api/family/join',
+        data,
+      );
+      return response;
+    },
+    [],
+  );
 
   // 현재 로그인한 사용자 조회
-  const fetchCurrentUser = async (): Promise<User> => {
-    const response = await apiClient.get('/api/users/me');
-    console.log('사용자 조회(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const fetchCurrentUser = useCallback(async (): Promise<
+    AxiosResponse<User>
+  > => {
+    const response = await apiClient.get<User>('/api/users/me');
+    return response;
+  }, []);
 
   // 사용자 프로필 조회
-  const fetchUserProfile = async (userId: number): Promise<UserProfile> => {
-    const response = await apiClient.get(`/api/users/${userId}`);
-    console.log('프로필 조회(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const fetchUserProfile = useCallback(
+    async (userId: number): Promise<AxiosResponse<UserProfile>> => {
+      const response = await apiClient.get<UserProfile>(`/api/users/${userId}`);
+      return response;
+    },
+    [],
+  );
 
   // 사용자 프로필 수정
-  const updateUserProfile = async (
-    userId: number,
-    data: UpdateUserProfileRequest,
-  ): Promise<UpdateWithImageResponse> => {
-    const response = await apiClient.patch(`/api/users/${userId}`, data);
-    console.log('프로필 수정(useUserApi.ts): ', response.data);
-    return response.data;
-  };
+  const updateUserProfile = useCallback(
+    async (
+      userId: number,
+      data: UpdateUserProfileRequest,
+    ): Promise<AxiosResponse<UpdateWithImageResponse>> => {
+      const response = await apiClient.patch<UpdateWithImageResponse>(
+        `/api/users/${userId}`,
+        data,
+      );
+      return response;
+    },
+    [],
+  );
 
   // presignedUrl로 이미지 업로드
-  const uploadImageWithPresignedUrl = async (
-    presignedUrl: string,
-    file: File,
-  ): Promise<void> => {
-    await axios.put(presignedUrl, file, {
-      headers: {
-        'Content-Type': file.type,
-      },
-    });
-    console.log('이미지 업로드 완료');
-  };
+  const uploadImageWithPresignedUrl = useCallback(
+    async (presignedUrl: string, file: File): Promise<AxiosResponse<void>> => {
+      const response = await axios.put<void>(presignedUrl, file, {
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+      return response;
+    },
+    [],
+  );
 
   return {
     // 가족 관련 API

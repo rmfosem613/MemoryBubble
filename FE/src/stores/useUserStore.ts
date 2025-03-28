@@ -3,20 +3,20 @@ import { create } from 'zustand';
 // 타입
 export interface User {
   userId: number | null;
-  name: string;
-  profileUrl: string;
-  birth: string;
-  phoneNumber: string;
-  gender: 'F' | 'M' | '';
+  name: string | null;
+  profileUrl: string | null;
+  birth: string | null;
+  phoneNumber: string | null;
+  gender: 'F' | 'M' | null;
   familyId: number | null;
 }
 
 interface FamilyMember {
   userId: number | null;
-  name: string;
-  profileUrl: string;
-  birth: string;
-  phoneNumber: string;
+  name: string | null;
+  profileUrl: string | null;
+  birth: string | null;
+  phoneNumber: string | null;
 }
 
 export interface Family {
@@ -39,11 +39,11 @@ interface UserStore {
 // 초기 상태
 const initialUser: User = {
   userId: null,
-  name: '',
-  profileUrl: '',
-  birth: '',
-  phoneNumber: '',
-  gender: '',
+  name: null,
+  profileUrl: null,
+  birth: null,
+  phoneNumber: null,
+  gender: null,
   familyId: null,
 };
 
@@ -63,16 +63,16 @@ const useUserStore = create<UserStore>((set) => ({
   // 액션
   setUser: (userData) =>
     set((state) => ({
-      user: { ...state.user, ...userData }
+      user: { ...state.user, ...userData },
     })),
-  
+
   setFamily: (familyData) =>
     set((state) => ({
-      family: { ...state.family, ...familyData }
+      family: { ...state.family, ...familyData },
     })),
-    
+
   setIsUnread: (isUnread) => set({ isUnread }),
-  
+
   resetUser: () =>
     set({
       user: initialUser,
