@@ -3,6 +3,7 @@ package com.ssafy.memorybubble.api.auth.security.dto;
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 @ToString
 public class PrincipalDetails implements OAuth2User, UserDetails {
@@ -26,13 +28,17 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        log.info("userRole={}", user.getRole());
         return Collections.singletonList(
-                new SimpleGrantedAuthority("user"));
+                new SimpleGrantedAuthority(user.getRole().toString()));
+//        return Collections.singletonList(
+//                new SimpleGrantedAuthority("user"));
     }
 
     @Override
     public String getPassword() {
-        return null;    }
+        return null;
+    }
 
     // DB의 userId 반환
     @Override

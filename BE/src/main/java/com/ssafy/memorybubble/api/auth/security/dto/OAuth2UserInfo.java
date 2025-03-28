@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.api.auth.security.dto;
 
+import com.ssafy.memorybubble.domain.Role;
 import com.ssafy.memorybubble.domain.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class OAuth2UserInfo {
     private String name;
     private String email;
     private String profile;
+    private Role role;
 
     public static OAuth2UserInfo of(String registrationId, Map<String, Object> attributes) {
         if (!"kakao".equals(registrationId)) {
@@ -28,6 +30,7 @@ public class OAuth2UserInfo {
                 .name((String) profile.get("nickname"))
                 .email((String) account.get("email"))
                 .profile((String) profile.get("profile_image_url"))
+                .role(Role.USER)
                 .build();
     }
 
@@ -36,7 +39,7 @@ public class OAuth2UserInfo {
                 .name(name)
                 .email(email)
                 .active(true)
+                .role(Role.USER)
                 .build();
     }
-
 }

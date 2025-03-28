@@ -5,6 +5,7 @@ import com.ssafy.memorybubble.api.auth.security.handler.OAuth2SuccessHandler;
 import com.ssafy.memorybubble.api.auth.security.jwt.TokenAuthenticationFilter;
 import com.ssafy.memorybubble.api.auth.security.jwt.TokenExceptionFilter;
 import com.ssafy.memorybubble.api.auth.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +56,21 @@ public class SecurityConfig {
                                 .userInfoEndpoint(c->c.userService(oAuth2UserService))
                                 .successHandler(oAuth2SuccessHandler)
                                 .failureHandler(oAuth2FailureHandler)
+                )
+                // 인증/권한 예외 처리 설정
+                .exceptionHandling(handling -> handling
+                        // 인증 X
+                        .authenticationEntryPoint(((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"error\":\"인증이 필요합니다.\"}");
+                        }))
+                        // 인증 O, 권한 X
+                        .accessDeniedHandler(((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"error\":\"접근 권한이 없습니다.\"}");
+                        }))
                 )
                 // jwt 설정
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

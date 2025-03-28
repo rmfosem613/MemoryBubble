@@ -13,13 +13,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -86,7 +89,7 @@ public class FontController {
         return ResponseEntity.ok(fontService.addFont(Long.parseLong(userDetails.getUsername()), fontRequest));
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/admin/fonts")
     @Operation(
             summary = "폰트 생성 요청 목록 API (관리자)",
@@ -97,10 +100,11 @@ public class FontController {
             }
     )
     public ResponseEntity<List<FontAdminResponse>> fontRequestList(@AuthenticationPrincipal UserDetails userDetails) {
+        log.info("userDetails={}", userDetails);
         return ResponseEntity.ok(fontService.fontRequestList());
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/admin/fonts")
     @Operation(
             summary = "폰트 생성 완료 API (관리자)",
