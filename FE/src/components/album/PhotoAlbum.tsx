@@ -325,7 +325,8 @@ function PhotoAlbum() {
           <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
             앨범 선택하기
           </p>
-          <DropDown />
+          {/* 이거 살려야 함 */}
+          {/* <DropDown /> */}
           <div className="h-[130px]"></div>
         </div>
       </Modal>

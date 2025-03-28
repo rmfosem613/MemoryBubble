@@ -1,11 +1,17 @@
 import React, { useState, useRef } from 'react';
 
-function InputImg() {
-  const [selectedImages, setSelectedImages] = useState([]);
-  const fileInputRef = useRef(null);
+interface InputImgProps {
+  onImagesSelected: (images: { file: File; preview: string }[]) => void;
+}
+
+function InputImg({ onImagesSelected }: InputImgProps) {
+  const [selectedImages, setSelectedImages] = useState<{ file: File; preview: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 이미지 선택 핸들러
-  const handleImageSelect = (e) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    
     const files = Array.from(e.target.files);
 
     // 최대 5개 이미지만 허용
@@ -17,26 +23,36 @@ function InputImg() {
     // 이미지 파일 미리보기 URL 생성
     const newImages = files.map(file => ({
       file,
-      preview: URL.createObjectURL(file as Blob)
+      preview: URL.createObjectURL(file)
     }));
 
-    setSelectedImages(prev => [...prev, ...newImages]);
+    const updatedImages = [...selectedImages, ...newImages];
+    setSelectedImages(updatedImages);
+    
+    // 부모 컴포넌트에 선택된 이미지 전달
+    onImagesSelected(updatedImages);
   };
 
   // 이미지 삭제 핸들러
-  const removeImage = (index) => {
+  const removeImage = (index: number) => {
     setSelectedImages(prev => {
       const updated = [...prev];
       // 미리보기 URL 해제
       URL.revokeObjectURL(updated[index].preview);
       updated.splice(index, 1);
+      
+      // 부모 컴포넌트에 업데이트된 이미지 배열 전달
+      onImagesSelected(updated);
+      
       return updated;
     });
   };
 
   // 이미지 업로드 트리거
   const triggerFileInput = () => {
-    fileInputRef.current.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -76,6 +92,7 @@ function InputImg() {
             <button
               className="absolute top-1 right-1 bg-gray-800 bg-opacity-70 rounded-full w-5 h-5 flex items-center justify-center"
               onClick={() => removeImage(index)}
+              type="button"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -1,78 +1,212 @@
-import SlidingAlbumList from "@/components/album/SlidingAlbumList"
+import { useEffect, useState } from "react";
+import SlidingAlbumList from "@/components/album/SlidingAlbumList";
 import useAlbumStore from "@/stores/useAlbumStore";
 import { useNavigate } from 'react-router-dom';
-import Modal from "@/components/common/Modal/Modal";
 import useModal from "@/hooks/useModal";
+import Loading from "./LoadingPage";
+import useUserStore from "@/stores/useUserStore";
 
-// 모달창 관련 컴포넌트
-import InputText from "@/components/common/Modal/InputText";
-import InputImg from "@/components/common/Modal/InputImg";
-import DropDown from "@/components/common/Modal/DropDown";
+// 분리된 컴포넌트들 임포트
+import PhotoUploader from "@/components/photo/PhotoUploader";
+import AlbumCreator from "@/components/album/AlbumCreator";
+
+// 기본 앨범 이미지 불러오기
+import defaultAlbumImage from "@/assets/album/blank.svg";
+import apiClient from "@/apis/apiClient";
 
 function MainPage() {
-  const { currentAlbum } = useAlbumStore();
+  const { currentAlbum, fetchAlbumsData, albums, isLoading, error } = useAlbumStore();
   const navigate = useNavigate();
+  const { user, setUser } = useUserStore();
+  
+  // 앨범 선택 상태 관리
+  const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
 
   // 모달 관련
   const createAlbumModal = useModal();
   const addPhotoModal = useModal();
 
+  // 컴포넌트 마운트 시 앨범 데이터 가져오기
+  useEffect(() => {
+    fetchAlbumsData();
+  }, [fetchAlbumsData]);
+
+  // 앨범 로드 후 초기 선택 앨범 설정
+  useEffect(() => {
+    if (currentAlbum && currentAlbum.id) {
+      setSelectedAlbumId(currentAlbum.id);
+    }
+  }, [currentAlbum]);
+
+  // familyId를 store에서 불러오기
+  // useEffect(() => {
+  //   const handle = async () => {
+  //     const userResponse = await apiClient.get("/api/users/me")
+  //     const { familyId } = userResponse.data
+  //     console.log("main : " + familyId)
+  //     setUser({
+  //       familyId
+  //     })
+  //   }
+
+  //   handle()
+  // }, [setUser]);
+
   // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
   const handleAlbumClick = () => {
     if (!currentAlbum) return;
-
-    // 앨범 ID가 1인 경우 BasicPhotoAlbumPage로 이동
-    if (currentAlbum.id === 1) {
+    
+    // 앨범 리스트의 인덱스 확인
+    const { activeIndex } = useAlbumStore.getState();
+    
+    // 첫 번째 앨범(인덱스 0)인 경우 BasicPhotoAlbumPage로, 그 외에는 PhotoAlbumPage로 이동
+    if (activeIndex === 0) {
       navigate('/album/basic');
     } else {
-      // 그 외의 경우 일반 PhotoAlbumPage로 이동하며 id 전달
       navigate(`/album/${currentAlbum.id}`);
     }
   };
 
+  // 앨범 이미지 URL 체크 함수
+  const getAlbumImageUrl = (url?: string) => {
+    // URL이 비어있거나 presigned URL 문자열이 포함된 경우 기본 이미지 반환
+    if (!url || url.includes('presigned')) {
+      return defaultAlbumImage;
+    }
+    return url;
+  };
+
+  // 앨범 선택 핸들러
+  const handleAlbumSelect = (albumId: number) => {
+    setSelectedAlbumId(albumId);
+  };
+
+  // 앨범 생성 완료 핸들러
+  const handleAlbumCreated = async () => {
+    await fetchAlbumsData();
+  };
+
+  // 사진 업로드 완료 핸들러
+  const handlePhotosUploaded = async () => {
+    await fetchAlbumsData();
+  };
+
+  // 로딩 상태 표시
+  if (isLoading) {
+    return (
+      <Loading message="Now Loading..." />
+    );
+  }
+
+  // 에러 상태 표시
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white">
+        <p className="text-subtitle-1-lg font-p-500 text-red-500">{error}</p>
+        <button
+          onClick={() => fetchAlbumsData()}
+          className="mt-4 px-4 py-2 bg-p-800 text-white rounded-md"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  // 앨범이 없는 경우
+  if (!currentAlbum) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white flex-col">
+        <p className="text-subtitle-1-lg font-p-500">앨범이 없습니다.</p>
+        <button
+          onClick={createAlbumModal.open}
+          className="mt-4 px-4 py-2 bg-p-800 text-white rounded-md"
+        >
+          앨범 생성하기
+        </button>
+
+        {/* 앨범 생성 컴포넌트 */}
+        <AlbumCreator
+          isOpen={createAlbumModal.isOpen}
+          onClose={createAlbumModal.close}
+          familyId={user.familyId || 0}
+          onCreateComplete={handleAlbumCreated}
+        />
+      </div>
+    );
+  }
+
+  // 앨범 이미지 URL 확인
+  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl);
+
+  // 앨범 선택 컴포넌트 - 사진 업로더에 전달할 컴포넌트
+  const AlbumSelector = (
+    <div className="relative w-full mb-4">
+      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
+      <select
+        className="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
+        value={selectedAlbumId || ""}
+        onChange={(e) => handleAlbumSelect(Number(e.target.value))}
+        disabled={false}
+      >
+        <option value="" disabled>앨범을 선택해주세요</option>
+        {albums.map((album) => (
+          <option key={album.id} value={album.id}>
+            {album.title}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   return (
     <>
-      {/* 임시 헤더 영역 */}
-      {/* <div className="w-full h-[65px] z-50 fixed top-0 left-0 bg-white opacity-[80%]">
-        <p className="text-h-logo-lg font-p-800 p-[16px]">추억방울</p>
-      </div> */}
-
       {/* 여기서부터 MainPage */}
-      <div className={`${currentAlbum?.bgColor || 'bg-p-800'} h-screen transition-colors duration-500`}>
+      <div
+        className="h-screen transition-colors duration-500 overflow-hidden scrollbar-hide"
+        style={{ backgroundColor: currentAlbum.bgColor || '#FFFFFF' }}
+      >
         <div className="flex w-[90%] ml-0 z-0 relative">
           {/* 영역1 */}
-          <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex">
+          <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex overflow-hidden">
             {/* 앨범 이미지 영역 */}
-            <div className="flex mb-auto w-full">
-              
+            <div className="flex mb-auto w-full overflow-hidden">
+
               {/* 앨범 제목 */}
-              <div className={`absolute z-10 w-full bg-p-800 ${currentAlbum?.bgColor || 'bg-album-200'} transition-colors duration-500`}>
+              <div
+                className="absolute z-10 w-full transition-colors duration-500"
+                style={{ backgroundColor: currentAlbum.bgColor || '#FFFFFF' }}
+              >
                 <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
-                  <p
-                    className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
-                    drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]
-                    '
-                    style={{
-                      color: "transparent",
-                      WebkitBackgroundClip: "text",
-                      // WebkitTextStroke:"1px rgba(0, 0, 0, 0.1)", // 글자 stroke 버전
-                      // backgroundImage: `url('${currentAlbum?.imageUrl || "./assets/album-1.png"}')`,
-                      // backgroundImage: `url('${"../public/assets/album-1.png"}')`,
-                      backgroundImage: `url('${currentAlbum?.imageUrl || "/assets/album-1.png"}')`,
-                      backgroundSize: "100%"
-                    }}>
-                    {currentAlbum?.title || "추억보관함"}
-                  </p>
+                  {albumImageUrl === defaultAlbumImage ? (
+                    // 기본 이미지일 때는 검은색 텍스트로 표시
+                    <p className='absolute text-album-1-lg font-p-800 w-[94%] text-gray-200
+                      drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]'>
+                      {currentAlbum.title}
+                    </p>
+                  ) : (
+                    // 커스텀 이미지일 때는 기존 스타일 유지
+                    <p
+                      className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
+                      drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]'
+                      style={{
+                        color: "transparent",
+                        WebkitBackgroundClip: "text",
+                        backgroundImage: `url('${albumImageUrl}')`,
+                        backgroundSize: "100%"
+                      }}>
+                      {currentAlbum.title || "추억보관함"}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
-                // src={currentAlbum?.imageUrl || "./assets/album-1.png"}
-                // src={"../../public/assets/album-1.png"}
-                src={currentAlbum?.imageUrl || "/assets/album-1.png"}
+                src={albumImageUrl}
                 className='w-[94%] object-cover cursor-pointer'
                 onClick={handleAlbumClick}
+                alt={currentAlbum.title}
               />
             </div>
 
@@ -82,7 +216,7 @@ function MainPage() {
           <div className="flex-[30]" />
 
           {/* 앨범 리스트 컴포넌트 */}
-          <div className="h-full bg-blue-400">
+          <div className="h-full">
             <SlidingAlbumList />
             <div className="fixed w-[360px] p-4 mr-auto ml-[-380px] bottom-[8px] z-40 grid grid-cols-2 gap-4">
               <button
@@ -100,50 +234,24 @@ function MainPage() {
         </div>
       </div>
 
-      {/* 앨범 생성 모달 */}
-      <Modal
+      {/* 앨범 생성 컴포넌트 */}
+      <AlbumCreator
         isOpen={createAlbumModal.isOpen}
         onClose={createAlbumModal.close}
-        title="앨범 생성"
-        confirmButtonText="생성하기"
-        cancelButtonText="취소하기"
-      >
-        <div className="py-2">
-                      <p className="mb-4">새로운 추억보관함을 생성해보세요!</p>
-                      <p className="text-subtitle-1-lg font-p-500 text-black">앨범 이름 (최대 7자)</p>
-          <InputText />
-                      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 한 줄 설명 (최대 60자)</p>
-          <InputText />
-                      <p className="mt-[3px]  text-subtitle-1-lg font-p-500 text-black">표지색 정하기</p>
+        familyId={user.familyId || 0}
+        onCreateComplete={handleAlbumCreated}
+      />
 
-          <div className="flex space-x-3 mt-[12px] mb-[8px]">
-            <div className="w-[35px] h-[35px] rounded-full bg-album-100"></div>
-            <div className="w-[35px] h-[35px] rounded-full bg-album-200"></div>
-            <div className="w-[35px] h-[35px] rounded-full bg-album-300"></div>
-            <div className="w-[35px] h-[35px] rounded-full bg-album-400"></div>
-            <div className="w-[35px] h-[35px] rounded-full bg-album-500"></div>
-            <div className="w-[35px] h-[35px] rounded-full bg-album-600"></div>
-          </div>
-        </div>
-      </Modal>
-
-      {/* 사진 추가 모달 */}
-      <Modal
+      {/* 사진 업로드 컴포넌트 */}
+      <PhotoUploader
         isOpen={addPhotoModal.isOpen}
         onClose={addPhotoModal.close}
-        title="추억 보관하기"
-        confirmButtonText="보관하기"
-        cancelButtonText="취소하기"
-      >
-        <div className="py-2">
-                      <p className="mb-4">사진은 최대 5장까지 한 번에 추가할 수 있습니다.</p>
-          <InputImg />
-                      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
-          <DropDown />
-        </div>
-      </Modal>
+        albumId={selectedAlbumId}
+        onUploadComplete={handlePhotosUploaded}
+        albumSelectComponent={AlbumSelector}
+      />
     </>
-  )
+  );
 }
 
-export default MainPage
+export default MainPage;
