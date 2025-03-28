@@ -114,21 +114,23 @@ function Step2() {
 
   return (
     <div className="flex flex-col w-full space-y-6 p-4">
-      <div className="text-xl font-bold mb-2">업로드 파일</div>
+      <div className="flex flex-row justify-between">
+        <div className="text-xl font-bold mb-2">업로드 파일</div>
 
-      {/* 파일 개수 표시 */}
-      <div className="flex justify-between items-center">
-        <div className="text-gray-600">
-          <span
-            className={remainingFiles === 0 ? 'text-red-500 font-bold' : ''}>
-            {uploadedFiles.length}/{MAX_FILES} 파일 업로드됨
-          </span>
-        </div>
-        {remainingFiles > 0 && (
-          <div className="text-sm text-gray-500">
-            {remainingFiles}개 더 업로드 가능
+        {/* 파일 개수 표시 */}
+        <div className="flex justify-between items-center">
+          <div className="text-gray-600">
+            <span
+              className={remainingFiles === 0 ? 'text-red-500 font-bold' : ''}>
+              {uploadedFiles.length}/{MAX_FILES} 파일 업로드됨
+            </span>
           </div>
-        )}
+          {remainingFiles > 0 && (
+            <div className="text-sm text-gray-500 ml-2">
+              {remainingFiles}개 더 업로드 가능
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 에러 메시지 */}
@@ -138,33 +140,36 @@ function Step2() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-        {uploadedFiles.length > 0 ? (
-          uploadedFiles.map((file) => (
-            <div
-              key={file.id}
-              className="border rounded-lg p-4 flex flex-col items-center w-full overflow-hidden">
-              <div className="w-12 h-12 mb-2">
-                <FileCheck strokeWidth={1} width={'50px'} height={'50px'} />
+      {/* 파일 리스트 - 단일 행으로 표시하고 필요시 가로 스크롤 */}
+      <div className="w-full overflow-x-auto">
+        <div className="flex flex-nowrap min-w-full gap-4 pb-2">
+          {uploadedFiles.length > 0 ? (
+            uploadedFiles.map((file) => (
+              <div
+                key={file.id}
+                className="border rounded-lg p-4 flex flex-col items-center flex-shrink-0 w-36 h-36">
+                <div className="w-12 h-12 mb-2">
+                  <FileCheck strokeWidth={1} width={'50px'} height={'50px'} />
+                </div>
+                <div className="text-sm font-medium line-clamp-2 text-center w-full overflow-hidden">
+                  {file.name}
+                </div>
+                <button
+                  onClick={() => {
+                    removeFile(file.id);
+                    setError(null); // 파일이 제거되면 에러 메시지도 제거
+                  }}
+                  className="mt-2 px-3 py-1 text-xs bg-gray-200 rounded-md hover:bg-gray-300">
+                  삭제
+                </button>
               </div>
-              <div className="text-sm font-medium line-clamp-2 text-center w-full overflow-hidden">
-                {file.name}
-              </div>
-              <button
-                onClick={() => {
-                  removeFile(file.id);
-                  setError(null); // 파일이 제거되면 에러 메시지도 제거
-                }}
-                className="mt-2 px-3 py-1 text-xs bg-gray-200 rounded-md hover:bg-gray-300">
-                삭제
-              </button>
+            ))
+          ) : (
+            <div className="w-full text-gray-400 text-center py-6">
+              업로드된 파일이 없습니다
             </div>
-          ))
-        ) : (
-          <div className="col-span-full text-gray-400 text-center py-6 w-full">
-            업로드된 파일이 없습니다
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div
