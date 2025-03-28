@@ -1,69 +1,40 @@
-import { useEffect, useState } from "react" 
+import { useEffect } from "react" 
 import { useNavigate } from "react-router-dom" 
-import apiClient from "@/apis/apiClient" 
-// import { useUserStore } from "@/stores/useUserStroe" 
-import useUserStore from "@/stores/useUserStore"
+import useUser from '@/hooks/useUser';
 
 function OAuthCallback() {
-    const navigate = useNavigate() 
-    const [isLoading, setIsLoading] = useState(true) 
-    const { setUser } = useUserStore() 
+  const navigate = useNavigate() 
+  const { checkAuthAndFetchUserData } = useUser();
 
-    useEffect(() => {
-        const handleAuthentication = async () => {
-            try {
-                // URL에서 토큰 정보 가져오기
+  useEffect(() => {
+    const handleAuthentication = async () => {
+      // URL에서 토큰 정보 가져오기
                 const urlParams = new URLSearchParams(window.location.search) 
                 const accessToken = urlParams.get("accessToken") 
                 const refreshToken = urlParams.get("refreshToken") 
 
-                // 토큰이 존재하면 localStorage에 저장
-                if (accessToken) {
+      // 토큰이 존재하면 localStorage에 저장
+      if (accessToken) {
                     localStorage.setItem("accessToken", accessToken) 
                     console.log("Access 토큰 저장 완료") 
-                }
-                if (refreshToken) {
+      }
+      if (refreshToken) {
                     localStorage.setItem("refreshToken", refreshToken) 
                     console.log("Refresh 토큰 저장 완료") 
-                }
+      }
 
-                // 사용자 정보 가져오기
-                const userResponse = await apiClient.get("/api/users/me") 
-                const { userId, familyId } = userResponse.data 
+      // 사용자 정보 조회 및 상태 업데이트
+      await checkAuthAndFetchUserData();
 
-                // 상세 사용자 정보 가져오기
-                const userDetailsResponse = await apiClient.get(`/api/users/${userId}`) 
-                const userDetails = userDetailsResponse.data 
-                
-                // 전역 상태에 사용자 정보 저장
-                setUser({
-                    userId,
-                    familyId,
-                    ...userDetails
-                }) 
+      // 메인 페이지로 이동 (ProtectedRoute가 조건에 따라 적절히 리다이렉트 처리)
+      navigate("/");
+    }
 
-                // 사용자 정보에 따라 페이지 이동 처리
-                if (!familyId) {
-                    navigate("/enter")  // 가족 정보 입력 페이지로 이동
-                } else if (!userDetails.birth) {
-                    // alert창 열기
-                    sessionStorage.setItem('showJoinAlert', 'true');
-                    navigate("/join")  // 추가 회원 가입 페이지로 이동
-                } else {
-                    navigate("/")  // 메인 페이지로 이동
-                }
-            } catch (error) {
-                console.error("인증 처리 중 오류 발생:", error) 
-                navigate("/login")  // 오류 발생 시 로그인 페이지로 이동
-            } finally {
-                setIsLoading(false) 
-            }
-        } 
+    handleAuthentication();
+  }, [navigate, checkAuthAndFetchUserData]);
 
-        handleAuthentication() 
-    }, [navigate, setUser]) 
-
-    return <div className="flex items-center justify-center min-h-screen">로그인 처리 중...</div> 
+  // 로딩 화면 대신 빈 컴포넌트 반환 (App 컴포넌트에서 로딩 처리함)
+  return null;
 }
 
 export default OAuthCallback 

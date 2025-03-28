@@ -6,7 +6,8 @@ import InputGroupName from "@/components/join/InputGroupName"
 import InputGroupPic from "@/components/join/InputGroupPic"
 
 import { useNavigate } from 'react-router-dom'
-import apiClient from "@/apis/apiClient"
+import useUserStore from "@/stores/useUserStore"
+import useUserApi from "@/apis/useUserApi"
 
 import Title from "@/components/common/Title"
 
@@ -36,6 +37,8 @@ const CircleCheck = () => {
 
 function CreateGroupPage() {
   const navigate = useNavigate()
+  const { setUser, setFamily } = useUserStore()
+  const { createFamily, uploadImageWithPresignedUrl } = useUserApi() // useUserApi 사용
   const [currentStep, setCurrentStep] = useState(1)
   const [groupName, setGroupName] = useState("")
   const [groupImage, setGroupImage] = useState(null)
@@ -76,30 +79,30 @@ function CreateGroupPage() {
         setImageError("")
 
         // API 호출로 가족 그룹 생성
-        const response = await apiClient.post('/api/family', {
+        const response = await createFamily({
           familyName: groupName
         })
 
         const data = response.data
+        setUser({
+          familyId: data.familyId
+        })
+        setFamily({
+          familyName: groupName,
+          thumbnailUrl: data.presignedUrl
+        });
 
         // 이미지가 있는 경우 presignedUrl을 사용하여 S3에 이미지 업로드
         if (groupImage && data.presignedUrl) {
           try {
             // 이미지를 webp 형식으로 변환
             const imageBlob = await convertToWebP(groupImage)
-
+            
             // presignedUrl을 사용하여 S3에 이미지 업로드
-            const uploadResponse = await fetch(data.presignedUrl, {
-              method: 'PUT',
-              body: imageBlob as BodyInit,
-              headers: {
-                'Content-Type': 'image/webp',
-              },
-            })
-
-            if (!uploadResponse.ok) {
-              throw new Error(`Upload failed: ${uploadResponse.status}`)
-            }
+            await uploadImageWithPresignedUrl(
+              data.presignedUrl, 
+              new File([imageBlob], data.fileName, { type: 'image/webp' })
+            ) 
           } catch (uploadError) {
             console.error("이미지 업로드 실패:", uploadError)
             // 이미지 업로드 실패해도 그룹은 생성되었으므로 계속 진행

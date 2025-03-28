@@ -7,12 +7,10 @@ import InputBirth from "@/components/join/InputBirth";
 import InputPic from "@/components/join/InputPic";
 
 import { useNavigate } from 'react-router-dom';
-import apiClient from "@/apis/apiClient";
+import useUserApi from "@/apis/useUserApi";
 
 import Title from "@/components/common/Title";
 import Alert from "@/components/common/Alert";
-
-// import { useUserStore } from "@/stores/useUserStroe";
 import useUserStore from "@/stores/useUserStore";
 
 // react-icons를 대신할 커스텀 컴포넌트
@@ -42,8 +40,10 @@ const CircleCheck = () => {
 
 function JoinPage() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
   const { user, setUser } = useUserStore();
+  const { joinFamily, uploadImageWithPresignedUrl } = useUserApi();
+  
+  const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -68,17 +68,6 @@ function JoinPage() {
       // 한 번 표시한 후에는 알림 표시 제거
       sessionStorage.removeItem('showJoinAlert');
     }
-
-    // users/me에서 한 번 더 familyId 호출해야 join 가능
-    async () => {
-      const userResponse = await apiClient.get("/api/users/me")
-      const { familyId } = userResponse.data
-      console.log("join: " + familyId)
-      setUser({
-        familyId
-      })
-    }
-
   }, []);
 
   // 다음 버튼 클릭 시 실행되는 함수
@@ -127,8 +116,8 @@ function JoinPage() {
         // 성별을 API 포맷에 맞게 변환
         const genderCode = gender === "여자" ? "F" : "M";
 
-        // 가족 가입 API 호출
-        const response = await apiClient.post('/api/family/join', {
+        // 가족 가입 API 호출 (useUserApi 사용)
+        const response = await joinFamily({
           familyId: user?.familyId,
           birth: birth,
           name: name,
@@ -137,6 +126,13 @@ function JoinPage() {
         });
 
         const data = response.data;
+        setUser({
+          name: name,
+          birth: birth,
+          phoneNumber: phoneNumber,
+          gender: genderCode,
+          profileUrl: data.presignedUrl
+        });
 
         // S3에 이미지를 업로드하기 위한 presigned URL 사용
         if (profileImage && data.presignedUrl) {
@@ -144,18 +140,11 @@ function JoinPage() {
             // 이미지를 webp 형식으로 변환
             const imageBlob = await convertToWebP(profileImage);
 
-            // presigned URL을 통해 이미지 업로드
-            const uploadResponse = await fetch(data.presignedUrl, {
-              method: 'PUT',
-              body: imageBlob as BodyInit,
-              headers: {
-                'Content-Type': 'image/webp',
-              },
-            });
-
-            if (!uploadResponse.ok) {
-              throw new Error(`업로드 실패: ${uploadResponse.status}`);
-            }
+            // presigned URL을 통해 이미지 업로드 (useUserApi 사용)
+            await uploadImageWithPresignedUrl(
+              data.presignedUrl,
+              new File([imageBlob], data.fileName, { type: 'image/webp' })
+            );
           } catch (uploadError) {
             console.error("이미지 업로드 실패:", uploadError);
             // 이미지 업로드 실패해도 계속 진행
@@ -174,7 +163,7 @@ function JoinPage() {
   };
 
   // 이미지를 webp 형식으로 변환하는 함수
-  const convertToWebP = async (file) => {
+  const convertToWebP = async (file): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (event) => {
