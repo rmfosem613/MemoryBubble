@@ -25,7 +25,7 @@ public class BlacklistService {
         Long now = new Date().getTime();
         long remainingExpiration = expiration - now;
         // 남은 만료 시간만큼 블랙리스트로 등록
-        redisTemplate.opsForValue().set(key, "true", remainingExpiration, TimeUnit.MILLISECONDS);
+        if(remainingExpiration > 0) redisTemplate.opsForValue().set(key, "true", remainingExpiration, TimeUnit.MILLISECONDS);
     }
 
     public boolean isBlacklisted(String token) {
