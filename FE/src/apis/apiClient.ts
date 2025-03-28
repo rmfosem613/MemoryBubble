@@ -27,7 +27,8 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         const { data } = await axios.post(
-          'http://localhost:8080/api/auth/reissue',
+          'https://memorybubble.site/api/auth/reissue',
+          // 'http://localhost:8080/api/auth/reissue',
           { refreshToken: refreshToken },
         );
 
