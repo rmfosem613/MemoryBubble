@@ -14,7 +14,6 @@ import com.ssafy.memorybubble.api.font.repository.FontRepository;
 import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
-import com.ssafy.memorybubble.common.exception.ErrorCode;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Font;
 import com.ssafy.memorybubble.domain.FontStatus;
