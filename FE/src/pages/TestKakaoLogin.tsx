@@ -70,9 +70,12 @@ function TestKakaoLogin() {
       // 카카오 로그인 API 호출
       // console.log(API_BASE_URL)
 
+      console.log('API_BASE_URL 1차 : ', API_BASE_URL);
       // const response = await apiClient.get('/api/users/me');
-      const response = await axios.get(`${API_BASE_URL}/api/auth/login`);
-      console.log('API_BASE_URL : ', API_BASE_URL);
+      const response = await axios.get(
+        `https://memorybubble.site/api/auth/login`,
+      );
+      console.log('API_BASE_URL 2차 : ', API_BASE_URL);
 
       console.log('response.data 확인 : ', response.data);
 
