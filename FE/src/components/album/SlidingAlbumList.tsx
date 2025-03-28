@@ -19,6 +19,11 @@ function SlidingAlbumList({ onAlbumChange }: SlidingAlbumListProps) {
     }
   }, [currentAlbum, onAlbumChange]);
   
+  // 앨범이 없는 경우 렌더링하지 않음
+  if (albums.length === 0) {
+    return null;
+  }
+  
   // 현재 보여질 앨범들
   const visibleAlbums = getVisibleAlbums(albums, activeIndex);
   

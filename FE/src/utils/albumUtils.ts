@@ -4,11 +4,20 @@ import { AlbumData } from '../types/Album';
  * 현재 보여질 앨범들 결정 (첫 번째 또는 마지막 항목일 경우 특별 처리)
  */
 export function getVisibleAlbums(albums: AlbumData[], activeIndex: number): AlbumData[] {
+  if (albums.length === 0) {
+    return [];
+  }
+  
+  // 앨범이 한 개뿐인 경우
+  if (albums.length === 1) {
+    return [albums[0]];
+  }
+  
   // 첫 번째 앨범이 활성화된 경우
   if (activeIndex === 0) {
     return [
-      albums[0], // 첫 번째 앨범 (활성화)
-      albums[1]  // 두 번째 앨범 (다음)
+      albums[0],
+      ...(albums.length > 1 ? [albums[1]] : [])  // 두 번째 앨범이 있을 경우만 추가
     ];
   }
   // 마지막 앨범이 활성화된 경우
@@ -32,6 +41,11 @@ export function getVisibleAlbums(albums: AlbumData[], activeIndex: number): Albu
  * 앨범 위치 및 스타일 결정 함수
  */
 export function getAlbumStyle(activeIndex: number, totalAlbums: number, index: number): string {
+  // 앨범이 한 개뿐인 경우
+  if (totalAlbums === 1) {
+    return 'scale-100 opacity-100 z-20'; // 활성화/중앙
+  }
+  
   // 첫 번째 앨범이 활성화된 경우
   if (activeIndex === 0) {
     return index === 0
