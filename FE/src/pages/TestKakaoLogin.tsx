@@ -7,6 +7,7 @@ import apiClient from '@/apis/apiClient';
 // API 기본 URL 설정
 import axios from 'axios';
 const API_BASE_URL = 'https://memorybubble.site';
+// const API_BASE_URL = 'http://localhost:8080';
 
 function TestKakaoLogin() {
   const [isLoading, setIsLoading] = useState(false);
@@ -71,10 +72,10 @@ function TestKakaoLogin() {
       // console.log(API_BASE_URL)
 
       console.log('API_BASE_URL 1차 : ', API_BASE_URL);
-      // const response = await apiClient.get('/api/users/me');
-      const response = await axios.get(
-        `https://memorybubble.site/api/auth/login`,
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/users/login`);
+      // const response = await axios.get(
+      //   `https://memorybubble.site/api/auth/login`,
+      // );
       console.log('API_BASE_URL 2차 : ', API_BASE_URL);
 
       console.log('response.data 확인 : ', response.data);
@@ -86,7 +87,7 @@ function TestKakaoLogin() {
     } catch (error) {
       console.error('로그인 요청 중 오류 발생:', error);
       // 오류 발생 시에도 전체 URL 사용
-      // window.location.href = `${API_BASE_URL}/api/auth/login`
+      window.location.href = `${API_BASE_URL}/api/auth/login`
     } finally {
       setIsLoading(false);
     }
