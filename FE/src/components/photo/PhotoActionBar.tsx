@@ -60,9 +60,10 @@ function PhotoActionBar({
               className="flex space-x-1 cursor-pointer"
               onClick={onToggleSelectionMode}
             >
-              <CircleCheck strokeWidth={1} className="absolute z-10 ml-[-3pX] mt-[2px]" size={'21px'} />
+              <FolderUp strokeWidth={1} className="absolute z-10 ml-[-5pX] mt-[2px]" size={'22px'} />
+              {/* <CircleCheck strokeWidth={1} className="absolute z-10 ml-[-3pX] mt-[2px]" size={'21px'} /> */}
               <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-700 opacity-15"></div>
-              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">선택하기</p>
+              <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">앨범 이동하기</p>
             </div>
             <div
               className="flex space-x-1 cursor-pointer"

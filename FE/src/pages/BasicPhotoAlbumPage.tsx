@@ -27,9 +27,10 @@ function BasicPhotoAlbumPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 현재 화면에 보여줄 사진 상태와 페이징
+  // 현재 화면에 보여줄 사진 상태와 무한스크롤을 위한 페이징
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const photosPerPage = 10;
+  const initialPhotosCount = 25; // 초기에 보여줄 사진 수 (25개)
+  const photosPerPage = 10; // 그 이후 추가로 로드할 사진 수 (10개씩)
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
@@ -53,6 +54,11 @@ function BasicPhotoAlbumPage() {
   const thumbnailModal = useModal();
   const addPhotoModal = useModal();
   const moveAlbumModal = useModal();
+
+  const resetSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedPhotos([]);
+  };
 
   // 첫 번째 앨범 ID 가져오기 (추억보관함 앨범)
   const getFirstAlbumId = useCallback(async () => {
@@ -103,7 +109,7 @@ function BasicPhotoAlbumPage() {
       // 초기 페이지 설정
       setPage(1);
       setPhotos([]);
-      setHasMore(albumData.photoList.length > 0);
+      setHasMore(albumData.photoList.length > initialPhotosCount); // 초기 로드 이후에도 더 로드할 사진이 있는지
     } catch (err) {
       console.error("앨범 사진 로드 실패:", err);
       setError("앨범 사진을 불러오는 중 오류가 발생했습니다.");
@@ -119,7 +125,7 @@ function BasicPhotoAlbumPage() {
       setAllPhotos(albumData.photoList || []);
       setPage(1);
       setPhotos([]);
-      setHasMore(albumData.photoList.length > 0);
+      setHasMore(albumData.photoList.length > initialPhotosCount);
     } catch (err) {
       console.error("앨범 사진 새로고침 실패:", err);
     }
@@ -130,12 +136,32 @@ function BasicPhotoAlbumPage() {
     fetchAlbumPhotos();
   }, [fetchAlbumPhotos]);
 
-  // 이미지 로드 함수
+  // 초기 이미지 로드 (25개)
+  useEffect(() => {
+    if (!isLoading && allPhotos.length > 0) {
+      // 초기에 25개 사진 로드
+      const initialPhotos = allPhotos.slice(0, initialPhotosCount);
+      setPhotos(initialPhotos);
+      
+      // 초기 25개 이후에 더 불러올 사진이 있는지 확인
+      setHasMore(allPhotos.length > initialPhotosCount);
+      
+      // 다음 페이지는 25개 이후부터 시작
+      setPage(Math.ceil(initialPhotosCount / photosPerPage) + 1);
+    }
+  }, [allPhotos, isLoading]);
+
+  // 더 많은 이미지 로드 함수 (스크롤 시 10개씩 추가)
   const loadMorePhotos = useCallback(() => {
     if (!hasMore || isLoading) return;
 
-    const startIndex = (page - 1) * photosPerPage;
+    // 이미 로드된 사진 수를 기준으로 다음 인덱스 계산
+    const startIndex = photos.length;
     const endIndex = startIndex + photosPerPage;
+    
+    console.log(`Loading more photos: ${startIndex} to ${endIndex} of ${allPhotos.length}`);
+    
+    // 새로운 사진들 가져오기
     const newPhotos = allPhotos.slice(startIndex, endIndex);
 
     if (newPhotos.length > 0) {
@@ -147,14 +173,7 @@ function BasicPhotoAlbumPage() {
     if (endIndex >= allPhotos.length) {
       setHasMore(false);
     }
-  }, [page, hasMore, allPhotos, isLoading]);
-
-  // 초기 이미지 로드
-  useEffect(() => {
-    if (!isLoading && allPhotos.length > 0) {
-      loadMorePhotos();
-    }
-  }, [allPhotos, isLoading, loadMorePhotos]);
+  }, [photos.length, hasMore, allPhotos, isLoading]);
 
   // 모드 전환 함수들
   const enterThumbnailMode = () => {
@@ -210,6 +229,11 @@ function BasicPhotoAlbumPage() {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
+    
+    // 자동으로 사라지도록 설정
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
   };
 
   // 선택된 썸네일 이미지 URL 얻기
@@ -348,6 +372,7 @@ function BasicPhotoAlbumPage() {
         albums={albums}
         onMoveComplete={fetchAlbumPhotos}
         onError={showAlertMessage}
+        onResetSelection={resetSelection}
       />
     </>
   );
