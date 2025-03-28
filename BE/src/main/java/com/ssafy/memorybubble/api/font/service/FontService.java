@@ -1,5 +1,8 @@
 package com.ssafy.memorybubble.api.font.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
+import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
@@ -8,10 +11,13 @@ import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
 import com.ssafy.memorybubble.api.font.exception.FontException;
 import com.ssafy.memorybubble.api.font.repository.FontRepository;
+import com.ssafy.memorybubble.api.user.exception.UserException;
+import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Font;
 import com.ssafy.memorybubble.domain.FontStatus;
+import com.ssafy.memorybubble.domain.Role;
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +30,7 @@ import java.util.stream.IntStream;
 
 import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_BAD_REQUEST;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -33,11 +40,12 @@ public class FontService {
     private final FontRepository fontRepository;
     private final UserService userService;
     private final FileService fileService;
-
+    private final FcmService fcmService;
     private final static String TEMPLATE_FILE = "template/추억방울_템플릿.zip";
     private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png"; // template/{userId}/{templateNumber}.png
     private final static int TEMPLATE_FILE_COUNT = 8; // 템플릿 파일의 개수
     private final static String FONT_PATH = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
+    private final UserRepository userRepository;
 
     // 사용자 - 폰트 조회
     @Transactional(readOnly = true)
@@ -114,8 +122,9 @@ public class FontService {
                 .collect(Collectors.toList());
         log.info("fileResponseList={}", fileResponseList);
 
-        // TODO: 관리자에게 폰트 생성 요청 알림(FCM) 보내기
-
+        // 관리자에게 폰트 생성 요청 알림(FCM) 보내기
+        User admin = userRepository.findByRole(Role.ADMIN).orElseThrow(()->new UserException(USER_NOT_FOUND));
+        sendFontMessage(admin, "추억 방울", "새로운 폰트 생성 요청이 있습니다.");
         return fileResponseList;
     }
 
@@ -155,10 +164,33 @@ public class FontService {
         // 폰트 생성 상태 업데이트
         font.updateStatus();
 
-        // TODO: 사용자에게 폰트 생성 완료 알림 보내기
+        // 사용자에게 폰트 생성 완료 알림 보내기
+        sendFontMessage(user, "추억 방울", "폰트 생성이 완료되었습니다.");
 
         // ttf 파일 업로드할 Presigned URL 리턴
         String fontPath = String.format(FONT_PATH, user.getId(), font.getName());
         return fileService.createUploadFileResponse(fontPath);
+    }
+
+    private void sendFontMessage(User receiver, String title, String body) {
+        FcmMessage.Notification notification = FcmMessage.Notification.builder()
+                .title(title)
+                .body(body)
+                .build();
+
+        FcmMessage.Message message = FcmMessage.Message.builder()
+                .notification(notification)
+                .build();
+
+        FcmMessage fcmMessage = FcmMessage.builder()
+                .validateOnly(false)  // 실제 전송 여부 설정
+                .message(message)
+                .build();
+
+        try {
+            fcmService.sendMessage(receiver.getId(), fcmMessage);
+        } catch (FirebaseMessagingException e) {
+            log.warn("Failed to send FCM message to user {}: {}", receiver.getId(), e.getMessage());
+        }
     }
 }
