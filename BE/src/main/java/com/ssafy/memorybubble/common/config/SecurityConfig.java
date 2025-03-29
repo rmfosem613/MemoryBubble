@@ -58,14 +58,14 @@ public class SecurityConfig {
                                 .failureHandler(oAuth2FailureHandler)
                 )
                 // 인증/권한 예외 처리 설정
-//                .exceptionHandling(handling -> handling
-//                        // 인증 O, 권한 X
-//                        .accessDeniedHandler(((request, response, accessDeniedException) -> {
-//                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//                            response.setContentType("application/json;charset=UTF-8");
-//                            response.getWriter().write("{\"error\":\"접근 권한이 없습니다.\"}");
-//                        }))
-//                )
+                .exceptionHandling(handling -> handling
+                        // 인증 O, 권한 X
+                        .accessDeniedHandler(((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"error\":\"접근 권한이 없습니다.\"}");
+                        }))
+                )
                 // jwt 설정
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(tokenExceptionFilter, tokenAuthenticationFilter.getClass());
