@@ -29,6 +29,7 @@ import Header from './components/header/Header';
 import AdminPage from './pages/AdminPage'
 import TestKakaoLogin from './pages/TestKakaoLogin';
 import OAuthCallback from './components/oauth/OAuthCallback';
+import PWAInstaller from './components/PWAInstaller';
 
 function App() {
   const { isLoading, checkAuthAndFetchUserData } = useUser();
@@ -83,6 +84,7 @@ function App() {
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </BrowserRouter>
+      <PWAInstaller />
     </div>
   );
 }
