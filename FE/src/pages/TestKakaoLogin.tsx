@@ -22,7 +22,7 @@ function TestKakaoLogin() {
     } catch (error) {
       console.error('로그인 요청 중 오류 발생:', error);
       // 오류 발생 시에도 전체 URL 사용
-      // window.location.href = `${API_BASE_URL}/api/auth/login`;
+      window.location.href = `${API_BASE_URL}/api/auth/login`;
     } finally {
       setIsLoading(false);
     }
