@@ -12,6 +12,7 @@ import useUserApi from "@/apis/useUserApi";
 import Title from "@/components/common/Title";
 import Alert from "@/components/common/Alert";
 import useUserStore from "@/stores/useUserStore";
+import useUser from "@/hooks/useUser";
 
 // react-icons를 대신할 커스텀 컴포넌트
 const CircleNumber = ({ number, isActive }) => {
@@ -40,8 +41,9 @@ const CircleCheck = () => {
 
 function JoinPage() {
   const navigate = useNavigate();
-  const { user, setUser } = useUserStore();
+  const { user } = useUserStore();
   const { joinFamily, uploadImageWithPresignedUrl } = useUserApi();
+  const { fetchProfileAndFamilyInfo } = useUser();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState("");
@@ -126,13 +128,6 @@ function JoinPage() {
         });
 
         const data = response.data;
-        setUser({
-          name: name,
-          birth: birth,
-          phoneNumber: phoneNumber,
-          gender: genderCode,
-          profileUrl: data.presignedUrl
-        });
 
         // S3에 이미지를 업로드하기 위한 presigned URL 사용
         if (profileImage && data.presignedUrl) {
@@ -150,6 +145,9 @@ function JoinPage() {
             // 이미지 업로드 실패해도 계속 진행
           }
         }
+
+         // 사용자 정보 조회 및 상태 업데이트
+        await fetchProfileAndFamilyInfo(user.userId, user.familyId);
 
         // 가입 성공 후 메인 페이지로 이동
         navigate('/');

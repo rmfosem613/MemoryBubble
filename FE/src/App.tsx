@@ -1,6 +1,5 @@
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import useUserStore from './stores/useUserStore';
 import useUser from './hooks/useUser';
 
 // 보호된 라우트 컴포넌트들
@@ -8,6 +7,7 @@ import {
   ProtectedRoute,
   FamilyCreationRoute,
   ProfileCreationRoute,
+  NonAuthRoute,
 } from './components/ProtectedRoute';
 
 // 페이지 컴포넌트들
@@ -48,10 +48,12 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
-          {/* 인증이 필요 없는 경로 */}
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/oauth/callback' element={<OAuthCallback />} />
-          <Route path='/kakao' element={<TestKakaoLogin />} />
+          {/* 인증이 필요 없는 경로 (로그인하지 않은 사용자만 접근 가능) */}
+          <Route element={<NonAuthRoute />}>
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/oauth/callback' element={<OAuthCallback />} />
+            <Route path='/kakao' element={<TestKakaoLogin />} />
+          </Route>
 
           {/* 가족 생성/가입 페이지 - 인증 필요, 가족 없어야 함 */}
           <Route element={<FamilyCreationRoute />}>

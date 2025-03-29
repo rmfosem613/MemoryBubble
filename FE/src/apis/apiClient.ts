@@ -42,6 +42,8 @@ apiClient.interceptors.response.use(
         // 모든 인증 관련 데이터 제거
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        
+        alert('로그인 정보가 만료되었습니다.');
 
         // 로그인 페이지로 리다이렉트
         window.location.href = '/kakao';
