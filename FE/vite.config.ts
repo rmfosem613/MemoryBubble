@@ -11,7 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo-2.svg'],
       manifest: {
-        name: '추억방울',
+        name: '추억방울', 
         short_name: '추억방울',
         description: '소중한 추억을 보관하세요',
         theme_color: '#ffffff',
@@ -39,16 +39,24 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,woff,woff2,ttf,eot}'],
+        // 캐시할 최대 파일 크기 설정 (5MB)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // 아래 패턴에서 assets 폴더 내용도 명시적으로 포함
+        globPatterns: [
+          '**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,woff,woff2,ttf,eot}',
+          'assets/**/*'
+        ],
+        // assets 폴더 제외 금지
+        globIgnores: ['**/node_modules/**'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.memorybubble\.site\/.*/i, // 실제 API 주소에 맞게 수정
+            urlPattern: /^https:\/\/api\.memorybubble\.site\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 1주일
+                maxAgeSeconds: 60 * 60 * 24 * 7
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -56,13 +64,14 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+            // 모든 이미지 파일 캐싱 강화
+            urlPattern: /\.(png|jpg|jpeg|svg|gif)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'images-cache',
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30일
+                maxEntries: 150, // 캐시 항목 수 증가
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -76,7 +85,7 @@ export default defineConfig({
               cacheName: 'static-resources',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 1주일
+                maxAgeSeconds: 60 * 60 * 24 * 7
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -90,7 +99,7 @@ export default defineConfig({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 20,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1년
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -121,29 +130,32 @@ export default defineConfig({
   publicDir: 'public',
   base: '/',
   server: {
-    port: 5173, // 개발 서버 포트
+    port: 5173,
   },
   preview: {
-    port: 4173, // 미리보기 서버 포트 (스프링 포트와 충돌 방지)
+    port: 5173,
   },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    // 정적 에셋 파일 처리 최적화
+    // assets 관련 설정 추가
+    assetsInlineLimit: 4096, // 4KB 미만의 이미지는 인라인화 (기본값)
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
         },
+        // 에셋 파일명 보존 설정
+        assetFileNames: 'assets/[name].[hash].[ext]'
       },
     },
-    // 빌드 결과물 최적화
+    // 빌드 결과물 최적화 
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // 콘솔 로그 제거
-        drop_debugger: true, // 디버거 코드 제거
+        drop_console: true,
+        drop_debugger: true,
       },
     },
   },
