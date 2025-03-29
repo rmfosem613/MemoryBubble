@@ -205,6 +205,12 @@ export const useUserApi = () => {
     [],
   );
 
+  // 로그아웃
+  const logout = useCallback(async (): Promise<AxiosResponse> => {
+    const response = await apiClient.get('/api/auth/logout');
+    return response;
+  }, []);
+
   // presignedUrl로 이미지 업로드
   const uploadImageWithPresignedUrl = useCallback(
     async (presignedUrl: string, file: File): Promise<AxiosResponse<void>> => {
@@ -231,6 +237,7 @@ export const useUserApi = () => {
     fetchCurrentUser,
     fetchUserProfile,
     updateUserProfile,
+    logout,
 
     // 유틸리티
     uploadImageWithPresignedUrl,

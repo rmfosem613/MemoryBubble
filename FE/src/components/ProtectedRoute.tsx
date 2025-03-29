@@ -1,45 +1,64 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import useUserStore from '@/stores/useUserStore';
+import { ReactNode, useMemo } from 'react';
 
 interface RouteProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
+
+const useRouteAuth = () => {
+  const { user } = useUserStore();
+  const isAuthenticated = localStorage.getItem('accessToken') !== null;
+  const hasFamilyId = !!user.familyId;
+  const hasCompletedProfile = !!user.birth;
+
+  // 사용자 상태에 따른 적절한 리다이렉트 경로 반환
+  const getRedirectPath = () => {
+    if (!isAuthenticated) {
+      return '/kakao';
+    }
+    
+    if (!hasFamilyId) {
+      return '/enter';
+    }
+    
+    if (!hasCompletedProfile) {
+      return '/join';
+    }
+    
+    return '/'; // 모든 조건 충족 시 메인으로
+  };
+
+  return {
+    isAuthenticated,
+    hasFamilyId,
+    hasCompletedProfile,
+    getRedirectPath,
+    // 특정 라우트 접근 가능 여부 확인 함수들
+    canAccessProtectedRoute: isAuthenticated && hasFamilyId && hasCompletedProfile,
+    canAccessFamilyCreation: isAuthenticated && !hasFamilyId,
+    canAccessProfileCreation: isAuthenticated && hasFamilyId && !hasCompletedProfile,
+    canAccessNonAuth: !isAuthenticated
+  };
+};
 
 // 완전히 보호된 라우트 - 인증, 가족, 프로필 정보 모두 필요
 export const ProtectedRoute = ({ children }: RouteProps) => {
-  const { user } = useUserStore();
-  const isAuthenticated = localStorage.getItem('accessToken') !== null;
+  const { canAccessProtectedRoute, getRedirectPath } = useRouteAuth();
 
-  // 로그인이 안 된 경우 로그인 페이지로 리다이렉트
-  if (!isAuthenticated) {
-    return <Navigate to="/kakao" replace />;
+  if (!canAccessProtectedRoute) {
+    return <Navigate to={getRedirectPath()} replace />;
   }
 
-  // 그룹에 가입되어 있지 않은 경우 그룹 가입 페이지로 리다이렉트
-  if (!user.familyId) {
-    return <Navigate to="/enter" replace />;
-  }
-
-  // 사용자 정보가 등록되어 있지 않은 경우 사용자 정보 등록 페이지로 리다이렉트
-  if (!user.birth || !user.name) {
-    return <Navigate to="/join" replace />;
-  }
-
-  // 모든 조건을 만족하는 경우 자식 컴포넌트 또는 Outlet 렌더링
   return children || <Outlet />;
 };
 
 // 가족 생성/가입 라우트 - 인증 필요 + 가족이 없어야 함
 export const FamilyCreationRoute = ({ children }: RouteProps) => {
-  const { user } = useUserStore();
-  const isAuthenticated = localStorage.getItem('accessToken') !== null;
+  const { canAccessFamilyCreation, getRedirectPath } = useRouteAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/kakao" replace />;
-  }
-
-  if (user.familyId) {
-    return <Navigate to="/" replace />; // 이미 가족이 있으면 메인으로
+  if (!canAccessFamilyCreation) {
+    return <Navigate to={getRedirectPath()} replace />;
   }
 
   return children || <Outlet />;
@@ -47,19 +66,21 @@ export const FamilyCreationRoute = ({ children }: RouteProps) => {
 
 // 프로필 생성 라우트 - 인증 + 가족 필요 + 프로필이 없어야 함
 export const ProfileCreationRoute = ({ children }: RouteProps) => {
-  const { user } = useUserStore();
-  const isAuthenticated = localStorage.getItem('accessToken') !== null;
+  const { canAccessProfileCreation, getRedirectPath } = useRouteAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/kakao" replace />;
+  if (!canAccessProfileCreation) {
+    return <Navigate to={getRedirectPath()} replace />;
   }
 
-  if (!user.familyId) {
-    return <Navigate to="/enter" replace />; // 가족이 없으면 입장 페이지로
-  }
+  return children || <Outlet />;
+};
 
-  if (user.birth) {
-    return <Navigate to="/" replace />; // 이미 정보가 있으면 메인으로
+// 인증되지 않은 사용자만 접근 가능한 라우트 컴포넌트
+export const NonAuthRoute = ({ children }: RouteProps) => {
+  const { canAccessNonAuth, getRedirectPath } = useRouteAuth();
+  
+  if (!canAccessNonAuth) {
+    return <Navigate to={getRedirectPath()} replace />;
   }
 
   return children || <Outlet />;
