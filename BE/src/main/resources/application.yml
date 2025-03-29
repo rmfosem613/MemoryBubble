@@ -9,16 +9,17 @@ spring:
     username: ${mysql.username}
     password: ${mysql.password}
   jpa:
-#    hibernate:
-#      ddl-auto: update
+    hibernate:
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-#  data:
-#    redis:
-#      host: localhost
-#      port: 6379
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
   security:
     oauth2:
       client:
