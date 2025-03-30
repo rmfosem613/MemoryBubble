@@ -5,6 +5,7 @@ import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 import useModal from '@/hooks/useModal';
 import CalendarEventAddModal from './CalendarEventAddModal';
 import CalendarEventRemoveModal from './CalendarEventRemoveModal';
+import CalendarEventEditModal from './CalendarEventEditModal';
 
 function CalendarEvent() {
   const { selectDate } = useCalendarStore();
@@ -13,9 +14,13 @@ function CalendarEvent() {
   const [selectEvent, setSelectEvent] = useState<{
     scheduleId: number;
     scheduleContent: string;
+    startDate?: string;
+    endDate?: string;
+    albumId?: number | null;
   } | null>(null);
   const calendarEventAddModal = useModal(false);
   const calendarEventRemoveModal = useModal(false);
+  const calendarEventEditModal = useModal(false);
 
   // 토글 이벤트 함수
   const toggleEvent = (scheduleId: number) => {
@@ -34,6 +39,12 @@ function CalendarEvent() {
   const openRemoveModal = (scheduleId: number, scheduleContent: string) => {
     setSelectEvent({ scheduleId, scheduleContent });
     calendarEventRemoveModal.open();
+  };
+
+  // 수정 모달 열기
+  const openEditModal = (event) => {
+    setSelectEvent(event);
+    calendarEventEditModal.open();
   };
 
   return (
@@ -82,7 +93,12 @@ function CalendarEvent() {
                         <p>{event.albumId ? '앨범이름' : '앨범 연결'}</p>
                       </div>
                       <div className="flex justify-end space-x-2">
-                        <button className="p-1 rounded-full hover:bg-winter-100">
+                        <button
+                          className="p-1 rounded-full hover:bg-winter-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(event);
+                          }}>
                           <PenLine size={18} />
                         </button>
                         <button
@@ -109,14 +125,21 @@ function CalendarEvent() {
           )}
         </div>
       </div>
-      {/* 모달 컴포넌트 추가 */}
+      {/* 추가 모달 */}
       <CalendarEventAddModal
         isOpen={calendarEventAddModal.isOpen}
         close={calendarEventAddModal.close}
       />
+      {/* 삭제 모달 */}
       <CalendarEventRemoveModal
         isOpen={calendarEventRemoveModal.isOpen}
         close={calendarEventRemoveModal.close}
+        event={selectEvent}
+      />
+      {/* 수정 모달 */}
+      <CalendarEventEditModal
+        isOpen={calendarEventEditModal.isOpen}
+        close={calendarEventEditModal.close}
         event={selectEvent}
       />
     </>

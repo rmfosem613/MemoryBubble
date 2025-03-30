@@ -2,15 +2,30 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 import { Link } from 'lucide-react';
 import { useCalendarStore } from '@/stores/useCalendarStore';
+import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 
-interface CalendarEventAddModalProps {
+interface CalendarEventEditModalProps {
   isOpen: boolean;
   close: () => void;
+  event: {
+    scheduleId: number;
+    scheduleContent: string;
+    startDate?: string;
+    endDate?: string;
+    albumId?: number | null;
+  } | null;
 }
 
-function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
+function CalendarEventEditModal({
+  isOpen,
+  close,
+  event,
+}: CalendarEventEditModalProps) {
+  if (!event) return null;
+
   const { selectDate } = useCalendarStore();
-  const [eventTitle, setEventTitle] = useState('');
+  const { updateEvent } = useCalendarEventStore();
+  const [scheduleContent, setScheduleContent] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [errors, setErrors] = useState({
@@ -18,19 +33,19 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
     date: '',
   });
 
-  // 컴포넌트 마운트 시 선택 날짜로 초기화
   useEffect(() => {
-    const formattedDate = selectDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
-    setEventTitle('');
-    setStartDate(formattedDate);
-    setEndDate(formattedDate);
-  }, [isOpen, selectDate]);
+    setScheduleContent(event.scheduleContent);
+    setStartDate(event.startDate);
+    setEndDate(event.endDate);
+  }, [isOpen, event]);
 
   // 제출
   const handleSubmit = () => {
+    if (!event) return false;
+
     const newErrors = { title: '', date: '' };
     // 일정 유효성 검사
-    if (eventTitle.trim() === '') {
+    if (scheduleContent.trim() === '') {
       newErrors.title = '일정을 입력해주세요.';
     }
     // 날짜 유효성 검사
@@ -38,12 +53,19 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
       newErrors.date = '날짜를 입력(선택)해주세요.';
     }
     setErrors(newErrors);
+
     // 에러 메시지가 하나라도 있으면 false 반환
     if (newErrors.title || newErrors.date) {
-      return false
+      return false;
     }
 
     // axios 요청
+
+    updateEvent(event.scheduleId, {
+      scheduleContent,
+      startDate,
+      endDate,
+    });
   };
 
   // 시작 날짜 변경
@@ -74,36 +96,38 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
     }
   };
 
+  if (!event) return null;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={close}
       onConfirm={handleSubmit}
-      title="일정 등록"
+      title="일정 수정"
       cancelButtonText="취소하기"
-      confirmButtonText="등록하기">
+      confirmButtonText="수정완료">
       <div className="flex flex-col gap-4 px-2">
         <p className="text-gray-600">
-          새로운 일정을 등록하고 가족들과 공유해봅시다
+          일정 정보를 수정하고 가족들과 공유해보세요
         </p>
         {/* 일정 */}
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
             <label htmlFor="event-title">일정</label>
             <span className="text-sm text-gray-500">
-              {eventTitle.length}/50
+              {scheduleContent.length}/50
             </span>
           </div>
           <textarea
             id="event-title"
             className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
             placeholder="일정을 입력해주세요"
-            value={eventTitle}
+            value={scheduleContent}
             maxLength={50}
             rows={2}
             onChange={(e) => {
               setErrors((prev) => ({ ...prev, title: '' }));
-              setEventTitle(e.target.value);
+              setScheduleContent(e.target.value);
             }}
           />
           {errors.title && (
@@ -135,11 +159,11 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
         {/* 앨범 연결 */}
         <button className="flex items-center gap-1">
           <Link size={16} />
-          <p>앨범 연결</p>
+          <p>{event.albumId ? '앨범 연결 변경' : '앨범 연결'}</p>
         </button>
       </div>
     </Modal>
   );
 }
 
-export default CalendarEventAddModal;
+export default CalendarEventEditModal;
