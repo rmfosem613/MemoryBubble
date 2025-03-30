@@ -5,50 +5,122 @@ import {
   ImageUp,
   ChevronLeft,
   ChevronRight,
-  Trash2,
   FolderUp,
   Mic,
-  CirclePlay,
-  CirclePause,
 } from 'lucide-react';
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 import DropDown from '../common/Modal/DropDown';
 import { usePhotoMessages } from '@/hooks/usePhotoMessages ';
 import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
+import apiClient from '@/apis/apiClient';
 
 function PhotoAlbum() {
   const {
-    postcardMessage,
-    setPostcardMessage,
-    isRecording,
-    messageInputRef,
-    handleSaveMessage,
-    toggleAudioPlayback,
-    handleRecordButtonClick,
-    sortedMessages,
-  } = usePhotoMessages();
-
-  const {
+    albumTitle,
+    newAlbumName,
+    setNewAlbumName,
+    newAlbumContent,
+    setNewAlbumContent,
     isFlipped,
+    toggleFlipWithPostCard,
     toggleFlip,
-    currentAlbum,
     photos,
     isLoading,
     currentIndex,
+    photoMessages, // API에서 가져온 메시지 데이터
+    setPhotoMessages, // 메시지 데이터 업데이트 함수
     handleChangeTitle,
     handleChangeThumnail,
     getPrevIndex,
     getNextIndex,
     goToPrevious,
     goToNext,
+    allAlbums,
+    setTargetAlbumId,
+    handleMovePhoto,
+    albumId,
   } = usePhotoAlbum();
+
+  const {
+    postcardMessage,
+    setPostcardMessage,
+    isRecording,
+    messageInputRef,
+    handleSaveMessage,
+    handleRecordButtonClick,
+  } = usePhotoMessages(photos, currentIndex);
 
   // 각 모달별로 useModal() 훅 사용하여 상태 관리
   const editAlbumModal = useModal();
   const changeThumbnailModal = useModal();
-  const deletePhotoModal = useModal();
   const movePhotoModal = useModal();
+
+  // API에서 가져온 메시지 렌더링 함수
+  const renderApiMessage = (message) => {
+    if (message.type === 'TEXT') {
+      return (
+        <div key={message.createdAt} className="mb-4 rounded-lg">
+          <div className="flex items-center gap-2">
+            <h4 className="font-p-700 text-h4-lg">
+              {message.writer || '사용자'}
+            </h4>
+          </div>
+          <p className="text-gray-700 mt-1 text-subtitle-1-lg font-p-500">
+            {message.content}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // 메시지 저장 함수 (기존 handleSaveMessage 함수 호출 후 메시지 목록 갱신)
+  const handleMessageSubmit = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // 기존 handleSaveMessage 함수 호출
+    await handleSaveMessage(e);
+
+    // API에서 최신 메시지 목록 다시 가져오기
+    if (photos && photos.length > 0) {
+      try {
+        const currentPhotoId = photos[currentIndex].id;
+        const response = await apiClient.get(
+          `/api/photos/${currentPhotoId}/reviews`,
+        );
+        if (response.data && Array.isArray(response.data)) {
+          if (setPhotoMessages) {
+            setPhotoMessages(response.data);
+          }
+        }
+      } catch (error) {
+        console.error('메시지 목록 업데이트 실패:', error);
+      }
+    }
+  };
+
+  // 앨범 선택 핸들러
+  const handleSelectAlbum = (albumId) => {
+    setTargetAlbumId(albumId);
+  };
+
+  // 비동기 함수를 Modal의 onConfirm 속성에 맞는 래퍼 함수로 변환
+  const handleChangeTitleWrapper = () => {
+    handleChangeTitle();
+    return true; // 모달 닫기
+  };
+
+  const handleChangeThumnailWrapper = () => {
+    handleChangeThumnail();
+    return true; // 모달 닫기
+  };
+
+  const handleMovePhotoWrapper = () => {
+    handleMovePhoto();
+    return true; // 모달 닫기
+  };
 
   if (isLoading) {
     return <div className="text-center p-8">사진을 불러오는 중...</div>;
@@ -57,7 +129,7 @@ function PhotoAlbum() {
   return (
     <div className="container">
       <div className="flex justify-between items-baseline mb-6">
-        <Title text={currentAlbum.title} />
+        <Title text={albumTitle} />
         <div className="flex justify-end gap-4">
           <div
             className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
@@ -96,27 +168,32 @@ function PhotoAlbum() {
             className="relative z-20 perspective-1000 cursor-pointer"
             style={{ perspective: '1000px' }}>
             <div
-              className="relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[500px]"
+              className="relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[500px] flex items-center justify-center"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 transition: 'transform 0.6s',
               }}>
               {/* 앞면 - 사진 */}
-              <img
-                src={photos[currentIndex].src}
-                alt={photos[currentIndex].alt}
-                className="w-full h-full object-cover absolute backface-hidden"
-                style={{
-                  backfaceVisibility: 'hidden',
-                  position: 'relative',
-                }}
-                onClick={toggleFlip}
-              />
+              {photos && photos.length > 0 ? (
+                <img
+                  src={photos[currentIndex].src}
+                  alt={photos[currentIndex].alt}
+                  className="max-w-full max-h-full object-contain absolute"
+                  style={{
+                    backfaceVisibility: 'hidden',
+                  }}
+                  onClick={toggleFlipWithPostCard}
+                />
+              ) : (
+                <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">
+                  아직 사진이 없습니다.
+                </p>
+              )}
 
               {/* 뒷면 - 엽서 형태 */}
               <div
-                className="absolute w-full h-full inset-0 bg-white p-4 rounded-lg shadow-lg flex flex-col justify-between backface-hidden"
+                className="absolute w-full h-full inset-0 bg-white p-4 rounded-lg shadow-lg flex flex-col justify-between"
                 style={{
                   backfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
@@ -124,12 +201,6 @@ function PhotoAlbum() {
                 {/* 상단 버튼 영역 */}
                 <div className="flex justify-end gap-2">
                   <div className="flex gap-2">
-                    <button
-                      className="flex p-1 hover:text-blue-500 gap-1"
-                      onClick={deletePhotoModal.open}>
-                      <Trash2 size={20} />
-                      삭제하기
-                    </button>
                     <button
                       className="flex p-1 hover:text-blue-500 gap-1"
                       onClick={movePhotoModal.open}>
@@ -144,45 +215,15 @@ function PhotoAlbum() {
                   </div>
                 </div>
 
-                {/* 메시지 표시 영역 - 통합된 메시지 목록 */}
+                {/* 메시지 표시 영역 - API에서 가져온 메시지 표시 */}
                 <div className="flex-1 overflow-y-auto px-2 mt-2 z-10">
-                  {sortedMessages.map((message) => (
-                    <div key={message.id} className="mb-4 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-p-700 text-h4-lg">
-                          현재 유저 이름
-                        </h4>
-
-                        <div>
-                          {message.type === 'audio' ? (
-                            <div className="relative">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleAudioPlayback(message.id);
-                                }}
-                                className="p-2 bg-blue-100 rounded-full ">
-                                {message.isPlaying ? (
-                                  <CirclePause size={24} />
-                                ) : (
-                                  <CirclePlay size={24} />
-                                )}
-                                <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
-                              </button>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
-                      </div>
-
-                      {message.type === 'text' && (
-                        <p className="text-gray-700 mt-1 text-subtitle-1-lg font-p-500">
-                          {message.content}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                  {photoMessages && photoMessages.length > 0 ? (
+                    photoMessages.map((message) => renderApiMessage(message))
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">
+                      이 사진에 남겨진 메시지가 없습니다.
+                    </p>
+                  )}
                 </div>
 
                 {/* 하단 입력 영역 - 이벤트 버블링 방지 적용 */}
@@ -199,28 +240,31 @@ function PhotoAlbum() {
                       onChange={(e) => setPostcardMessage(e.target.value)}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                          handleSaveMessage(e);
+                          handleMessageSubmit(e);
                         }
                       }}
+                      disabled={isRecording}
                     />
                   </div>
                   <button
                     className="bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors z-10"
-                    onClick={handleSaveMessage}>
+                    onClick={handleMessageSubmit}
+                    disabled={isRecording || !postcardMessage.trim()}>
                     글 남기기
                   </button>
-                  {!isRecording ? (
-                    <button
-                      className="bg-white text-black h-full px-4 py-2 rounded-lg border z-10 hover:bg-gray-100 transition-colors"
-                      onClick={handleRecordButtonClick}>
-                      <Mic size={20} />
-                    </button>
-                  ) : (
-                    <button
-                      className="bg-red-500 text-white h-full px-4 py-2 rounded-lg border hover:bg-red-600 transition-colors z-10"
-                      onClick={handleRecordButtonClick}>
-                      <Mic size={20} />
-                    </button>
+                  <button
+                    className={`${
+                      isRecording
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-white text-black hover:bg-gray-100 border'
+                    } h-full px-4 py-2 rounded-lg transition-colors z-10`}
+                    onClick={handleRecordButtonClick}>
+                    <Mic size={20} />
+                  </button>
+                  {isRecording && (
+                    <span className="animate-pulse text-red-500 ml-2">
+                      녹음중...
+                    </span>
                   )}
                 </div>
                 {/* 엽서 템플릿 */}
@@ -263,18 +307,35 @@ function PhotoAlbum() {
         title="앨범명 수정"
         confirmButtonText="저장하기"
         cancelButtonText="취소하기"
-        onConfirm={handleChangeTitle}>
+        onConfirm={handleChangeTitleWrapper}>
         <div>
-          <p className="text-subtitle-1-lg font-p-500">앨범명을 수정해주세요</p>
+          <p className="text-subtitle-1-lg font-p-500">
+            앨범명과 내용을 수정해주세요
+          </p>
           <form className="py-4">
             <label
-              htmlFor="album_name"
+              htmlFor="albumName"
               className="block mb-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
               앨범명
             </label>
             <input
               type="text"
-              id="album_name"
+              id="albumName"
+              value={newAlbumName}
+              onChange={(e) => setNewAlbumName(e.target.value)}
+              placeholder={albumTitle}
+              className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            />
+            <label
+              htmlFor="albumContent"
+              className="block mb-2 mt-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
+              앨범 내용
+            </label>
+            <input
+              type="text"
+              id="albumContent"
+              value={newAlbumContent}
+              onChange={(e) => setNewAlbumContent(e.target.value)}
               className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
           </form>
@@ -288,28 +349,22 @@ function PhotoAlbum() {
         title="썸네일 변경"
         confirmButtonText="저장하기"
         cancelButtonText="취소하기"
-        onConfirm={handleChangeThumnail}>
+        onConfirm={handleChangeThumnailWrapper}>
         <div className="py-2">
           <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
           <div className="w-full flex justify-center">
-            <img
-              src={photos[currentIndex].src}
-              alt="Selected thumbnail"
-              className="h-64 object-cover"
-            />
+            {photos && photos.length > 0 && currentIndex < photos.length ? (
+              <img
+                src={photos[currentIndex].src}
+                alt="Selected thumbnail"
+                className="h-64 object-cover"
+              />
+            ) : (
+              <div className="h-64 flex items-center justify-center bg-gray-200 rounded-lg">
+                <p className="text-gray-500">사진이 없습니다.</p>
+              </div>
+            )}
           </div>
-        </div>
-      </Modal>
-
-      {/* 사진 삭제 모달 */}
-      <Modal
-        isOpen={deletePhotoModal.isOpen}
-        onClose={deletePhotoModal.close}
-        title="사진 삭제하기"
-        confirmButtonText="삭제하기"
-        cancelButtonText="취소하기">
-        <div className="py-2">
-          <p className="mb-4">사진을 삭제하시겠습니까?</p>
         </div>
       </Modal>
 
@@ -319,15 +374,19 @@ function PhotoAlbum() {
         onClose={movePhotoModal.close}
         title="앨범 이동하기"
         confirmButtonText="이동하기"
-        cancelButtonText="취소하기">
+        cancelButtonText="취소하기"
+        onConfirm={handleMovePhotoWrapper}>
         <div className="py-2">
           <p className="mb-4">이동할 앨범을 선택해주세요.</p>
           <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
             앨범 선택하기
           </p>
-          {/* 이거 살려야 함 */}
-          {/* <DropDown /> */}
-          <div className="h-[130px]"></div>
+          <DropDown
+            albums={allAlbums}
+            currentAlbumId={parseInt(albumId)} // useParams()로 가져온 현재 앨범 ID
+            onSelectAlbum={handleSelectAlbum}
+            placeholder="앨범을 선택해주세요"
+          />
         </div>
       </Modal>
     </div>

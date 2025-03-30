@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import apiClient from '@/apis/apiClient';
+import { Photo } from './usePhotoAlbum'; // Photo 인터페이스 임포트
 
 // 통합 메시지 인터페이스 정의
 export interface Message {
@@ -9,7 +11,7 @@ export interface Message {
   isPlaying?: boolean; // 오디오 메시지 재생 상태 (오디오인 경우만 사용)
 }
 
-export const usePhotoMessages = () => {
+export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
   const [postcardMessage, setPostcardMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -70,26 +72,49 @@ export const usePhotoMessages = () => {
     };
   }, [currentlyPlayingId, messages.length]);
 
-  const handleSaveMessage = (
+  const handleSaveMessage = async (
     e:
       | React.MouseEvent<HTMLButtonElement>
       | React.KeyboardEvent<HTMLInputElement>,
   ) => {
     e.stopPropagation();
     if (postcardMessage.trim() !== '') {
-      // 텍스트 메시지 추가
-      const newTextMessage: Message = {
-        id: generateId(),
-        type: 'text',
-        content: postcardMessage,
-        timestamp: new Date().toLocaleString(),
-      };
+      try {
+        // photos와 currentIndex가 유효한 경우에만 API 요청
+        if (photos && currentIndex !== undefined && photos.length > 0) {
+          const currentPhotoId = photos[currentIndex].id;
 
-      setMessages((prev) => [...prev, newTextMessage]);
-      setPostcardMessage('');
+          // API 요청 데이터 형식
+          const messageData = {
+            type: 'TEXT',
+            content: postcardMessage,
+          };
 
-      if (messageInputRef.current) {
-        messageInputRef.current.focus();
+          // API 요청 보내기
+          const response = await apiClient.post(
+            `/api/photos/${currentPhotoId}/review`,
+            messageData,
+          );
+          console.log('메시지 전송 성공:', response.data);
+        }
+
+        // 로컬 메시지 상태 업데이트 (기존 로직)
+        const newTextMessage: Message = {
+          id: generateId(),
+          type: 'text',
+          content: postcardMessage,
+          timestamp: new Date().toLocaleString(),
+        };
+
+        setMessages((prev) => [...prev, newTextMessage]);
+        setPostcardMessage('');
+
+        if (messageInputRef.current) {
+          messageInputRef.current.focus();
+        }
+      } catch (error) {
+        console.error('메시지 전송 실패:', error);
+        // 에러 처리 로직 추가 가능
       }
     }
   };
