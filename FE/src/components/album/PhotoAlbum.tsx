@@ -37,7 +37,6 @@ function PhotoAlbum() {
     goToPrevious,
     goToNext,
     allAlbums,
-    targetAlbumId,
     setTargetAlbumId,
     handleMovePhoto,
     albumId,
@@ -76,8 +75,11 @@ function PhotoAlbum() {
     return null;
   };
 
-  // handleSaveMessage 사용 시 추가 작업을 위한 래퍼 함수
+  // 메시지 저장 함수 (기존 handleSaveMessage 함수 호출 후 메시지 목록 갱신)
   const handleMessageSubmit = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     // 기존 handleSaveMessage 함수 호출
     await handleSaveMessage(e);
 
@@ -85,7 +87,9 @@ function PhotoAlbum() {
     if (photos && photos.length > 0) {
       try {
         const currentPhotoId = photos[currentIndex].id;
-        const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
+        const response = await apiClient.get(
+          `/api/photos/${currentPhotoId}/reviews`,
+        );
         if (response.data && Array.isArray(response.data)) {
           if (setPhotoMessages) {
             setPhotoMessages(response.data);
@@ -100,6 +104,22 @@ function PhotoAlbum() {
   // 앨범 선택 핸들러
   const handleSelectAlbum = (albumId) => {
     setTargetAlbumId(albumId);
+  };
+
+  // 비동기 함수를 Modal의 onConfirm 속성에 맞는 래퍼 함수로 변환
+  const handleChangeTitleWrapper = () => {
+    handleChangeTitle();
+    return true; // 모달 닫기
+  };
+
+  const handleChangeThumnailWrapper = () => {
+    handleChangeThumnail();
+    return true; // 모달 닫기
+  };
+
+  const handleMovePhotoWrapper = () => {
+    handleMovePhoto();
+    return true; // 모달 닫기
   };
 
   if (isLoading) {
@@ -223,25 +243,28 @@ function PhotoAlbum() {
                           handleMessageSubmit(e);
                         }
                       }}
+                      disabled={isRecording}
                     />
                   </div>
                   <button
                     className="bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors z-10"
-                    onClick={handleMessageSubmit}>
+                    onClick={handleMessageSubmit}
+                    disabled={isRecording || !postcardMessage.trim()}>
                     글 남기기
                   </button>
-                  {!isRecording ? (
-                    <button
-                      className="bg-white text-black h-full px-4 py-2 rounded-lg border z-10 hover:bg-gray-100 transition-colors"
-                      onClick={handleRecordButtonClick}>
-                      <Mic size={20} />
-                    </button>
-                  ) : (
-                    <button
-                      className="bg-red-500 text-white h-full px-4 py-2 rounded-lg border hover:bg-red-600 transition-colors z-10"
-                      onClick={handleRecordButtonClick}>
-                      <Mic size={20} />
-                    </button>
+                  <button
+                    className={`${
+                      isRecording
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-white text-black hover:bg-gray-100 border'
+                    } h-full px-4 py-2 rounded-lg transition-colors z-10`}
+                    onClick={handleRecordButtonClick}>
+                    <Mic size={20} />
+                  </button>
+                  {isRecording && (
+                    <span className="animate-pulse text-red-500 ml-2">
+                      녹음중...
+                    </span>
                   )}
                 </div>
                 {/* 엽서 템플릿 */}
@@ -284,7 +307,7 @@ function PhotoAlbum() {
         title="앨범명 수정"
         confirmButtonText="저장하기"
         cancelButtonText="취소하기"
-        onConfirm={handleChangeTitle}>
+        onConfirm={handleChangeTitleWrapper}>
         <div>
           <p className="text-subtitle-1-lg font-p-500">
             앨범명과 내용을 수정해주세요
@@ -326,7 +349,7 @@ function PhotoAlbum() {
         title="썸네일 변경"
         confirmButtonText="저장하기"
         cancelButtonText="취소하기"
-        onConfirm={handleChangeThumnail}>
+        onConfirm={handleChangeThumnailWrapper}>
         <div className="py-2">
           <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
           <div className="w-full flex justify-center">
@@ -352,7 +375,7 @@ function PhotoAlbum() {
         title="앨범 이동하기"
         confirmButtonText="이동하기"
         cancelButtonText="취소하기"
-        onConfirm={handleMovePhoto}>
+        onConfirm={handleMovePhotoWrapper}>
         <div className="py-2">
           <p className="mb-4">이동할 앨범을 선택해주세요.</p>
           <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">
