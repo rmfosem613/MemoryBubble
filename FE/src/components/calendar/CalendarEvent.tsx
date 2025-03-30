@@ -4,12 +4,18 @@ import { useCalendarStore } from '@/stores/useCalendarStore';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 import useModal from '@/hooks/useModal';
 import CalendarEventAddModal from './CalendarEventAddModal';
+import CalendarEventRemoveModal from './CalendarEventRemoveModal';
 
-function CalendarEventRender() {
+function CalendarEvent() {
   const { selectDate } = useCalendarStore();
   const { getEventsByDate } = useCalendarEventStore();
   const [openEvents, setOpenEvents] = useState<Record<number, boolean>>({});
+  const [selectEvent, setSelectEvent] = useState<{
+    scheduleId: number;
+    scheduleContent: string;
+  } | null>(null);
   const calendarEventAddModal = useModal(false);
+  const calendarEventRemoveModal = useModal(false);
 
   // 토글 이벤트 함수
   const toggleEvent = (scheduleId: number) => {
@@ -23,6 +29,12 @@ function CalendarEventRender() {
   const filteredEvents = useMemo(() => {
     return getEventsByDate(selectDate);
   }, [getEventsByDate, selectDate]);
+
+  // 삭제 모달 열기
+  const openRemoveModal = (scheduleId: number, scheduleContent: string) => {
+    setSelectEvent({ scheduleId, scheduleContent });
+    calendarEventRemoveModal.open();
+  };
 
   return (
     <>
@@ -46,10 +58,10 @@ function CalendarEventRender() {
             filteredEvents.map((event) => (
               <div key={event.scheduleId} className="mb-3">
                 {/* 일정 */}
-                <div
-                  className="flex flex-col pb-2 border-b-2 border-dashed border-winter-200 cursor-pointer"
-                  onClick={() => toggleEvent(event.scheduleId)}>
-                  <div className="px-2 flex justify-between items-center">
+                <div className="flex flex-col pb-2 border-b-2 border-dashed border-winter-200 cursor-pointer">
+                  <div
+                    className="px-2 flex justify-between items-center"
+                    onClick={() => toggleEvent(event.scheduleId)}>
                     <p className="p-1 text-h5-lg font-p-500">
                       {event.scheduleContent}
                     </p>
@@ -71,7 +83,15 @@ function CalendarEventRender() {
                         <button className="p-1 rounded-full hover:bg-winter-100">
                           <PenLine size={18} />
                         </button>
-                        <button className="p-1 rounded-full hover:bg-winter-100">
+                        <button
+                          className="p-1 rounded-full hover:bg-winter-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openRemoveModal(
+                              event.scheduleId,
+                              event.scheduleContent,
+                            );
+                          }}>
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -92,8 +112,13 @@ function CalendarEventRender() {
         isOpen={calendarEventAddModal.isOpen}
         close={calendarEventAddModal.close}
       />
+      <CalendarEventRemoveModal
+        isOpen={calendarEventRemoveModal.isOpen}
+        close={calendarEventRemoveModal.close}
+        event={selectEvent}
+      />
     </>
   );
 }
 
-export default CalendarEventRender;
+export default CalendarEvent;
