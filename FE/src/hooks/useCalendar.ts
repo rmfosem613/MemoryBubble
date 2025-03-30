@@ -1,12 +1,32 @@
-// useCalendar.ts
 import { useMemo } from 'react';
-import {
-  DayInfo,
-  DayName,
-  CalendarDateInfo,
-  CalendarHookReturn,
-} from '@/types/CalendarType';
 import { useCalendarStore } from '@/stores/useCalendarStore';
+
+// 요일명 리터럴 타입
+export type DayName = '일' | '월' | '화' | '수' | '목' | '금' | '토';
+
+// 날짜 계산 관련 타입
+export interface CalendarDateInfo {
+  year: number;
+  month: number;
+  today: Date;
+  firstDay: Date;
+  lastDay: Date;
+  firstDayOfWeek: number;
+  daysInMonth: number;
+}
+
+//  날짜 정보 타입
+export type DayInfo = {
+  date: number | null;
+  isToday?: boolean;
+  isSelect?: boolean;
+};
+
+// 훅의 반환 타입
+export interface CalendarHookReturn {
+  dayNames: DayName[];
+  days: DayInfo[];
+}
 
 export function useCalendar(): CalendarHookReturn {
   const { currentDate, selectDate } = useCalendarStore();
@@ -62,7 +82,7 @@ function getCalendarDateInfo(date: Date): CalendarDateInfo {
     firstDay, // 현재 월의 첫 날
     lastDay, // 현재 월의 마지막 날
     firstDayOfWeek: firstDay.getDay(), // 현재 월의 첫 날 요일 (0: 일요일, 6: 토요일)
-    daysInMonth: lastDay.getDate(),  // 현재 월의 총 일수
+    daysInMonth: lastDay.getDate(), // 현재 월의 총 일수
   };
 }
 
