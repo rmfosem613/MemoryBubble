@@ -107,7 +107,7 @@ public class LetterService {
     }
 
     public List<LetterDto> getLetters(Long userId) {
-        List<Letter> letters = letterRepository.findByReceiverId(userId);
+        List<Letter> letters = letterRepository.findByReceiverIdWithSender(userId);
         return letters.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
