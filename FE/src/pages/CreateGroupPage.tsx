@@ -1,18 +1,19 @@
-import { useState } from "react";
-import { ChevronRight } from "lucide-react";
-import Button from "@/components/common/Button/Button";
+import { useState } from "react"
+import { ChevronRight } from "lucide-react"
+import Button from "@/components/common/Button/Button"
 
-import InputGroupName from "@/components/join/InputGroupName";
-import InputGroupPic from "@/components/join/InputGroupPic";
+import InputGroupName from "@/components/join/InputGroupName"
+import InputGroupPic from "@/components/join/InputGroupPic"
 
 import { useNavigate } from 'react-router-dom'
+import useUserStore from "@/stores/useUserStore"
+import useUserApi from "@/apis/useUserApi"
 
-import Title from "@/components/common/Title";
+import Title from "@/components/common/Title"
 
-// Custom components to replace missing react-icons
 const CircleNumber = ({ number, isActive }) => {
-  const bgColor = isActive ? "#7DABF8" : "#E1E1E8";
-  const textColor = isActive ? "#FFFFFF" : "#4B4B51";
+  const bgColor = isActive ? "#7DABF8" : "#E1E1E8"
+  const textColor = isActive ? "#FFFFFF" : "#4B4B51"
 
   return (
     <div
@@ -21,8 +22,8 @@ const CircleNumber = ({ number, isActive }) => {
     >
       <span className="text-sm font-bold" style={{ color: textColor }}>{number}</span>
     </div>
-  );
-};
+  )
+}
 
 const CircleCheck = () => {
   return (
@@ -31,35 +32,145 @@ const CircleCheck = () => {
         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
       </svg>
     </div>
-  );
-};
+  )
+}
 
 function CreateGroupPage() {
   const navigate = useNavigate()
+  const { setUser } = useUserStore()
+  const { createFamily, uploadImageWithPresignedUrl } = useUserApi() // useUserApi 사용
+  const [currentStep, setCurrentStep] = useState(1)
+  const [groupName, setGroupName] = useState("")
+  const [groupImage, setGroupImage] = useState(null)
+  const [groupImagePreview, setGroupImagePreview] = useState(null) // 이미지 미리보기 URL을 저장
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [nameError, setNameError] = useState("")
+  const [imageError, setImageError] = useState("")
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const handleNext = async () => {
+    if (currentStep === 1) {
+      if (!groupName) {
+        setNameError("그룹명을 입력해주세요.")
+        return
+      }
 
-  const handleNext = () => {
-    if (currentStep < 2) {
-      setCurrentStep(currentStep + 1);
+      if (groupName.length < 2) {
+        setNameError("그룹명은 최소 2글자 이상이어야 합니다.")
+        return
+      }
+
+      if (groupName.length > 7) {
+        setNameError("그룹명은 최대 7글자까지 가능합니다.")
+        return
+      }
+
+      setCurrentStep(currentStep + 1)
     } else {
-      // 완료 버튼을 눌렀을 때 메인 페이지로 이동
-      navigate('/join');
+      if (!groupImage) {
+        setImageError("그룹 이미지를 등록해주세요.")
+        return
+      }
+
+      // 완료 버튼을 눌렀을 때 가족 그룹 생성 API 호출
+      try {
+        setIsLoading(true)
+        setError("")
+        setImageError("")
+
+        // API 호출로 가족 그룹 생성
+        const response = await createFamily({
+          familyName: groupName
+        })
+
+        const data = response.data
+        setUser(data)
+
+        // 이미지가 있는 경우 presignedUrl을 사용하여 S3에 이미지 업로드
+        if (groupImage && data.presignedUrl) {
+          try {
+            // 이미지를 webp 형식으로 변환
+            const imageBlob = await convertToWebP(groupImage)
+            
+            // presignedUrl을 사용하여 S3에 이미지 업로드
+            await uploadImageWithPresignedUrl(
+              data.presignedUrl, 
+              new File([imageBlob], data.fileName, { type: 'image/webp' })
+            )
+          } catch (uploadError) {
+            console.error("이미지 업로드 실패:", uploadError)
+            // 이미지 업로드 실패해도 그룹은 생성되었으므로 계속 진행
+          }
+        }
+
+        // 성공 시 join 페이지로 이동 (아직 개인 정보 생성 전)
+        navigate('/join')
+      } catch (err) {
+        console.error("가족 그룹 생성 실패:", err)
+        setError("가족 그룹 생성에 실패했습니다. 다시 시도해주세요.")
+      } finally {
+        setIsLoading(false)
+      }
     }
-  };
+  }
+
+  // 이미지를 webp 형식으로 변환하는 함수
+  const convertToWebP = async (file): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0)
+
+          // webp 형식으로 변환
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob)
+            } else {
+              reject(new Error('Failed to convert image to webp'))
+            }
+          }, 'image/webp')
+        }
+        img.onerror = () => reject(new Error('Failed to load image'))
+        img.src = event.target.result as string
+      }
+      reader.onerror = () => reject(new Error('Failed to read file'))
+      reader.readAsDataURL(file)
+    })
+  }
 
   const handlePrev = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   // Get text color based on step status
   const getTextColor = (step) => {
-    if (step === currentStep) return "text-blue-500";
-    if (step < currentStep) return "text-blue-600";
-    return "text-gray-500";
-  };
+    if (step === currentStep) return "text-blue-500"
+    if (step < currentStep) return "text-blue-600"
+    return "text-gray-500"
+  }
+
+  const handleGroupNameChange = (name) => {
+    setGroupName(name)
+  }
+
+  const handleImageChange = (file, previewUrl = null) => {
+    setGroupImage(file)
+
+    // 미리보기 URL도 함께 저장 (전달 받았을 경우)
+    if (previewUrl) {
+      setGroupImagePreview(previewUrl)
+    }
+
+    setImageError("") // 이미지가 선택되면 에러 메시지 초기화
+  }
 
   return (
     <>
@@ -67,8 +178,6 @@ function CreateGroupPage() {
         <Title text="그룹 생성하기" />
       </div>
       <div className="flex justify-center mt-[10px]">
-
-
 
         {/* 앞에 흰 div */}
         <div className="px-10 py-[40px] w-[440px] h-[550px] border border-gray-300 bg-white rounded-[8px] flex flex-col z-30">
@@ -93,22 +202,30 @@ function CreateGroupPage() {
                 )}
                 <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(2)}`}>사진 등록</p>
               </div>
-
-              {/* <ChevronRight color="#4B4B51" size={20} />
-
-            <div className="flex justify-center items-center">
-              <CircleNumber number={3} isActive={currentStep >= 3} />
-              <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(3)}`}>사진등록</p>
-            </div> */}
             </div>
 
             <hr className="my-8" />
 
             {/* Content based on current step */}
             <div className="transition-opacity duration-300">
-              {currentStep === 1 && <InputGroupName />}
-              {currentStep === 2 && <InputGroupPic />}
+              {currentStep === 1 && (
+                <InputGroupName
+                  onChangeGroupName={handleGroupNameChange}
+                  value={groupName}
+                  error={nameError}
+                  setError={setNameError} />
+              )}
+              {currentStep === 2 && (
+                <InputGroupPic
+                  onImageChange={handleImageChange}
+                  initialImage={groupImage}
+                  initialPreviewUrl={groupImagePreview}
+                />
+              )}
             </div>
+
+            {error && <p className="text-red-500 mt-2">{error}</p>}
+            {imageError && <p className="text-red-500 mt-2 text-center">{imageError}</p>}
           </div>
 
           {/* Buttons fixed to bottom */}
@@ -117,7 +234,11 @@ function CreateGroupPage() {
               {currentStep > 1 && (
                 <Button name="이전" color="white" onClick={handlePrev} />
               )}
-              <Button name={currentStep === 2 ? "완료" : "다음"} color="blue" onClick={handleNext} />
+              <Button
+                name={currentStep === 2 ? (isLoading ? "처리 중..." : "완료") : "다음"}
+                color="blue"
+                onClick={handleNext}
+              />
             </div>
           </div>
         </div>
@@ -125,14 +246,12 @@ function CreateGroupPage() {
         {/* 세번째 파란색 div */}
         <div className="absolute ml-[60px] px-8 py-[40px] w-[440px] h-[510px] bg-blue-500 rounded-[8px] flex flex-col z-10px" />
 
-
         {/* 두번째 하늘색 div */}
         <div className="absolute ml-[30px] px-8 py-[40px] w-[440px] h-[530px] bg-blue-300 rounded-[8px] flex flex-col z-20px" />
 
-
       </div>
     </>
-  );
+  )
 }
 
-export default CreateGroupPage;
+export default CreateGroupPage

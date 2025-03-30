@@ -1,98 +1,215 @@
-import { useState, useEffect, useCallback } from "react"
-import Title from "@/components/common/Title"
-import album1 from "/assets/album-1.png"
-import album2 from "/assets/album-2.png"
-import album3 from "/assets/album-3.png"
-import album4 from "/assets/album-4.png"
-import album5 from "/assets/album-5.png"
-import { useModal } from '@/hooks/useModal'
-import InputImg from "@/components/common/Modal/InputImg"
-import DropDown from "@/components/common/Modal/DropDown"
-import Alert from "@/components/common/Alert"
-import InfiniteScroll from "@/components/photoAlbum/InfiniteScroll"
+import { useState, useEffect, useCallback } from "react";
+import Title from "@/components/common/Title";
+import Alert from "@/components/common/Alert";
+import useModal from "@/hooks/useModal";
+import { getBasicAlbumPhotos } from "@/apis/photoApi";
+import { fetchAlbums } from "@/apis/albumApi";
+import Loading from "@/pages/LoadingPage";
 
-import { CircleCheck, CirclePlus, FolderUp, ImageUp, Trash2, X } from 'lucide-react';
+// 새로 분리한 컴포넌트들 임포트
+import PhotoUploader from "@/components/photo/PhotoUploader";
+import PhotoActionBar from "@/components/photo/PhotoActionBar";
+import ThumbnailSelector from "@/components/photo/ThumbnailSelector";
+import PhotoModal from "@/components/photo/PhotoModal";
+import PhotoMover from "@/components/photo/PhotoMover";
+import PhotoGrid from "@/components/photo/PhotoGrid";
+
+import useUserStore from "@/stores/useUserStore";
+
+interface Photo {
+  photoId: number;
+  photoUrl: string;
+}
 
 function BasicPhotoAlbumPage() {
-  const allPhotos = [
-    album1, album2, album3, album4, album5,
-    album2, album3, album4, album5, album1,
-    album3, album4, album5, album1, album2,
-    album4, album5, album1, album2, album3,
-    album1, album2, album3, album4, album5,
-    album2, album3, album4, album5, album1,
-    album3, album4, album5, album1, album2,
-    album4, album5, album1, album2, album3,
-    album1, album2, album3, album4, album5,
-    album2, album3, album4, album5, album1,
-    album3, album4, album5, album1, album2,
-    album4, album5, album1, album2, album3,
-  ];
+  const { user } = useUserStore()
 
-  // 현재 화면에 보여줄 사진 상태
-  const [photos, setPhotos] = useState<string[]>([]);
-  // 한 번에 로드할 아이템 수와 현재 페이지
-  const photosPerPage = 10; // 한 번에 2줄(10개) 로드
+  // 앨범 정보 상태
+  const [albumName, setAlbumName] = useState<string>("추억보관함");
+  const [albumId, setAlbumId] = useState<number | null>(null);
+  const [allPhotos, setAllPhotos] = useState<Photo[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 현재 화면에 보여줄 사진 상태와 무한스크롤을 위한 페이징
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const initialPhotosCount = 15; // 초기에 보여줄 사진 수 (25개)
+  const photosPerPage = 10; // 그 이후 추가로 로드할 사진 수 (10개씩)
   const [page, setPage] = useState(1);
-  // 모든 사진이 로드되었는지 확인
   const [hasMore, setHasMore] = useState(true);
 
-  // 사진 선택 상태 관리
+  // 사진 선택 및 모드 상태
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isThumbnailMode, setIsThumbnailMode] = useState(false);
 
-  // 모달 관련
-  const { openModal } = useModal();
+  // 앨범 이동 관련 상태
+  const [albums, setAlbums] = useState<{ id: number; title: string }[]>([]);
 
-  // 확대해서 보기 위한 상태
+  // 확대 사진 상태
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
 
-  // Alert 상태 관리 추가
+  // Alert 상태
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
 
-  // 이미지 로드 함수
+  // 모달 관련
+  const thumbnailModal = useModal();
+  const addPhotoModal = useModal();
+  const moveAlbumModal = useModal();
+
+  const resetSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedPhotos([]);
+  };
+
+  // 첫 번째 앨범 ID 가져오기 (추억보관함 앨범)
+  const getFirstAlbumId = useCallback(async () => {
+    try {
+      const albums = await fetchAlbums();
+      if (albums && albums.length > 0) {
+        return albums[0].albumId;
+      }
+      throw new Error("앨범이 없습니다.");
+    } catch (error) {
+      console.error("앨범 ID 가져오기 실패:", error);
+      throw error;
+    }
+  }, []);
+
+  // 모든 앨범 목록 가져오기
+  useEffect(() => {
+    const getAllAlbums = async () => {
+      try {
+        const albumsData = await fetchAlbums();
+        const formattedAlbums = albumsData.map(album => ({
+          id: album.albumId,
+          title: album.albumName
+        }));
+        setAlbums(formattedAlbums);
+      } catch (error) {
+        console.error("앨범 목록 가져오기 실패:", error);
+      }
+    };
+
+    getAllAlbums();
+  }, []);
+
+  // 앨범 사진 데이터 가져오기
+  const fetchAlbumPhotos = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const albumData = await getBasicAlbumPhotos();
+      setAlbumName(albumData.albumName || "추억보관함");
+      
+      const photoList = albumData.photoList || [];
+      setAllPhotos(photoList);
+
+      // 첫 번째 앨범 ID 가져와서 저장
+      const firstAlbumId = await getFirstAlbumId();
+      setAlbumId(firstAlbumId);
+
+      // 초기 페이지 설정
+      setPage(1);
+      setPhotos([]);
+
+      // 강제 리렌더링을 위한 약간의 딜레이 추가
+      setTimeout(() => {
+        setPhotos(photoList.slice(0, initialPhotosCount));
+        setHasMore(photoList.length > initialPhotosCount);
+        setIsLoading(false);
+      }, 0);
+    } catch (err) {
+      console.error("앨범 사진 로드 실패:", err);
+      setError("앨범 사진을 불러오는 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getFirstAlbumId]);
+
+  // 강제 리렌더링
+  const refreshPhotos = useCallback(async () => {
+    try {
+      const albumData = await getBasicAlbumPhotos();
+      setAllPhotos(albumData.photoList || []);
+      setPage(1);
+      setPhotos([]);
+      setHasMore(albumData.photoList.length > initialPhotosCount);
+    } catch (err) {
+      console.error("앨범 사진 새로고침 실패:", err);
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    fetchAlbumPhotos();
+  }, [fetchAlbumPhotos]);
+
+  // 초기 이미지 로드 (25개)
+  useEffect(() => {
+    if (!isLoading && allPhotos.length > 0) {
+      // 초기에 25개 사진 로드
+      const initialPhotos = allPhotos.slice(0, initialPhotosCount);
+      setPhotos(initialPhotos);
+
+      // 초기 25개 이후에 더 불러올 사진이 있는지 확인
+      setHasMore(allPhotos.length > initialPhotosCount);
+
+      // 다음 페이지는 25개 이후부터 시작
+      setPage(Math.ceil(initialPhotosCount / photosPerPage) + 1);
+    }
+  }, [allPhotos, isLoading, initialPhotosCount, photosPerPage]);
+
+  // 더 많은 이미지 로드 함수 (스크롤 시 10개씩 추가)
   const loadMorePhotos = useCallback(() => {
-    if (!hasMore) return;
-    
-    const startIndex = (page - 1) * photosPerPage;
+    if (!hasMore || isLoading) return;
+
+    // 이미 로드된 사진 수를 기준으로 다음 인덱스 계산
+    const startIndex = photos.length;
     const endIndex = startIndex + photosPerPage;
+
+    console.log(`Loading more photos: ${startIndex} to ${endIndex} of ${allPhotos.length}`);
+
+    // 새로운 사진들 가져오기
     const newPhotos = allPhotos.slice(startIndex, endIndex);
-    
+
     if (newPhotos.length > 0) {
       setPhotos(prev => [...prev, ...newPhotos]);
       setPage(prev => prev + 1);
     }
-    
+
     // 모든 사진을 다 불러왔는지 확인
     if (endIndex >= allPhotos.length) {
       setHasMore(false);
     }
-  }, [page, hasMore, allPhotos]);
+  }, [photos.length, hasMore, allPhotos, isLoading]);
 
-  // 초기 이미지 로드
-  useEffect(() => {
-    loadMorePhotos();
-  }, []);
-
-  // 썸네일 모드 진입 함수
+  // 모드 전환 함수들
   const enterThumbnailMode = () => {
     setIsThumbnailMode(true);
     setIsSelectionMode(false);
     setSelectedPhotos([]);
   };
 
-  // 취소하기 함수 - 모든 모드 취소
   const cancelAllModes = () => {
     setIsSelectionMode(false);
     setIsThumbnailMode(false);
     setSelectedPhotos([]);
   };
 
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setIsThumbnailMode(false);
+    if (isSelectionMode) {
+      setSelectedPhotos([]);
+    }
+  };
+
   // 사진 클릭 처리 함수
-  const handlePhotoClick = (photo: string, index: number) => {
+  const handlePhotoClick = (photo: Photo, index: number) => {
     if (isSelectionMode) {
       // 선택 모드에서는 사진 선택/해제
       if (selectedPhotos.includes(index)) {
@@ -103,132 +220,100 @@ function BasicPhotoAlbumPage() {
     } else if (isThumbnailMode) {
       // 썸네일 모드에서는 한 장만 선택하고 모달 열기
       setSelectedPhotos([index]);
-
-      // 대표 이미지 변경 모달 열기
-      openModal({
-        title: "대표 이미지 변경하기",
-        content: (
-          <div className="py-2">
-            {/* 선택한 이미지 보이기 */}
-            <p className="mb-4">썸네일로 등록할 사진을 확인해주세요</p>
-            <div className="w-full flex justify-center">
-              <img
-                src={photo}
-                alt="Selected thumbnail"
-                className="h-64 object-cover"
-              />
-            </div>
-          </div>
-        ),
-        confirmButtonText: "변경하기",
-        cancelButtonText: "취소하기",
-      });
+      thumbnailModal.open();
     } else {
       // 일반 모드에서는 사진 확대
-      setEnlargedPhoto(photo);
+      setEnlargedPhoto(photo.photoUrl);
     }
-  };
-
-  // 선택 모드 토글 함수
-  const toggleSelectionMode = () => {
-    setIsSelectionMode(!isSelectionMode);
-    setIsThumbnailMode(false);
-    if (isSelectionMode) {
-      // 선택 모드 종료 시 선택된 사진 초기화
-      setSelectedPhotos([]);
-    }
-  };
-
-  // 사진 추가 모달 열기
-  const openAddPhotoModal = () => {
-    openModal({
-      title: "추억 보관하기",
-      content: (
-        <div className="py-2">
-          <p className="mb-4">사진은 최대 5장까지 한 번에 추가할 수 있습니다.</p>
-          <InputImg />
-        </div>
-      ),
-      confirmButtonText: "보관하기",
-      cancelButtonText: "취소하기",
-    });
   };
 
   // 앨범 이동 모달 열기
   const openMoveAlbumModal = () => {
     if (selectedPhotos.length === 0) {
-      setAlertMessage("이동할 사진을 먼저 선택해주세요.");
-      setAlertColor("red");
-      setShowAlert(true);
+      showAlertMessage("이동할 사진을 먼저 선택해주세요.");
       return;
     }
-
-    openModal({
-      title: "앨범 이동하기",
-      content: (
-        <div className="py-2">
-          <p className="mb-4">이동할 앨범을 선택해주세요.</p>
-          <p className="mt-3 text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
-          <DropDown />
-          <div className="h-[130px]"></div>
-        </div>
-      ),
-      confirmButtonText: "이동하기",
-      cancelButtonText: "취소하기",
-    });
+    moveAlbumModal.open();
   };
 
-  // 선택한 사진 삭제
-  const deleteSelectedPhotos = () => {
-    if (selectedPhotos.length === 0) {
-      setAlertMessage("삭제할 사진을 먼저 선택해주세요.");
-      setAlertColor("red");
-      setShowAlert(true);
-      return;
-    }
+  // Alert 표시 함수
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
 
-    // 모달을 열고 확인 버튼에 대한 콜백 함수를 제공
-    openModal({
-      title: "사진 삭제하기",
-      content: (
-        <div className="py-2">
-          <p className="mb-4">사진을 삭제하시겠습니까?</p>
-        </div>
-      ),
-      confirmButtonText: "삭제하기",
-      cancelButtonText: "취소하기",
-    });
+    // 자동으로 사라지도록 설정
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
   };
 
-  // 선택된 사진 수에 따른 메시지 표시
-  const getSelectionMessage = () => {
-    if (!isSelectionMode) return null;
-
-    if (selectedPhotos.length === 0) {
-      return "사진을 선택해주세요";
-    } else {
-      return <span>사진 <span className="font-bold">{selectedPhotos.length}</span>장이 선택되었습니다.</span>;
-    }
+  // 선택된 썸네일 이미지 URL 얻기
+  const getSelectedThumbnailUrl = (): string | null => {
+    if (selectedPhotos.length === 0) return null;
+    const selectedPhotoIndex = selectedPhotos[0];
+    return photos[selectedPhotoIndex]?.photoUrl || null;
   };
 
-  // InfiniteScroll 컴포넌트를 위한 renderItem 함수
-  const renderPhoto = (photo: string, index: number) => (
-    <div
-      className={`relative aspect-square overflow-hidden cursor-pointer ${selectedPhotos.includes(index) ? 'ring-4 ring-blue-500' : ''}`}
-      onClick={() => handlePhotoClick(photo, index)}
-    >
-      <img
-        src={photo}
-        alt={`Photo ${index + 1}`}
-        className="w-full h-full object-cover"
-      />
-      {isSelectionMode && selectedPhotos.includes(index) && (
-        <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white">
-          ✓
+  // 선택된 썸네일 이미지 ID 얻기
+  const getSelectedThumbnailId = (): number | null => {
+    if (selectedPhotos.length === 0) return null;
+    const selectedPhotoIndex = selectedPhotos[0];
+    return photos[selectedPhotoIndex]?.photoId || null;
+  };
+
+  // 선택된 사진 ID 배열 얻기
+  const getSelectedPhotoIds = (): number[] => {
+    return selectedPhotos.map(index => photos[index]?.photoId).filter(Boolean) as number[];
+  };
+
+  // 로딩 중 표시
+  if (isLoading) {
+    return <Loading message="사진을 불러오는 중..." />;
+  }
+
+  // 오류 표시
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white flex-col">
+        <p className="text-subtitle-1-lg font-p-500 text-red-500">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-p-800 text-white rounded-md"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  // 사진이 없는 경우
+  if (allPhotos.length === 0) {
+    return (
+      <div className="container mt-8">
+        <div className="flex space-x-6 mb-3">
+          <Title text={albumName} />
         </div>
-      )}
-    </div>
-  );
+        <div className="flex flex-col items-center justify-center h-64">
+          <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">아직 사진이 없습니다.</p>
+          <button
+            onClick={addPhotoModal.open}
+            className="flex items-center space-x-2 px-4 py-2 bg-p-800 text-white rounded-md"
+          >
+            <span>사진 추가하기</span>
+          </button>
+        </div>
+
+        {/* 사진 업로더 컴포넌트 */}
+        <PhotoUploader
+          isOpen={addPhotoModal.isOpen}
+          onClose={addPhotoModal.close}
+          albumId={albumId}
+          onUploadComplete={refreshPhotos}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -237,136 +322,72 @@ function BasicPhotoAlbumPage() {
       )}
 
       <div className="container">
-        <div className="flex space-x-6 mb-3">
-          <Title text="추억보관함" />
-          <div className="flex mt-auto space-x-5 justify-end w-3/4">
-            {!isSelectionMode && !isThumbnailMode ? (
-              <>
-                {/* 일반 모드 버튼들 */}
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={toggleSelectionMode}
-                >
-                  <CircleCheck strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-300"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">선택하기</p>
-                </div>
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={enterThumbnailMode}
-                >
-                  <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
-                </div>
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={openAddPhotoModal}
-                >
-                  <CirclePlus strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'21px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">사진 추가</p>
-                </div>
-              </>
-            ) : isSelectionMode ? (
-              <>
-                {/* 선택 모드 버튼들 */}
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={toggleSelectionMode}
-                >
-                  <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
-                </div>
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={openMoveAlbumModal}
-                >
-                  <FolderUp strokeWidth={1} className="absolute z-30 ml-[-5pX] mt-[2px]" size={'22px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-400"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">앨범 이동하기</p>
-                </div>
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={deleteSelectedPhotos}
-                >
-                  <Trash2 strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[1px]" size={'22px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-red-200 opacity-[70%]"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">삭제하기</p>
-                </div>
-              </>
-            ) : (
-              <>
-                {/* 썸네일 모드 버튼들 */}
-                <div
-                  className="flex space-x-1 cursor-pointer"
-                  onClick={cancelAllModes}
-                >
-                  <X strokeWidth={1} className="absolute z-30 ml-[-3pX] mt-[2px]" size={'23px'} />
-
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">취소하기</p>
-                </div>
-                <div className="flex space-x-1">
-                  <ImageUp strokeWidth={1} className="absolute z-30 ml-[-4px] mt-[2px]" size={'21px'} />
-                  <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-300"></div>
-                  <p className="font-p-500 text-subtitle-1-lg">썸네일 변경</p>
-                </div>
-              </>
-            )}
+        <div className="flex space-x-6 mb-6 mt-[10px]">
+          <Title text={albumName} />
+          <div className="flex space-x-1 h-[40px] justify-end w-full relative mt-[100px]">
+            {/* 사진 액션 바 컴포넌트 */}
+            <PhotoActionBar
+              mode={isSelectionMode ? 'selection' : (isThumbnailMode ? 'thumbnail' : 'normal')}
+              onToggleSelectionMode={toggleSelectionMode}
+              onEnterThumbnailMode={enterThumbnailMode}
+              onCancelMode={cancelAllModes}
+              onAddPhoto={addPhotoModal.open}
+              onMovePhotos={openMoveAlbumModal}
+              selectionCount={selectedPhotos.length}
+            />
           </div>
         </div>
-        {isSelectionMode ? (
-          <p className="text-red-200 font-p-500 text-subtitle-1-lg">
-            {getSelectionMessage()}
-          </p>
-        ) : isThumbnailMode ? (
-          <p className="text-red-200 font-p-500 text-subtitle-1-lg">
-            대표 이미지로 설정할 사진을 선택해주세요.
-          </p>
-        ) : (
-          <p className="text-transparent h-[24px] text-subtitle-1-lg"></p>
-        )}
       </div>
 
-      {/* 무한 스크롤 컴포넌트로 변경 */}
-      <InfiniteScroll 
-        items={photos}
-        renderItem={renderPhoto}
-        loadMoreItems={loadMorePhotos}
+      {/* 사진 그리드 컴포넌트 */}
+      <PhotoGrid
+        photos={photos}
+        selectedPhotoIndices={selectedPhotos}
+        isSelectionMode={isSelectionMode}
+        isThumbnailMode={isThumbnailMode}
+        onPhotoClick={handlePhotoClick}
+        onLoadMore={loadMorePhotos}
         hasMore={hasMore}
       />
 
-      {/* 확대된 사진 모달 */}
-      {enlargedPhoto && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
-          onClick={() => setEnlargedPhoto(null)}
-        >
-          <div className="relative max-w-4xl max-h-screen p-4">
-            <img
-              src={enlargedPhoto}
-              alt="Enlarged photo"
-              className="max-w-full max-h-full object-contain"
-            />
-            <button
-              className="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 w-10 h-10 rounded-full flex items-center justify-center"
-              onClick={() => setEnlargedPhoto(null)}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
+      {/* 사진 확대 모달 컴포넌트 */}
+      <PhotoModal
+        photoUrl={enlargedPhoto}
+        onClose={() => setEnlargedPhoto(null)}
+      />
+
+      {/* 썸네일 선택기 컴포넌트 */}
+      <ThumbnailSelector
+        isOpen={thumbnailModal.isOpen}
+        onClose={thumbnailModal.close}
+        albumId={albumId}
+        selectedPhotoId={getSelectedThumbnailId()}
+        photoUrl={getSelectedThumbnailUrl()}
+        onUpdateComplete={fetchAlbumPhotos}
+        onError={showAlertMessage}
+      />
+
+      {/* 사진 업로더 컴포넌트 */}
+      <PhotoUploader
+        isOpen={addPhotoModal.isOpen}
+        onClose={addPhotoModal.close}
+        albumId={albumId}
+        onUploadComplete={refreshPhotos}
+      />
+
+      {/* 사진 이동 컴포넌트 */}
+      <PhotoMover
+        isOpen={moveAlbumModal.isOpen}
+        onClose={moveAlbumModal.close}
+        sourceAlbumId={albumId}
+        photoIds={getSelectedPhotoIds()}
+        albums={albums}
+        onMoveComplete={fetchAlbumPhotos}
+        onError={showAlertMessage}
+        onResetSelection={resetSelection}
+      />
     </>
-  )
+  );
 }
 
-export default BasicPhotoAlbumPage
+export default BasicPhotoAlbumPage;

@@ -1,39 +1,89 @@
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import useUser from './hooks/useUser';
 
+// 보호된 라우트 컴포넌트들
+import {
+  ProtectedRoute,
+  FamilyCreationRoute,
+  ProfileCreationRoute,
+  NonAuthRoute,
+} from './components/ProtectedRoute';
+
+// 페이지 컴포넌트들
+import LoadingPage from './pages/LoadingPage';
 import BasicPhotoAlbumPage from './pages/BasicPhotoAlbumPage';
 import FontPage from './pages/FontPage';
 import LoginPage from './pages/LoginPage';
 import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
-import Modal from './components/common/Modal/Modal';
 import CalendarPage from './pages/CalendarPage';
 import MainWithLoading from './pages/MainWithLoading';
 import LetterStoragePage from './pages/LetterStoragePage';
 import EnterPage from './pages/EnterPage';
 import JoinPage from './pages/JoinPage';
 import CreateGroupPage from './pages/CreateGroupPage';
+import Header from './components/header/Header';
+
+// 관리자 페이지
+import AdminPage from './pages/AdminPage'
+import TestKakaoLogin from './pages/TestKakaoLogin';
+import OAuthCallback from './components/oauth/OAuthCallback';
+// import PWAInstaller from './components/PWAInstaller';
 
 function App() {
+  const { isLoading, checkAuthAndFetchUserData } = useUser();
+
+  // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청
+  useEffect(() => {
+    checkAuthAndFetchUserData();
+  }, []);
+
+  if (isLoading) {
+    // 로딩 중일 때 표시할 컴포넌트
+    return <LoadingPage message="Now Loading..." />;
+  }
+
   return (
     <div className='font-pretendard font-normal min-w-80'>
       <BrowserRouter>
+        <Header />
         <Routes>
-          {/* 메인 페이지로 이동 전에 Loading 페이지 보임 */}
-          <Route index path='/' element={<MainWithLoading />} />
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/font' element={<FontPage />} />
-          <Route path='/letter' element={<WriteLetterPage />} />
-          <Route path='/album/basic' element={<BasicPhotoAlbumPage />} />
-          <Route path='/album' element={<PhotoAlbumPage />} />
-          <Route path='/album/:id' element={<PhotoAlbumPage />} />
-          <Route path='/storage' element={<LetterStoragePage />} />
-          <Route path='/calendar' element={<CalendarPage />} />
-          <Route path='/enter' element={<EnterPage />} />
-          <Route path='/join' element={<JoinPage />} />
-          <Route path='/create' element={<CreateGroupPage />} />
+          {/* 인증이 필요 없는 경로 (로그인하지 않은 사용자만 접근 가능) */}
+          <Route element={<NonAuthRoute />}>
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/oauth/callback' element={<OAuthCallback />} />
+            <Route path='/kakao' element={<TestKakaoLogin />} />
+          </Route>
+
+          {/* 가족 생성/가입 페이지 - 인증 필요, 가족 없어야 함 */}
+          <Route element={<FamilyCreationRoute />}>
+            <Route path='/enter' element={<EnterPage />} />
+            <Route path='/create' element={<CreateGroupPage />} />
+          </Route>
+
+          {/* 사용자 정보 등록 페이지 - 인증 필요, 가족 있어야 함 */}
+          <Route element={<ProfileCreationRoute />}>
+            <Route path='/join' element={<JoinPage />} />
+          </Route>
+
+          {/* 완전 보호된 경로 - 모든 조건 충족 필요 */}
+          <Route element={<ProtectedRoute />}>
+            <Route index path='/' element={<MainWithLoading />} />
+            <Route path='/font' element={<FontPage />} />
+            <Route path='/letter' element={<WriteLetterPage />} />
+            <Route path='/album/basic' element={<BasicPhotoAlbumPage />} />
+            <Route path='/album' element={<PhotoAlbumPage />} />
+            <Route path='/album/:id' element={<PhotoAlbumPage />} />
+            <Route path='/storage' element={<LetterStoragePage />} />
+            <Route path='/calendar' element={<CalendarPage />} />
+            <Route path='/admin' element={<AdminPage />} />
+          </Route>
+
+          {/* 일치하는 경로가 없는 경우 메인으로 리다이렉트 */}
+          <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </BrowserRouter>
-      <Modal />
     </div>
   );
 }

@@ -10,6 +10,8 @@ import ReceivedLetterContent from '@/components/storage/ReceivedLetterContent'
 import postBox from '@/assets/storage/postBox.svg'
 import doll from '@/assets/storage/doll.svg'
 
+import '@/components/storage/animation/letterAnimation.css';
+
 function LetterStoragePage() {
   const navigate = useNavigate()
   const { storageType } = useBoxStore()

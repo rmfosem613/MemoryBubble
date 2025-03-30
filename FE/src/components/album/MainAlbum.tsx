@@ -1,4 +1,5 @@
 import { MainAlbumProps } from "@/types/Album";
+import defaultAlbumImage from "@/assets/album/blank.svg";
 
 function MainAlbum({
   title,
@@ -7,6 +8,18 @@ function MainAlbum({
   bgColor,
   photoCount
 }: MainAlbumProps) {
+  // 앨범 이미지 URL 체크 함수
+  const getAlbumImageUrl = (url) => {
+    // URL이 비어있거나 presigned URL 문자열이 포함된 경우 기본 이미지 반환
+    if (!url || url.includes('presigned')) {
+      return defaultAlbumImage;
+    }
+    return url;
+  };
+
+  // 현재 이미지 URL 확인
+  const validImageUrl = getAlbumImageUrl(imageUrl);
+
   return (
     // 앨범 색이 적용이 안 될때, 아래 주석을 풀고 100부터 600까지 저장 후 다시 시도하면 작동함 (무슨 문제인지 모르겠습니다)
     <div className={`${bgColor} relative rounded-[8px] mb-[4px]`}>
@@ -16,7 +29,7 @@ function MainAlbum({
         {/* 이미지 영역 */}
         <div className="relative w-[167px] h-[167px] bg-red-100 rounded-[8px]">
           <img
-            src={imageUrl}
+            src={validImageUrl}
             className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
             alt={title}
           />

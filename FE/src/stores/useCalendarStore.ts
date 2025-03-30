@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { CalendarStore } from '@/types/CalendarType';
 
-const useCalendarStore = create<CalendarStore>((set) => ({
+export const useCalendarStore = create<CalendarStore>((set) => ({
   currentDate: new Date(),
+  selectDate: new Date(new Date().setHours(0, 0, 0, 0)),
 
   nextMonth: () =>
     set((state) => {
@@ -17,6 +18,9 @@ const useCalendarStore = create<CalendarStore>((set) => ({
       newDate.setMonth(newDate.getMonth() - 1);
       return { currentDate: newDate };
     }),
-}));
 
-export default useCalendarStore;
+  setSelectDate: (year, month, day) =>
+    set(() => ({
+      selectDate: new Date(year, month, day),
+    })),
+}));

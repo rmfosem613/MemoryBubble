@@ -17,8 +17,9 @@
     },
     // @로 파일 경로 탐색하기 위해 추가한 설정
     "jsx": "react-jsx",
-    "moduleResolution": "bundler", 
-    "allowImportingTsExtensions":true, // . 으로 경로 탐색 허용
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true // . 으로 경로 탐색 허용
   },
   "files": [],
   "include": ["src"],

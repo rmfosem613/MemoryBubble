@@ -6,41 +6,17 @@ import {
   CalendarDateInfo,
   CalendarHookReturn,
 } from '@/types/CalendarType';
-import useCalendarStore from '@/stores/useCalendarStore';
-
-const getCalendarDateInfo = (date: Date): CalendarDateInfo => {
-  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-  return {
-    year: date.getFullYear(),
-    month: date.getMonth(),
-    today: new Date(),
-    firstDay,
-    lastDay,
-    firstDayOfWeek: firstDay.getDay(),
-    daysInMonth: lastDay.getDate(),
-  };
-};
+import { useCalendarStore } from '@/stores/useCalendarStore';
 
 export function useCalendar(): CalendarHookReturn {
-  const { currentDate, nextMonth, prevMonth } = useCalendarStore();
+  const { currentDate, selectDate } = useCalendarStore();
 
   // 요일 이름 배열
   const dayNames: DayName[] = ['일', '월', '화', '수', '목', '금', '토'];
 
   // 현재 달의 날짜 생성
   const days: DayInfo[] = useMemo(() => {
-      const dateInfo = getCalendarDateInfo(currentDate);
-      
-    // 오늘 날짜 체크를 위한 비교
-    const isToday = (day: number): boolean => {
-      return (
-        dateInfo.today.getDate() === day &&
-        dateInfo.today.getMonth() === dateInfo.month &&
-        dateInfo.today.getFullYear() === dateInfo.year
-      );
-    };
+    const dateInfo = getCalendarDateInfo(currentDate);
 
     // 빈 칸 배열 만들기 (첫 주 시작 전)
     const emptyDays: DayInfo[] = Array.from(
@@ -58,20 +34,54 @@ export function useCalendar(): CalendarHookReturn {
 
         return {
           date: dayNumber,
-          isToday: isToday(dayNumber),
+          isToday: isToday(dayNumber, dateInfo),
+          isSelect: isSelect(dayNumber, dateInfo, selectDate),
         };
       },
     );
 
     // 두 배열 합치기
     return [...emptyDays, ...monthDays];
-  }, [currentDate]);
+  }, [currentDate, selectDate]);
 
   return {
-    currentDate,
     dayNames,
     days,
-    nextMonth,
-    prevMonth,
   };
+}
+
+// ------------------------------------------------------------------------------
+function getCalendarDateInfo(date: Date): CalendarDateInfo {
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+  return {
+    year: date.getFullYear(), // 현재 연도
+    month: date.getMonth(), // 현재 월 (0-11)
+    today: new Date(), // 오늘 날짜
+    firstDay, // 현재 월의 첫 날
+    lastDay, // 현재 월의 마지막 날
+    firstDayOfWeek: firstDay.getDay(), // 현재 월의 첫 날 요일 (0: 일요일, 6: 토요일)
+    daysInMonth: lastDay.getDate(),  // 현재 월의 총 일수
+  };
+}
+
+function isToday(day: number, dateInfo: CalendarDateInfo): boolean {
+  return (
+    dateInfo.today.getDate() === day &&
+    dateInfo.today.getMonth() === dateInfo.month &&
+    dateInfo.today.getFullYear() === dateInfo.year
+  );
+}
+
+function isSelect(
+  day: number,
+  dateInfo: CalendarDateInfo,
+  selectDate: Date,
+): boolean {
+  return (
+    selectDate.getDate() === day &&
+    selectDate.getMonth() === dateInfo.month &&
+    selectDate.getFullYear() === dateInfo.year
+  );
 }
