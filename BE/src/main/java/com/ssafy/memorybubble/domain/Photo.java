@@ -28,6 +28,10 @@ public class Photo {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    public void updateAlbum(Album album) {
+        this.album = album;
+    }
+
     @Builder
     public Photo(Album album, String path, LocalDateTime createdAt) {
         this.album = album;

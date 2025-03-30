@@ -35,12 +35,20 @@ public class Font {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FontStatus fontStatus; // 폰트 생성 상태
+
     @Builder
-    public Font(User user, String name, String nameEng, String path, LocalDateTime createdAt) {
+    public Font(User user, String name, String nameEng, String path) {
         this.user = user;
         this.name = name;
         this.nameEng = nameEng;
         this.path = path;
-        this.createdAt = createdAt;
+        this.fontStatus = FontStatus.REQUESTED;
+    }
+
+    public void updateStatus() {
+        this.fontStatus = FontStatus.DONE;
     }
 }

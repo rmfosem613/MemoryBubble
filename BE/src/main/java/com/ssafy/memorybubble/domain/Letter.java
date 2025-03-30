@@ -6,6 +6,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,7 +40,7 @@ public class Letter {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime openAt; // default: createdAt과 같음
+    private LocalDate openAt; // default: createdAt과 같음
 
     @ColumnDefault("false")
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
@@ -48,8 +49,12 @@ public class Letter {
     @Column(length = 30)
     private String backgroundColor;
 
+    public void updateIsRead(Boolean isRead) {
+        this.isRead = isRead;
+    }
+
     @Builder
-    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDateTime openAt, Boolean isRead, String backgroundColor) {
+    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDate openAt, Boolean isRead, String backgroundColor) {
         this.receiver = receiver;
         this.sender = sender;
         this.content = content;
@@ -62,8 +67,8 @@ public class Letter {
 
     @PrePersist
     protected void onPersist() {
-        if (this.openAt == null) {
-            this.openAt = this.createdAt; // openAt이 null 이면 createdAt과 동일해야 함
+        if (this.openAt == null && this.createdAt != null) {
+            this.openAt = this.createdAt.toLocalDate(); // openAt이 null 이면 createdAt과 동일해야 함
         }
     }
 }

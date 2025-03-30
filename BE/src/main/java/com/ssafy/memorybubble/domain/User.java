@@ -3,6 +3,7 @@ package com.ssafy.memorybubble.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 
@@ -39,20 +40,23 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean active;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     public void updateUserFamily(Family family) {
         this.family = family;
     }
 
     public void updateUser(String name, String profile, String phoneNumber, Gender gender, LocalDate birth) {
-        this.name = name;
-        this.profile = profile;
-        this.phoneNumber = phoneNumber;
-        this.gender = gender;
-        this.birth = birth;
+        if(StringUtils.hasText(name)) this.name = name;
+        if(StringUtils.hasText(profile)) this.profile = profile;
+        if(StringUtils.hasText(phoneNumber)) this.phoneNumber = phoneNumber;
+        if(gender != null) this.gender = gender;
+        if(birth != null) this.birth = birth;
     }
 
     @Builder
-    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Boolean active) {
+    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Boolean active, Role role) {
         this.family = family;
         this.email = email;
         this.name = name;
@@ -61,5 +65,6 @@ public class User {
         this.gender = gender;
         this.birth = birth;
         this.active = active;
+        this.role = role;
     }
 }
