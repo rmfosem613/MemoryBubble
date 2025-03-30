@@ -83,7 +83,7 @@ public class PhotoService {
         // 앨범에 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, photo.getAlbum());
 
-        List<Review> reviews = reviewRepository.findByPhotoId(photo.getId());
+        List<Review> reviews = reviewRepository.findByPhotoIdWithWriter(photo.getId());
         return reviews.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
