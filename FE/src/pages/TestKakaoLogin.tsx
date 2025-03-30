@@ -1,6 +1,5 @@
 import { useState } from 'react';
 // API 기본 URL 설정
-import axios from 'axios';
 const API_BASE_URL = 'https://memorybubble.site';
 // const API_BASE_URL = 'http://localhost:8080';
 
@@ -10,8 +9,10 @@ function TestKakaoLogin() {
   const kakaoLoginHandler = async () => {
     try {
       setIsLoading(true);
+      // 바로 API_BASE_URL로 리다이렉트
+      window.location.href = `${API_BASE_URL}/api/auth/login`;
       // 카카오 로그인 API 호출
-      const response = await axios.get(`${API_BASE_URL}/api/auth/login`);
+      // const response = await axios.get(`${API_BASE_URL}/api/auth/login`);
       // const response = await axios.get(
       //   `https://memorybubble.site/api/auth/login`,
       // );
