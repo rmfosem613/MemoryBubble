@@ -1,5 +1,11 @@
 import { create } from 'zustand';
-import { CalendarStore } from '@/types/CalendarType';
+interface CalendarStore {
+  currentDate: Date;
+  selectDate: Date;
+  nextMonth: () => void;
+  prevMonth: () => void;
+  setSelectDate: (year: number, month: number, day: number) => void;
+}
 
 export const useCalendarStore = create<CalendarStore>((set) => ({
   currentDate: new Date(),
