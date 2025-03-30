@@ -8,7 +8,7 @@ import CalendarEventRemoveModal from './CalendarEventRemoveModal';
 
 function CalendarEvent() {
   const { selectDate } = useCalendarStore();
-  const { getEventsByDate } = useCalendarEventStore();
+  const { getEventsByDate, events } = useCalendarEventStore();
   const [openEvents, setOpenEvents] = useState<Record<number, boolean>>({});
   const [selectEvent, setSelectEvent] = useState<{
     scheduleId: number;
@@ -28,7 +28,7 @@ function CalendarEvent() {
   // 선택된 날짜에 해당하는 이벤트 필터링
   const filteredEvents = useMemo(() => {
     return getEventsByDate(selectDate);
-  }, [getEventsByDate, selectDate]);
+  }, [getEventsByDate, selectDate, events]);
 
   // 삭제 모달 열기
   const openRemoveModal = (scheduleId: number, scheduleContent: string) => {
@@ -46,7 +46,9 @@ function CalendarEvent() {
             {selectDate.getMonth() + 1}월 {selectDate.getDate()}일
           </h2>
           {/* 일정추가 */}
-          <div className="flex items-center" onClick={calendarEventAddModal.open}>
+          <div
+            className="flex items-center"
+            onClick={calendarEventAddModal.open}>
             <CirclePlus size={17} />
             <span className="text-subtitle-1-lg font-p-500">일정 추가</span>
           </div>
