@@ -124,7 +124,8 @@ public class PhotoService {
                     .path(key)
                     .build();
             photoRepository.save(photo);
-
+            // 썸네일 없으면 업데이트
+            if(album.getThumbnail() == null) album.updateThumbnail(key);
             fileResponses.add(fileService.createUploadFileResponse(key));
         }
         return fileResponses;
