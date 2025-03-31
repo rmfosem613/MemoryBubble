@@ -14,6 +14,9 @@ public enum ErrorCode {
     INVALID_TOKEN(UNAUTHORIZED, "올바르지 않은 토큰입니다."),
     INVALID_JWT_SIGNATURE(UNAUTHORIZED, "잘못된 JWT 시그니처입니다."),
 
+    ACCESS_DENIED(FORBIDDEN, "접근 권한이 없습니다."),
+    UNAUTHORIZED_USER(UNAUTHORIZED, "인증되지 않은 사용자 입니다."),
+
     // family
     ALREADY_FAMILY_EXIST(BAD_REQUEST, "이미 다른 가족에 가입되어 있습니다."),
     FAMILY_NOT_FOUND(FORBIDDEN, "해당 가족에 가입되어 있지 않습니다."),

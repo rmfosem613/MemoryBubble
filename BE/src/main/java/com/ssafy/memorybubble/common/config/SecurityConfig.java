@@ -1,11 +1,12 @@
 package com.ssafy.memorybubble.common.config;
 
+import com.ssafy.memorybubble.api.auth.security.handler.CustomAccessDeniedHandler;
+import com.ssafy.memorybubble.api.auth.security.handler.CustomAuthenticationEntryPoint;
 import com.ssafy.memorybubble.api.auth.security.handler.OAuth2FailureHandler;
 import com.ssafy.memorybubble.api.auth.security.handler.OAuth2SuccessHandler;
 import com.ssafy.memorybubble.api.auth.security.jwt.TokenAuthenticationFilter;
 import com.ssafy.memorybubble.api.auth.security.jwt.TokenExceptionFilter;
 import com.ssafy.memorybubble.api.auth.service.CustomOAuth2UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +42,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 x
                 // request 인증, 인가 설정
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
+                        request.requestMatchers("/error", "/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                                 .permitAll()
                                 .requestMatchers("/api/auth/success", "/api/auth/login", "/api/auth/reissue")
                                 .permitAll()
@@ -52,23 +53,19 @@ public class SecurityConfig {
                 // oauth 설정
                 .oauth2Login(oauth ->
                         oauth
-                                .authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/login"))
+                                //.authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/login/kakao"))
                                 .userInfoEndpoint(c->c.userService(oAuth2UserService))
                                 .successHandler(oAuth2SuccessHandler)
                                 .failureHandler(oAuth2FailureHandler)
                 )
-                // 인증/권한 예외 처리 설정
-                .exceptionHandling(handling -> handling
-                        // 인증 O, 권한 X
-                        .accessDeniedHandler(((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"error\":\"접근 권한이 없습니다.\"}");
-                        }))
-                )
                 // jwt 설정
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(tokenExceptionFilter, tokenAuthenticationFilter.getClass());
+                .addFilterBefore(tokenExceptionFilter, tokenAuthenticationFilter.getClass())
+                // 인증, 권한 예외 처리 설정
+                .exceptionHandling(exception -> exception
+                        //.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                        .accessDeniedHandler(new CustomAccessDeniedHandler()));
+
 
         return http.build();
     }
