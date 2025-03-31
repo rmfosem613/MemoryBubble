@@ -17,6 +17,8 @@
     "@heroicons/react": "^2.2.0",
     "@types/react-datepicker": "^6.2.0",
     "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "firebase": "^11.5.0",
     "lucide-react": "^0.479.0",
     "react": "^19.0.0",
     "react-datepicker": "^8.2.1",
