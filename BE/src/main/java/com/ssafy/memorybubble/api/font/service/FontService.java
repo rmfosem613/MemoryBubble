@@ -11,7 +11,6 @@ import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
 import com.ssafy.memorybubble.api.font.exception.FontException;
 import com.ssafy.memorybubble.api.font.repository.FontRepository;
-import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
@@ -28,9 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_BAD_REQUEST;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -123,8 +120,8 @@ public class FontService {
         log.info("fileResponseList={}", fileResponseList);
 
         // 관리자에게 폰트 생성 요청 알림(FCM) 보내기
-        User admin = userRepository.findByRole(Role.ADMIN).orElseThrow(()->new UserException(USER_NOT_FOUND));
-        sendFontMessage(admin, "추억 방울", "새로운 폰트 생성 요청이 있습니다.");
+        userRepository.findAllByRole(Role.ADMIN)
+                .forEach(admin -> sendFontMessage(admin, "추억 방울", "새로운 폰트 생성 요청이 있습니다."));
         return fileResponseList;
     }
 
