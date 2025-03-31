@@ -267,6 +267,32 @@ export const usePhotoAlbum = () => {
     return currentIndex === photos.length - 1 ? 0 : currentIndex + 1;
   };
 
+  // 앨범 사진 목록 새로고침 함수
+  const refreshPhotos = async () => {
+    try {
+      if (!id) {
+        throw new Error('앨범 ID가 유효하지 않습니다.');
+      }
+
+      const response = await apiClient.get(`/api/albums/${id}`);
+      console.log('앨범 사진 새로고침:', response.data);
+
+      // API 응답에서 photoList 배열 추출
+      const photoList = response.data.photoList || [];
+
+      // Photo 인터페이스에 맞게 데이터 변환
+      const formattedPhotos: Photo[] = photoList.map((photo: any) => ({
+        id: photo.photoId,
+        src: photo.photoUrl,
+        alt: `앨범 사진 ${photo.photoId}`,
+      }));
+
+      setPhotos(formattedPhotos);
+    } catch (error) {
+      console.error('사진 목록 새로고침 실패:', error);
+    }
+  };
+
   return {
     albumTitle,
     newAlbumName,
@@ -294,5 +320,6 @@ export const usePhotoAlbum = () => {
     setTargetAlbumId,
     handleMovePhoto,
     albumId: id, // 현재 앨범 ID 반환
+    refreshPhotos,
   };
 };

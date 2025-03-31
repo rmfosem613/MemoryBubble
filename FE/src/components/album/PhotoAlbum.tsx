@@ -7,6 +7,9 @@ import {
   ChevronRight,
   FolderUp,
   Mic,
+  CirclePause,
+  CirclePlay,
+  CirclePlus,
 } from 'lucide-react';
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 import DropDown from '../common/Modal/DropDown';
@@ -14,6 +17,7 @@ import { usePhotoMessages } from '@/hooks/usePhotoMessages ';
 import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
 import apiClient from '@/apis/apiClient';
+import PhotoUploader from '../photo/PhotoUploader';
 
 function PhotoAlbum() {
   const {
@@ -28,7 +32,7 @@ function PhotoAlbum() {
     photos,
     isLoading,
     currentIndex,
-    photoMessages, // API에서 가져온 메시지 데이터
+    photoMessages, // API에서 가져온 메시지 데이터0
     setPhotoMessages, // 메시지 데이터 업데이트 함수
     handleChangeTitle,
     handleChangeThumnail,
@@ -40,27 +44,56 @@ function PhotoAlbum() {
     setTargetAlbumId,
     handleMovePhoto,
     albumId,
+    refreshPhotos,
   } = usePhotoAlbum();
 
   const {
     postcardMessage,
     setPostcardMessage,
     isRecording,
+    currentlyPlayingId,
     messageInputRef,
     handleSaveMessage,
     handleRecordButtonClick,
+    toggleAudioPlayback,
   } = usePhotoMessages(photos, currentIndex);
 
   // 각 모달별로 useModal() 훅 사용하여 상태 관리
   const editAlbumModal = useModal();
   const changeThumbnailModal = useModal();
   const movePhotoModal = useModal();
+  const addPhotoModal = useModal();
+
+  // 녹음 버튼 핸들러 래핑 함수
+  const handleRecordButtonWrapper = async () => {
+    const wasRecording = isRecording;
+
+    handleRecordButtonClick();
+
+    if (wasRecording) {
+      setTimeout(async () => {
+        if (photos && photos.length > 0) {
+          try {
+            const currentPhotoId = photos[currentIndex].id;
+            const response = await apiClient.get(
+              `/api/photos/${currentPhotoId}`,
+            );
+            if (response.data && Array.isArray(response.data)) {
+              setPhotoMessages(response.data);
+            }
+          } catch (error) {
+            console.error('메시지 목록 업데이트 실패:', error);
+          }
+        }
+      }, 1000);
+    }
+  };
 
   // API에서 가져온 메시지 렌더링 함수
   const renderApiMessage = (message) => {
     if (message.type === 'TEXT') {
       return (
-        <div key={message.createdAt} className="mb-4 rounded-lg">
+        <div key={message.id || message.createdAt} className="mb-2">
           <div className="flex items-center gap-2">
             <h4 className="font-p-700 text-h4-lg">
               {message.writer || '사용자'}
@@ -71,10 +104,41 @@ function PhotoAlbum() {
           </p>
         </div>
       );
+    } else if (message.type === 'AUDIO') {
+      const isPlaying = currentlyPlayingId === (message.id || message.content);
+
+      return (
+        <div
+          key={message.id || message.createdAt}
+          className="flex flex-row mb-2 ">
+          <div className="flex items-center justify-center gap-2">
+            <h4 className="font-p-700 text-h4-lg">
+              {message.writer || '사용자'}
+            </h4>
+          </div>
+          <div className="mt-2">
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // URL을 직접 전달하고 isDirectUrl을 true로 설정
+                  toggleAudioPlayback(message.content, true);
+                }}
+                className="p-2 bg-blue-100 rounded-full">
+                {isPlaying ? (
+                  <CirclePause size={24} />
+                ) : (
+                  <CirclePlay size={24} />
+                )}
+                <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
     }
     return null;
   };
-
   // 메시지 저장 함수 (기존 handleSaveMessage 함수 호출 후 메시지 목록 갱신)
   const handleMessageSubmit = async (e) => {
     e.preventDefault();
@@ -83,17 +147,15 @@ function PhotoAlbum() {
     // 기존 handleSaveMessage 함수 호출
     await handleSaveMessage(e);
 
-    // API에서 최신 메시지 목록 다시 가져오기
+    // API에서 최신 메시지 목록 다시 가져오기 - toggleFlipWithPostCard 함수의 로직 활용
     if (photos && photos.length > 0) {
       try {
         const currentPhotoId = photos[currentIndex].id;
-        const response = await apiClient.get(
-          `/api/photos/${currentPhotoId}/reviews`,
-        );
+        const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
         if (response.data && Array.isArray(response.data)) {
-          if (setPhotoMessages) {
-            setPhotoMessages(response.data);
-          }
+          setPhotoMessages(response.data);
+        } else {
+          setPhotoMessages([]);
         }
       } catch (error) {
         console.error('메시지 목록 업데이트 실패:', error);
@@ -135,15 +197,22 @@ function PhotoAlbum() {
             className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
             onClick={editAlbumModal.open}>
             <div className="absolute bg-gray-600 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
-            <PencilLine size={18} />
+            <PencilLine size={18} strokeWidth={1} />
             <p className="text-subtitle-1-lg">앨범명 수정</p>
           </div>
           <div
             className="relative flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors"
             onClick={changeThumbnailModal.open}>
             <div className="absolute bg-blue-400 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
-            <ImageUp size={18} />
+            <ImageUp size={18} strokeWidth={1} />
             <p className="text-subtitle-1-lg">썸네일 변경</p>
+          </div>
+          <div
+            className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
+            onClick={addPhotoModal.open}>
+            <div className="absolute bg-album-200 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
+            <CirclePlus size={18} strokeWidth={1} />
+            <p className="text-subtitle-1-lg">사진 추가하기</p>
           </div>
         </div>
       </div>
@@ -204,7 +273,7 @@ function PhotoAlbum() {
                     <button
                       className="flex p-1 hover:text-blue-500 gap-1"
                       onClick={movePhotoModal.open}>
-                      <FolderUp size={20} />
+                      <FolderUp size={20} strokeWidth={1} />
                       앨범 이동하기
                     </button>
                     <p
@@ -258,8 +327,8 @@ function PhotoAlbum() {
                         ? 'bg-red-500 hover:bg-red-600 text-white'
                         : 'bg-white text-black hover:bg-gray-100 border'
                     } h-full px-4 py-2 rounded-lg transition-colors z-10`}
-                    onClick={handleRecordButtonClick}>
-                    <Mic size={20} />
+                    onClick={handleRecordButtonWrapper}>
+                    <Mic size={20} strokeWidth={1} />
                   </button>
                   {isRecording && (
                     <span className="animate-pulse text-red-500 ml-2">
@@ -389,6 +458,14 @@ function PhotoAlbum() {
           />
         </div>
       </Modal>
+
+      {/* 사진 추가 모달 */}
+      <PhotoUploader
+        isOpen={addPhotoModal.isOpen}
+        onClose={addPhotoModal.close}
+        albumId={parseInt(albumId)}
+        onUploadComplete={refreshPhotos}
+      />
     </div>
   );
 }
