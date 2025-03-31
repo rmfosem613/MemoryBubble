@@ -53,7 +53,7 @@ public class SecurityConfig {
                 // oauth 설정
                 .oauth2Login(oauth ->
                         oauth
-                                //.authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/login/kakao"))
+                                .authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/login"))
                                 .userInfoEndpoint(c->c.userService(oAuth2UserService))
                                 .successHandler(oAuth2SuccessHandler)
                                 .failureHandler(oAuth2FailureHandler)
