@@ -10,7 +10,7 @@ function TestKakaoLogin() {
     try {
       setIsLoading(true);
       // 바로 API_BASE_URL로 리다이렉트
-      window.location.href = `${API_BASE_URL}/api/auth/login`;
+      window.location.href = `${API_BASE_URL}/api/auth/login/kakao`;
       // 카카오 로그인 API 호출
       // const response = await axios.get(`${API_BASE_URL}/api/auth/login`);
       // const response = await axios.get(
@@ -23,7 +23,7 @@ function TestKakaoLogin() {
     } catch (error) {
       console.error('로그인 요청 중 오류 발생:', error);
       // 오류 발생 시에도 전체 URL 사용
-      window.location.href = `${API_BASE_URL}/api/auth/login`;
+      window.location.href = `${API_BASE_URL}/api/auth/login/kakao`;
     } finally {
       setIsLoading(false);
     }
