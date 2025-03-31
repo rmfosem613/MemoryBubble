@@ -1,6 +1,7 @@
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import useUser from './hooks/useUser';
+import { requestNotificationPermission, onMessageListener } from './hooks/firebase';
 
 // 보호된 라우트 컴포넌트들
 import {
@@ -31,12 +32,37 @@ import TestKakaoLogin from './pages/TestKakaoLogin';
 import OAuthCallback from './components/oauth/OAuthCallback';
 // import PWAInstaller from './components/PWAInstaller';
 
+type NotificationPayload = {
+  notification?: {
+    title?: string;
+    body?: string;
+  };
+};
+
 function App() {
   const { isLoading, checkAuthAndFetchUserData } = useUser();
 
-  // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청
+  // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청, fcm token 요청
   useEffect(() => {
     checkAuthAndFetchUserData();
+
+    const initFCM = async (): Promise<void> => {
+      await requestNotificationPermission();
+    };
+
+    // 포그라운드 메시지 리스너 설정
+    onMessageListener()
+      .then((payload: NotificationPayload) => {
+        if (payload.notification) {
+          console.log('Foreground message received:', payload.notification);
+          console.log(payload.notification.title);
+          console.log(payload.notification.body);
+          alert(`알림 도착: ${JSON.stringify(payload)}`);
+        }
+      })
+      .catch((err) => console.log('FCM 메시지 리스너 오류:', err));
+
+    initFCM();
   }, []);
 
   if (isLoading) {
