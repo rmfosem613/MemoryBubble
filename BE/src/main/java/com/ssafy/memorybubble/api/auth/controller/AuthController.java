@@ -3,6 +3,7 @@ package com.ssafy.memorybubble.api.auth.controller;
 import com.ssafy.memorybubble.api.auth.dto.TokenRequest;
 import com.ssafy.memorybubble.api.auth.dto.TokenResponse;
 import com.ssafy.memorybubble.api.auth.service.TokenService;
+import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class AuthController {
 
     private final TokenService tokenService;
+    private final FcmService fcmService;
 
     @GetMapping("/test")
     @Operation(
@@ -64,6 +66,7 @@ public class AuthController {
         log.info("userDetails.getUsername() logged out : {}", userDetails.getUsername());
         // user가 가진 refresh token 객체 삭제
         tokenService.deleteRefreshToken(userDetails.getUsername());
+        fcmService.deleteToken(Long.valueOf(userDetails.getUsername()));
         return ResponseEntity.ok().build();
     }
 
