@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 // import { Link } from 'lucide-react';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
+import useCalendarApi from '@/apis/useCalendarApi';
+import useUserStore from '@/stores/useUserStore';
 
 interface CalendarEventEditModalProps {
   isOpen: boolean;
@@ -23,22 +25,29 @@ function CalendarEventEditModal({
   if (!event) return null;
 
   const { updateEvent } = useCalendarEventStore();
+  const { updateSchedule } = useCalendarApi();
+  const { user } = useUserStore();
   const [scheduleContent, setScheduleContent] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
     title: '',
     date: '',
   });
 
   useEffect(() => {
-    setScheduleContent(event.scheduleContent);
-    setStartDate(event.startDate);
-    setEndDate(event.endDate);
+    if (event) {
+      setScheduleContent(event.scheduleContent || '');
+      setStartDate(event.startDate || '');
+      setEndDate(event.endDate || '');
+      setErrors({ title: '', date: '' });
+      setIsLoading(false);
+    }
   }, [isOpen, event]);
 
   // 제출
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!event) return false;
 
     const newErrors = { title: '', date: '' };
@@ -57,13 +66,36 @@ function CalendarEventEditModal({
       return false;
     }
 
-    // axios 요청
+    // api 요청
+    setIsLoading(true);
 
-    updateEvent(event.scheduleId, {
-      scheduleContent,
-      startDate,
-      endDate,
-    });
+    try {
+      console.log('요청할 데이터:', {
+        familyId: user.familyId,
+        startDate,
+        endDate,
+        content: scheduleContent,
+      });
+
+      const response = await updateSchedule(event.scheduleId, {
+        familyId: user.familyId,
+        startDate,
+        endDate,
+        content: scheduleContent,
+      });
+
+      if (response.status === 200) {
+        // 스토어 상태 업데이트
+        updateEvent(event.scheduleId, response.data);
+        return true;
+      }
+    } catch (error) {
+      console.error('일정 수정 실패:', error);
+      alert('일정 수정에 실패했습니다. 다시 시도해주세요.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 시작 날짜 변경
@@ -103,7 +135,7 @@ function CalendarEventEditModal({
       onConfirm={handleSubmit}
       title="일정 수정"
       cancelButtonText="취소하기"
-      confirmButtonText="수정완료">
+      confirmButtonText={isLoading ? '수정 중...' : '수정완료'}>
       <div className="flex flex-col gap-4 px-2">
         <p className="text-gray-600">
           일정 정보를 수정하고 가족들과 공유해보세요

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Modal from '../common/Modal/Modal';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
+import useCalendarApi from '@/apis/useCalendarApi';
 
 interface CalendarEventRemoveModalProps {
   isOpen: boolean;
@@ -17,12 +18,33 @@ function CalendarEventRemoveModal({
   event,
 }: CalendarEventRemoveModalProps) {
   if (!event) return null;
+
   const { removeEvent } = useCalendarEventStore();
+  const { deleteSchedule } = useCalendarApi();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleConfirm = () => {
-    // axios 요청
+  const handleConfirm = async () => {
+    if (!event) return false;
 
-    removeEvent(event.scheduleId);
+    // 삭제 요청 시작
+    setIsLoading(true);
+
+    try {
+      // 일정 삭제 API 호출
+      const response = await deleteSchedule(event.scheduleId);
+
+      if (response.status === 200) {
+        // 스토어에서 일정 제거
+        removeEvent(event.scheduleId);
+        return true;
+      }
+    } catch (error) {
+      console.error('일정 삭제 실패:', error);
+      alert('일정 삭제에 실패했습니다. 다시 시도해주세요.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -31,7 +53,7 @@ function CalendarEventRemoveModal({
       onClose={close}
       title="일정 삭제"
       cancelButtonText="취소하기"
-      confirmButtonText="삭제하기"
+      confirmButtonText={isLoading ? '삭제 중...' : '삭제하기'}
       onConfirm={handleConfirm}>
       <p className="py-4">
         [ <span className="text-blue-500">{event.scheduleContent}</span> ]

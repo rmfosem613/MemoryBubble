@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 // import { Link } from 'lucide-react';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
+import useCalendarApi from '@/apis/useCalendarApi';
+import useUserStore from '@/stores/useUserStore';
 // import DropDown from '../common/Modal/DropDown';
 // import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 
@@ -11,10 +13,14 @@ interface CalendarEventAddModalProps {
 }
 
 function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
-  const { selectDate } = useCalendarEventStore();
+  const { selectDate, addEvent } = useCalendarEventStore();
+  const { createSchedule } = useCalendarApi();
+  const { user } = useUserStore();
+
   const [eventTitle, setEventTitle] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
     title: '',
     date: '',
@@ -30,10 +36,12 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
     setEventTitle('');
     setStartDate(formattedDate);
     setEndDate(formattedDate);
+    setErrors({ title: '', date: '' });
+    setIsLoading(false);
   }, [isOpen, selectDate]);
 
   // 제출
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = { title: '', date: '' };
     // 일정 유효성 검사
     if (eventTitle.trim() === '') {
@@ -49,7 +57,31 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
       return false;
     }
 
-    // axios 요청
+    // api 요청
+    setIsLoading(true);
+
+    try {
+      // 일정 추가 API 호출
+      const response = await createSchedule({
+        familyId: user.familyId,
+        startDate,
+        endDate,
+        content: eventTitle,
+        albumId: null,
+      });
+
+      if (response.status === 200) {
+        // 스토어에 새 일정 추가
+        addEvent(response.data);
+        return true;
+      }
+    } catch (error) {
+      console.error('일정 추가 실패:', error);
+      alert('일정 추가에 실패했습니다. 다시 시도해주세요.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 시작 날짜 변경
@@ -97,7 +129,7 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
       onConfirm={handleSubmit}
       title="일정 등록"
       cancelButtonText="취소하기"
-      confirmButtonText="등록하기">
+      confirmButtonText={isLoading ? '등록 중...' : '등록하기'}>
       <div className="flex flex-col gap-4 px-2">
         <p className="text-gray-600">
           새로운 일정을 등록하고 가족들과 공유해봅시다

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -5,10 +6,39 @@ import koLocale from '@fullcalendar/core/locales/ko';
 import { DateClickArg } from '@fullcalendar/interaction';
 
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
+import useCalendarApi from '@/apis/useCalendarApi';
+import useUserStore from '@/stores/useUserStore';
 import './CalendarStyle.css';
 
 const Calendar = () => {
-  const { events, selectDate, setSelectDate } = useCalendarEventStore();
+  const { events, selectDate, setSelectDate, setEvents } =
+    useCalendarEventStore();
+  const { fetchSchedules } = useCalendarApi();
+  const { user } = useUserStore();
+
+  // 월 변경 또는 날짜 선택 시 해당 월의 일정 데이터 가져오기
+  useEffect(() => {
+    const loadSchedules = async () => {
+      try {
+        const year = selectDate.getFullYear();
+        const month = selectDate.getMonth() + 1;
+
+        const response = await fetchSchedules({
+          family_id: user.familyId,
+          year,
+          month,
+        });
+
+        if (response.status === 200) {
+          setEvents(response.data);
+        }
+      } catch (error) {
+        console.error('일정 데이터 로딩 실패:', error);
+      }
+    };
+
+    loadSchedules();
+  }, [fetchSchedules, setEvents]);
 
   // FullCalendar 형식에 맞게 이벤트 데이터 변환
   const calendarEvents = events.map((event) => {
@@ -74,23 +104,34 @@ const Calendar = () => {
   };
 
   // 월 변경 시 해당 월의 1일로 선택 업데이트
-  const handleDatesSet = (arg: { start: Date; end: Date }) => {
-    console.log('월 변경 감지!', {
-      startDate: arg.start,
-      endDate: arg.end,
-      year: arg.start.getFullYear(),
-      month: arg.start.getMonth() + 1,
-    });
-
-    const firstDayOfMonth = new Date(arg.start);
-    firstDayOfMonth.setDate(1);
-
+  const handleDatesSet = async (arg: { start: Date; end: Date }) => {
     // 이전 선택 날짜와 비교하여 year 또는 month가 변경된 경우에만 업데이트
     if (
-      selectDate.getFullYear() !== firstDayOfMonth.getFullYear() ||
-      selectDate.getMonth() !== firstDayOfMonth.getMonth()
+      selectDate.getFullYear() !== arg.start.getFullYear() ||
+      selectDate.getMonth() !== arg.start.getMonth()
     ) {
+      const firstDayOfMonth = new Date(arg.start);
+      firstDayOfMonth.setDate(1);
+
       setSelectDate(firstDayOfMonth);
+
+      const year = arg.start.getFullYear();
+      const month = arg.start.getMonth() + 1;
+      try {
+        const response = await fetchSchedules({
+          family_id: user.familyId,
+          year,
+          month,
+        });
+        if (response.status === 200) {
+          // 새 이벤트 데이터로 전체 교체
+          setEvents(response.data);
+          console.log(year, month);
+          console.log(response.data);
+        }
+      } catch (error) {
+        console.error('일정 데이터 로딩 실패:', error);
+      }
     }
   };
 
