@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 import { Link } from 'lucide-react';
-import { useCalendarStore } from '@/stores/useCalendarStore';
+import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 
 interface CalendarEventAddModalProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface CalendarEventAddModalProps {
 }
 
 function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
-  const { selectDate } = useCalendarStore();
+  const { selectDate } = useCalendarEventStore();
   const [eventTitle, setEventTitle] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -20,7 +20,7 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
 
   // 컴포넌트 마운트 시 선택 날짜로 초기화
   useEffect(() => {
-    const formattedDate = selectDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+    const formattedDate = `${selectDate.getFullYear()}-${String(selectDate.getMonth() + 1).padStart(2, '0')}-${String(selectDate.getDate()).padStart(2, '0')}`;
     setEventTitle('');
     setStartDate(formattedDate);
     setEndDate(formattedDate);
@@ -40,7 +40,7 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
     setErrors(newErrors);
     // 에러 메시지가 하나라도 있으면 false 반환
     if (newErrors.title || newErrors.date) {
-      return false
+      return false;
     }
 
     // axios 요청

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 import { Link } from 'lucide-react';
-import { useCalendarStore } from '@/stores/useCalendarStore';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 
 interface CalendarEventEditModalProps {
@@ -23,8 +22,7 @@ function CalendarEventEditModal({
 }: CalendarEventEditModalProps) {
   if (!event) return null;
 
-  const { selectDate } = useCalendarStore();
-  const { updateEvent } = useCalendarEventStore();
+  const { selectDate, updateEvent } = useCalendarEventStore();
   const [scheduleContent, setScheduleContent] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');

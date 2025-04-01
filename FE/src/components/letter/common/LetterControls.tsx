@@ -1,11 +1,53 @@
-import DatePicker from '@/components/common/DatePicker'
-import LetterDropdown from '@/components/letter/common/LetterDropDown'
-import ColorSelector from '@/components/letter/common/ColorSelector'
-import { useLetterStore } from '@/stores/useLetterStore'
-import { COLOR_OPTIONS, MEMBER_OPTIONS } from '@/utils/letterUtils';
+import { useEffect, useState } from 'react';
+import DatePicker from '@/components/common/DatePicker';
+import LetterDropdown from '@/components/letter/common/LetterDropDown';
+import ColorSelector from '@/components/letter/common/ColorSelector';
+import { useLetterStore } from '@/stores/useLetterStore';
+import { COLOR_OPTIONS } from '@/utils/letterUtils';
+import { useUserApi } from '@/apis/useUserApi';
+import { LetterMember } from '@/types/Letter';
+import useUserStore from '@/stores/useUserStore';
 
-function LetterControls() {
+interface LetterControlsProps {
+  onDateChange: (date: Date | null) => void;
+}
+
+function LetterControls({ onDateChange }: LetterControlsProps) {
   const { selectedColor, setSelectedColor, selectedMember, setSelectedMember } = useLetterStore();
+  const [familyMembers, setFamilyMembers] = useState<LetterMember[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { fetchFamilyInfo } = useUserApi();
+  const { user, family } = useUserStore();
+
+
+  // 가족 구성원 정보 조회
+  useEffect(() => {
+    const loadFamilyMembers = async () => {
+      try {
+        setIsLoading(true);
+        
+        // 가족 ID가 있는 경우에만 가족 정보 조회
+        if (user.familyId) {
+          const familyResponse = await fetchFamilyInfo(user.familyId);
+          const family = familyResponse.data;
+          
+          // 가족 구성원 데이터를 LetterMember 형식으로 변환
+          const members: LetterMember[] = family.familyMembers.map(member => ({
+            id: member.userId.toString(),
+            label: member.name
+          }));
+          
+          setFamilyMembers(members);
+        }
+      } catch (error) {
+        console.error('가족 구성원 정보 조회 실패:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFamilyMembers();
+  }, [fetchFamilyInfo]);
 
   const handleMemberSelect = (option: { id: string; label: string }) => {
     setSelectedMember(option);
@@ -13,6 +55,10 @@ function LetterControls() {
 
   const handleColorSelect = (colorId: string) => {
     setSelectedColor(colorId as any);
+  };
+
+  const handleDateChange = (date: Date) => {
+    onDateChange(date);
   };
 
   return (
@@ -25,8 +71,8 @@ function LetterControls() {
         {/* 받는 사람 */}
         <p className="text-subtitle-1-lg font-p-500 mb-[3px]">받는 사람</p>
         <LetterDropdown 
-          options={MEMBER_OPTIONS}
-          placeholder="멤버"
+          options={familyMembers}
+          placeholder={isLoading ? "로딩 중..." : "멤버"}
           onSelect={handleMemberSelect}
           selectedOption={selectedMember}
         />
@@ -37,7 +83,7 @@ function LetterControls() {
 
         {/* DatePicker */}
         <div className="mr-[12px] mb-[30px]">
-          <DatePicker onChange={(date) => console.log('선택된 날짜:', date)} />
+          <DatePicker onChange={handleDateChange} />
         </div>
 
         {/* 색상 */}

@@ -34,7 +34,7 @@ function FontDownload({ fontId }: FontDownloadProps) {
 
   return (
     <div className="container">
-      <div className="flex items-baseline mb-3">
+      <div className="flex items-baseline justify-between mb-3">
         <Title text="나의 폰트" />
         <p className="pt-1 pl-2 text-gray-600 text-subtitle-1-lg font-p-500">
           나만의 폰트를 확인해보고 다운로드 해보세요

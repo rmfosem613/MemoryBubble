@@ -1,9 +1,44 @@
+import { useEffect, useState } from 'react';
 import { useLetterStore } from '@/stores/useLetterStore';
 import LetterContainer from '@/components/letter/common/LetterContainer';
 import SeasonalDecorations from '@/components/letter/common/SeasonTemplate';
+import { useUserApi } from '@/apis/useUserApi';
+import useUserStore from '@/stores/useUserStore';
 
-function TextLetterContent() {
+interface TextLetterContentProps {
+  content: string;
+  onContentChange: (content: string) => void;
+}
+
+function TextLetterContent({ content, onContentChange }: TextLetterContentProps) {
   const { selectedColor, selectedMember } = useLetterStore();
+  const [senderName, setSenderName] = useState<string>('');
+  const { fetchUserProfile } = useUserApi();
+  const { user, family } = useUserStore();
+
+  // 현재 사용자 정보 조회
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        // 사용자 프로필 정보 조회
+        const profileResponse = await fetchUserProfile(user.userId);
+        const userProfile = profileResponse.data;
+        
+        // 보내는 사람 이름 설정
+        if (userProfile.name) {
+          setSenderName(userProfile.name);
+        }
+      } catch (error) {
+        console.error('사용자 프로필 조회 실패:', error);
+      }
+    };
+
+    loadUserProfile();
+  }, [fetchUserProfile]);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onContentChange(e.target.value);
+  };
 
   return (
     <LetterContainer>
@@ -15,7 +50,7 @@ function TextLetterContent() {
           <div className="flex space-x-3 relative z-20 items-end mb-[9px]">
             <p className="text-h3-lg font-p-700">TO.</p>
             <p className="pb-[2px] text-h4-lg font-p-700">
-              {selectedMember ? selectedMember.label : '사랑스런 큰딸'}
+              {selectedMember ? selectedMember.label : ''}
             </p>
           </div>
         </div>
@@ -30,7 +65,9 @@ function TextLetterContent() {
         <div>
           <div className="flex space-x-3 relative z-20 items-end mt-[-31px] justify-end">
             <p className="text-h3-lg font-p-700">From.</p>
-            <p className="pb-[2px] text-h4-lg font-p-700">엄마가</p>
+            <p className="pb-[2px] text-h4-lg font-p-700">
+              {senderName ? `${senderName}` : '보내는 사람이 없습니다.'}
+            </p>
           </div>
         </div>
       </div>
@@ -45,6 +82,9 @@ function TextLetterContent() {
             outline: 'none',
           }}
           rows={9}
+          value={content}
+          onChange={handleTextChange}
+          placeholder="여기에 편지 내용을 입력하세요"
         />
       </div>
     </LetterContainer>
