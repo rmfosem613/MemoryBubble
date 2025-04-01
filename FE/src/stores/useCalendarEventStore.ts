@@ -9,8 +9,10 @@ interface CalendarEvent {
 }
 
 interface CalendarEventStore {
+  selectDate: Date;
   events: CalendarEvent[];
 
+  setSelectDate: (date: Date) => void;
   addEvent: (event: CalendarEvent) => void;
   removeEvent: (scheduleId: number) => void;
   updateEvent: (
@@ -21,29 +23,47 @@ interface CalendarEventStore {
 }
 
 export const useCalendarEventStore = create<CalendarEventStore>((set, get) => ({
+  selectDate: new Date(new Date().setHours(0, 0, 0, 0)),
   events: [
     {
       scheduleId: 101,
       scheduleContent: '제주도 여행',
-      startDate: '2025-03-01',
-      endDate: '2025-03-03',
+      startDate: '2025-04-01',
+      endDate: '2025-04-03',
       albumId: 201,
     },
     {
       scheduleId: 103,
       scheduleContent: '생일 파티 준비',
-      startDate: '2025-03-08',
-      endDate: '2025-03-08',
+      startDate: '2025-04-08',
+      endDate: '2025-04-08',
+      albumId: 202,
+    },
+    {
+      scheduleId: 109,
+      scheduleContent: '생일 파티 준비',
+      startDate: '2025-04-08',
+      endDate: '2025-04-08',
+      albumId: 202,
+    },
+    {
+      scheduleId: 12,
+      scheduleContent: '생일 파티 준비',
+      startDate: '2025-04-08',
+      endDate: '2025-04-08',
       albumId: 202,
     },
     {
       scheduleId: 104,
       scheduleContent: '웹 개발 컨퍼런스',
-      startDate: '2025-03-08',
-      endDate: '2025-03-12',
+      startDate: '2025-04-08',
+      endDate: '2025-04-12',
       albumId: null,
     },
   ],
+
+  // 선택된 날짜
+  setSelectDate: (date) => set({ selectDate: date }),
 
   // 이벤트 추가 함수
   addEvent: (event) =>
