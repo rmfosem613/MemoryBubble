@@ -40,8 +40,8 @@ public class PhotoController {
             }
     )
     public ResponseEntity<List<FileResponse>> addPhotos(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @Valid @RequestBody PhotoRequest photoRequest) {
-        List<FileResponse> fileResponses = photoService.addPhoto(Long.valueOf(userDetails.getUsername()), photoRequest);
+                                                        @Valid @RequestBody PhotoRequest request) {
+        List<FileResponse> fileResponses = photoService.addPhoto(Long.valueOf(userDetails.getUsername()), request);
         return ResponseEntity.ok(fileResponses);
     }
 
@@ -58,8 +58,8 @@ public class PhotoController {
     )
     public ResponseEntity<?> addReview(@AuthenticationPrincipal UserDetails userDetails,
                                        @PathVariable Long photoId,
-                                       @Valid @RequestBody ReviewRequest reviewRequest) {
-        Object result = photoService.addReview(Long.valueOf(userDetails.getUsername()), photoId, reviewRequest);
+                                       @Valid @RequestBody ReviewRequest request) {
+        Object result = photoService.addReview(Long.valueOf(userDetails.getUsername()), photoId, request);
         if (result == null) {
             // TEXT: null
             return ResponseEntity.ok().build();

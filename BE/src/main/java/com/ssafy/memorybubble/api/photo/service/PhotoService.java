@@ -141,7 +141,7 @@ public class PhotoService {
         reviewRepository.save(review);
     }
 
-    public ReviewDto convertToDto(Review review) {
+    private ReviewDto convertToDto(Review review) {
         String content = review.getContent();
 
         // AUDIO인 경우 내용을 음성 파일 presigned url로 전달
