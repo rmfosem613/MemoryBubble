@@ -96,6 +96,7 @@ public class UserService {
         return UserDto.builder()
                 .familyId(user.getFamily() != null ? user.getFamily().getId() : null)
                 .userId(userId)
+                .role(user.getRole())
                 .build();
     }
 
