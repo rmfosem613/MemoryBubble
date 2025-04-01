@@ -379,7 +379,7 @@ function PhotoAlbum() {
         onConfirm={handleChangeTitleWrapper}>
         <div>
           <p className="text-subtitle-1-lg font-p-500">
-            앨범명과 내용을 수정해주세요
+            앨범명과 내용을 수정해주세요 (최대 7글자)
           </p>
           <form className="py-4">
             <label
@@ -391,10 +391,21 @@ function PhotoAlbum() {
               type="text"
               id="albumName"
               value={newAlbumName}
-              onChange={(e) => setNewAlbumName(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= 7) {
+                  setNewAlbumName(e.target.value);
+                }
+              }}
               placeholder={albumTitle}
               className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
+            <div className="flex justify-end mt-1">
+              <span
+                className={`text-xs ${newAlbumName.length >= 7 ? 'text-red-500' : 'text-gray-500'}`}>
+                {newAlbumName.length}/7
+              </span>
+            </div>
+
             <label
               htmlFor="albumContent"
               className="block mb-2 mt-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
@@ -404,9 +415,19 @@ function PhotoAlbum() {
               type="text"
               id="albumContent"
               value={newAlbumContent}
-              onChange={(e) => setNewAlbumContent(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= 60) {
+                  setNewAlbumContent(e.target.value);
+                }
+              }}
               className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
+            <div className="flex justify-end mt-1">
+              <span
+                className={`text-xs ${newAlbumContent.length >= 60 ? 'text-red-500' : 'text-gray-500'}`}>
+                {newAlbumContent.length}/60
+              </span>
+            </div>
           </form>
         </div>
       </Modal>
