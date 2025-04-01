@@ -1,7 +1,6 @@
 package com.ssafy.memorybubble.api.font.controller;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
-import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
 import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
@@ -106,9 +105,6 @@ public class FontController {
         return ResponseEntity.ok(fontService.fontRequestList());
     }
 
-    /**
-     * 폰트 생성 완료 API는 POST /api/admin/fonts/{font_id}를 사용하고 있는데, 이는 REST 원칙상 조금 불명확할 수 있습니다. 리소스 생성이 아닌 상태 변경이라면 PATCH가 더 적절할 수 있습니다
-     */
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/admin/fonts/{font_id}")
     @Operation(

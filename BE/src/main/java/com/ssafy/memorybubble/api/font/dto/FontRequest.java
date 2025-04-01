@@ -9,5 +9,4 @@ import lombok.Getter;
 @AllArgsConstructor
 public class FontRequest {
     private String fontName;
-    private String fontNameEng;
 }
