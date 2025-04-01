@@ -181,7 +181,7 @@ public class ScheduleService {
         }
     }
 
-    public ScheduleResponse convertToScheduleResponse(Schedule schedule) {
+    private ScheduleResponse convertToScheduleResponse(Schedule schedule) {
         return ScheduleResponse.builder()
                 .scheduleId(schedule.getId())
                 .startDate(schedule.getStartDate())

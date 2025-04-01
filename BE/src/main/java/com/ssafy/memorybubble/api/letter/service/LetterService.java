@@ -131,7 +131,7 @@ public class LetterService {
         return converToDetailDto(letter);
     }
 
-    public LetterDto convertToDto(Letter letter) {
+    private LetterDto convertToDto(Letter letter) {
         return LetterDto.builder()
                 .letterId(letter.getId())
                 .type(letter.getType())
@@ -143,7 +143,7 @@ public class LetterService {
                 .build();
     }
 
-    public LetterDetailDto converToDetailDto(Letter letter) {
+    private LetterDetailDto converToDetailDto(Letter letter) {
         String content = letter.getContent();
 
         // AUDIO인 경우 내용을 음성 파일 presigned url로 전달
