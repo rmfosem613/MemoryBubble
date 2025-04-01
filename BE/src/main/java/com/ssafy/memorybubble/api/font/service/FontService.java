@@ -65,7 +65,6 @@ public class FontService {
                 .fontId(font.getId())
                 .fontName(font.getName())
                 .fileName(font.getPath())
-                .fontNameEng(font.getNameEng())
                 .createdAt(font.getCreatedAt())
                 .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
                 .build();
@@ -103,7 +102,6 @@ public class FontService {
         Font font = Font.builder()
                 .user(user)
                 .name(fontRequest.getFontName() + "체")
-                .nameEng(fontRequest.getFontNameEng() + "체")
                 .path(String.format(FONT_PATH, userId, fontRequest.getFontName()))
                 .build();
         fontRepository.save(font);

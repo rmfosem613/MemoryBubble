@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class FontResponse {
     private Long fontId;
     private String fontName;
-    private String fontNameEng;
     private LocalDateTime createdAt;
     private String presignedUrl;
     private String fileName;
