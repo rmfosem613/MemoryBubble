@@ -4,9 +4,7 @@ import useFontStore from '@/stores/useFontStore';
 function Step3() {
   const {
     fontNameKo,
-    fontNameEn,
     setFontNameKo,
-    setFontNameEn,
     submitFont,
     isSubmitting,
     submitError,
@@ -35,41 +33,30 @@ function Step3() {
             <label
               htmlFor="fontNameKo"
               className="block mb-2 font-subtitle-1 text-subtitle-1-lg">
-              폰트명(한글)
+              폰트명(7글자 이내)
             </label>
             <div className="flex items-center gap-2 relative">
               <input
                 type="text"
                 id="fontNameKo"
                 value={fontNameKo}
-                onChange={(e) => setFontNameKo(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value.length <= 7) {
+                    setFontNameKo(e.target.value);
+                  }
+                }}
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
               <p className="">체</p>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label
-              htmlFor="fontNameEn"
-              className="block mb-2 font-subtitle-1 text-subtitle-1-lg">
-              폰트명(영어)
-            </label>
-            <div className="flex items-center gap-2 relative">
-              <input
-                type="text"
-                id="fontNameEn"
-                value={fontNameEn}
-                onChange={(e) => setFontNameEn(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-              <p>체</p>
+              <span
+                className={`text-xs ${fontNameKo.length >= 7 ? 'text-red-500' : 'text-gray-500'}`}>
+                {fontNameKo.length}/7
+              </span>
             </div>
           </div>
 
           {/* 업로드된 파일 수량 표시 */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-md">
+          <div className="mb-6 bg-gray-50 rounded-md">
             <p className="text-gray-700">
               업로드된 파일:{' '}
               <span className="font-bold">{uploadedFiles.length}개</span>

@@ -5,7 +5,6 @@ import axios from 'axios';
 interface FontResponse {
   fontId: string | null;
   fontName: string | null;
-  fontNameEng: string | null;
   createdAt: string | null;
   presignedUrl: string | null;
   fileName: string | null;
@@ -28,6 +27,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
   // 폰트 정보 가져오는 함수
   const getFontInfo = async (): Promise<FontResponse> => {
     const response = await apiClient.get<FontResponse>('api/fonts');
+    console.log('폰트 정보11111:', response.data);
     return response.data;
   };
 
@@ -86,7 +86,6 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       // 폰트 정보 가져오기
       const fontInfo = await getFontInfo();
       console.log('폰트 정보 (로드용):', fontInfo);
-      // console.log('폰트 정보 (로드용):', fontInfo.fontName);
       const createName = fontInfo.fontName;
 
       // presignedUrl이 없는 경우 (폰트가 아직 없음)
@@ -145,6 +144,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
         setFontLoaded(true);
       } catch (loadError) {
         console.error('폰트 로드 실패:', loadError);
+        alert('아직 폰트가 만들어지지 전 입니다!\n 조금만 기다려 주세요!');
         style.remove(); // 실패 시 스타일 제거
       }
     } catch (error) {

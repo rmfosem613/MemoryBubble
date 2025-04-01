@@ -25,9 +25,7 @@ interface FontState {
 
   // 폰트명 관련 상태
   fontNameKo: string;
-  fontNameEn: string;
   setFontNameKo: (name: string) => void;
-  setFontNameEn: (name: string) => void;
 
   // 제출 관련 함수와 상태
   submitFont: () => Promise<void>;
@@ -53,15 +51,14 @@ const useFontStore = create<FontState>((set, get) => ({
 
   // 폰트명 관련 상태 및 액션
   fontNameKo: '',
-  fontNameEn: '',
+
   setFontNameKo: (name) => set({ fontNameKo: name }),
-  setFontNameEn: (name) => set({ fontNameEn: name }),
 
   // 제출 관련 상태 및 액션
   isSubmitting: false,
   submitError: null,
   submitFont: async () => {
-    const { uploadedFiles, fontNameKo, fontNameEn } = get();
+    const { uploadedFiles, fontNameKo } = get();
 
     // 유효성 검사
     if (uploadedFiles.length === 0) {
@@ -69,7 +66,7 @@ const useFontStore = create<FontState>((set, get) => ({
       return;
     }
 
-    if (!fontNameKo.trim() || !fontNameEn.trim()) {
+    if (!fontNameKo.trim()) {
       set({ submitError: '폰트명을 모두 입력해주세요.' });
       return;
     }
@@ -80,7 +77,6 @@ const useFontStore = create<FontState>((set, get) => ({
       // 1단계: 폰트 이름 정보만 포함하는 요청 보내기
       const fontData = {
         fontName: fontNameKo,
-        fontNameEng: fontNameEn,
       };
 
       // 첫 번째 API 요청 (폰트 정보 제출)
@@ -164,7 +160,7 @@ const useFontStore = create<FontState>((set, get) => ({
       set({
         uploadedFiles: [],
         fontNameKo: '',
-        fontNameEn: '',
+
         isSubmitting: false,
         submitError: null, // 성공 시 에러 메시지 초기화
       });
