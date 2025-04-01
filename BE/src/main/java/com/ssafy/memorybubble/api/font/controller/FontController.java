@@ -1,7 +1,6 @@
 package com.ssafy.memorybubble.api.font.controller;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
-import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
 import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
