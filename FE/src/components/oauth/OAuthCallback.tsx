@@ -1,6 +1,8 @@
 import { useEffect } from "react" 
 import { useNavigate } from "react-router-dom" 
 import useUser from '@/hooks/useUser';
+import { requestNotificationPermission } from '@/hooks/firebase.ts';
+import apiClient from '@/apis/apiClient.ts';
 
 function OAuthCallback() {
   const navigate = useNavigate() 
@@ -25,6 +27,17 @@ function OAuthCallback() {
 
       // 사용자 정보 조회 및 상태 업데이트
       await checkAuthAndFetchUserData();
+
+      // FCM 토큰 요청 및 서버 전송
+      const fcmToken = await requestNotificationPermission();
+
+      if (fcmToken) {
+        // 백엔드에 토큰 전송
+        await apiClient.post('/api/fcm', {
+          token: fcmToken
+        })
+        console.log('FCM 토큰 서버 전송 완료');
+      }
 
       // 메인 페이지로 이동 (ProtectedRoute가 조건에 따라 적절히 리다이렉트 처리)
       navigate("/");
