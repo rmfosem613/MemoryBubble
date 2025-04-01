@@ -38,13 +38,17 @@ function TextLetterContent() {
       {/* 편지지 내용 입력: z-30 */}
       <div className="absolute top-[-10px] mt-[60px] z-30 flex flex-col w-full pr-[40px]">
         <textarea
-          className='resize-none h-[370px]'
-          style={{ backgroundColor: 'transparent', lineHeight: '340%', outline: 'none' }}
+          className="resize-none h-[370px]"
+          style={{
+            backgroundColor: 'transparent',
+            lineHeight: '340%',
+            outline: 'none',
+          }}
           rows={9}
         />
       </div>
     </LetterContainer>
   );
-};
+}
 
 export default TextLetterContent;
