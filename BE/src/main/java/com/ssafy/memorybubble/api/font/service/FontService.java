@@ -102,8 +102,8 @@ public class FontService {
         // 폰트 정보 저장
         Font font = Font.builder()
                 .user(user)
-                .name(fontRequest.getFontName())
-                .nameEng(fontRequest.getFontNameEng())
+                .name(fontRequest.getFontName() + "체")
+                .nameEng(fontRequest.getFontNameEng() + "체")
                 .path(String.format(FONT_PATH, userId, fontRequest.getFontName()))
                 .build();
         fontRepository.save(font);
