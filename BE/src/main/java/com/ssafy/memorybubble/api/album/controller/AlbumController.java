@@ -55,9 +55,9 @@ public class AlbumController {
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<MoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @PathVariable Long albumId,
-                                                        @RequestBody MoveRequest request) {
+    public ResponseEntity<PhotoMoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
+                                                             @PathVariable Long albumId,
+                                                             @RequestBody PhotoMoveRequest request) {
         return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()), albumId, request));
     }
 
@@ -103,7 +103,7 @@ public class AlbumController {
     )
     public ResponseEntity<Void> updateAlbum(@AuthenticationPrincipal UserDetails userDetails,
                                             @PathVariable Long albumId,
-                                            @Valid @RequestBody UpdateRequest request) {
+                                            @Valid @RequestBody AlbumUpdateRequest request) {
         albumService.updateAlbum(Long.valueOf(userDetails.getUsername()), albumId, request);
         return ResponseEntity.ok().build();
     }
@@ -122,7 +122,7 @@ public class AlbumController {
     )
     public ResponseEntity<Void> updateAlbumThumbnail(@AuthenticationPrincipal UserDetails userDetails,
                                                      @PathVariable Long albumId,
-                                                     @RequestBody ThumbnailRequest request) {
+                                                     @RequestBody ThumbnailUpdateRequest request) {
         albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, request.getPhotoId());
         return ResponseEntity.ok().build();
     }

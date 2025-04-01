@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class UpdateRequest {
+public class AlbumUpdateRequest {
     @Size(min = 1, max = 7, message = "앨범 이름은 1자 이상 7자 이하여야 합니다")
     String albumName;
 

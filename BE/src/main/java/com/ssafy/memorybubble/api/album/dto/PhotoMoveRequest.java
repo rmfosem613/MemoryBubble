@@ -2,11 +2,14 @@ package com.ssafy.memorybubble.api.album.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+import java.util.List;
+
 @Builder
 @AllArgsConstructor
-public class ThumbnailRequest {
-    Long photoId;
+@Getter
+public class PhotoMoveRequest {
+    Long albumId;
+    List<Long> photoList;
 }

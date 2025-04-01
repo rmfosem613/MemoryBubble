@@ -131,7 +131,7 @@ public class AlbumService {
     }
 
     @Transactional
-    public void updateAlbum(Long userId, Long albumId, UpdateRequest request) {
+    public void updateAlbum(Long userId, Long albumId, AlbumUpdateRequest request) {
         User user = userService.getUser(userId);
         Album album = getAlbum(albumId);
 

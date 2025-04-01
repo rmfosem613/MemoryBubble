@@ -1,7 +1,7 @@
 package com.ssafy.memorybubble.api.photo.service;
 
-import com.ssafy.memorybubble.api.album.dto.MoveRequest;
-import com.ssafy.memorybubble.api.album.dto.MoveResponse;
+import com.ssafy.memorybubble.api.album.dto.PhotoMoveRequest;
+import com.ssafy.memorybubble.api.album.dto.PhotoMoveResponse;
 import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
@@ -91,7 +91,7 @@ public class PhotoService {
 
     // 사진의 앨범 위치 변경
     @Transactional
-    public MoveResponse movePhotos(Long userId, Long albumId, MoveRequest request) {
+    public PhotoMoveResponse movePhotos(Long userId, Long albumId, PhotoMoveRequest request) {
         User user = userService.getUser(userId);
 
         Album moveFromAlbum = albumService.getAlbum(albumId); // 기존 앨범
@@ -108,7 +108,7 @@ public class PhotoService {
             // 앨범 id 업데이트
             photo.updateAlbum(moveToAlbum);
         }
-        return MoveResponse.builder()
+        return PhotoMoveResponse.builder()
                 .albumId(moveToAlbum.getId())
                 .build();
     }
