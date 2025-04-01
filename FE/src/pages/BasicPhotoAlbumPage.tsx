@@ -6,6 +6,8 @@ import { getBasicAlbumPhotos } from "@/apis/photoApi";
 import { fetchAlbums } from "@/apis/albumApi";
 import Loading from "@/pages/LoadingPage";
 
+import { CirclePlus } from "lucide-react"
+
 // 새로 분리한 컴포넌트들 임포트
 import PhotoUploader from "@/components/photo/PhotoUploader";
 import PhotoActionBar from "@/components/photo/PhotoActionBar";
@@ -104,7 +106,7 @@ function BasicPhotoAlbumPage() {
 
       const albumData = await getBasicAlbumPhotos();
       setAlbumName(albumData.albumName || "추억보관함");
-      
+
       const photoList = albumData.photoList || [];
       setAllPhotos(photoList);
 
@@ -291,17 +293,23 @@ function BasicPhotoAlbumPage() {
   if (allPhotos.length === 0) {
     return (
       <div className="container mt-8">
-        <div className="flex space-x-6 mb-3">
+
+        <div className="flex mb-3 justify-between">
           <Title text={albumName} />
-        </div>
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">아직 사진이 없습니다.</p>
-          <button
+
+          <div
+            className="flex space-x-1 relative top-[103px] justify-end cursor-pointer"
             onClick={addPhotoModal.open}
-            className="flex items-center space-x-2 px-4 py-2 bg-p-800 text-white rounded-md"
           >
-            <span>사진 추가하기</span>
-          </button>
+            <CirclePlus strokeWidth={1} className="z-10 ml-[-3pX] mt-[2px]" size={'21px'} />
+            <p>사진 추가</p>
+            <div className="absolute right-[63px] top-[10px] w-3.5 h-3.5 rounded-full bg-album-200 opacity-65"></div>
+          </div>
+
+        </div>
+        <div className="flex  flex-col items-center justify-center h-64">
+          <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">아직 사진이 없습니다.</p>
+
         </div>
 
         {/* 사진 업로더 컴포넌트 */}
@@ -311,7 +319,7 @@ function BasicPhotoAlbumPage() {
           albumId={albumId}
           onUploadComplete={refreshPhotos}
         />
-      </div>
+      </div >
     );
   }
 

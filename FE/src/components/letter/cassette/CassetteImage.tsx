@@ -10,7 +10,7 @@ interface CassetteImageProps {
 }
 
 function CassetteImage({ isRecordingOrPlaying }: CassetteImageProps) {
-  const { selectedColor, selectedMember } = useLetterStore();
+  const { selectedColor } = useLetterStore();
 
   // 선택된 색상에 따라 카세트 이미지 변경
   const getCassetteImage = () => {
@@ -26,31 +26,34 @@ function CassetteImage({ isRecordingOrPlaying }: CassetteImageProps) {
         return Cassette; // 겨울 또는 기본값
     }
   };
-  
+
   return (
-    <div className='flex h-full w-full justify-center mt-[-50px]'>
-      <div className='mt-[80px] h-[234px]'>
-        <img src={getCassetteImage()} className='relative z-10 w-[400px] h-full' />
-        <img 
-          src={CassetteReel} 
-          className={`relative w-[44px] z-10 ${isRecordingOrPlaying ? 'animate-spin-slow' : ''} 
-          top-[-149px] left-[24%] sm:left-[93px] md:left-[99px]`} 
+    <div className="flex h-full w-full justify-center mt-[-50px]">
+      <div className="mt-[80px] h-[234px]">
+        <img
+          src={getCassetteImage()}
+          className="relative z-10 w-[400px] h-full"
         />
-        <img 
-          src={CassetteReel} 
+        <img
+          src={CassetteReel}
           className={`relative w-[44px] z-10 ${isRecordingOrPlaying ? 'animate-spin-slow' : ''} 
-          top-[-192px] ml-[-15px] sm:ml-0 left-[68%] sm:left-[249px] md:left-[257px]`} 
+          top-[-149px] left-[24%] sm:left-[93px] md:left-[99px]`}
+        />
+        <img
+          src={CassetteReel}
+          className={`relative w-[44px] z-10 ${isRecordingOrPlaying ? 'animate-spin-slow' : ''} 
+          top-[-192px] ml-[-15px] sm:ml-0 left-[68%] sm:left-[249px] md:left-[257px]`}
         />
 
         {/* 카세트 보낸이 */}
-        <div className='relative z-30 flex justify-center top-[-315px] h-full p-[25px]'>
-          <div className='absolute bg-white w-0 sm:w-[120px] h-[20px]' />
-          <div className='relative bg-white w-0 sm:w-[120px] h-[20px] ml-[10px] mt-[15px]' />
+        <div className="relative z-30 flex justify-center top-[-315px] h-full p-[25px]">
+          <div className="absolute bg-white w-0 sm:w-[120px] h-[20px]" />
+          <div className="relative bg-white w-0 sm:w-[120px] h-[20px] ml-[10px] mt-[15px]" />
         </div>
 
-        <div className='relative z-30 flex justify-center top-[-520px] w-full h-0 sm:h-[130px] overflow-hidden'>
-          <p className='absolute font-p-700 text-h4-lg'>From. 아빠</p>
-          <p className='relative text-gray-600 mt-[110px] ml-[250px] text-p-lg'>
+        <div className="relative z-30 flex justify-center top-[-520px] w-full h-0 sm:h-[130px] overflow-hidden">
+          <p className="absolute font-p-700 text-h4-lg">From. 아빠</p>
+          <p className="relative text-gray-600 mt-[110px] ml-[250px] text-p-lg">
             {new Date().toLocaleDateString('ko-KR').replace(/\./g, '.')}
           </p>
         </div>

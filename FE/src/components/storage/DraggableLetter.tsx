@@ -12,6 +12,7 @@ interface DraggableLetterProps {
   zIndex: number;
   isAnimating: boolean;
   rotation: number;
+  onClick?: () => void; // onClick prop 추가
 }
 
 export const DraggableLetter: React.FC<DraggableLetterProps> = ({
@@ -22,13 +23,14 @@ export const DraggableLetter: React.FC<DraggableLetterProps> = ({
   zIndex,
   isAnimating,
   rotation,
+  onClick,
 }) => {
   // useDraggable 훅 사용
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
   });
 
-  const imageSize = letter.type === 'letter' ? 100 : 120;
+  const imageSize = letter.type === 'TEXT' ? 100 : 120;
 
   const style = {
     position: 'absolute',
@@ -48,16 +50,25 @@ export const DraggableLetter: React.FC<DraggableLetterProps> = ({
     transformOrigin: 'center center',
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    // 드래그 중이 아닐 때만 onClick 이벤트 처리
+    if (!isActive && onClick) {
+      e.stopPropagation();
+      onClick();
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style as React.CSSProperties}
       {...listeners}
       {...attributes}
-      className="absolute select-none">
+      className="absolute select-none"
+      onClick={handleClick}>
       <img
         src={getLetterImage(letter)}
-        alt={`${letter.name}의 ${letter.type}`}
+        alt={`${letter.senderName}의 ${letter.type}`}
         className={`w-full h-fit object-contain drop-shadow-md ${isAnimating ? 'animate-fade-in' : ''} hover:scale-110 transition-transform duration-300`}
         draggable={false}
       />

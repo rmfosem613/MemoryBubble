@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // FontRequest 타입은 useFontRequests에서 가져와서 사용
 export interface FontRequest {
-  userId: number;
+  fontId: number;
   userName: string;
   fontName: string;
   files: FontFile[];
@@ -27,16 +27,19 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
   }, [selectedRequest]);
 
   // TTF 파일 선택 핸들러
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.name.endsWith('.ttf')) {
-        setTtfFile(file);
-      } else {
-        alert('TTF 파일만 업로드할 수 있습니다.');
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        if (file.name.endsWith('.ttf')) {
+          setTtfFile(file);
+        } else {
+          alert('TTF 파일만 업로드할 수 있습니다.');
+        }
       }
-    }
-  }, []);
+    },
+    [],
+  );
 
   // 드래그 앤 드롭 핸들러
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -61,9 +64,9 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
 
     setIsUploading(true);
     try {
-      // 1. 서버에 userId를 보내 presignedUrl 요청
+      // 1. 서버에 fontId를 보내 presignedUrl 요청
       const response = await apiClient.post('/api/admin/fonts', {
-        userId: selectedRequest.userId,
+        fontId: selectedRequest.fontId,
       });
 
       const { presignedUrl } = response.data;
@@ -77,7 +80,6 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
 
       // 3. 성공 시 의뢰 완료 처리
       setUploadSuccess(true);
-
     } catch (error) {
       console.error('Font upload failed:', error);
       alert('폰트 업로드에 실패했습니다.');
@@ -86,6 +88,7 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
     }
   }, [selectedRequest, ttfFile]);
 
+
   return {
     ttfFile,
     isUploading,
@@ -93,7 +96,7 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
     handleFileChange,
     handleDragOver,
     handleDrop,
-    handleUpload
+    handleUpload,
   };
 };
 
