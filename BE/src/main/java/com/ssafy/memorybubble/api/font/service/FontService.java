@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_BAD_REQUEST;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -98,11 +99,12 @@ public class FontService {
             throw new FontException(FONT_BAD_REQUEST);
         }
 
+        String fontName = fontRequest.getFontName() + "체";
         // 폰트 정보 저장
         Font font = Font.builder()
                 .user(user)
-                .name(fontRequest.getFontName() + "체")
-                .path(String.format(FONT_PATH, userId, fontRequest.getFontName()))
+                .name(fontName)
+                .path(String.format(FONT_PATH, userId, fontName))
                 .build();
         fontRepository.save(font);
         log.info("font={}", font);
@@ -127,7 +129,7 @@ public class FontService {
         return fontRepository.findAllByFontStatus(FontStatus.REQUESTED)
                 .stream()
                 .map(font -> {
-                    User user = userService.getUser(font.getUser().getId());
+                    User user = font.getUser();
                     return convertToFontAdminDto(user, font);
                 })
                 .toList();
