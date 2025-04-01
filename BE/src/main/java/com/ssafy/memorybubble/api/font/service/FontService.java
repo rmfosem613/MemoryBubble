@@ -5,7 +5,6 @@ import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
-import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
 import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
@@ -131,12 +130,12 @@ public class FontService {
                 .stream()
                 .map(font -> {
                     User user = userService.getUser(font.getUser().getId());
-                    return convertToFontAdminDto(user, font.getName());
+                    return convertToFontAdminDto(user, font);
                 })
                 .toList();
     }
 
-    private FontAdminResponse convertToFontAdminDto(User user, String fontName) {
+    private FontAdminResponse convertToFontAdminDto(User user, Font font) {
         List<FileResponse> files = IntStream.rangeClosed(1, TEMPLATE_FILE_COUNT)
                 .mapToObj(i -> {
                     String templateFile = String.format(TEMPLATE_FILE_NAME, user.getId(), i);
@@ -145,18 +144,19 @@ public class FontService {
                 .toList();
 
         return FontAdminResponse.builder()
-                .userId(user.getId())
+                .fontId(font.getId())
                 .userName(user.getName())
-                .fontName(fontName)
+                .fontName(font.getName())
                 .files(files)
                 .build();
     }
 
     // 관리자 - 폰트 생성 완료
-    public FileResponse makeFont(FontAdminRequest fontAdminRequest) {
-        User user = userService.getUser(fontAdminRequest.getUserId());
-        Font font = fontRepository.findByUser(user)
+    public FileResponse makeFont(Long fontId) {
+        Font font = fontRepository.findById(fontId)
                 .orElseThrow(() -> new FontException(FONT_NOT_FOUND));
+
+        User user = font.getUser();
 
         // 폰트 생성 상태 업데이트
         font.updateStatus();
@@ -167,6 +167,17 @@ public class FontService {
         // ttf 파일 업로드할 Presigned URL 리턴
         String fontPath = String.format(FONT_PATH, user.getId(), font.getName());
         return fileService.createUploadFileResponse(fontPath);
+    }
+
+    // 관리자 - 폰트 생성 취소
+    public void cancelFont(Long fontId) {
+        Font font = fontRepository.findById(fontId)
+                .orElseThrow(() -> new FontException(FONT_NOT_FOUND));
+
+        fontRepository.delete(font);
+
+        // 사용자에게 폰트 생성 취소 알림 보내기
+        sendFontMessage(font.getUser(), "추억 방울", "파일의 내용이 올바르지 않아 폰트를 생성할 수 없습니다. 새로운 파일로 다시 요청해주세요.");
     }
 
     private void sendFontMessage(User receiver, String title, String body) {

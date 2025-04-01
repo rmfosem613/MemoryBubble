@@ -81,7 +81,8 @@ public class FontController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청 성공"),
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "400", description = "이미 생성된 폰트가 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    @ApiResponse(responseCode = "400", description = "이미 생성된 폰트가 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
     public ResponseEntity<List<FileResponse>> addFont(@AuthenticationPrincipal UserDetails userDetails,
@@ -105,8 +106,11 @@ public class FontController {
         return ResponseEntity.ok(fontService.fontRequestList());
     }
 
+    /**
+     * 폰트 생성 완료 API는 POST /api/admin/fonts/{font_id}를 사용하고 있는데, 이는 REST 원칙상 조금 불명확할 수 있습니다. 리소스 생성이 아닌 상태 변경이라면 PATCH가 더 적절할 수 있습니다
+     */
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/admin/fonts")
+    @PostMapping("/admin/fonts/{font_id}")
     @Operation(
             summary = "폰트 생성 완료 API (관리자)",
             description = "관리자가 폰트 생성을 완료합니다. ttf 파일을 올릴 링크를 제공합니다.",
@@ -117,7 +121,25 @@ public class FontController {
                     @ApiResponse(responseCode = "404", description = "해당 폰트를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<FileResponse> makeFont(@RequestBody FontAdminRequest fontAdminRequest) {
-        return ResponseEntity.ok(fontService.makeFont(fontAdminRequest));
+    public ResponseEntity<FileResponse> makeFont(@PathVariable("font_id") Long fontId) {
+        return ResponseEntity.ok(fontService.makeFont(fontId));
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/admin/fonts/{font_id}")
+    @Operation(
+            summary = "폰트 생성 취소 API (관리자)",
+            description = "올바르지 않은 파일 내용일 경우 관리자가 폰트 생성을 취소합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청 성공"),
+                    @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "일반 사용자는 접근할 수 없습니다. 관리자만 접근할 수 있습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "해당 폰트를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public ResponseEntity<Void> cancelFont(@PathVariable("font_id") Long fontId) {
+        fontService.cancelFont(fontId);
+
+        return ResponseEntity.ok().build();
     }
 }
