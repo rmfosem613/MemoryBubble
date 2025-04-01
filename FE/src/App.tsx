@@ -42,10 +42,13 @@ type NotificationPayload = {
 function App() {
   const { isLoading, checkAuthAndFetchUserData } = useUser();
 
-  // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청, fcm token 요청
+  // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청
   useEffect(() => {
     checkAuthAndFetchUserData();
+  },[]);
 
+  // fcm token 요청
+  useEffect(() => {
     const initFCM = async (): Promise<void> => {
       await requestNotificationPermission();
     };
@@ -57,7 +60,7 @@ function App() {
           console.log('Foreground message received:', payload.notification);
           console.log(payload.notification.title);
           console.log(payload.notification.body);
-          alert(`알림 도착: ${JSON.stringify(payload)}`);
+          alert(`알림 도착: ${payload.notification.title} ${payload.notification.body}`);
         }
       })
       .catch((err) => console.log('FCM 메시지 리스너 오류:', err));
