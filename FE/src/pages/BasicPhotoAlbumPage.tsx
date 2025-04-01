@@ -303,7 +303,7 @@ function BasicPhotoAlbumPage() {
           >
             <CirclePlus strokeWidth={1} className="z-10 ml-[-3pX] mt-[2px]" size={'21px'} />
             <p>사진 추가</p>
-            <div className="absolute right-[90px] top-[10px] w-3.5 h-3.5 rounded-full bg-album-200 opacity-65"></div>
+            <div className="absolute right-[63px] top-[10px] w-3.5 h-3.5 rounded-full bg-album-200 opacity-65"></div>
           </div>
 
         </div>
