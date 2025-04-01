@@ -1,6 +1,6 @@
 package com.ssafy.memorybubble.api.album.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class PhotoMoveRequest {
-    @NotBlank
+    @NotNull
     Long albumId;
     List<Long> photoList;
 }

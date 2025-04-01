@@ -4,6 +4,7 @@ import com.ssafy.memorybubble.domain.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class FamilyJoinRequest {
     LocalDate birth;
 
     @NotBlank
+    @Size(min = 1, max = 10, message = "이름은 1자 이상 10자 이하여야 합니다")
     String name;
 
     @NotBlank
