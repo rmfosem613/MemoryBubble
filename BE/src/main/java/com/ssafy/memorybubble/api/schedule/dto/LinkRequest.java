@@ -9,6 +9,5 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class LinkRequest {
-    @NotNull
-    Long albumId;
+    @NotNull Long albumId;
 }

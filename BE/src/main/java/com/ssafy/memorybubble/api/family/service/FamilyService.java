@@ -72,7 +72,7 @@ public class FamilyService {
                 .build();
     }
 
-    public CodeRequest getInviteCode(Long userId, Long familyId) {
+    public CodeDto getInviteCode(Long userId, Long familyId) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
@@ -88,12 +88,12 @@ public class FamilyService {
         }
 
         // redis에 familyId 있으면 반환, 없으면 familyId로 code 만들어서 redis에 저장
-        return CodeRequest.builder()
+        return CodeDto.builder()
                 .code(codeService.getInviteCode(familyId))
                 .build();
     }
 
-    public CodeResponse getFamilyIdByCode(CodeRequest request) {
+    public CodeResponse getFamilyIdByCode(CodeDto request) {
         // code를 Redis에서 찾아서 familyId 반환
         return CodeResponse.builder()
                 .familyId(codeService.getFamilyIdByCode(request.getCode()))

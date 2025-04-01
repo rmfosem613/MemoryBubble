@@ -10,7 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class ReviewRequest {
-    @NotNull
-    Type type;
+    @NotNull Type type;
     String content; // AUDIO는 null
 }

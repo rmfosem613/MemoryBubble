@@ -11,8 +11,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 public class ScheduleRequest {
-    @NotNull
-    Long familyId;
+    @NotNull Long familyId;
     LocalDate startDate;
     LocalDate endDate;
     String content;

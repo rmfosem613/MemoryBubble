@@ -52,8 +52,8 @@ public class FamilyController {
             }
     )
     @GetMapping("/{familyId}/invite")
-    public ResponseEntity<CodeRequest> getCode(@AuthenticationPrincipal UserDetails userDetails,
-                                               @PathVariable Long familyId) {
+    public ResponseEntity<CodeDto> getCode(@AuthenticationPrincipal UserDetails userDetails,
+                                           @PathVariable Long familyId) {
         // 요청 코드 반환
         return ResponseEntity.ok(familyService.getInviteCode(Long.valueOf(userDetails.getUsername()), familyId));
     }
@@ -69,7 +69,7 @@ public class FamilyController {
     )
     @PostMapping("/code")
     public ResponseEntity<CodeResponse> confirmCode(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @Valid @RequestBody CodeRequest request) {
+                                                    @Valid @RequestBody CodeDto request) {
         // 유효한 code인지 확인하고 familyId 반환
         return ResponseEntity.ok(familyService.getFamilyIdByCode(request));
     }

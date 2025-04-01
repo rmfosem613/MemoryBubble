@@ -15,20 +15,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class FamilyJoinRequest {
-    @NotNull
-    Long familyId;
-
-    @NotNull
-    LocalDate birth;
-
-    @NotBlank
-    @Size(min = 1, max = 10, message = "이름은 1자 이상 10자 이하여야 합니다")
+    @NotNull Long familyId;
+    @NotNull LocalDate birth;
+    @NotBlank @Size(min = 1, max = 10, message = "이름은 1자 이상 10자 이하여야 합니다")
     String name;
-
-    @NotBlank
-    @Pattern(regexp = "^\\d{3}-\\d{4}-\\d{4}$", message = "올바르지 않은 전화번호 형식입니다.")
+    @NotBlank @Pattern(regexp = "^\\d{3}-\\d{4}-\\d{4}$", message = "올바르지 않은 전화번호 형식입니다.")
     String phoneNumber;
-
-    @NotNull
-    Gender gender;
+    @NotNull Gender gender;
 }

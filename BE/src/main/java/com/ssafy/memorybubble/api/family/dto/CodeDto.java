@@ -7,6 +7,6 @@ import lombok.Getter;
 @Builder
 @Getter
 @AllArgsConstructor
-public class CodeRequest {
+public class CodeDto {
     String code;
 }
