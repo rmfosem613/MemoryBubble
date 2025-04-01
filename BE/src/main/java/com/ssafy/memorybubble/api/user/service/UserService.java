@@ -8,7 +8,7 @@ import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
-import com.ssafy.memorybubble.api.family.dto.JoinRequest;
+import com.ssafy.memorybubble.api.family.dto.FamilyJoinRequest;
 import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(User user, JoinRequest request, String profile) {
+    public void updateUser(User user, FamilyJoinRequest request, String profile) {
         // 이름, 프로필, 휴대폰번호, 성별, 생일 업데이트
         log.info("Updating user {}", user);
         user.updateUser(request.getName(), profile, request.getPhoneNumber(),
@@ -96,6 +96,7 @@ public class UserService {
         return UserDto.builder()
                 .familyId(user.getFamily() != null ? user.getFamily().getId() : null)
                 .userId(userId)
+                .role(user.getRole())
                 .build();
     }
 
