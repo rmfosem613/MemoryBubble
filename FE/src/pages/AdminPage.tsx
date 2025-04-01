@@ -1,5 +1,3 @@
-// src/components/admin/AdminPage.tsx
-
 import React from 'react';
 import {
   AlertCircle,
@@ -8,6 +6,7 @@ import {
   FileType2,
   Upload,
   Loader,
+  CircleX,
 } from 'lucide-react';
 import useFontRequests, {
   FontRequest,
@@ -22,6 +21,7 @@ interface AlertAdminProps {
   isSelected: boolean;
   onClick: () => void;
   onComplete: () => void;
+  onDelete: () => void;
 }
 
 const AlertAdmin: React.FC<AlertAdminProps> = ({
@@ -29,11 +29,12 @@ const AlertAdmin: React.FC<AlertAdminProps> = ({
   isSelected,
   onClick,
   onComplete,
+  onDelete,
 }) => {
   return (
     <div
-      className={`p-4 flex items-center justify-between border ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-700 bg-white'} rounded-lg w-full h-[60px] cursor-pointer hover:bg-gray-50`}
-      onClick={onClick}>
+      onClick={onClick}
+      className={`p-4 flex items-center justify-between border ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-700 bg-white'} rounded-lg w-full h-[60px] cursor-pointer hover:bg-gray-50`}>
       <div className="flex items-center space-x-2">
         <AlertCircle
           className={`w-4 h-4 ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}
@@ -46,13 +47,22 @@ const AlertAdmin: React.FC<AlertAdminProps> = ({
           폰트 생성을 의뢰하셨습니다.
         </span>
       </div>
-      <CircleCheck
-        className={`w-6 h-6 text-green-200 hover:text-green-500 cursor-pointer`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onComplete();
-        }}
-      />
+      <div className="flex flex-row items-center space-x-2">
+        <CircleCheck
+          className={`w-6 h-6 text-green-200 hover:text-green-500 cursor-pointer`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onComplete();
+          }}
+        />
+        <CircleX
+          className={`w-6 h-6 text-red-200 hover:text-red-700 cursor-pointer`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        />
+      </div>
     </div>
   );
 };
@@ -90,6 +100,7 @@ const AdminPage: React.FC = () => {
     selectedRequest,
     handleSelectRequest,
     handleCompleteRequest,
+    handleCancel,
   } = useFontRequests();
 
   const {
@@ -118,11 +129,12 @@ const AdminPage: React.FC = () => {
         {fontRequests.length > 0 ? (
           fontRequests.map((request) => (
             <AlertAdmin
-              key={request.userId}
+              key={request.fontId}
               request={request}
-              isSelected={selectedRequest?.userId === request.userId}
+              isSelected={selectedRequest?.fontId === request.fontId}
               onClick={() => handleSelectRequest(request)}
-              onComplete={() => handleCompleteRequest(request.userId)}
+              onComplete={() => handleCompleteRequest(request.fontId)}
+              onDelete={() => handleCancel(request.fontId)}
             />
           ))
         ) : (
