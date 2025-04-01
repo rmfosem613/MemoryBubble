@@ -8,8 +8,8 @@ interface ModalProps {
   cancelButtonText?: string;
   confirmButtonText?: string;
   onClose: () => void; // 모달을 닫기 위한 기본 함수
-  onCancel?: () => void | boolean; // 취소 버튼 클릭 시 추가 로직을 위한 함수
-  onConfirm?: () => void | boolean; // 확인 버튼 클릭 시 추가 로직을 위한 함수
+  onCancel?: () => void | boolean | Promise<boolean>; // 취소 버튼 클릭 시 추가 로직을 위한 함수
+  onConfirm?: () => void | boolean | Promise<boolean>; // 확인 버튼 클릭 시 추가 로직을 위한 함수
 }
 
 function Modal({
@@ -32,9 +32,9 @@ function Modal({
   };
 
   // 취소 버튼 클릭 핸들러
-  const handleCancelClick = () => {
+  const handleCancelClick = async () => {
     if (onCancel) {
-      const shouldClose = onCancel();
+      const shouldClose = await onCancel();
       if (shouldClose !== false) {
         onClose();
       }
@@ -44,9 +44,9 @@ function Modal({
   };
 
   // 확인 버튼 클릭 핸들러
-  const handleConfirmClick = () => {
+  const handleConfirmClick = async () => {
     if (onConfirm) {
-      const shouldClose = onConfirm();
+      const shouldClose = await onConfirm();
       if (shouldClose !== false) {
         onClose();
       }

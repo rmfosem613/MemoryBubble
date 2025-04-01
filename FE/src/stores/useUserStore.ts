@@ -32,7 +32,7 @@ interface UserStore {
 
   setUser: (user: Partial<User>) => void;
   setFamily: (family: Partial<Family>) => void;
-  setIsUnread: (show: boolean) => void;
+  setIsUnread: (isUnread: boolean) => void;
   resetUser: () => void;
 }
 
@@ -61,14 +61,14 @@ const useUserStore = create<UserStore>((set) => ({
   isUnread: false,
 
   // 액션
-  setUser: (userData) =>
+  setUser: (user) =>
     set((state) => ({
-      user: { ...state.user, ...userData },
+      user: { ...state.user, ...user },
     })),
 
-  setFamily: (familyData) =>
+  setFamily: (family) =>
     set((state) => ({
-      family: { ...state.family, ...familyData },
+      family: { ...state.family, ...family },
     })),
 
   setIsUnread: (isUnread) => set({ isUnread }),
