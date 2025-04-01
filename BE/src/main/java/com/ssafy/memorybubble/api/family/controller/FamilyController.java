@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +37,9 @@ public class FamilyController {
             }
     )
     public ResponseEntity<FamilyResponse> addFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @RequestBody FamilyRequest familyRequest) {
+                                                    @Valid @RequestBody FamilyRequest request) {
         // 가족 생성
-        return ResponseEntity.ok(familyService.addFamily(Long.valueOf(userDetails.getUsername()), familyRequest));
+        return ResponseEntity.ok(familyService.addFamily(Long.valueOf(userDetails.getUsername()), request));
     }
 
     @Operation(
@@ -51,8 +52,8 @@ public class FamilyController {
             }
     )
     @GetMapping("/{familyId}/invite")
-    public ResponseEntity<CodeDto> getCode(@AuthenticationPrincipal UserDetails userDetails,
-                                           @PathVariable Long familyId) {
+    public ResponseEntity<CodeRequest> getCode(@AuthenticationPrincipal UserDetails userDetails,
+                                               @PathVariable Long familyId) {
         // 요청 코드 반환
         return ResponseEntity.ok(familyService.getInviteCode(Long.valueOf(userDetails.getUsername()), familyId));
     }
@@ -68,9 +69,9 @@ public class FamilyController {
     )
     @PostMapping("/code")
     public ResponseEntity<CodeResponse> confirmCode(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @RequestBody CodeDto codeDto) {
+                                                    @Valid @RequestBody CodeRequest request) {
         // 유효한 code인지 확인하고 familyId 반환
-        return ResponseEntity.ok(familyService.getFamilyIdByCode(codeDto));
+        return ResponseEntity.ok(familyService.getFamilyIdByCode(request));
     }
 
     @Operation(
@@ -85,9 +86,9 @@ public class FamilyController {
     )
     @PostMapping("/join")
     public ResponseEntity<FileResponse> joinFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                                   @RequestBody JoinRequest joinRequest) {
+                                                   @Valid @RequestBody FamilyJoinRequest request) {
         // 가족 가입
-        return ResponseEntity.ok().body(familyService.join(Long.valueOf(userDetails.getUsername()), joinRequest));
+        return ResponseEntity.ok().body(familyService.join(Long.valueOf(userDetails.getUsername()), request));
     }
 
     @Operation(
@@ -117,10 +118,10 @@ public class FamilyController {
     @PatchMapping("/{familyId}")
     public ResponseEntity<FamilyResponse> updateFamily(@AuthenticationPrincipal UserDetails userDetails,
                                          @PathVariable Long familyId,
-                                         @RequestBody FamilyRequest familyRequest) {
+                                         @Valid @RequestBody FamilyRequest request) {
         // 가족 수정
         return ResponseEntity.ok().body(
-                familyService.updateFamily(Long.valueOf(userDetails.getUsername()), familyId, familyRequest)
+                familyService.updateFamily(Long.valueOf(userDetails.getUsername()), familyId, request)
         );
     }
 }

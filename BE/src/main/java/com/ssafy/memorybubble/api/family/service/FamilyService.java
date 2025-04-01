@@ -72,7 +72,7 @@ public class FamilyService {
                 .build();
     }
 
-    public CodeDto getInviteCode(Long userId, Long familyId) {
+    public CodeRequest getInviteCode(Long userId, Long familyId) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
@@ -88,20 +88,20 @@ public class FamilyService {
         }
 
         // redis에 familyId 있으면 반환, 없으면 familyId로 code 만들어서 redis에 저장
-        return CodeDto.builder()
+        return CodeRequest.builder()
                 .code(codeService.getInviteCode(familyId))
                 .build();
     }
 
-    public CodeResponse getFamilyIdByCode(CodeDto codeDto) {
+    public CodeResponse getFamilyIdByCode(CodeRequest request) {
         // code를 Redis에서 찾아서 familyId 반환
         return CodeResponse.builder()
-                .familyId(codeService.getFamilyIdByCode(codeDto.getCode()))
+                .familyId(codeService.getFamilyIdByCode(request.getCode()))
                 .build();
     }
 
     @Transactional
-    public FileResponse join(Long userId, JoinRequest request) {
+    public FileResponse join(Long userId, FamilyJoinRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
 
@@ -153,7 +153,7 @@ public class FamilyService {
 
         // Dto로 변환
         List<UserInfoDto> familyMembersDto = familyMembers.stream()
-                .map(userService::convertToDto)
+                .map(userService::getUserInfoDto)
                 .toList();
         log.info("family members dto: {}", familyMembersDto);
 
