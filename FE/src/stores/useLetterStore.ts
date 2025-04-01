@@ -49,8 +49,8 @@ export const useLetterStore = create<LetterState>((set) => ({
     recordingDuration: 0
   },
   
-  // 색상 테마 초기값
-  selectedColor: null,
+  // 색상 테마 초기값 - winter로 설정
+  selectedColor: 'winter',
   setSelectedColor: (color) => set({ selectedColor: color }),
   
   // 멤버 초기값

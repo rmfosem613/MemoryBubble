@@ -211,7 +211,7 @@ export const useUserApi = () => {
     return response;
   }, []);
 
-  // presignedUrl로 이미지 업로드
+  // presignedUrl로 이미지, 카세트 업로드
   const uploadImageWithPresignedUrl = useCallback(
     async (presignedUrl: string, file: File): Promise<AxiosResponse<void>> => {
       const response = await axios.put<void>(presignedUrl, file, {
