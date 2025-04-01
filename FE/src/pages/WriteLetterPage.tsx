@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import Title from '@/components/common/Title';
 import LetterTypeSelector from '@/components/letter/common/LetterTypeSelector';
 import TextLetterContent from '@/components/letter/text/TextLetterContent';
@@ -9,12 +10,14 @@ import { useLetterStore } from '@/stores/useLetterStore';
 import { sendLetter } from '@/apis/letterApi';
 import { SendLetterRequest } from '@/apis/letterApi';
 import { useNavigate } from 'react-router-dom';
+import { useUserApi } from '@/apis/useUserApi';
 
 function WriteLetterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [textContent, setTextContent] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const navigate = useNavigate();
+  const { uploadImageWithPresignedUrl } = useUserApi();
 
   // 편지 타입 및 상태 정보 가져오기
   const { 
@@ -24,6 +27,18 @@ function WriteLetterPage() {
     cassetteData 
   } = useLetterStore();
 
+  // 오디오 파일을 Blob으로 변환하는 함수
+  const fetchAudioBlobFromUrl = async (audioUrl: string): Promise<Blob> => {
+    try {
+      const response = await fetch(audioUrl);
+      const blob = await response.blob();
+      return blob;
+    } catch (error) {
+      console.error('오디오 파일 변환 실패:', error);
+      throw error;
+    }
+  };
+
   // 편지 보내기 처리 함수
   const handleSendLetter = async () => {
     // 유효성 검사
@@ -32,6 +47,7 @@ function WriteLetterPage() {
       return;
     }
 
+    // selectedColor가 없는 경우 기본값으로 winter 사용
     const themeColor = selectedColor || 'winter';
 
     // 텍스트 편지인 경우 내용 확인
@@ -57,18 +73,37 @@ function WriteLetterPage() {
       // API 요청 데이터 구성
       const letterRequest: SendLetterRequest = {
         type: letterType,
-        content: letterType === 'TEXT' ? textContent : cassetteData.recordingUrl || '',
+        content: letterType === 'TEXT' ? textContent : '',  // AUDIO 타입인 경우 content는 빈 문자열로 설정
         openAt: formattedDate,
         backgroundColor: themeColor,
         receiverId: parseInt(selectedMember.id, 10)
       };
 
-      const success = await sendLetter(letterRequest);
+      // 편지 전송 API 호출
+      const response = await sendLetter(letterRequest);
       
-      if (success) {
-        alert('편지가 성공적으로 전송되었습니다.');
-        navigate('/letter-box'); // 편지함 페이지로 이동
+      // AUDIO 타입인 경우, 녹음된 오디오 파일을 presignedUrl에 업로드
+      if (letterType === 'AUDIO' && cassetteData.recordingUrl && response.presignedUrl) {
+        // 오디오 URL에서 Blob 객체 가져오기
+        const audioBlob = await fetchAudioBlobFromUrl(cassetteData.recordingUrl);
+        
+        // 파일 타입 설정 (오디오 녹음은 일반적으로 audio/wav 또는 audio/webm)
+        const audioFile = new File([audioBlob], 'recording.mp3', { 
+          type: 'audio/mpeg'
+        });
+        
+        try {
+          // presignedUrl로 오디오 파일 업로드
+          await uploadImageWithPresignedUrl(response.presignedUrl, audioFile);
+        } catch (uploadError) {
+          console.error('오디오 파일 업로드 실패:', uploadError);
+          alert('오디오 파일 업로드에 실패했습니다. 다시 시도해주세요.');
+          throw uploadError;
+        }
       }
+      
+      alert('편지가 성공적으로 전송되었습니다.');
+      navigate('/letter-box'); // 편지함 페이지로 이동
     } catch (error) {
       console.error('편지 전송 오류:', error);
       alert('편지 전송에 실패했습니다. 다시 시도해주세요.');
@@ -97,7 +132,7 @@ function WriteLetterPage() {
               <div className="row-span-10">
                 {letterType === 'TEXT' ? 
                   <TextLetterContent onContentChange={setTextContent} content={textContent} /> : 
-                  <CassetteContent />
+                  <CassetteContent selectedDate={selectedDate} />
                 }
               </div>
             </div>

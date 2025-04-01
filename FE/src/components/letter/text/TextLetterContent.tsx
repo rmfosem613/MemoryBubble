@@ -3,6 +3,7 @@ import { useLetterStore } from '@/stores/useLetterStore';
 import LetterContainer from '@/components/letter/common/LetterContainer';
 import SeasonalDecorations from '@/components/letter/common/SeasonTemplate';
 import { useUserApi } from '@/apis/useUserApi';
+import useUserStore from '@/stores/useUserStore';
 
 interface TextLetterContentProps {
   content: string;
@@ -12,18 +13,15 @@ interface TextLetterContentProps {
 function TextLetterContent({ content, onContentChange }: TextLetterContentProps) {
   const { selectedColor, selectedMember } = useLetterStore();
   const [senderName, setSenderName] = useState<string>('');
-  const { fetchCurrentUser, fetchUserProfile } = useUserApi();
+  const { fetchUserProfile } = useUserApi();
+  const { user, family } = useUserStore();
 
   // 현재 사용자 정보 조회
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        // 현재 로그인한 사용자 ID 조회
-        const userResponse = await fetchCurrentUser();
-        const currentUser = userResponse.data;
-        
         // 사용자 프로필 정보 조회
-        const profileResponse = await fetchUserProfile(currentUser.userId);
+        const profileResponse = await fetchUserProfile(user.userId);
         const userProfile = profileResponse.data;
         
         // 보내는 사람 이름 설정
@@ -36,7 +34,7 @@ function TextLetterContent({ content, onContentChange }: TextLetterContentProps)
     };
 
     loadUserProfile();
-  }, [fetchCurrentUser, fetchUserProfile]);
+  }, [fetchUserProfile]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onContentChange(e.target.value);

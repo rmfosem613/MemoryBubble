@@ -6,6 +6,7 @@ import { useLetterStore } from '@/stores/useLetterStore';
 import { COLOR_OPTIONS } from '@/utils/letterUtils';
 import { useUserApi } from '@/apis/useUserApi';
 import { LetterMember } from '@/types/Letter';
+import useUserStore from '@/stores/useUserStore';
 
 interface LetterControlsProps {
   onDateChange: (date: Date | null) => void;
@@ -15,7 +16,9 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
   const { selectedColor, setSelectedColor, selectedMember, setSelectedMember } = useLetterStore();
   const [familyMembers, setFamilyMembers] = useState<LetterMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { fetchCurrentUser, fetchFamilyInfo } = useUserApi();
+  const { fetchFamilyInfo } = useUserApi();
+  const { user, family } = useUserStore();
+
 
   // 가족 구성원 정보 조회
   useEffect(() => {
@@ -23,13 +26,9 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
       try {
         setIsLoading(true);
         
-        // 현재 로그인한 사용자 정보 조회
-        const userResponse = await fetchCurrentUser();
-        const currentUser = userResponse.data;
-        
         // 가족 ID가 있는 경우에만 가족 정보 조회
-        if (currentUser.familyId) {
-          const familyResponse = await fetchFamilyInfo(currentUser.familyId);
+        if (user.familyId) {
+          const familyResponse = await fetchFamilyInfo(user.familyId);
           const family = familyResponse.data;
           
           // 가족 구성원 데이터를 LetterMember 형식으로 변환
@@ -48,7 +47,7 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
     };
 
     loadFamilyMembers();
-  }, [fetchCurrentUser, fetchFamilyInfo]);
+  }, [fetchFamilyInfo]);
 
   const handleMemberSelect = (option: { id: string; label: string }) => {
     setSelectedMember(option);

@@ -8,11 +8,17 @@ export interface SendLetterRequest {
   receiverId: number;
 }
 
-export const sendLetter = async (letterData: SendLetterRequest): Promise<boolean> => {
+// 편지 보내기 응답 타입 정의 (AUDIO 타입일 경우 presignedUrl 포함)
+export interface SendLetterResponse {
+  presignedUrl?: string;
+  fileName?: string;
+}
+
+export const sendLetter = async (letterData: SendLetterRequest): Promise<SendLetterResponse> => {
   try {
-    const response = await apiClient.post("/api/letters", letterData);
+    const response = await apiClient.post<SendLetterResponse>("/api/letters", letterData);
     console.log("편지 보내기 성공:", response.data);
-    return true;
+    return response.data;
   } catch (error) {
     console.error("편지 보내기 실패:", error);
     throw error;
