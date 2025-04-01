@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
-import { Link } from 'lucide-react';
+// import { Link } from 'lucide-react';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 
 interface CalendarEventEditModalProps {
@@ -22,7 +22,7 @@ function CalendarEventEditModal({
 }: CalendarEventEditModalProps) {
   if (!event) return null;
 
-  const { selectDate, updateEvent } = useCalendarEventStore();
+  const { updateEvent } = useCalendarEventStore();
   const [scheduleContent, setScheduleContent] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -133,7 +133,7 @@ function CalendarEventEditModal({
           )}
         </div>
         {/* 기간 */}
-        <div className="flex flex-col gap-1 mb-14">
+        <div className="flex flex-col gap-1 mb-6">
           <label htmlFor="event-date">기간</label>
           <div className="flex items-center gap-2">
             <input
@@ -155,10 +155,10 @@ function CalendarEventEditModal({
           {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
         </div>
         {/* 앨범 연결 */}
-        <button className="flex items-center gap-1">
+        {/* <button className="flex items-center gap-1">
           <Link size={16} />
           <p>{event.albumId ? '앨범 연결 변경' : '앨범 연결'}</p>
-        </button>
+        </button> */}
       </div>
     </Modal>
   );

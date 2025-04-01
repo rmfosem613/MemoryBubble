@@ -1,13 +1,19 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CirclePlus, Link, Trash2, PenLine } from 'lucide-react';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
 import useModal from '@/hooks/useModal';
+import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 import CalendarEventAddModal from './CalendarEventAddModal';
 import CalendarEventRemoveModal from './CalendarEventRemoveModal';
 import CalendarEventEditModal from './CalendarEventEditModal';
+import CalendarAlbumModal from './CalendarAlbumModal';
 
 function CalendarEvent() {
-  const { getEventsByDate, events, selectDate } = useCalendarEventStore();
+  const navigate = useNavigate();
+  const { getEventsByDate, events, selectDate, updateEvent } =
+    useCalendarEventStore();
+  const { allAlbums } = usePhotoAlbum(); // 앨범 목록을 가져옴
   const [openEvents, setOpenEvents] = useState<Record<number, boolean>>({});
   const [selectEvent, setSelectEvent] = useState<{
     scheduleId: number;
@@ -19,6 +25,15 @@ function CalendarEvent() {
   const calendarEventAddModal = useModal(false);
   const calendarEventRemoveModal = useModal(false);
   const calendarEventEditModal = useModal(false);
+  const calendarAlbumModal = useModal(false);
+
+  // 앨범 ID로 앨범 이름 찾기
+  const getAlbumNameById = (albumId: number | null) => {
+    if (!albumId) return '앨범';
+
+    const album = allAlbums.find((album) => album.id === albumId);
+    return album ? album.title : '앨범';
+  };
 
   // 토글 이벤트 함수
   const toggleEvent = (scheduleId: number) => {
@@ -32,6 +47,25 @@ function CalendarEvent() {
   const filteredEvents = useMemo(() => {
     return getEventsByDate(selectDate);
   }, [getEventsByDate, selectDate, events]);
+
+  // 앨범 연결 모달 열기
+  const openAlbumModal = (event) => {
+    setSelectEvent(event);
+    calendarAlbumModal.open();
+  };
+
+  // 앨범 연결 해제 핸들러
+  const handleUnlinkAlbum = (scheduleId) => {
+    updateEvent(scheduleId, { albumId: null });
+  };
+
+  // 연결된 앨범으로 이동
+  const navigateToAlbum = (albumId: number | null, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (albumId) {
+      navigate(`/album/${albumId}`);
+    }
+  };
 
   // 삭제 모달 열기
   const openRemoveModal = (scheduleId: number, scheduleContent: string) => {
@@ -92,9 +126,58 @@ function CalendarEvent() {
                         {event.endDate.replace(/-/g, '/')}
                       </p>
                       <div
-                        className={`flex items-center space-x-1 ${event.albumId ? 'text-winter-300 font-p-700' : 'text-gray-500'}`}>
-                        <Link size={17} strokeWidth={event.albumId ? 3 : 2} />
-                        <p>{event.albumId ? '앨범이름' : '앨범 연결'}</p>
+                        className={`flex items-center space-x-1 ${
+                          event.albumId
+                            ? 'text-winter-300 font-p-700'
+                            : 'text-gray-500'
+                        }`}>
+                        {event.albumId ? (
+                          <div
+                            className="flex items-center space-x-1 cursor-pointer hover:underline"
+                            onClick={(e) => navigateToAlbum(event.albumId, e)}>
+                            <Link size={17} strokeWidth={3} />
+                            <p>{getAlbumNameById(event.albumId)}</p>
+                          </div>
+                        ) : (
+                          <>
+                            <Link size={17} strokeWidth={2} />
+                            <p>앨범</p>
+                          </>
+                        )}
+
+                        {/* 앨범ID가 있을 때 다시연결하기와 연결끊기 버튼 추가 */}
+                        {event.albumId && (
+                          <div className="ml-auto flex space-x-2">
+                            <button
+                              className="px-2 py-1 text-xs rounded-md bg-winter-100 hover:bg-winter-200/50 text-gray-500 font-p-500"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openAlbumModal(event);
+                              }}>
+                              연결하기
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs rounded-md bg-red-100 hover:bg-red-200/30 text-gray-500 font-p-500"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUnlinkAlbum(event.scheduleId);
+                              }}>
+                              연결끊기
+                            </button>
+                          </div>
+                        )}
+
+                        {/* 앨범ID가 없을 때 앨범 연결하기 버튼 추가 */}
+                        {!event.albumId && (
+                          <button
+                            className="ml-auto px-2 py-1 text-xs rounded-md bg-winter-100 hover:bg-winter-200/50 text-gray-500 font-p-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAlbumModal(event);
+                            }}>
+                            연결하기
+                          </button>
+                        )}
                       </div>
                       <div className="flex justify-end space-x-2">
                         <button
@@ -146,6 +229,16 @@ function CalendarEvent() {
         close={calendarEventEditModal.close}
         event={selectEvent}
       />
+      {/* 앨범 연결 모달 */}
+      {selectEvent && (
+        <CalendarAlbumModal
+          isOpen={calendarAlbumModal.isOpen}
+          close={calendarAlbumModal.close}
+          scheduleId={selectEvent.scheduleId}
+          currentAlbumId={selectEvent.albumId || null}
+          allAlbums={allAlbums}
+        />
+      )}
     </>
   );
 }

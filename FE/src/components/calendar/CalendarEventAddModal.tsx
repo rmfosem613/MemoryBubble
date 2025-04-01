@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
-import { Link } from 'lucide-react';
+// import { Link } from 'lucide-react';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
+// import DropDown from '../common/Modal/DropDown';
+// import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 
 interface CalendarEventAddModalProps {
   isOpen: boolean;
@@ -17,6 +19,10 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
     title: '',
     date: '',
   });
+
+  // const { allAlbums } = usePhotoAlbum();
+  // const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
+  // const [isAlbumSelectorOpen, setIsAlbumSelectorOpen] = useState(false);
 
   // 컴포넌트 마운트 시 선택 날짜로 초기화
   useEffect(() => {
@@ -74,6 +80,16 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
     }
   };
 
+  // 앨범 연결
+  // const handleAlbumSelect = (albumId: number) => {
+  //   setSelectedAlbumId(albumId);
+  // };
+
+  // 앨범 연결 토글
+  // const toggleAlbumSelector = () => {
+  //   setIsAlbumSelectorOpen(!isAlbumSelectorOpen);
+  // };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -111,7 +127,7 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
           )}
         </div>
         {/* 기간 */}
-        <div className="flex flex-col gap-1 mb-14">
+        <div className="flex flex-col gap-1 mb-6">
           <label htmlFor="event-date">기간</label>
           <div className="flex items-center gap-2">
             <input
@@ -133,10 +149,25 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
           {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
         </div>
         {/* 앨범 연결 */}
-        <button className="flex items-center gap-1">
-          <Link size={16} />
-          <p>앨범 연결</p>
-        </button>
+        {/* <div className="flex flex-col gap-1">
+          <button
+            className="flex items-center gap-1 text-winter-300 mb-2"
+            onClick={toggleAlbumSelector}>
+            <Link size={16} />
+            <p>{selectedAlbumId ? '앨범 연결됨' : '앨범 연결하기'}</p>
+          </button>
+
+          {isAlbumSelectorOpen && (
+            <div className="py-2">
+              <p className="mb-4">연결할 앨범을 선택해주세요.</p>
+              <DropDown
+                albums={allAlbums}
+                onSelectAlbum={handleAlbumSelect}
+                placeholder="앨범을 선택해주세요"
+              />
+            </div>
+          )}
+        </div> */}
       </div>
     </Modal>
   );

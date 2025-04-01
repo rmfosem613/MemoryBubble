@@ -75,9 +75,23 @@ const Calendar = () => {
 
   // 월 변경 시 해당 월의 1일로 선택 업데이트
   const handleDatesSet = (arg: { start: Date; end: Date }) => {
+    console.log('월 변경 감지!', {
+      startDate: arg.start,
+      endDate: arg.end,
+      year: arg.start.getFullYear(),
+      month: arg.start.getMonth() + 1,
+    });
+
     const firstDayOfMonth = new Date(arg.start);
     firstDayOfMonth.setDate(1);
-    setSelectDate(firstDayOfMonth);
+
+    // 이전 선택 날짜와 비교하여 year 또는 month가 변경된 경우에만 업데이트
+    if (
+      selectDate.getFullYear() !== firstDayOfMonth.getFullYear() ||
+      selectDate.getMonth() !== firstDayOfMonth.getMonth()
+    ) {
+      setSelectDate(firstDayOfMonth);
+    }
   };
 
   return (
@@ -101,6 +115,7 @@ const Calendar = () => {
         dayCellClassNames={handleDayCellClassNames} // 날짜 셀에 적용할 클래스 결정 함수
         eventClassNames="pointer-events-none"
         moreLinkClassNames="pointer-events-none"
+        datesSet={handleDatesSet}
       />
     </>
   );
