@@ -133,7 +133,7 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
                 {letters.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-gray-500">
-                      아직 새로운 편지가 없습니다.
+                      새로운 편지가 없습니다.
                     </p>
                   </div>
                 ) : (
