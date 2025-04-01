@@ -256,7 +256,7 @@ function PhotoAlbum() {
                 />
               ) : (
                 <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">
-                  아직 사진이 없습니다.
+                  사진이 없습니다.
                 </p>
               )}
 

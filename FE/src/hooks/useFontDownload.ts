@@ -144,7 +144,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
         setFontLoaded(true);
       } catch (loadError) {
         console.error('폰트 로드 실패:', loadError);
-        alert('아직 폰트가 만들어지지 전 입니다!\n 조금만 기다려 주세요!');
+        alert('폰트가 만들어지지 전 입니다!\n 조금만 기다려 주세요!');
         style.remove(); // 실패 시 스타일 제거
       }
     } catch (error) {

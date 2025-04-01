@@ -81,7 +81,7 @@ function ReceivedLetterContent() {
   if (!letters || letters.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <p className="text-gray-500">아직 받은 편지가 없습니다.</p>
+        <p className="text-gray-500">받은 편지가 없습니다.</p>
       </div>
     );
   }

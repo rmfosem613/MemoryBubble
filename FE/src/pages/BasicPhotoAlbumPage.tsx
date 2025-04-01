@@ -308,7 +308,7 @@ function BasicPhotoAlbumPage() {
 
         </div>
         <div className="flex  flex-col items-center justify-center h-64">
-          <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">아직 사진이 없습니다.</p>
+          <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">사진이 없습니다.</p>
 
         </div>
 
