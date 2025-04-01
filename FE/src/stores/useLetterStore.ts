@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 // 편지 타입 정의
-type LetterType = 'text' | 'cassette';
+type LetterType = 'TEXT' | 'AUDIO';
 
 // 색상 테마 타입 정의
 type ColorTheme = 'spring' | 'summer' | 'autumn' | 'winter' | null;
@@ -42,7 +42,7 @@ interface LetterState {
 // Zustand 스토어 생성
 export const useLetterStore = create<LetterState>((set) => ({
   // 텍스트 편지 초기값
-  letterType: 'text',
+  letterType: 'TEXT',
   cassetteData: {
     isRecorded: false,
     recordingUrl: null,
@@ -75,7 +75,7 @@ interface StorageState {
   storageType: StorageType;
 }
 
-export const useBoxStore = create<StorageState>((set) => ({
+export const useBoxStore = create<StorageState>(() => ({
   // 텍스트 편지 초기값
   storageType: 'new',
 }));
