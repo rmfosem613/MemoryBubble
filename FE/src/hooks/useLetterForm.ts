@@ -64,7 +64,7 @@ export function useLetterForm(): LetterFormReturn {
       return false;
     }
 
-    if (letterType === 'text' && !letterContent.trim()) {
+    if (letterType === 'TEXT' && !letterContent.trim()) {
       alert('편지 내용을 입력해주세요.');
       return false;
     }
