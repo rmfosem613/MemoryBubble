@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class FontAdminResponse {
-    private Long userId;
+    private Long fontId;
     private String userName;
     private String fontName;
     private List<FileResponse> files;
