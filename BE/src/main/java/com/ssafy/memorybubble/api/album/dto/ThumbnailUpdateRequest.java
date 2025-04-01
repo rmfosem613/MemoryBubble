@@ -9,6 +9,5 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class ThumbnailUpdateRequest {
-    @NotNull
-    Long photoId;
+    @NotNull Long photoId;
 }

@@ -57,7 +57,7 @@ public class AlbumController {
     )
     public ResponseEntity<PhotoMoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
                                                              @PathVariable Long albumId,
-                                                             @RequestBody PhotoMoveRequest request) {
+                                                             @Valid @RequestBody PhotoMoveRequest request) {
         return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()), albumId, request));
     }
 
@@ -122,7 +122,7 @@ public class AlbumController {
     )
     public ResponseEntity<Void> updateAlbumThumbnail(@AuthenticationPrincipal UserDetails userDetails,
                                                      @PathVariable Long albumId,
-                                                     @RequestBody ThumbnailUpdateRequest request) {
+                                                     @Valid @RequestBody ThumbnailUpdateRequest request) {
         albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, request.getPhotoId());
         return ResponseEntity.ok().build();
     }
