@@ -7,6 +7,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class MoveResponse {
+public class PhotoMoveResponse {
     Long albumId;
 }

@@ -7,6 +7,7 @@ import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +79,7 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "새로운 accessToken 반환")
             }
     )
-    public ResponseEntity<TokenResponse> reissue(@RequestBody TokenRequest tokenRequest) {
+    public ResponseEntity<TokenResponse> reissue(@Valid @RequestBody TokenRequest tokenRequest) {
         // refresh Token 만료 조회 후 재발급
         String newAccessToken = tokenService.reissueAccessToken(tokenRequest.getRefreshToken());
         if (StringUtils.hasText(newAccessToken)) {

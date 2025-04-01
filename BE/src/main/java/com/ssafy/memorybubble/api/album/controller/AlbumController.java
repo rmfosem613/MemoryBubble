@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +39,8 @@ public class AlbumController {
             }
     )
     public ResponseEntity<Void> addAlbum(@AuthenticationPrincipal UserDetails userDetails,
-                                         @RequestBody AlbumRequest albumRequest) {
-        albumService.addAlbum(Long.valueOf(userDetails.getUsername()), albumRequest);
+                                         @Valid @RequestBody AlbumRequest request) {
+        albumService.addAlbum(Long.valueOf(userDetails.getUsername()), request);
         return ResponseEntity.ok().build();
     }
 
@@ -54,10 +55,10 @@ public class AlbumController {
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<MoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @PathVariable Long albumId,
-                                                        @RequestBody MoveRequest moveRequest) {
-        return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()), albumId, moveRequest));
+    public ResponseEntity<PhotoMoveResponse> moveAlbumPhotos(@AuthenticationPrincipal UserDetails userDetails,
+                                                             @PathVariable Long albumId,
+                                                             @Valid @RequestBody PhotoMoveRequest request) {
+        return ResponseEntity.ok(photoService.movePhotos(Long.valueOf(userDetails.getUsername()), albumId, request));
     }
 
     @GetMapping
@@ -102,8 +103,8 @@ public class AlbumController {
     )
     public ResponseEntity<Void> updateAlbum(@AuthenticationPrincipal UserDetails userDetails,
                                             @PathVariable Long albumId,
-                                            @RequestBody UpdateRequest updateRequest) {
-        albumService.updateAlbumName(Long.valueOf(userDetails.getUsername()), albumId, updateRequest);
+                                            @Valid @RequestBody AlbumUpdateRequest request) {
+        albumService.updateAlbum(Long.valueOf(userDetails.getUsername()), albumId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -121,8 +122,8 @@ public class AlbumController {
     )
     public ResponseEntity<Void> updateAlbumThumbnail(@AuthenticationPrincipal UserDetails userDetails,
                                                      @PathVariable Long albumId,
-                                                     @RequestBody ThumbnailRequest thumbnailRequest) {
-        albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, thumbnailRequest.getPhotoId());
+                                                     @Valid @RequestBody ThumbnailUpdateRequest request) {
+        albumService.updateAlbumThumbnail(Long.valueOf(userDetails.getUsername()), albumId, request.getPhotoId());
         return ResponseEntity.ok().build();
     }
 }

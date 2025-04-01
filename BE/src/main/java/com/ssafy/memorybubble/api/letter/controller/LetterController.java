@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class LetterController {
             }
     )
     public ResponseEntity<?> addLetter(@AuthenticationPrincipal UserDetails userDetails,
-                                       @RequestBody LetterRequest letterRequest) {
+                                       @Valid @RequestBody LetterRequest letterRequest) {
         Object result = letterService.sendLetter(Long.valueOf(userDetails.getUsername()), letterRequest);
         if (result == null) {
             // TEXT: null

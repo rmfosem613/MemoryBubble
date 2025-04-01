@@ -131,7 +131,7 @@ public class AlbumService {
     }
 
     @Transactional
-    public void updateAlbumName(Long userId, Long albumId, UpdateRequest request) {
+    public void updateAlbum(Long userId, Long albumId, AlbumUpdateRequest request) {
         User user = userService.getUser(userId);
         Album album = getAlbum(albumId);
 
@@ -155,7 +155,7 @@ public class AlbumService {
         return albumRepository.findById(id).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
     }
 
-    public AlbumDto convertToDto(Album album) {
+    private AlbumDto convertToDto(Album album) {
         return AlbumDto.builder()
                 .albumId(album.getId())
                 .albumName(album.getName())
@@ -166,7 +166,7 @@ public class AlbumService {
                 .build();
     }
 
-    public AlbumDetailDto convertToDto(Album album, List<Photo> photos) {
+    private AlbumDetailDto convertToDto(Album album, List<Photo> photos) {
         // 앨범에 포함된 사진을 dto로 변환 후 앨범 dto로 변환
         List<PhotoDto> photoDtos = photos.stream()
                 .map(this::convertToDto)
@@ -178,7 +178,7 @@ public class AlbumService {
                 .build();
     }
 
-    public PhotoDto convertToDto(Photo photo) {
+    private PhotoDto convertToDto(Photo photo) {
         // 사진을 dto로 변환
         return PhotoDto.builder()
                 .photoId(photo.getId())

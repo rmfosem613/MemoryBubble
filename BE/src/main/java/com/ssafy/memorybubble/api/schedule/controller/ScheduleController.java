@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +41,8 @@ public class ScheduleController {
             }
     )
     public ResponseEntity<ScheduleResponse> addSchedule(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @RequestBody ScheduleRequest scheduleRequest) {
-        ScheduleResponse scheduleResponse = scheduleService.addSchedule(Long.valueOf(userDetails.getUsername()), scheduleRequest);
+                                                        @Valid @RequestBody ScheduleRequest request) {
+        ScheduleResponse scheduleResponse = scheduleService.addSchedule(Long.valueOf(userDetails.getUsername()), request);
         return ResponseEntity.ok().body(scheduleResponse);
     }
 
@@ -75,9 +76,9 @@ public class ScheduleController {
             }
     )
     public ResponseEntity<ScheduleResponse> updateSchedule(@AuthenticationPrincipal UserDetails userDetails,
-                                               @PathVariable Long scheduleId,
-                                               @RequestBody ScheduleRequest scheduleRequest) {
-        ScheduleResponse scheduleResponse = scheduleService.updateSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, scheduleRequest);
+                                                           @PathVariable Long scheduleId,
+                                                           @Valid @RequestBody ScheduleRequest request) {
+        ScheduleResponse scheduleResponse = scheduleService.updateSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, request);
         return ResponseEntity.ok().body(scheduleResponse);
     }
 
@@ -94,9 +95,9 @@ public class ScheduleController {
             }
     )
     public ResponseEntity<ScheduleResponse> linkSchedule(@AuthenticationPrincipal UserDetails userDetails,
-                                             @PathVariable Long scheduleId,
-                                             @RequestBody LinkRequest linkRequest) {
-        ScheduleResponse scheduleResponse =scheduleService.linkSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, linkRequest.getAlbumId());
+                                                         @PathVariable Long scheduleId,
+                                                         @Valid @RequestBody LinkRequest request) {
+        ScheduleResponse scheduleResponse = scheduleService.linkSchedule(Long.valueOf(userDetails.getUsername()), scheduleId, request.getAlbumId());
         return ResponseEntity.ok().body(scheduleResponse);
     }
 
