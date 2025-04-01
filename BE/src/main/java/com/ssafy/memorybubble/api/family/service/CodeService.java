@@ -33,19 +33,16 @@ public class CodeService {
     public String getInviteCode(Long familyId) {
         String key = "invite:" + familyId;
         String existingCode = redisTemplate.opsForValue().get(key);
+        return existingCode != null ? existingCode : createInviteCode(familyId, key);
+    }
 
-        if (existingCode != null) {
-            return existingCode; // Redis에 코드가 있으면 반환
-        }
-
-        // 없으면 새로운 코드 생성
+    // 없으면 새로운 코드 생성
+    private String createInviteCode(Long familyId, String key) {
         String newCode = generateRandomCode();
-
         // familyId로 code 저장
         redisTemplate.opsForValue().set(key, newCode, 24, TimeUnit.HOURS); // 유효기간 24시간 설정
         // code로 familyId 저장
         redisTemplate.opsForValue().set("code:"+ newCode, String.valueOf(familyId),24, TimeUnit.HOURS);
-
         return newCode;
     }
 
