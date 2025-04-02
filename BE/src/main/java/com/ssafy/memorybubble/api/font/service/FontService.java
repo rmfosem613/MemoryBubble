@@ -1,6 +1,8 @@
 package com.ssafy.memorybubble.api.font.service;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
+import com.ssafy.memorybubble.api.family.dto.FamilyFontDto;
+import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
@@ -13,10 +15,7 @@ import com.ssafy.memorybubble.api.font.repository.FontRepository;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
-import com.ssafy.memorybubble.domain.Font;
-import com.ssafy.memorybubble.domain.FontStatus;
-import com.ssafy.memorybubble.domain.Role;
-import com.ssafy.memorybubble.domain.User;
+import com.ssafy.memorybubble.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,8 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_BAD_REQUEST;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -35,14 +33,15 @@ import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
 @Transactional
 public class FontService {
     private final FontRepository fontRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final FileService fileService;
     private final FcmService fcmService;
+
     private final static String TEMPLATE_FILE = "template/추억방울_템플릿.zip";
     private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png"; // template/{userId}/{templateNumber}.png
     private final static int TEMPLATE_FILE_COUNT = 8; // 템플릿 파일의 개수
     private final static String FONT_PATH = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
-    private final UserRepository userRepository;
 
     // 사용자 - 폰트 조회
     @Transactional(readOnly = true)
@@ -53,7 +52,9 @@ public class FontService {
         Font font = fontRepository.findByUser(user).orElse(null);
         // 만들어진 폰트가 없는 경우
         if (font == null) {
-            return FontResponse.builder().build();
+            return FontResponse.builder()
+                    .status(FontStatus.NOT_CREATED)
+                    .build();
         }
         log.info("font={}", font);
 
@@ -67,7 +68,11 @@ public class FontService {
                 .fontName(font.getName())
                 .fileName(font.getPath())
                 .createdAt(font.getCreatedAt())
-                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+                // REQUESTED 상태에도 S3 주소 반환 vs DONE 상태일 때만 S3 주소 반환
+                .presignedUrl(font.getFontStatus() != FontStatus.NOT_CREATED ? fileService.getDownloadPresignedURL(font.getPath()) : null)
+//                .presignedUrl(font.getFontStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getPath()) : null)
+//                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+                .status(font.getFontStatus())
                 .build();
     }
 
@@ -200,5 +205,39 @@ public class FontService {
         } catch (FirebaseMessagingException e) {
             log.warn("Failed to send FCM message to user {}: {}", receiver.getId(), e.getMessage());
         }
+    }
+
+    public List<FamilyFontDto> getFamilyFont(Long userId, Long familyId) {
+        User user = userService.getUser(userId);
+        log.info("user={}", user);
+
+        Family family = user.getFamily();
+        log.info("family={}", family);
+
+        // 그룹에 가입되어 있지 않거나 다른 그룹에 가입되어 있는 경우
+        if (family == null || !family.getId().equals(familyId)) {
+            throw new FamilyException(FAMILY_NOT_FOUND);
+        }
+
+        // 가족 구성원 전체 조회 & 폰트 조회
+        return userService.getUsersByFamilyId(familyId)
+                .stream()
+                .map(this::convertToFamilyFontDto)
+                .toList();
+    }
+
+    private FamilyFontDto convertToFamilyFontDto(User user) {
+        FontResponse font = getFont(user.getId());
+
+        return FamilyFontDto.builder()
+                .userId(user.getId())
+                .userName(user.getName())
+                .fontName(font.getFontName())
+                // REQUESTED 상태에도 S3 주소 반환 vs DONE 상태일 때만 S3 주소 반환
+                .fileName(font.getStatus() != FontStatus.NOT_CREATED ? fileService.getDownloadPresignedURL(font.getFileName()) : null)
+//                .fileName(font.getStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getFileName()) : null)
+//                .fileName(font.getFileName() == null? null : fileService.getDownloadPresignedURL(font.getFileName()))
+                .status(font.getStatus())
+                .build();
     }
 }

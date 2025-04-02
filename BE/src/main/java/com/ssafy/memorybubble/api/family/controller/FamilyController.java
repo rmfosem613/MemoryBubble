@@ -1,9 +1,9 @@
 package com.ssafy.memorybubble.api.family.controller;
 
 import com.ssafy.memorybubble.api.family.dto.*;
+import com.ssafy.memorybubble.api.family.service.FamilyService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.common.exception.ErrorResponse;
-import com.ssafy.memorybubble.api.family.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -117,8 +117,8 @@ public class FamilyController {
     )
     @PatchMapping("/{familyId}")
     public ResponseEntity<FamilyResponse> updateFamily(@AuthenticationPrincipal UserDetails userDetails,
-                                         @PathVariable Long familyId,
-                                         @Valid @RequestBody FamilyRequest request) {
+                                                       @PathVariable Long familyId,
+                                                       @Valid @RequestBody FamilyRequest request) {
         // 가족 수정
         return ResponseEntity.ok().body(
                 familyService.updateFamily(Long.valueOf(userDetails.getUsername()), familyId, request)
