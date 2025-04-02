@@ -149,6 +149,7 @@ public class LetterService {
         return LetterDetailDto.builder()
                 .type(letter.getType())
                 .senderName(letter.getSender().getName())
+                .senderId(letter.getSender().getId())
                 .createdAt(letter.getCreatedAt())
                 .openAt(letter.getOpenAt())
                 .backgroundColor(letter.getBackgroundColor())
