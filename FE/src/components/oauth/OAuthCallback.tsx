@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import useUser from '@/hooks/useUser';
 import { requestNotificationPermission } from '@/hooks/firebase.ts';
 import apiClient from '@/apis/apiClient.ts';
+import useUserStore from '@/stores/useUserStore';
 
 function OAuthCallback() {
   const navigate = useNavigate() 
@@ -40,9 +41,13 @@ function OAuthCallback() {
       }
 
       // 메인 페이지로 이동 (ProtectedRoute가 조건에 따라 적절히 리다이렉트 처리)
-      navigate("/");
+      const role = useUserStore.getState().user.role;
+      if (role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate("/");
+      }
     }
-
     handleAuthentication();
   }, [navigate, checkAuthAndFetchUserData]);
 

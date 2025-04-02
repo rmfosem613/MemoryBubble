@@ -11,21 +11,22 @@ const useRouteAuth = () => {
   const isAuthenticated = localStorage.getItem('accessToken') !== null;
   const hasFamilyId = !!user.familyId;
   const hasCompletedProfile = !!user.birth;
+  const isAdmin = user.role === 'ADMIN';
 
   // 사용자 상태에 따른 적절한 리다이렉트 경로 반환
   const getRedirectPath = () => {
     if (!isAuthenticated) {
       return '/kakao';
     }
-    
+
     if (!hasFamilyId) {
       return '/enter';
     }
-    
+
     if (!hasCompletedProfile) {
       return '/join';
     }
-    
+
     return '/'; // 모든 조건 충족 시 메인으로
   };
 
@@ -33,12 +34,14 @@ const useRouteAuth = () => {
     isAuthenticated,
     hasFamilyId,
     hasCompletedProfile,
+    isAdmin,
     getRedirectPath,
     // 특정 라우트 접근 가능 여부 확인 함수들
     canAccessProtectedRoute: isAuthenticated && hasFamilyId && hasCompletedProfile,
     canAccessFamilyCreation: isAuthenticated && !hasFamilyId,
     canAccessProfileCreation: isAuthenticated && hasFamilyId && !hasCompletedProfile,
-    canAccessNonAuth: !isAuthenticated
+    canAccessNonAuth: !isAuthenticated,
+    canAccessAdminRoute: isAuthenticated && isAdmin,
   };
 };
 
@@ -78,9 +81,26 @@ export const ProfileCreationRoute = ({ children }: RouteProps) => {
 // 인증되지 않은 사용자만 접근 가능한 라우트 컴포넌트
 export const NonAuthRoute = ({ children }: RouteProps) => {
   const { canAccessNonAuth, getRedirectPath } = useRouteAuth();
-  
+
   if (!canAccessNonAuth) {
     return <Navigate to={getRedirectPath()} replace />;
+  }
+
+  return children || <Outlet />;
+};
+
+// 관리자 라우트 - 인증 + 관리자 역할만 필요 (가족/프로필 정보 불필요)
+export const AdminRoute = ({ children }: RouteProps) => {
+  const { isAuthenticated, isAdmin } = useRouteAuth();
+
+  // 인증이 안 된 경우 로그인 페이지로
+  if (!isAuthenticated) {
+    return <Navigate to="/kakao" replace />;
+  }
+
+  // 관리자가 아닌 경우 메인으로
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
   }
 
   return children || <Outlet />;

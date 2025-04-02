@@ -9,6 +9,7 @@ export interface User {
   phoneNumber: string | null;
   gender: 'F' | 'M' | null;
   familyId: number | null;
+  role: 'USER' | 'ADMIN' | null;
 }
 
 interface FamilyMember {
@@ -45,6 +46,7 @@ const initialUser: User = {
   phoneNumber: null,
   gender: null,
   familyId: null,
+  role: null,
 };
 
 const initialFamily: Family = {
