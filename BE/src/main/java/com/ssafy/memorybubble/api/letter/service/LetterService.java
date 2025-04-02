@@ -10,6 +10,7 @@ import com.ssafy.memorybubble.api.letter.dto.LetterRequest;
 import com.ssafy.memorybubble.api.letter.exception.LetterException;
 import com.ssafy.memorybubble.api.letter.repository.LetterRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
+import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Letter;
 import com.ssafy.memorybubble.domain.Type;
 import com.ssafy.memorybubble.domain.User;
@@ -43,7 +44,7 @@ public class LetterService {
         User receiver = userService.getUser(letterRequest.getReceiverId());
 
         // 가족 관계 검증
-        validateFamilyRelationship(sender, receiver);
+        Validator.validateFamilyRelationship(sender, receiver);
 
         if (letterRequest.getType().equals(Type.AUDIO)) {
             // 음성 메세지를 올릴 presigned 주소 생성
@@ -97,13 +98,6 @@ public class LetterService {
         } catch (FirebaseMessagingException e) {
             log.warn("Failed to send FCM message to user {}: {}", receiver.getId(), e.getMessage());
         }
-    }
-
-    private void validateFamilyRelationship(User sender, User receiver) {
-        if (!sender.getFamily().equals(receiver.getFamily())) {
-            throw new LetterException(LETTER_RECEIVER_FORBIDDEN);
-        }
-        log.info("Sending letter from user {} to receiver {}", sender, receiver);
     }
 
     public List<LetterDto> getLetters(Long userId) {

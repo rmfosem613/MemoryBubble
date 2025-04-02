@@ -2,7 +2,6 @@ package com.ssafy.memorybubble.api.font.service;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.ssafy.memorybubble.api.family.dto.FamilyFontDto;
-import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
@@ -208,13 +207,8 @@ public class FontService {
         User user = userService.getUser(userId);
         log.info("user={}", user);
 
-        Family family = user.getFamily();
+        Family family = Validator.validateAndGetFamily(user, familyId);
         log.info("family={}", family);
-
-        // 그룹에 가입되어 있지 않거나 다른 그룹에 가입되어 있는 경우
-        if (family == null || !family.getId().equals(familyId)) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
 
         // 가족 구성원 전체 조회 & 폰트 조회
         return userService.getUsersByFamilyId(familyId)

@@ -9,6 +9,7 @@ import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.font.service.FontService;
 import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
 import com.ssafy.memorybubble.api.user.service.UserService;
+import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -79,19 +80,11 @@ public class FamilyService {
         log.info("user: {}", user);
 
         // 요청을 한 user가 가입된 family가 없으면 예외 반환
-        Family family = user.getFamily();
-        if(family == null) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
-
-        // 요청 한 user가 가입된 family와 familyId가 일치하지 않으면 예외 반환
-        if(!familyId.equals(family.getId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = Validator.validateAndGetFamily(user, familyId);
 
         // redis에 familyId 있으면 반환, 없으면 familyId로 code 만들어서 redis에 저장
         return CodeDto.builder()
-                .code(codeService.getInviteCode(familyId))
+                .code(codeService.getInviteCode(family.getId()))
                 .build();
     }
 
@@ -138,13 +131,7 @@ public class FamilyService {
 
     public FamilyInfoResponse getFamily(Long userId, Long familyId) {
         User user = userService.getUser(userId);
-        Family family = user.getFamily();
-        log.info("family: {}", family);
-
-        // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        if (family == null || !family.getId().equals(familyId)) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = Validator.validateAndGetFamily(user, familyId);
 
         // 해당 가족에 소속된 user 목록 찾기 -> 자기 자신은 포함 x
         List<User> familyMembers = userService.getUsersByFamilyId(familyId)
@@ -173,13 +160,8 @@ public class FamilyService {
     public FamilyResponse updateFamily(Long userId, Long familyId, FamilyRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
-        Family family = user.getFamily();
+        Family family = Validator.validateAndGetFamily(user, familyId);
         log.info("family: {}", family);
-
-        // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        if (family == null || !family.getId().equals(familyId)) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
 
         // 가족 이름 수정
         family.updateFamilyName(request.getFamilyName());
