@@ -2,11 +2,20 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 // import useAlbumStore from '@/stores/useAlbumStore';
 import apiClient from '@/apis/apiClient';
+import useUserstore from '@/stores/useUserStore';
 
 export interface Photo {
   id: number;
   src: string;
   alt: string;
+}
+
+interface FontInfo {
+  userId: number;
+  userName: string;
+  fontName: string;
+  fileName: string;
+  status: string;
 }
 
 export const usePhotoAlbum = () => {
@@ -18,6 +27,8 @@ export const usePhotoAlbum = () => {
   const [error, setError] = useState<string | null>(null);
   const [newAlbumName, setNewAlbumName] = useState('');
   const [newAlbumContent, setNewAlbumContent] = useState('');
+  // 추가: 폰트 정보 상태
+  const [fontInfoList, setFontInfoList] = useState<FontInfo[]>([]);
 
   // 추가: 현재 사진의 메시지 데이터를 저장할 상태
   const [photoMessages, setPhotoMessages] = useState<any[]>([]);
@@ -28,7 +39,7 @@ export const usePhotoAlbum = () => {
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
 
   const { id } = useParams();
-  // const { albums } = useAlbumStore();
+  const { user } = useUserstore();
 
   useEffect(() => {
     const fetchAllAlbums = async () => {
@@ -204,15 +215,28 @@ export const usePhotoAlbum = () => {
 
   // 카드 뒤집기 토글(axios 요청 포함)
   const toggleFlipWithPostCard = async () => {
+    const familyId = user.familyId;
+
+    try {
+      const fontResponse = await apiClient.get(`api/fonts/family/${familyId}`);
+      console.log('가족 폰트 데이터:', fontResponse.data);
+
+      // 폰트 데이터를 상태에 저장
+      if (fontResponse.data && Array.isArray(fontResponse.data)) {
+        setFontInfoList(fontResponse.data);
+      }
+    } catch (error) {
+      console.error('Error fetching font data:', error);
+    }
+
     const currentPhotoId = photos[currentIndex].id;
     try {
       const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
-      console.log(response.data);
-      // 받아온 메시지 데이터를 상태에 저장
+      console.log(response.data, "'포스트 카드 데이터');");
+
       if (response.data && Array.isArray(response.data)) {
         setPhotoMessages(response.data);
       } else {
-        // 데이터 형식이 다른 경우 빈 배열로 초기화
         setPhotoMessages([]);
       }
     } catch (error) {
@@ -321,5 +345,6 @@ export const usePhotoAlbum = () => {
     handleMovePhoto,
     albumId: id, // 현재 앨범 ID 반환
     refreshPhotos,
+    fontInfoList,
   };
 };

@@ -19,6 +19,30 @@ import useModal from '@/hooks/useModal';
 import apiClient from '@/apis/apiClient';
 import PhotoUploader from '../photo/PhotoUploader';
 
+// 폰트 스타일을 생성하는 컴포넌트
+const FontStyles = ({ fontInfoList }) => {
+  return (
+    <style>
+      {fontInfoList.map((font) => {
+        if (font.status === 'DONE' && font.fileName) {
+          return `
+            @font-face {
+              font-family: '${font.fontName}';
+              src: url('${font.fileName}') format('truetype');
+              font-weight: normal;
+              font-style: normal;
+            }
+            .font-user-${font.userId} {
+              font-family: '${font.fontName}', sans-serif;
+            }
+          `;
+        }
+        return '';
+      })}
+    </style>
+  );
+};
+
 function PhotoAlbum() {
   const {
     albumTitle,
@@ -45,6 +69,7 @@ function PhotoAlbum() {
     handleMovePhoto,
     albumId,
     refreshPhotos,
+    fontInfoList,
   } = usePhotoAlbum();
 
   const {
@@ -91,15 +116,27 @@ function PhotoAlbum() {
 
   // API에서 가져온 메시지 렌더링 함수
   const renderApiMessage = (message) => {
+    // 메시지 작성자의 폰트 정보 찾기
+    const userFont = fontInfoList.find(
+      (font) => font.userId === message.writerId,
+    );
+
+    // 폰트 클래스 이름 생성 (해당 폰트가 있을 경우만)
+    const fontClass =
+      userFont && userFont.status === 'DONE'
+        ? `font-user-${userFont.userId}`
+        : '';
+
     if (message.type === 'TEXT') {
       return (
         <div key={message.id || message.createdAt} className="mb-2">
           <div className="flex items-center gap-2">
-            <h4 className="font-p-700 text-h4-lg">
+            <h4 className={`font-p-700 text-h3-lg ${fontClass}`}>
               {message.writer || '사용자'}
             </h4>
           </div>
-          <p className="text-gray-700 mt-1 text-subtitle-1-lg font-p-500">
+          <p
+            className={`text-gray-700 mt-1 text-h4-lg font-p-500 ${fontClass}`}>
             {message.content}
           </p>
         </div>
@@ -112,7 +149,7 @@ function PhotoAlbum() {
           key={message.id || message.createdAt}
           className="flex flex-row mb-2 ">
           <div className="flex items-center justify-center gap-2">
-            <h4 className="font-p-700 text-h4-lg">
+            <h4 className={`font-p-700 text-h3-lg ${fontClass}`}>
               {message.writer || '사용자'}
             </h4>
           </div>
@@ -262,11 +299,12 @@ function PhotoAlbum() {
 
               {/* 뒷면 - 엽서 형태 */}
               <div
-                className="absolute w-full h-full inset-0 bg-white p-4 rounded-lg shadow-lg flex flex-col justify-between"
+                className="absolute w-full h-full inset-0 bg-white p-4 border flex flex-col justify-between"
                 style={{
                   backfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
                 }}>
+                <FontStyles fontInfoList={fontInfoList} />
                 {/* 상단 버튼 영역 */}
                 <div className="flex justify-end gap-2">
                   <div className="flex gap-2">
