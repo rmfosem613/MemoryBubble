@@ -8,6 +8,7 @@ interface FontResponse {
   createdAt: string | null;
   presignedUrl: string | null;
   fileName: string | null;
+  status: string | null;
 }
 
 interface UseFontDownloadReturn {
@@ -17,6 +18,7 @@ interface UseFontDownloadReturn {
   fontLoaded: boolean;
   fontFamily: string | null;
   fontName: string | null; // fontName 추가
+  status: string | null;
 }
 
 export const useFontDownload = (): UseFontDownloadReturn => {
@@ -27,7 +29,6 @@ export const useFontDownload = (): UseFontDownloadReturn => {
   // 폰트 정보 가져오는 함수
   const getFontInfo = async (): Promise<FontResponse> => {
     const response = await apiClient.get<FontResponse>('api/fonts');
-    console.log('폰트 정보11111:', response.data);
     return response.data;
   };
 
@@ -86,6 +87,13 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       // 폰트 정보 가져오기
       const fontInfo = await getFontInfo();
       console.log('폰트 정보 (로드용):', fontInfo);
+
+      // 폰트 상태 확인
+      if (fontInfo.status !== 'DONE') {
+        alert('폰트가 만들어지지 전 입니다!\n 조금만 기다려 주세요!');
+        return;
+      }
+
       const createName = fontInfo.fontName;
 
       // presignedUrl이 없는 경우 (폰트가 아직 없음)
