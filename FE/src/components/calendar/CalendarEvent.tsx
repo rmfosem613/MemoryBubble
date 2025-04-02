@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CirclePlus, Link, Trash2, PenLine } from 'lucide-react';
 import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
+import useCalendarApi from '@/apis/useCalendarApi';
 import useModal from '@/hooks/useModal';
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
 import CalendarEventAddModal from './CalendarEventAddModal';
@@ -13,6 +14,7 @@ function CalendarEvent() {
   const navigate = useNavigate();
   const { getEventsByDate, events, selectDate, updateEvent } =
     useCalendarEventStore();
+  const { linkAlbumToSchedule } = useCalendarApi();
   const { allAlbums } = usePhotoAlbum(); // 앨범 목록을 가져옴
   const [openEvents, setOpenEvents] = useState<Record<number, boolean>>({});
   const [selectEvent, setSelectEvent] = useState<{
@@ -54,9 +56,22 @@ function CalendarEvent() {
     calendarAlbumModal.open();
   };
 
-  // 앨범 연결 해제 핸들러
-  const handleUnlinkAlbum = (scheduleId) => {
-    updateEvent(scheduleId, { albumId: null });
+  // 앨범 연결 해제
+  const handleUnlinkAlbum = async (scheduleId: number) => {
+    try {
+      // API 호출: albumId를 null로 설정
+      const response = await linkAlbumToSchedule(scheduleId, {
+        albumId: null,
+      });
+
+      if (response.status === 200) {
+        // 스토어 업데이트
+        updateEvent(scheduleId, response.data);
+      }
+    } catch (error) {
+      console.error('앨범 연결 해제 실패:', error);
+      alert('앨범 연결 해제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   // 연결된 앨범으로 이동
