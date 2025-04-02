@@ -68,10 +68,7 @@ public class FontService {
                 .fontName(font.getName())
                 .fileName(font.getPath())
                 .createdAt(font.getCreatedAt())
-                // REQUESTED 상태에도 S3 주소 반환 vs DONE 상태일 때만 S3 주소 반환
-                .presignedUrl(font.getFontStatus() != FontStatus.NOT_CREATED ? fileService.getDownloadPresignedURL(font.getPath()) : null)
-//                .presignedUrl(font.getFontStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getPath()) : null)
-//                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+                .presignedUrl(font.getFontStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getPath()) : null)
                 .status(font.getFontStatus())
                 .build();
     }
@@ -233,10 +230,7 @@ public class FontService {
                 .userId(user.getId())
                 .userName(user.getName())
                 .fontName(font.getFontName())
-                // REQUESTED 상태에도 S3 주소 반환 vs DONE 상태일 때만 S3 주소 반환
-                .fileName(font.getStatus() != FontStatus.NOT_CREATED ? fileService.getDownloadPresignedURL(font.getFileName()) : null)
-//                .fileName(font.getStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getFileName()) : null)
-//                .fileName(font.getFileName() == null? null : fileService.getDownloadPresignedURL(font.getFileName()))
+                .fileName(font.getStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getFileName()) : null)
                 .status(font.getStatus())
                 .build();
     }
