@@ -18,7 +18,6 @@ interface UseFontDownloadReturn {
   fontLoaded: boolean;
   fontFamily: string | null;
   fontName: string | null; // fontName 추가
-  status: string | null;
 }
 
 export const useFontDownload = (): UseFontDownloadReturn => {
