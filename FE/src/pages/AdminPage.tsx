@@ -14,6 +14,7 @@ import useFontRequests, {
 } from '@/hooks/useFontRequests';
 import useFileDownload from '@/hooks/useFileDownload';
 import useFontUpload from '@/hooks/useFontUpload';
+import JungKins from '@/assets/admin/JEONGKINS.png';
 
 // AlertAdmin 컴포넌트: 폰트 의뢰 알림 표시
 interface AlertAdminProps {
@@ -117,7 +118,8 @@ const AdminPage: React.FC = () => {
     <div className="container pt-[68px] space-y-3">
       {/* Header section */}
       <div className="flex py-[10px] border border-x-0 border-t-0 border-gray-700 space-x-1 items-end">
-        <span className="font-p-700 text-h5-lg">관리자</span>
+        <img src={JungKins} alt="Jung Kins 로고" className="h-10" />
+        <span className="font-p-700 text-h5-lg">Jung kins</span>
         <span className="font-p-500 text-subtitle-1-lg flex mb-[1.3px]">
           페이지
         </span>
