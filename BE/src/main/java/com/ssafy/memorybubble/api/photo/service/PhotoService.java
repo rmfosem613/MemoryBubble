@@ -155,6 +155,7 @@ public class PhotoService {
                 .content(content)
                 .createdAt(review.getCreatedAt())
                 .writer(review.getWriter().getName())
+                .writerId(review.getWriter().getId())
                 .build();
     }
 

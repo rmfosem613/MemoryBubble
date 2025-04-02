@@ -15,4 +15,5 @@ public class ReviewDto {
     String content;
     LocalDateTime createdAt;
     String writer;
+    Long writerId;
 }
