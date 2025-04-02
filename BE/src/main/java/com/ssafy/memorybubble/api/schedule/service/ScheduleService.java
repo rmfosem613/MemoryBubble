@@ -99,7 +99,7 @@ public class ScheduleService {
         validateFamily(user, schedule.getFamily().getId());
         log.info("family: {}", user.getFamily());
 
-        validateUpdateDates(request, schedule);
+        validateDates(request.getStartDate(), request.getEndDate());
         schedule.update(request.getStartDate(), request.getEndDate(), request.getContent());
 
         return convertToScheduleResponse(schedule);
@@ -165,18 +165,6 @@ public class ScheduleService {
 
     private void validateDates(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
-    }
-
-    private void validateUpdateDates(ScheduleRequest request, Schedule schedule) {
-        if (request.getStartDate() != null && request.getEndDate() != null) {
-            validateDates(request.getStartDate(), request.getEndDate());
-        }
-        if (request.getStartDate() != null && request.getStartDate().isAfter(schedule.getEndDate())) {
-            throw new ScheduleException(SCHEDULE_DATE_INVALID);
-        }
-        if (request.getEndDate() != null && request.getEndDate().isBefore(schedule.getStartDate())) {
             throw new ScheduleException(SCHEDULE_DATE_INVALID);
         }
     }
