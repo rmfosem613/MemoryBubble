@@ -2,13 +2,13 @@ package com.ssafy.memorybubble.api.schedule.service;
 
 import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.schedule.dto.ScheduleResponse;
+import com.ssafy.memorybubble.common.util.Validator;
 import com.ssafy.memorybubble.domain.Album;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.Schedule;
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.api.schedule.dto.ScheduleRequest;
 import com.ssafy.memorybubble.api.album.exception.AlbumException;
-import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.schedule.exception.ScheduleException;
 import com.ssafy.memorybubble.api.schedule.repository.ScheduleRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
@@ -40,7 +40,7 @@ public class ScheduleService {
         log.info("user: {}", user);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = validateFamily(user, request.getFamilyId());
+        Family family = Validator.validateAndGetFamily(user, request.getFamilyId());
         log.info("family: {}", family);
 
         // albumId가 있으면 album 찾음
@@ -48,9 +48,7 @@ public class ScheduleService {
         if (request.getAlbumId() != null) {
             album = albumService.getAlbum(request.getAlbumId());
             // 앨범의 family가 familyId와 다르면 예외 반환
-            if (!family.getId().equals(album.getFamily().getId())) {
-                throw new AlbumException(ALBUM_ACCESS_DENIED);
-            }
+            Validator.validateAlbumAccess(family, album);
         }
 
         // 날짜 검증
@@ -79,8 +77,8 @@ public class ScheduleService {
         log.info("schedule: {}", schedule);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        validateFamily(user, schedule.getFamily().getId());
-        log.info("family: {}", user.getFamily());
+        Family family = Validator.validateAndGetFamily(user, schedule.getFamily().getId());
+        log.info("family: {}", family);
 
         scheduleRepository.delete(schedule);
     }
@@ -96,8 +94,8 @@ public class ScheduleService {
         log.info("schedule: {}", schedule);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        validateFamily(user, schedule.getFamily().getId());
-        log.info("family: {}", user.getFamily());
+        Family family = Validator.validateAndGetFamily(user, schedule.getFamily().getId());
+        log.info("family: {}", family);
 
         validateDates(request.getStartDate(), request.getEndDate());
         schedule.update(request.getStartDate(), request.getEndDate(), request.getContent());
@@ -114,7 +112,7 @@ public class ScheduleService {
         log.info("schedule: {}", schedule);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = validateFamily(user, schedule.getFamily().getId());
+        Family family = Validator.validateAndGetFamily(user, schedule.getFamily().getId());
         log.info("family: {}", family);
 
         if(albumId == null) {
@@ -137,10 +135,7 @@ public class ScheduleService {
         log.info("user: {}", user);
 
         // user가 다른 그룹에 가입 되어있거나 가입되어 있지 않은 경우 예외 반환
-        Family family = user.getFamily();
-        if (family == null || !family.getId().equals(familyId)) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = Validator.validateAndGetFamily(user, familyId);
         log.info("family: {}", family);
 
         // 해당 월의 마지막 시작 날짜, 마지막 날짜 구함
@@ -152,15 +147,6 @@ public class ScheduleService {
         return schedules.stream()
                 .map(this::convertToScheduleResponse)
                 .toList();
-    }
-
-    // user의 가족이 없거나, 가족이 familyId로 찾은 가족과 다르면 예외 반환
-    private Family validateFamily(User user, Long familyId) {
-        Family family = user.getFamily();
-        if (family == null || !family.getId().equals(familyId)) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
-        return family;
     }
 
     private void validateDates(LocalDate startDate, LocalDate endDate) {

@@ -11,7 +11,6 @@ import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.Photo;
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.api.album.exception.AlbumException;
-import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.album.repository.AlbumRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -54,18 +53,8 @@ public class AlbumService {
     public void addAlbum(Long userId, AlbumRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
-        Family family = user.getFamily();
+        Family family = Validator.validateAndGetFamily(user, request.getFamilyId());
         log.info("family: {}", family);
-
-        // 요청을 한 user가 가입된 family가 없으면 예외 반환
-        if(family == null) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
-
-        // 요청 한 user가 가입된 family와 albumRequest의 familyId가 일치하지 않으면 예외 반환
-        if(!request.getFamilyId().equals(family.getId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
 
         Album album = Album.builder()
                 .family(family)
@@ -79,12 +68,7 @@ public class AlbumService {
 
     public List<AlbumDto> getAlbums(Long userId, String name) {
         User user = userService.getUser(userId);
-        Family family = user.getFamily();
-
-        // 요청을 한 user가 가입된 family가 없으면 예외 반환
-        if(family == null) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = Validator.validateAndGetFamily(user);
 
         // name이 없거나 빈 문자열이면 family로 album을 찾고 name이 있으면 포함된 album 찾음
         List<Album> albums = StringUtils.hasText(name)
