@@ -2,18 +2,19 @@ package com.ssafy.memorybubble.api.family.service;
 
 import com.ssafy.memorybubble.api.album.service.AlbumService;
 import com.ssafy.memorybubble.api.family.dto.*;
-import com.ssafy.memorybubble.api.file.dto.FileResponse;
-import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
-import com.ssafy.memorybubble.domain.Family;
-import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.family.repository.FamilyRepository;
+import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
+import com.ssafy.memorybubble.api.font.service.FontService;
+import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
 import com.ssafy.memorybubble.api.user.service.UserService;
-import org.springframework.transaction.annotation.Transactional;
+import com.ssafy.memorybubble.domain.Family;
+import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class FamilyService {
     private final AlbumService albumService;
     private final UserService userService;
     private final CodeService codeService;
+    private final FontService fontService;
 
     private final String[] colors = {"#F4E2DC", "#F3D1B2", "#F7F0D5", "#BFDAAB", "#C5DFE6", "#B3C6E3"};
 
