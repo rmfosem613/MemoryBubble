@@ -37,7 +37,7 @@ const useAlbumStore = create<AlbumState>((set, get) => ({
         description: album.albumContent,
         imageUrl: album.thumbnailUrl,
         bgColor: album.backgroundColor,
-        photoCount: `${album.photoLength}장의 순간`
+        photoCount: `${album.photoLength}장`
       }));
       
       set({ 
