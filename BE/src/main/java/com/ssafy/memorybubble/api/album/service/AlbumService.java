@@ -169,4 +169,9 @@ public class AlbumService {
                 .photoUrl(fileService.getDownloadPresignedURL(photo.getPath()))
                 .build();
     }
+
+    public boolean isBasicAlbum(Long albumId, Long familyId) {
+        Album album = albumRepository.findFirstByFamilyIdOrderByCreatedAtAsc(familyId).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
+        return album.getId().equals(albumId);
+    }
 }
