@@ -139,7 +139,11 @@ const Header = () => {
           ))}
           <Link
             to="/storage"
-            className={`${styles.menuItemMobile} ${isActivePath('/storage') || isActivePath('/letter') ? styles.menuItemAtive : ''}`}>
+            className={`${styles.menuItemMobile} ${isActivePath('/storage') || isActivePath('/letter') ? styles.menuItemAtive : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              closeMenu();
+            }}>
             <div className="relative">
               <Mail size={26} strokeWidth={1.3} />
               {isUnread && isMenuOpen && (
