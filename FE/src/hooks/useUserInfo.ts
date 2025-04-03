@@ -34,9 +34,13 @@ const useUserInfo = () => {
         isVisible: true,
       });
 
-      // 3초 후 알림 자동 숨김 (Alert 컴포넌트 내부에서도 처리하지만 상태관리를 위해 여기서도 설정)
+      // 3초 후 알림 자동 숨김
       setTimeout(() => {
-        setCustomAlert((prev) => ({ ...prev, isVisible: false }));
+        setCustomAlert((prev) => ({
+          message: '',
+          color: 'green',
+          isVisible: false,
+        }));
       }, 3000);
     },
     [],
@@ -67,7 +71,10 @@ const useUserInfo = () => {
         setShowInviteCode(true);
       }
     } catch (error) {
-      showCustomAlert('초대 코드를 가져오는데 실패했습니다. 잠시후 다시 시도해주세요.', 'red');
+      showCustomAlert(
+        '초대 코드를 가져오는데 실패했습니다. 잠시후 다시 시도해주세요.',
+        'red',
+      );
     }
   }, [getFamilyInviteCode, user.familyId, showCustomAlert]);
 
@@ -93,16 +100,19 @@ const useUserInfo = () => {
   }, [logout]);
 
   return {
+    // 상태
     isDropdownOpen,
-    setIsDropdownOpen,
-    toggleDropdown,
     showInviteCode,
-    setShowInviteCode,
     inviteCode,
+    customAlert,
+
+    // 액션
+    setIsDropdownOpen,
+    setShowInviteCode,
+    toggleDropdown,
     handleShowInviteCode,
     copyInviteCode,
     handleLogout,
-    customAlert,
   };
 };
 
