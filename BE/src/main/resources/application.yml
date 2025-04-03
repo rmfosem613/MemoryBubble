@@ -50,6 +50,10 @@ spring:
         secret-key: ${aws.secret-key}
       s3:
         bucket: ${aws.bucket}
+      cloudfront:
+        domain: https://d257m5puxmn5e1.cloudfront.net
+        key-pair-id: ${cloudfront.key-pair-id}
+        private-key-path: ${cloudfront.private-key-path}
 jwt:
   secret: ${jwt.secret}
 baseUrl: ${url}
