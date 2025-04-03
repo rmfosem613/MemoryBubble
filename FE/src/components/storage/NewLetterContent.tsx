@@ -87,6 +87,7 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
     try {
       const response = await apiClient.get(`/api/letters/${id}`);
       console.log(response.data, '편지 상세 정보');
+      console.log(response.data.content, '편지 상세 정보 내용');
 
       // 상세 정보를 상태에 저장
       setSelectedLetter(response.data);
@@ -132,9 +133,7 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
               <div ref={setNodeRef} className="w-full h-full relative">
                 {letters.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-500">
-                      새로운 편지가 없습니다.
-                    </p>
+                    <p className="text-gray-500">새로운 편지가 없습니다.</p>
                   </div>
                 ) : (
                   letters.map((letter, index) => {

@@ -41,7 +41,7 @@ function Step2() {
     e.stopPropagation();
   };
 
-  // 파일 추가 처리 함수 (중복 코드 방지)
+  // 파일 처리 함수 수정
   const processFiles = (files: FileList) => {
     // 에러 메시지 초기화
     setError(null);
@@ -52,17 +52,43 @@ function Step2() {
       return;
     }
 
-    // 추가 가능한 파일 수 확인
-    const allowedCount = Math.min(files.length, remainingFiles);
+    // 파일 형식 필터링: .png 확장자만 허용
+    const validFiles: File[] = [];
+    const invalidFiles: string[] = [];
 
-    if (allowedCount < files.length) {
+    Array.from(files).forEach((file) => {
+      if (file.name.toLowerCase().endsWith('.png')) {
+        validFiles.push(file);
+      } else {
+        invalidFiles.push(file.name);
+      }
+    });
+
+    // 유효하지 않은 파일이 있는 경우 에러 메시지 표시
+    if (invalidFiles.length > 0) {
+      setError(`PNG 형식만 업로드할 수 있습니다: ${invalidFiles.join(', ')}`);
+
+      // 유효한 파일이 없으면 함수 종료
+      if (validFiles.length === 0) {
+        return;
+      }
+    }
+
+    // 추가 가능한 파일 수 확인
+    const remainingFiles = MAX_FILES - uploadedFiles.length;
+    const allowedCount = Math.min(validFiles.length, remainingFiles);
+
+    if (allowedCount < validFiles.length) {
       setError(
-        `파일은 최대 ${MAX_FILES}개까지만 업로드할 수 있습니다. ${allowedCount}개만 추가됩니다.`,
+        `${setError(
+          (prevError) =>
+            `${prevError ? prevError + ' 또한, ' : ''}파일은 최대 ${MAX_FILES}개까지만 업로드할 수 있습니다. ${allowedCount}개만 추가됩니다.`,
+        )}`,
       );
     }
 
     // 추가 가능한 파일만 필터링
-    const filesToAdd = Array.from(files).slice(0, allowedCount);
+    const filesToAdd = validFiles.slice(0, allowedCount);
 
     if (filesToAdd.length > 0) {
       const newFiles: FileItem[] = filesToAdd.map((file, index) => ({
@@ -179,7 +205,7 @@ function Step2() {
             : remainingFiles === 0
               ? 'border-gray-400 bg-gray-100 cursor-not-allowed'
               : 'border-gray-900'
-        } rounded-lg p-8 transition-colors`}
+        } rounded-lg p-4 transition-colors`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -187,8 +213,8 @@ function Step2() {
         <div className="flex flex-col items-center justify-center">
           <div className="w-16 h-16 mb-4">
             <File
-              strokeWidth={0.5}
-              width={'75px'}
+              strokeWidth={1}
+              width={'59px'}
               height={'75px'}
               color={remainingFiles === 0 ? '#9CA3AF' : '#000000'}
             />

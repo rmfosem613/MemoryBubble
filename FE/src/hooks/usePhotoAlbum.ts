@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 // import useAlbumStore from '@/stores/useAlbumStore';
 import apiClient from '@/apis/apiClient';
+import useUserstore from '@/stores/useUserStore';
+import useFontStore from '@/stores/useFontStore';
 
 export interface Photo {
   id: number;
@@ -28,7 +30,15 @@ export const usePhotoAlbum = () => {
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
 
   const { id } = useParams();
-  // const { albums } = useAlbumStore();
+  const { user } = useUserstore();
+  const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
+
+  // 컴포넌트 마운트 시 가족 폰트 정보 미리 로드
+  useEffect(() => {
+    if (!isFamilyFontsLoaded && user && user.familyId) {
+      fetchFamilyFonts(user.familyId);
+    }
+  }, [isFamilyFontsLoaded, fetchFamilyFonts, user]);
 
   useEffect(() => {
     const fetchAllAlbums = async () => {
@@ -202,17 +212,17 @@ export const usePhotoAlbum = () => {
     setIsFlipped(!isFlipped);
   };
 
-  // 카드 뒤집기 토글(axios 요청 포함)
+  // 카드 뒤집기 토글(axios 요청 포함) - 폰트 로딩 로직 수정
   const toggleFlipWithPostCard = async () => {
+    // 현재 사진의 메시지 데이터 가져오기
     const currentPhotoId = photos[currentIndex].id;
     try {
       const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
-      console.log(response.data);
-      // 받아온 메시지 데이터를 상태에 저장
+      console.log(response.data, "'포스트 카드 데이터');");
+
       if (response.data && Array.isArray(response.data)) {
         setPhotoMessages(response.data);
       } else {
-        // 데이터 형식이 다른 경우 빈 배열로 초기화
         setPhotoMessages([]);
       }
     } catch (error) {
@@ -302,7 +312,6 @@ export const usePhotoAlbum = () => {
     isFlipped,
     toggleFlip,
     toggleFlipWithPostCard,
-    // currentAlbum,
     photos,
     photoMessages,
     setPhotoMessages,
@@ -321,5 +330,6 @@ export const usePhotoAlbum = () => {
     handleMovePhoto,
     albumId: id, // 현재 앨범 ID 반환
     refreshPhotos,
+    fontInfoList: familyFonts,
   };
 };

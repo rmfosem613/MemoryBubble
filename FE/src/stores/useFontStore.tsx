@@ -15,6 +15,15 @@ interface PresignedUrlData {
   fileName: string;
 }
 
+// 폰트 정보 인터페이스 추가
+interface FontInfo {
+  userId: number;
+  userName: string;
+  fontName: string;
+  fileName: string;
+  status: string;
+}
+
 // 폰트 스토어 상태 인터페이스
 interface FontState {
   // 파일 관련 상태
@@ -32,7 +41,10 @@ interface FontState {
   isSubmitting: boolean;
   submitError: string | null;
 
-  // 폰트 삭제 함수
+  // 가족 폰트 관련 상태 추가
+  familyFonts: FontInfo[];
+  isFamilyFontsLoaded: boolean;
+  fetchFamilyFonts: (familyId: number) => Promise<void>;
 }
 
 // Zustand 스토어 생성
@@ -57,6 +69,7 @@ const useFontStore = create<FontState>((set, get) => ({
   // 제출 관련 상태 및 액션
   isSubmitting: false,
   submitError: null,
+  // submitFont 함수 수정
   submitFont: async () => {
     const { uploadedFiles, fontNameKo } = get();
 
@@ -74,6 +87,28 @@ const useFontStore = create<FontState>((set, get) => ({
     try {
       set({ isSubmitting: true, submitError: null });
 
+      // 파일명을 기준으로 정렬 (숫자 부분을 추출하여 비교)
+      const sortedFiles = [...uploadedFiles].sort((a, b) => {
+        // 파일명에서 숫자 부분 추출 (예: "1.png"에서 1 추출)
+        const getNumberFromFilename = (filename: string) => {
+          const match = filename.match(/^(\d+)/);
+          return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
+        };
+
+        const numA = getNumberFromFilename(a.name);
+        const numB = getNumberFromFilename(b.name);
+
+        // 숫자 부분이 있으면 그걸 기준으로 정렬, 없으면 문자열 비교
+        if (
+          numA !== Number.MAX_SAFE_INTEGER &&
+          numB !== Number.MAX_SAFE_INTEGER
+        ) {
+          return numA - numB;
+        } else {
+          return a.name.localeCompare(b.name);
+        }
+      });
+
       // 1단계: 폰트 이름 정보만 포함하는 요청 보내기
       const fontData = {
         fontName: fontNameKo,
@@ -82,6 +117,7 @@ const useFontStore = create<FontState>((set, get) => ({
       // 첫 번째 API 요청 (폰트 정보 제출)
       const fontResponse = await apiClient.post('/api/fonts', fontData);
       console.log('폰트 정보 제출 성공:', fontResponse.data);
+      console.log(sortedFiles, '업로드 할 파일들 (정렬됨)');
 
       // presignedUrl 배열 확인
       if (
@@ -94,15 +130,15 @@ const useFontStore = create<FontState>((set, get) => ({
         // 업로드할 파일 수 (presignedUrl 배열 길이와 실제 파일 수 중 작은 값)
         const uploadCount = Math.min(
           fontResponse.data.length,
-          uploadedFiles.length,
+          sortedFiles.length,
         );
 
         // 파일 업로드 작업 배열
         const uploadPromises = [];
 
-        // 각 파일을 해당 presignedUrl에 업로드
+        // 각 파일을 해당 presignedUrl에 업로드 (정렬된 파일 리스트 사용)
         for (let i = 0; i < uploadCount; i++) {
-          const fileItem = uploadedFiles[i];
+          const fileItem = sortedFiles[i];
           const urlData = fontResponse.data[i] as PresignedUrlData;
 
           if (fileItem && urlData && urlData.presignedUrl) {
@@ -113,7 +149,7 @@ const useFontStore = create<FontState>((set, get) => ({
                   `파일 "${fileItem.name}"을 "${urlData.fileName}"으로 업로드 시작`,
                 );
 
-                const uploadResponse = await axios({
+                await axios({
                   url: urlData.presignedUrl,
                   method: 'PUT',
                   data: fileItem.file,
@@ -160,7 +196,6 @@ const useFontStore = create<FontState>((set, get) => ({
       set({
         uploadedFiles: [],
         fontNameKo: '',
-
         isSubmitting: false,
         submitError: null, // 성공 시 에러 메시지 초기화
       });
@@ -170,6 +205,29 @@ const useFontStore = create<FontState>((set, get) => ({
         submitError: '폰트 제출 중 오류가 발생했습니다.',
         isSubmitting: false,
       });
+    }
+  },
+
+  // 가족 폰트 관련 상태 및 함수
+  familyFonts: [],
+  isFamilyFontsLoaded: false,
+
+  fetchFamilyFonts: async (familyId) => {
+    // 이미 로드된 경우 중복 로딩 방지
+    if (get().isFamilyFontsLoaded) return;
+
+    try {
+      const response = await apiClient.get(`api/fonts/family/${familyId}`);
+      console.log('가족 폰트 데이터 로드:', response.data);
+
+      if (response.data && Array.isArray(response.data)) {
+        set({
+          familyFonts: response.data,
+          isFamilyFontsLoaded: true,
+        });
+      }
+    } catch (error) {
+      console.error('가족 폰트 로드 실패:', error);
     }
   },
 }));
