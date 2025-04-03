@@ -98,31 +98,54 @@ public class PhotoService {
         // 기존 앨범에 유저가 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, moveFromAlbum);
 
-        // 이동한 후 앨범의 사진 갯수가 0개면 썸네일 없앰
-        if(photoRepository.countByAlbumId(moveFromAlbum.getId())-request.getPhotoList().size()==0) moveFromAlbum.updateThumbnail(null);
-        // 기본 앨범인 경우 가족 이미지로 변경
-        if(albumService.isBasicAlbum(albumId, moveFromAlbum.getFamily().getId())) {
-            moveFromAlbum.updateThumbnail(moveFromAlbum.getFamily().getThumbnail());
-        }
-
         Album moveToAlbum = albumService.getAlbum(request.getAlbumId()); // 이동하려는 앨범
         // 이동하려는 앨범에 유저가 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, moveToAlbum);
 
         List<Long> photos = request.getPhotoList();
 
-        // 이동한 앨범이 비어있으면 옮기려는 사진의 가장 처음 사진을 썸네일로 업데이트
-        if(photoRepository.countByAlbumId(moveToAlbum.getId()) == 0) moveToAlbum.updateThumbnail(getPhoto(photos.get(0)).getPath());
+        // 기존 앨범의 대표 사진이 이동하려는 사진 중 하나인지 확인
+        String currentThumbnail = moveFromAlbum.getThumbnail();
+        boolean isThumbnailBeingMoved = currentThumbnail != null &&
+                photos.stream().map(this::getPhoto)
+                        .map(Photo::getPath)
+                        .anyMatch(path -> path.equals(currentThumbnail));
+
         for (Long photoId : photos) {
             Photo photo = getPhoto(photoId);
             // 앨범 id 업데이트
             photo.updateAlbum(moveToAlbum);
         }
+
+        // 이동하려는 사진이 기존 앨범의 대표 사진이라면 앨범에 남은 사진 중 하나로 대표 사진 변경, 기존 앨범이 비었으면 대표 사진 null
+        if (isThumbnailBeingMoved) {
+            List<Photo> remainingPhotos = photoRepository.findByAlbumId(moveFromAlbum.getId());
+            if (remainingPhotos.isEmpty()) {
+                if (albumService.isBasicAlbum(moveFromAlbum.getId(), moveFromAlbum.getFamily().getId())) {
+                    // 기본 앨범이고 비어 있다면, 대표 사진 가족 이미지로 변경
+                    moveFromAlbum.updateThumbnail(moveFromAlbum.getFamily().getThumbnail());
+                } else {
+                    // 그 외 비어있는 앨범이면 대표 사진 null로 변경
+                    moveFromAlbum.updateThumbnail(null);
+                }
+            }
+            else {
+                // 남아있는 사진 중 가장 첫번째 사진으로 대표 사진 변경
+                moveFromAlbum.updateThumbnail(remainingPhotos.get(0).getPath());
+            }
+        }
+
+        // 이동하려는 앨범이 원래 비어 있었으면 첫 번째 사진을 대표 사진 설정
+        if (photoRepository.countByAlbumId(moveToAlbum.getId()) == photos.size()) {
+            moveToAlbum.updateThumbnail(getPhoto(photos.get(0)).getPath());
+        }
+
         return PhotoMoveResponse.builder()
                 .albumId(moveToAlbum.getId())
                 .build();
     }
 
+    // 앨범에 사진 업로드
     private List<FileResponse> generateFileResponses(int photoLength, Album album) {
         List<FileResponse> fileResponses = new ArrayList<>();
         for(int i=0;i<photoLength;i++) {
@@ -136,6 +159,12 @@ public class PhotoService {
             photoRepository.save(photo);
             // 썸네일 없으면 업데이트
             if(album.getThumbnail() == null) album.updateThumbnail(key);
+            // 기본 앨범일 때 대표 사진이 그룹 사진이면 사진이 저장될 때 대표 사진 업데이트
+            if (albumService.isBasicAlbum(album.getId(), album.getFamily().getId())) {
+                if (album.getThumbnail().equals(album.getFamily().getThumbnail())) {
+                    album.updateThumbnail(key);
+                }
+            }
             fileResponses.add(fileService.createUploadFileResponse(key));
         }
         return fileResponses;
