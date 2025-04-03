@@ -105,7 +105,7 @@ const Header = () => {
               ) : (
                 // 가족 및 프로필이 없는 경우 로그아웃만 표시
                 <button
-                  className="flex items-center space-x-1 text-h-logo-sm md:text-h-logo-md lg:text-h-logo-lg whitespace-nowrap hover:text-red-700 transition-colors duration-300"
+                  className="flex items-center space-x-1 text-h-logo-sm md:text-h-logo-md lg:text-h-logo-lg whitespace-nowrap hover:text-red-700 transition-colors duration-300 order-1 sm:order-none"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleLogout();
