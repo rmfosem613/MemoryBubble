@@ -32,10 +32,10 @@ import static com.ssafy.memorybubble.common.exception.ErrorCode.PHOTO_NOT_FOUND;
 @Transactional(readOnly = true)
 public class PhotoService {
     private final PhotoRepository photoRepository;
+    private final ReviewRepository reviewRepository;
     private final FileService fileService;
     private final AlbumService albumService;
     private final UserService userService;
-    private final ReviewRepository reviewRepository;
 
     // 사진 업로드
     @Transactional
@@ -98,11 +98,21 @@ public class PhotoService {
         // 기존 앨범에 유저가 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, moveFromAlbum);
 
+        // 이동한 후 앨범의 사진 갯수가 0개면 썸네일 없앰
+        if(photoRepository.countByAlbumId(moveFromAlbum.getId())-request.getPhotoList().size()==0) moveFromAlbum.updateThumbnail(null);
+        // 기본 앨범인 경우 가족 이미지로 변경
+        if(albumService.isBasicAlbum(albumId, moveFromAlbum.getFamily().getId())) {
+            moveFromAlbum.updateThumbnail(moveFromAlbum.getFamily().getThumbnail());
+        }
+
         Album moveToAlbum = albumService.getAlbum(request.getAlbumId()); // 이동하려는 앨범
         // 이동하려는 앨범에 유저가 접근할 수 있는지 확인
         Validator.validateAlbumAccess(user, moveToAlbum);
 
         List<Long> photos = request.getPhotoList();
+
+        // 이동한 앨범이 비어있으면 옮기려는 사진의 가장 처음 사진을 썸네일로 업데이트
+        if(photoRepository.countByAlbumId(moveToAlbum.getId()) == 0) moveToAlbum.updateThumbnail(getPhoto(photos.get(0)).getPath());
         for (Long photoId : photos) {
             Photo photo = getPhoto(photoId);
             // 앨범 id 업데이트
