@@ -1,4 +1,4 @@
-import React, { ReactNode, MouseEvent } from 'react';
+import React, { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../Button/Button';
 
@@ -25,12 +25,12 @@ function Modal({
 }: ModalProps) {
   if (!isOpen) return null;
 
-  // 배경 클릭 시 모달 닫기 핸들러
-  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  // // 배경 클릭 시 모달 닫기 핸들러
+  // const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
+  //   if (e.target === e.currentTarget) {
+  //     onClose();
+  //   }
+  // };
 
   // 취소 버튼 클릭 핸들러
   const handleCancelClick = async () => {
@@ -59,8 +59,7 @@ function Modal({
   const modalContent = (
     <div
       // 백드롭 (배경 어둡게 및 블러 처리)
-      className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]"
-      onClick={handleBackdropClick}>
+      className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]">
       {/* 모달 컨테이너 */}
       <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh] font-pretendard font-normal">
         {/* 제목 영역 */}
