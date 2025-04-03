@@ -1,6 +1,7 @@
 package com.ssafy.memorybubble.api.file.service;
 
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FileService {
     private final S3Presigner s3Presigner;
     private final CloudFrontService cloudFrontService;
@@ -67,8 +69,8 @@ public class FileService {
         try {
             return cloudFrontService.generateSignedUrl(key);
         } catch (Exception e) {
-            // return getDownloadPresignedURL(key);
-            return "";
+            log.error(e.getMessage());
+            return getDownloadPresignedURL(key);
         }
     }
 }
