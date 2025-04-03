@@ -81,6 +81,7 @@ public class FontService {
         // 삭제하려는 폰트가 삭제를 요청한 사용자의 폰트인지 검사
         Validator.validateFontOwnership(user, font);
 
+        fileService.deleteFile(font.getPath());
         fontRepository.deleteById(fontId);
     }
 
