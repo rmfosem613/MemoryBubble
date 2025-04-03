@@ -15,6 +15,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class FileService {
     private final S3Presigner s3Presigner;
+    private final CloudFrontService cloudFrontService;
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
@@ -22,7 +23,7 @@ public class FileService {
     public FileResponse createDownloadFileResponse(String key) {
         return FileResponse.builder()
                 .fileName(key)
-                .presignedUrl(getDownloadPresignedURL(key))
+                .presignedUrl(getDownloadSignedURL(key))
                 .build();
     }
 
@@ -61,4 +62,13 @@ public class FileService {
         return presignedRequest.url().toString();
     }
 
+    // 클라우드 프론트에서 다운로드
+    public String getDownloadSignedURL(String key) {
+        try {
+            return cloudFrontService.generateSignedUrl(key);
+        } catch (Exception e) {
+            // return getDownloadPresignedURL(key);
+            return "";
+        }
+    }
 }

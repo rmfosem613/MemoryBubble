@@ -157,7 +157,7 @@ public class PhotoService {
         // AUDIO인 경우 내용을 음성 파일 presigned url로 전달
         if(review.getType().equals(Type.AUDIO)) {
             String key = review.getContent();
-            content = fileService.getDownloadPresignedURL(key);
+            content = fileService.getDownloadSignedURL(key);
         }
 
         return ReviewDto.builder()
