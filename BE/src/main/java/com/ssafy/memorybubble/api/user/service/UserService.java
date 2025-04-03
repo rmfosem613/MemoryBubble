@@ -3,7 +3,6 @@ package com.ssafy.memorybubble.api.user.service;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.letter.repository.LetterRepository;
-import com.ssafy.memorybubble.api.photo.dto.PhotoDto;
 import com.ssafy.memorybubble.api.user.dto.*;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;

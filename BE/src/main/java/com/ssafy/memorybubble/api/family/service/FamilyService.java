@@ -33,7 +33,6 @@ public class FamilyService {
     private final AlbumService albumService;
     private final UserService userService;
     private final CodeService codeService;
-    private final FontService fontService;
 
     private final String[] colors = {"#F4E2DC", "#F3D1B2", "#F7F0D5", "#BFDAAB", "#C5DFE6", "#B3C6E3"};
 
