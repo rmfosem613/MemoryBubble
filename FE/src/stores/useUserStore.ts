@@ -29,11 +29,9 @@ export interface Family {
 interface UserStore {
   user: User;
   family: Family;
-  isUnread: boolean;
 
   setUser: (user: Partial<User>) => void;
   setFamily: (family: Partial<Family>) => void;
-  setIsUnread: (isUnread: boolean) => void;
   resetUser: () => void;
 }
 
@@ -60,7 +58,6 @@ const useUserStore = create<UserStore>((set) => ({
   // 상태
   user: initialUser,
   family: initialFamily,
-  isUnread: false,
 
   // 액션
   setUser: (user) =>
@@ -73,13 +70,10 @@ const useUserStore = create<UserStore>((set) => ({
       family: { ...state.family, ...family },
     })),
 
-  setIsUnread: (isUnread) => set({ isUnread }),
-
   resetUser: () =>
     set({
       user: initialUser,
       family: initialFamily,
-      isUnread: false,
     }),
 }));
 

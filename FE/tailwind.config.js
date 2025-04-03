@@ -169,7 +169,7 @@ module.exports = {
           },
         ],
         "h-logo-lg": [ // 헤더에 로고
-          "20px",
+          "18px",
           {
             lineHeight: "30px",
             letterSpacing: "-0.4px",
@@ -280,7 +280,7 @@ module.exports = {
           },
         ],
         "h-logo-md": [
-          "18px",
+          "17px",
           {
             lineHeight: "27px",
             letterSpacing: "-0.4px",
@@ -387,7 +387,7 @@ module.exports = {
           },
         ],
         "h-logo-sm": [
-          "16px",
+          "15px",
           {
             lineHeight: "24px",
             letterSpacing: "-0.4px",
