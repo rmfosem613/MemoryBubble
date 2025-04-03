@@ -6,7 +6,6 @@ import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.family.repository.FamilyRepository;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
-import com.ssafy.memorybubble.api.font.service.FontService;
 import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
