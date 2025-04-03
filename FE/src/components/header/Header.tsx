@@ -3,9 +3,11 @@ import { LogOut } from 'lucide-react';
 import useHeader from '@/hooks/useHeader';
 import HeaderMenuItems from './HeaderMenuItems';
 import UserInfo from './UserInfo';
+import { useUserStatus } from '@/hooks/useUserSatus';
 
 const Header = () => {
-  const { isLoggedIn, hasCompleteProfile, handleLogout } = useHeader();
+  const { handleLogout } = useHeader();
+  const { isLoggedIn, hasCompleteProfile } = useUserStatus();
 
   return (
     <header className="fixed top-0 h-[50px] md:h-[55px] lg:h-[60px] w-full bg-white/30 backdrop-blur-md flex items-center z-[50]">
@@ -32,7 +34,10 @@ const Header = () => {
               // 가족 및 프로필이 없는 경우 로그아웃만 표시
               <button
                 className="flex items-center space-x-1 text-h-logo-sm md:text-h-logo-md lg:text-h-logo-lg whitespace-nowrap hover:text-red-700 transition-colors duration-300"
-                onClick={handleLogout}>
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}>
                 <LogOut className="size-4 md:size-[18px]" />
                 <p>로그아웃</p>
               </button>

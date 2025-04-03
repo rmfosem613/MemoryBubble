@@ -2,9 +2,10 @@ import React, { useRef, useEffect } from 'react';
 import { Copy, X, Edit2, Settings, LogOut } from 'lucide-react';
 import useUserStore from '@/stores/useUserStore';
 import useModal from '@/hooks/useModal';
-import useHeader from '@/hooks/useHeader';
+import useUserInfo from '@/hooks/useUserInfo';
 import GroupEditModal from './GroupEditModal';
 import ProfileEditModal from './ProfileEditModal';
+import Alert from '../common/Alert';
 
 const UserInfo = () => {
   const { user, family } = useUserStore();
@@ -18,7 +19,8 @@ const UserInfo = () => {
     handleShowInviteCode,
     copyInviteCode,
     handleLogout,
-  } = useHeader();
+    customAlert,
+  } = useUserInfo();
 
   // 모달 관련 상태
   const groupNameModal = useModal();
@@ -56,6 +58,10 @@ const UserInfo = () => {
   return (
     <>
       <div className="relative" ref={dropdownRef}>
+        {/* 커스텀 알림 렌더링 */}
+        {customAlert.isVisible && (
+          <Alert message={customAlert.message} color={customAlert.color} />
+        )}
         {/*  헤더 - 프로필 사진 */}
         <img
           src={user.profileUrl}

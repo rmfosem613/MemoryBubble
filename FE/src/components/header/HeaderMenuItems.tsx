@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
-import useHeader from '@/hooks/useHeader';
+import useHeaderMenuItems from '@/hooks/useHeaderMenuItems';
 
 interface HeaderMenuItemsProps {
   className?: string;
 }
 
 const HeaderMenuItems = ({ className = '' }: HeaderMenuItemsProps) => {
-  const { isUnread } = useHeader();
+  const { isUnread } = useHeaderMenuItems();
 
   const menuItemStyle =
     'px-2 py-1.5 rounded-full hover:bg-black/5 transition-colors duration-300 text-h-logo-sm md:text-h-logo-md lg:text-h-logo-lg font-p-500';
