@@ -67,7 +67,7 @@ public class FontService {
                 .fontName(font.getName())
                 .fileName(font.getPath())
                 .createdAt(font.getCreatedAt())
-                .presignedUrl(font.getFontStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getPath()) : null)
+                .presignedUrl(font.getFontStatus() == FontStatus.DONE? fileService.getDownloadSignedURL(font.getPath()) : null)
                 .status(font.getFontStatus())
                 .build();
     }
@@ -224,7 +224,7 @@ public class FontService {
                 .userId(user.getId())
                 .userName(user.getName())
                 .fontName(font.getFontName())
-                .fileName(font.getStatus() == FontStatus.DONE? fileService.getDownloadPresignedURL(font.getFileName()) : null)
+                .fileName(font.getStatus() == FontStatus.DONE? fileService.getDownloadSignedURL(font.getFileName()) : null)
                 .status(font.getStatus())
                 .build();
     }

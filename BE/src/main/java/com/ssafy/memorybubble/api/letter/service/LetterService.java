@@ -143,7 +143,7 @@ public class LetterService {
         // AUDIO인 경우 내용을 음성 파일 presigned url로 전달
         if(letter.getType().equals(Type.AUDIO)) {
             String key = letter.getContent();
-            content = fileService.getDownloadPresignedURL(key);
+            content = fileService.getDownloadSignedURL(key);
         }
 
         return LetterDetailDto.builder()

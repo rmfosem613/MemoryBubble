@@ -109,7 +109,7 @@ public class UserService {
         return UserInfoDto.builder()
                 .userId(user.getId())
                 .name(user.getName())
-                .profileUrl(user.getProfile() !=null ? fileService.getDownloadPresignedURL(user.getProfile()) : null)
+                .profileUrl(user.getProfile() !=null ? fileService.getDownloadSignedURL(user.getProfile()) : null)
                 .birth(user.getBirth())
                 .phoneNumber(user.getPhoneNumber())
                 .build();
