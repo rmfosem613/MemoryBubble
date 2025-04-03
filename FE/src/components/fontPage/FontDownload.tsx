@@ -5,6 +5,7 @@ import useFontDownload from '@/hooks/useFontDownload';
 import useFont from '@/hooks/useFont';
 import useTextAreaRef from '@/hooks/useTextAreaRef';
 import { useEffect } from 'react';
+import Alert from '../common/Alert';
 
 // props 타입을 인터페이스로 정의
 interface FontDownloadProps {
@@ -15,8 +16,14 @@ interface FontDownloadProps {
 function FontDownload({ fontId }: FontDownloadProps) {
   const { text, fontSize, setText, setFontSize } = useFont();
 
-  const { downloadFont, resetFont, fontLoaded, fontFamily, fontName } =
-    useFontDownload();
+  const {
+    downloadFont,
+    resetFont,
+    fontLoaded,
+    fontFamily,
+    fontName,
+    alertState,
+  } = useFontDownload();
 
   const { currentFontFamily, setCurrentFontFamily } = useTextAreaRef();
 
@@ -56,6 +63,9 @@ function FontDownload({ fontId }: FontDownloadProps) {
 
         <FontActions onDownload={downloadFont} onReset={handleReset} />
       </div>
+      {alertState && (
+        <Alert message={alertState.message} color={alertState.color} />
+      )}
     </div>
   );
 }

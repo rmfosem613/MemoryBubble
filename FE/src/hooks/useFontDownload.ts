@@ -11,19 +11,37 @@ interface FontResponse {
   status: string | null;
 }
 
+interface AlertState {
+  visible: boolean;
+  message: string;
+  color: 'red' | 'green' | 'gray';
+}
+
 interface UseFontDownloadReturn {
   downloadFont: () => Promise<void>;
   resetFont: (fontId: string) => Promise<void>;
   loadFont: () => Promise<void>;
   fontLoaded: boolean;
   fontFamily: string | null;
-  fontName: string | null; // fontName 추가
+  fontName: string | null;
+  alertState: AlertState | null; // Alert 상태 추가
 }
 
 export const useFontDownload = (): UseFontDownloadReturn => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [fontFamily, setFontFamily] = useState<string | null>(null);
   const [fontName, setFontName] = useState<string | null>(null);
+  const [alertState, setAlertState] = useState<AlertState | null>(null);
+
+  // Alert 표시 함수
+  const showAlert = (message: string, color: 'red' | 'green' | 'gray') => {
+    setAlertState({ visible: true, message, color });
+
+    // 3초 후에 알림 숨기기
+    setTimeout(() => {
+      setAlertState(null);
+    }, 3000);
+  };
 
   // 폰트 정보 가져오는 함수
   const getFontInfo = async (): Promise<FontResponse> => {
@@ -69,11 +87,14 @@ export const useFontDownload = (): UseFontDownloadReturn => {
         window.URL.revokeObjectURL(downloadUrl);
 
         console.log('폰트 다운로드 완료');
+        showAlert('폰트 다운로드가 완료되었습니다.', 'green');
       } else {
         console.error('다운로드할 presignedUrl이 없습니다.');
+        showAlert('다운로드할 폰트 정보가 없습니다.', 'red');
       }
     } catch (error) {
       console.error('폰트 다운로드 중 오류 발생:', error);
+      showAlert('폰트 다운로드 중 오류가 발생했습니다.', 'red');
     }
   };
 
@@ -89,7 +110,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
 
       // 폰트 상태 확인
       if (fontInfo.status !== 'DONE') {
-        alert('폰트가 만들어지지 전 입니다!\n 조금만 기다려 주세요!');
+        showAlert('폰트가 만들어지기 전 입니다! 조금만 기다려 주세요!', 'red');
         return;
       }
 
@@ -149,15 +170,17 @@ export const useFontDownload = (): UseFontDownloadReturn => {
         setFontFamily(fontFamilyName);
         setFontName(createName);
         setFontLoaded(true);
-      } catch (loadError) {
-        console.error('폰트 로드 실패:', loadError);
-        alert('폰트가 만들어지지 전 입니다!\n 조금만 기다려 주세요!');
+        showAlert('폰트가 성공적으로 로드되었습니다.', 'green');
+      } catch (error) {
+        console.error('폰트 로드 실패:', error);
+        showAlert('폰트가 만들어지기 전 입니다! 조금만 기다려 주세요!', 'red');
         style.remove(); // 실패 시 스타일 제거
       }
     } catch (error) {
       console.error('폰트 로드 중 오류 발생:', error);
       setFontFamily('pretendard'); // 오류 발생 시 기본 폰트 사용
       setFontLoaded(false);
+      showAlert('폰트 로드 중 오류가 발생했습니다.', 'red');
     }
   };
 
@@ -174,6 +197,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
 
       // 성공 메시지나 추가 처리가 필요하면 여기에 구현
       console.log(`폰트 ID ${fontId} 삭제 완료`);
+      showAlert('폰트가 성공적으로 삭제되었습니다.', 'green');
 
       // 상태 초기화
       setFontLoaded(false);
@@ -183,6 +207,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       window.location.reload();
     } catch (error) {
       console.error('폰트 삭제 중 오류 발생:', error);
+      showAlert('폰트 삭제 중 오류가 발생했습니다.', 'red');
     }
   }, []);
 
@@ -198,6 +223,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
     fontLoaded,
     fontFamily,
     fontName,
+    alertState, // 알림 상태 반환
   };
 };
 

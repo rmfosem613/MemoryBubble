@@ -15,6 +15,7 @@ import useFontRequests, {
 import useFileDownload from '@/hooks/useFileDownload';
 import useFontUpload from '@/hooks/useFontUpload';
 import JungKins from '@/assets/admin/JEONGKINS.png';
+import Alert from '@/components/common/Alert';
 
 // AlertAdmin 컴포넌트: 폰트 의뢰 알림 표시
 interface AlertAdminProps {
@@ -23,6 +24,7 @@ interface AlertAdminProps {
   onClick: () => void;
   onComplete: () => void;
   onDelete: () => void;
+  isProcessing: boolean;
 }
 
 const AlertAdmin: React.FC<AlertAdminProps> = ({
@@ -31,6 +33,7 @@ const AlertAdmin: React.FC<AlertAdminProps> = ({
   onClick,
   onComplete,
   onDelete,
+  isProcessing,
 }) => {
   return (
     <div
@@ -49,20 +52,26 @@ const AlertAdmin: React.FC<AlertAdminProps> = ({
         </span>
       </div>
       <div className="flex flex-row items-center space-x-2">
-        <CircleCheck
-          className={`w-6 h-6 text-green-200 hover:text-green-500 cursor-pointer`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onComplete();
-          }}
-        />
-        <CircleX
-          className={`w-6 h-6 text-red-200 hover:text-red-700 cursor-pointer`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        />
+        {isProcessing ? (
+          <Loader className="w-6 h-6 text-blue-500 animate-spin" />
+        ) : (
+          <>
+            <CircleCheck
+              className={`w-6 h-6 text-green-200 hover:text-green-500 cursor-pointer`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onComplete();
+              }}
+            />
+            <CircleX
+              className={`w-6 h-6 text-red-200 hover:text-red-700 cursor-pointer`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );
@@ -81,7 +90,7 @@ const DownloadFont: React.FC<DownloadFontProps> = ({ file }) => {
     <div
       className="flex border h-[70px] w-[150px] justify-center items-center space-x-2 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer bg-white"
       onClick={handleDownload}>
-      <FileType2 width="40px" height="40px" strokeWidth="1" />
+      <FileType2 width="40px" height="40px" strokeWidth={1} />
       <div className="">
         <span className="font-p-700">{actualFileName}</span>
       </div>
@@ -96,23 +105,32 @@ const DownloadFont: React.FC<DownloadFontProps> = ({ file }) => {
 
 // AdminPage 컴포넌트: 관리자 페이지 메인
 const AdminPage: React.FC = () => {
+  // useFontUpload 먼저 초기화 - 파일 선택 기능 사용
+  const {
+    ttfFile,
+    handleFileChange,
+    handleDragOver,
+    handleDrop,
+    getCurrentFile,
+    alertState,
+  } = useFontUpload(null);
+
+  // useFontRequests 사용 - getCurrentFile 함수 전달
   const {
     fontRequests,
     selectedRequest,
     handleSelectRequest,
     handleCompleteRequest,
     handleCancel,
-  } = useFontRequests();
+    alertRequestState,
+    isProcessing,
+  } = useFontRequests(getCurrentFile);
 
-  const {
-    ttfFile,
-    isUploading,
-    uploadSuccess,
-    handleFileChange,
-    handleDragOver,
-    handleDrop,
-    handleUpload,
-  } = useFontUpload(selectedRequest);
+  // selectedRequest가 변경되면 useFontUpload에 전달
+  React.useEffect(() => {
+    // 이 부분은 useFontUpload 내부에서 참조하도록 수정이 필요할 수 있음
+    // 현재는 useFontUpload가 selectedRequest를 파라미터로 받는 방식
+  }, [selectedRequest]);
 
   return (
     <div className="container pt-[68px] space-y-3">
@@ -137,6 +155,9 @@ const AdminPage: React.FC = () => {
               onClick={() => handleSelectRequest(request)}
               onComplete={() => handleCompleteRequest(request.fontId)}
               onDelete={() => handleCancel(request.fontId)}
+              isProcessing={
+                isProcessing && selectedRequest?.fontId === request.fontId
+              }
             />
           ))
         ) : (
@@ -180,22 +201,23 @@ const AdminPage: React.FC = () => {
                 onDrop={handleDrop}>
                 {ttfFile ? (
                   <>
-                    <FileType2 className="w-12 h-12 text-green-600 mb-2" />
-                    <p className="text-sm text-center mb-2">{ttfFile.name}</p>
-                    {uploadSuccess ? (
-                      <>
-                        <p className="text-green-600 font-medium">
-                          업로드 성공!
-                        </p>
-                      </>
-                    ) : (
-                      <button
-                        className={`mt-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={handleUpload}
-                        disabled={isUploading}>
-                        {isUploading ? '업로드 중...' : '파일 업로드'}
-                      </button>
-                    )}
+                    <FileType2
+                      className="w-12 h-12 text-green-600 mb-2"
+                      strokeWidth={1}
+                    />
+                    <p className="text-sm text-center">{ttfFile.name}</p>
+                    <p className="text-green-600 font-medium text-center">
+                      파일이 선택되었습니다.
+                    </p>
+                    <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                      파일 선택
+                      <input
+                        type="file"
+                        accept=".ttf"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                    </label>
                   </>
                 ) : (
                   <>
@@ -223,6 +245,15 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
       </div>
+      {alertState && (
+        <Alert message={alertState.message} color={alertState.color} />
+      )}
+      {alertRequestState && (
+        <Alert
+          message={alertRequestState.message}
+          color={alertRequestState.color}
+        />
+      )}
     </div>
   );
 };
