@@ -145,7 +145,7 @@ public class AlbumService {
                 .albumName(album.getName())
                 .albumContent(album.getContent())
                 .backgroundColor(album.getBackgroundColor())
-                .thumbnailUrl(album.getThumbnail() == null ? null : fileService.getDownloadPresignedURL(album.getThumbnail()))
+                .thumbnailUrl(album.getThumbnail() == null ? null : fileService.getDownloadSignedURL(album.getThumbnail()))
                 .photoLength(photoRepository.countByAlbumId(album.getId()))
                 .build();
     }
@@ -166,7 +166,12 @@ public class AlbumService {
         // 사진을 dto로 변환
         return PhotoDto.builder()
                 .photoId(photo.getId())
-                .photoUrl(fileService.getDownloadPresignedURL(photo.getPath()))
+                .photoUrl(fileService.getDownloadSignedURL(photo.getPath()))
                 .build();
+    }
+
+    public boolean isBasicAlbum(Long albumId, Long familyId) {
+        Album album = albumRepository.findFirstByFamilyIdOrderByCreatedAtAsc(familyId).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
+        return album.getId().equals(albumId);
     }
 }
