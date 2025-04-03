@@ -10,11 +10,14 @@ interface TextLetterContentProps {
   onContentChange: (content: string) => void;
 }
 
-function TextLetterContent({ content, onContentChange }: TextLetterContentProps) {
+function TextLetterContent({
+  content,
+  onContentChange,
+}: TextLetterContentProps) {
   const { selectedColor, selectedMember } = useLetterStore();
   const [senderName, setSenderName] = useState<string>('');
   const { fetchUserProfile } = useUserApi();
-  const { user, family } = useUserStore();
+  const { user } = useUserStore();
 
   // 현재 사용자 정보 조회
   useEffect(() => {
@@ -23,7 +26,7 @@ function TextLetterContent({ content, onContentChange }: TextLetterContentProps)
         // 사용자 프로필 정보 조회
         const profileResponse = await fetchUserProfile(user.userId);
         const userProfile = profileResponse.data;
-        
+
         // 보내는 사람 이름 설정
         if (userProfile.name) {
           setSenderName(userProfile.name);
