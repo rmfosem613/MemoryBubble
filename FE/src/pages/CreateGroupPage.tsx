@@ -92,10 +92,10 @@ function CreateGroupPage() {
           try {
             // 이미지를 webp 형식으로 변환
             const webpBlob = await convertToWebp(groupImage)
-            
+
             // presignedUrl을 사용하여 S3에 이미지 업로드
             await uploadImageWithPresignedUrl(
-              data.presignedUrl, 
+              data.presignedUrl,
               new File([webpBlob], data.fileName, { type: 'image/webp' })
             )
           } catch (uploadError) {
@@ -153,11 +153,11 @@ function CreateGroupPage() {
         const img = new Image()
         img.onload = () => {
           const canvas = document.createElement('canvas')
-          
+
           // 원본 이미지 크기로 캔버스 설정 (고해상도 유지)
           canvas.width = img.width
           canvas.height = img.height
-          
+
           const ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0)
 
@@ -228,8 +228,8 @@ function CreateGroupPage() {
                     initialImage={groupImage}
                     initialPreviewUrl={groupImagePreview}
                   />
-                  
-                  <p className="text-xs text-gray-500 text-center mt-2">
+
+                  <p className="text-xs text-gray-500 text-center mt-2 mb-2">
                     이미지 크기는 100KB ~ 3MB 이내로 등록해주세요.
                   </p>
                 </>

@@ -15,8 +15,8 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
   const [selectedRatio, setSelectedRatio] = useState("4:3") // 기본 비율
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
-    width: 100,
-    height: 75,
+    width: 20,
+    height: 15,
     x: 0,
     y: 0,
     aspect: 4 / 3
@@ -54,30 +54,22 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
   // 모달이 열릴 때 실행되는 초기화 함수
   useEffect(() => {
     if (showCropper && imgRef.current && previewUrl) {
-      // 이미지가 로드될 때까지 기다리기 위한 이미지 로드 이벤트 리스너
       const img = imgRef.current
-      const onImageLoad = () => {
+
+      const initializeCrop = () => {
         imageLoaded.current = true
         // 이미지 로드 후 crop 영역 초기화
         handleResetCrop()
-
-
-        // 초기 completedCrop 값 설정
-        // setCompletedCrop(crop)
-
-        setTimeout(() => {
-          setCompletedCrop({ ...crop })
-        }, 100)
       }
 
       if (img.complete) {
         // 이미지가 이미 캐시되어 있는 경우
-        onImageLoad()
+        initializeCrop()
       } else {
         // 이미지가 아직 로드 중인 경우
-        img.addEventListener('load', onImageLoad)
+        img.addEventListener('load', initializeCrop)
         return () => {
-          img.removeEventListener('load', onImageLoad)
+          img.removeEventListener('load', initializeCrop)
         }
       }
     }
@@ -179,8 +171,8 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
 
   // 크롭 적용 버튼 클릭 시 실행되는 함수
   const handleApplyCrop = () => {
-    // completedCrop이 없으면 현재 crop 값 사용
-    const cropToUse = crop
+    // 중요 수정: completedCrop가 없거나 비어있으면 현재 crop 값 사용
+    const cropToUse = completedCrop && completedCrop.width > 0 ? completedCrop : crop
 
     if (!cropToUse || !imgRef.current) return
 
@@ -252,29 +244,22 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
     if (imgRef.current) {
       const { width, height } = imgRef.current;
 
-      let newWidth, newHeight, newX, newY;
+      // 고정 너비 100px 설정
+      const fixedWidth = 100;
+      // 비율에 맞는 높이 계산
+      const fixedHeight = fixedWidth / aspectRatio;
 
-      if (width / height > aspectRatio) {
-        // 이미지가 더 넓은 경우
-        newHeight = height;
-        newWidth = height * aspectRatio;
-        newX = (width - newWidth) / 2;
-        newY = 0;
-      } else {
-        // 이미지가 더 좁거나 비율이 같은 경우
-        newWidth = width;
-        newHeight = width / aspectRatio;
-        newX = 0;
-        newY = (height - newHeight) / 2;
-      }
+      // 픽셀값을 퍼센트로 변환
+      const percentWidth = (fixedWidth / width) * 100;
+      const percentHeight = (fixedHeight / height) * 100;
 
-      // 퍼센트로 변환
+      // 왼쪽 위 모서리에 위치 (x=0, y=0)
       const percentCrop = {
         unit: '%',
-        width: (newWidth / width) * 100,
-        height: (newHeight / height) * 100,
-        x: (newX / width) * 100,
-        y: (newY / height) * 100,
+        width: percentWidth,
+        height: percentHeight,
+        x: 0,
+        y: 0,
         aspect: aspectRatio
       } as Crop;
 
@@ -285,8 +270,8 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
       // imgRef.current가 없는 경우 기본값으로 설정
       const defaultCrop = {
         unit: '%',
-        width: 100,
-        height: aspectRatio === 4 / 3 ? 75 : 133.33,
+        width: 20,
+        height: aspectRatio === 4 / 3 ? 15 : 26.67,
         x: 0,
         y: 0,
         aspect: aspectRatio
@@ -338,12 +323,6 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
               <p className="text-sm text-gray-600">클릭하거나 드래그</p>
             </div>
           )}
-
-          {!previewUrl && (
-            <p className="font-p-500 text-subtitle-1-lg text-gray-500 mb-2">
-              그룹을 대표할 사진을 선택해주세요
-            </p>
-          )}
         </>
       )}
 
@@ -360,7 +339,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
                 <Crop />
                 <h3 className="text-xl font-bold mb-4 text-start w-[110px]">이미지 자르기</h3>
               </div>
-              {/* 비율 선택 버튼 (모달 내부에 위치) */}
+              {/* 비율 선택 버튼 */}
               <div className="mb-4">
                 <div className="flex flex-col space-y-4 mb-4">
                   <button
@@ -386,9 +365,6 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
             {/* 영역2 */}
 
             <div className='flex-col'>
-              {/* <div className="text-blue-500 font-semibold mb-2 text-center">{selectedRatio} 비율로 이미지를 자르세요</div> */}
-              {/* <p className="text-gray-500 text-sm mb-4 text-center">영역을 드래그하여 조절할 수 있습니다</p> */}
-
               <div className="flex justify-center mb-6">
                 <div className="max-w-full" style={{ maxHeight: 'calc(90vh - 350px)' }}>
                   <ReactCrop
