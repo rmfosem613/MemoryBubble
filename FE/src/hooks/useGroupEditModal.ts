@@ -107,7 +107,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
         }
         alert('그룹 정보가 수정되었습니다.');
         if (window.location.pathname === '/' && thumbnail) {
-          window.location.reload(); // 알림이 보일 수 있도록 약간의 지연 추가
+          window.location.reload();
         }
         return true; // 성공 시 모달 닫기
       } else {
