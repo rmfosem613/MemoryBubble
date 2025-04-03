@@ -1,4 +1,5 @@
 import React, { ReactNode, MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import Button from '../Button/Button';
 
 interface ModalProps {
@@ -55,13 +56,13 @@ function Modal({
     }
   };
 
-  return (
+  const modalContent = (
     <div
       // 백드롭 (배경 어둡게 및 블러 처리)
       className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]"
       onClick={handleBackdropClick}>
       {/* 모달 컨테이너 */}
-      <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh]">
+      <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh] font-pretendard font-normal">
         {/* 제목 영역 */}
         <h1 className="font-p-700 text-h3-sm p-5 pb-1 md:p-6 md:pb-1 lg:p-7 lg:pb-1 border-b-2 border-dashed border-gray-300 md:text-h3-md lg:text-h3-lg">
           {title}
@@ -88,6 +89,8 @@ function Modal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default Modal;
