@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { LetterData } from '@/types/Letter';
 import { Headset, CirclePause, CirclePlay } from 'lucide-react';
 import useUserStore from '@/stores/useUserStore';
+import useFontStore from '@/stores/useFontStore';
 
 // Letter.ts에 contents 필드 추가를 가정
 // 실제 프로젝트에서는 Letter.ts 파일에 해당 필드를 추가해야 합니다
 declare module '@/types/Letter' {
   interface LetterData {
     content?: string;
+    senderId: number;
   }
 }
 
@@ -38,6 +40,30 @@ interface LetterAnimationProps {
   isOpen: boolean;
 }
 
+// 편지 폰트 적용
+const FontStyles = ({ fontInfoList }) => {
+  return (
+    <style>
+      {fontInfoList.map((font) => {
+        if (font.status === 'DONE' && font.fileName) {
+          return `
+              @font-face {
+                font-family: '${font.fontName}';
+                src: url('${font.fileName}') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+              }
+              .font-user-${font.userId} {
+                font-family: '${font.fontName}', sans-serif;
+              }
+            `;
+        }
+        return '';
+      })}
+    </style>
+  );
+};
+
 const LetterAnimation: React.FC<LetterAnimationProps> = ({
   letter,
   onClose,
@@ -45,8 +71,27 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
 }) => {
   const unsubscribeRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
   const { user } = useUserStore();
+
+  // 컴포넌트 마운트 시 폰트 정보 로드
+  useEffect(() => {
+    if (!isFamilyFontsLoaded && user && user.familyId) {
+      fetchFamilyFonts(user.familyId);
+    }
+  }, [isFamilyFontsLoaded, fetchFamilyFonts, user]);
+
+  // 발신자 폰트 찾기
+  const senderFont =
+    letter && letter.senderId
+      ? familyFonts.find((font) => font.userId === letter.senderId)
+      : null;
+
+  // 폰트 클래스 이름 생성
+  const fontClass =
+    senderFont && senderFont.status === 'DONE'
+      ? `font-user-${senderFont.userId}`
+      : '';
 
   useEffect(() => {
     if (isOpen && letter) {
@@ -168,6 +213,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
   return (
     <>
       <style>{waveAnimationStyle}</style>
+      <FontStyles fontInfoList={familyFonts} />
       <div
         id="unsubscribe"
         ref={unsubscribeRef}
@@ -283,7 +329,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                     <div className="flex-1 relative z-20 mb-12">
                       {letter.content ? (
                         <div
-                          className="text-lg leading-loose text-gray-700 overflow-y-auto h-full"
+                          className={`text-lg leading-loose text-gray-700 overflow-y-auto h-full ${fontClass}`}
                           dangerouslySetInnerHTML={{ __html: letter.content }}
                         />
                       ) : (

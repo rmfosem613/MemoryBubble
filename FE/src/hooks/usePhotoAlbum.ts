@@ -3,19 +3,12 @@ import { useParams } from 'react-router-dom';
 // import useAlbumStore from '@/stores/useAlbumStore';
 import apiClient from '@/apis/apiClient';
 import useUserstore from '@/stores/useUserStore';
+import useFontStore from '@/stores/useFontStore';
 
 export interface Photo {
   id: number;
   src: string;
   alt: string;
-}
-
-interface FontInfo {
-  userId: number;
-  userName: string;
-  fontName: string;
-  fileName: string;
-  status: string;
 }
 
 export const usePhotoAlbum = () => {
@@ -27,8 +20,6 @@ export const usePhotoAlbum = () => {
   const [error, setError] = useState<string | null>(null);
   const [newAlbumName, setNewAlbumName] = useState('');
   const [newAlbumContent, setNewAlbumContent] = useState('');
-  // 추가: 폰트 정보 상태
-  const [fontInfoList, setFontInfoList] = useState<FontInfo[]>([]);
 
   // 추가: 현재 사진의 메시지 데이터를 저장할 상태
   const [photoMessages, setPhotoMessages] = useState<any[]>([]);
@@ -40,6 +31,14 @@ export const usePhotoAlbum = () => {
 
   const { id } = useParams();
   const { user } = useUserstore();
+  const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
+
+  // 컴포넌트 마운트 시 가족 폰트 정보 미리 로드
+  useEffect(() => {
+    if (!isFamilyFontsLoaded && user && user.familyId) {
+      fetchFamilyFonts(user.familyId);
+    }
+  }, [isFamilyFontsLoaded, fetchFamilyFonts, user]);
 
   useEffect(() => {
     const fetchAllAlbums = async () => {
@@ -213,22 +212,9 @@ export const usePhotoAlbum = () => {
     setIsFlipped(!isFlipped);
   };
 
-  // 카드 뒤집기 토글(axios 요청 포함)
+  // 카드 뒤집기 토글(axios 요청 포함) - 폰트 로딩 로직 수정
   const toggleFlipWithPostCard = async () => {
-    const familyId = user.familyId;
-
-    try {
-      const fontResponse = await apiClient.get(`api/fonts/family/${familyId}`);
-      console.log('가족 폰트 데이터:', fontResponse.data);
-
-      // 폰트 데이터를 상태에 저장
-      if (fontResponse.data && Array.isArray(fontResponse.data)) {
-        setFontInfoList(fontResponse.data);
-      }
-    } catch (error) {
-      console.error('Error fetching font data:', error);
-    }
-
+    // 현재 사진의 메시지 데이터 가져오기
     const currentPhotoId = photos[currentIndex].id;
     try {
       const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
@@ -326,7 +312,6 @@ export const usePhotoAlbum = () => {
     isFlipped,
     toggleFlip,
     toggleFlipWithPostCard,
-    // currentAlbum,
     photos,
     photoMessages,
     setPhotoMessages,
@@ -345,6 +330,6 @@ export const usePhotoAlbum = () => {
     handleMovePhoto,
     albumId: id, // 현재 앨범 ID 반환
     refreshPhotos,
-    fontInfoList,
+    fontInfoList: familyFonts,
   };
 };

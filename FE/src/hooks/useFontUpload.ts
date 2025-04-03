@@ -65,7 +65,7 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
     setIsUploading(true);
     try {
       // 1. 서버에 fontId를 보내 presignedUrl 요청
-      const response = await apiClient.post(
+      const response = await apiClient.patch(
         `/api/admin/fonts/${selectedRequest.fontId}`,
       );
 

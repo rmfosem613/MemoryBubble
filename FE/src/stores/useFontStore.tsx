@@ -15,6 +15,15 @@ interface PresignedUrlData {
   fileName: string;
 }
 
+// 폰트 정보 인터페이스 추가
+interface FontInfo {
+  userId: number;
+  userName: string;
+  fontName: string;
+  fileName: string;
+  status: string;
+}
+
 // 폰트 스토어 상태 인터페이스
 interface FontState {
   // 파일 관련 상태
@@ -32,7 +41,10 @@ interface FontState {
   isSubmitting: boolean;
   submitError: string | null;
 
-  // 폰트 삭제 함수
+  // 가족 폰트 관련 상태 추가
+  familyFonts: FontInfo[];
+  isFamilyFontsLoaded: boolean;
+  fetchFamilyFonts: (familyId: number) => Promise<void>;
 }
 
 // Zustand 스토어 생성
@@ -137,7 +149,7 @@ const useFontStore = create<FontState>((set, get) => ({
                   `파일 "${fileItem.name}"을 "${urlData.fileName}"으로 업로드 시작`,
                 );
 
-                const uploadResponse = await axios({
+                await axios({
                   url: urlData.presignedUrl,
                   method: 'PUT',
                   data: fileItem.file,
@@ -193,6 +205,29 @@ const useFontStore = create<FontState>((set, get) => ({
         submitError: '폰트 제출 중 오류가 발생했습니다.',
         isSubmitting: false,
       });
+    }
+  },
+
+  // 가족 폰트 관련 상태 및 함수
+  familyFonts: [],
+  isFamilyFontsLoaded: false,
+
+  fetchFamilyFonts: async (familyId) => {
+    // 이미 로드된 경우 중복 로딩 방지
+    if (get().isFamilyFontsLoaded) return;
+
+    try {
+      const response = await apiClient.get(`api/fonts/family/${familyId}`);
+      console.log('가족 폰트 데이터 로드:', response.data);
+
+      if (response.data && Array.isArray(response.data)) {
+        set({
+          familyFonts: response.data,
+          isFamilyFontsLoaded: true,
+        });
+      }
+    } catch (error) {
+      console.error('가족 폰트 로드 실패:', error);
     }
   },
 }));
