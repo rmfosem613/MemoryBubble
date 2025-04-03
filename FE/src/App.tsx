@@ -19,7 +19,7 @@ import {
 import LoadingPage from './pages/LoadingPage';
 import BasicPhotoAlbumPage from './pages/BasicPhotoAlbumPage';
 import FontPage from './pages/FontPage';
-import LoginPage from './pages/LoginPage';
+import IntroPage from './pages/IntroPage';
 import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
 import CalendarPage from './pages/CalendarPage';
@@ -84,9 +84,10 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
+          <Route path="/intro" element={<IntroPage />} />
+
           {/* 인증이 필요 없는 경로 (로그인하지 않은 사용자만 접근 가능) */}
           <Route element={<NonAuthRoute />}>
-            <Route path="/login" element={<LoginPage />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
             <Route path="/kakao" element={<TestKakaoLogin />} />
           </Route>

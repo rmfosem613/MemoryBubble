@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import Modal from '@/components/common/Modal/Modal';
-import useUserStore from '@/stores/useUserStore';
-import useUserApi from '@/apis/useUserApi';
+import { useGroupEditModal } from '@/hooks/useGroupEditModal';
 
 interface GroupEditModalProps {
   isOpen: boolean;
@@ -9,123 +8,18 @@ interface GroupEditModalProps {
 }
 
 const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
-  const { updateFamilyInfo, uploadImageWithPresignedUrl } = useUserApi();
-
-  const familyId = useUserStore((state) => state.user.familyId);
-  const familyName = useUserStore((state) => state.family.familyName);
-  const thumbnailUrl = useUserStore((state) => state.family.thumbnailUrl);
-  const setFamily = useUserStore((state) => state.setFamily);
-
-  const [groupName, setGroupName] = useState('');
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 초기화
-  useEffect(() => {
-    if (isOpen) {
-      setGroupName(familyName);
-      setThumbnailPreview(thumbnailUrl);
-      setThumbnail(null);
-      setErrorMessage('');
-    }
-  }, [isOpen, familyName, thumbnailUrl]);
-
-  // 입력 변경 시 에러 메시지 초기화
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGroupName(e.target.value);
-    setErrorMessage('');
-  };
-
-  // 이미지 선택 버튼 클릭
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  // 파일 선택 핸들러
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // 이미지 파일 검증
-      if (!file.type.match('image.*')) {
-        setErrorMessage('이미지 파일만 업로드 가능합니다.');
-        return;
-      }
-      setThumbnail(file);
-
-      // 이미지 미리보기 생성
-      const reader = new FileReader();
-      reader.onload = () => {
-        setThumbnailPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      setErrorMessage('');
-    }
-  };
-
-  // 확인 버튼 클릭 시 실행할 함수
-  const onConfirm = async () => {
-    // 유효성 검사
-    const trimmedName = groupName.trim();
-    if (!trimmedName) {
-      setErrorMessage('그룹명을 입력해주세요.');
-      return false; // 모달 유지
-    }
-    setErrorMessage(''); // 유효성 검사 통과 시 에러 메시지 초기화
-
-    // 기존 이름과 동일하고 새 이미지가 없으면 API 호출 없이 닫기
-    if (trimmedName === familyName && !thumbnail) {
-      return true; // 모달 닫기
-    }
-
-    // api 요청
-    try {
-      setIsLoading(true);
-
-      if (familyId) {
-        const response = await updateFamilyInfo(familyId, {
-          familyName: trimmedName,
-        });
-
-        if (response.status === 200) {
-          // 이름 업데이트 성공 시 이름 상태 업데이트
-          setFamily({
-            familyName: trimmedName,
-          });
-
-          // 이미지 업로드 처리
-          if (thumbnail && response.data.presignedUrl) {
-            try {
-              await uploadImageWithPresignedUrl(
-                response.data.presignedUrl,
-                thumbnail,
-              );
-              // 이미지 업로드 성공 시 이미지 URL 상태 업데이트
-              setFamily({
-                thumbnailUrl: thumbnailPreview,
-              });
-            } catch (uploadError) {
-              console.error('이미지 업로드 실패:', uploadError);
-              setErrorMessage('이미지 업로드 중 오류가 발생했습니다.');
-              return false;
-            }
-          }
-          return true; // 모달 닫기
-        } else {
-          setErrorMessage('그룹 정보 수정 중 오류가 발생했습니다.');
-          return false; // 모달 유지
-        }
-      }
-      return false; // familyId 없으면 모달 유지
-    } catch (error) {
-      setErrorMessage('그룹 정보 수정 중 오류가 발생했습니다.');
-      return false; // 모달 유지
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    groupName,
+    thumbnailPreview,
+    errorMessage,
+    isLoading,
+    fileInputRef,
+    handleInputChange,
+    handleGroupNameBlur,
+    handleImageClick,
+    handleFileChange,
+    onConfirm,
+  } = useGroupEditModal(isOpen);
 
   return (
     <Modal
@@ -182,15 +76,16 @@ const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
             type="text"
             value={groupName}
             onChange={handleInputChange}
+            onBlur={handleGroupNameBlur}
             className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             placeholder="그룹명을 입력해주세요."
             maxLength={10}
             disabled={isLoading}
           />
+          {errorMessage && (
+            <p className="text-red-500 mt-1 text-sm">{errorMessage}</p>
+          )}
         </div>
-        {errorMessage && (
-          <p className="text-red-500 mt-1 text-sm">{errorMessage}</p>
-        )}
       </>
     </Modal>
   );
