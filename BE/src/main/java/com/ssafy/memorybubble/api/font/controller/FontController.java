@@ -113,7 +113,7 @@ public class FontController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/admin/fonts/{fontId}")
+    @PostMapping("/admin/fonts/{fontId}")
     @Operation(
             summary = "폰트 생성 완료 API (관리자)",
             description = "관리자가 폰트 생성을 완료합니다. ttf 파일을 올릴 링크를 제공합니다.",
