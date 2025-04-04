@@ -21,7 +21,7 @@ function MainAlbum({
     if (!url || url.includes('presigned')) {
       return defaultAlbumImage;
     }
-    return url;
+    return url+"&w=500&h=500";
   };
 
   // 현재 이미지 URL 확인
