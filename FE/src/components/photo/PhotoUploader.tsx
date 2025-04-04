@@ -84,9 +84,9 @@ const PhotoUploader = ({
       return;
     }
 
-    // 파일 크기 검증 (100KB ~ 3MB)
+    // 파일 크기 검증 (100KB ~ 10MB)
     const validatedFiles = files.filter(file => {
-      const validation = validateImageSize(file, 100, 3);
+      const validation = validateImageSize(file, 100, 10);
       if (!validation.valid) {
         showAlertMessage(validation.message, "red");
         return false;
@@ -97,14 +97,14 @@ const PhotoUploader = ({
     // 유효한 파일이 없으면 종료
     if (validatedFiles.length === 0) {
       if (files.length > 0) {
-        showAlertMessage("선택한 모든 이미지의 크기가 유효하지 않습니다. 이미지 크기는 100KB에서 3MB 사이여야 합니다.", "red");
+        showAlertMessage("선택한 모든 이미지의 크기가 유효하지 않습니다. 이미지 크기는 100KB에서 10MB 사이여야 합니다.", "red");
       }
       return;
     }
 
     // 일부 파일만 유효한 경우 알림
     if (validatedFiles.length < files.length) {
-      showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 크기 제한(100KB~3MB)을 벗어나 제외되었습니다.`, "red");
+      showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 크기 제한(100KB~10MB)을 벗어나 제외되었습니다.`, "red");
     }
 
     const newFiles = [...selectedFiles, ...validatedFiles];
@@ -287,7 +287,7 @@ const PhotoUploader = ({
 
         {/* 크기 제한 안내 메시지 */}
         <div className="text-sm-lg text-gray-400 mb-3 -mt-3">
-          이미지 제한 용량: 100KB ~ 3MB
+          이미지 제한 용량: 100KB ~ 10MB
         </div>
 
 

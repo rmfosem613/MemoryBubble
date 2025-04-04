@@ -54,7 +54,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         allowedAspectRatios={["4:3", "3:4", "1:1"]} // 그룹 이미지는 4:3, 3:4 비율 허용
         defaultAspectRatio="4:3" // 초기 crop 비율
         minSize={100} // 최소 100KB
-        maxSize={3}   // 최대 3MB
+        maxSize={10}   // 최대 10MB
         imageQuality={1.0} // 최대 품질
         renderPreview={renderGroupPreview}
         renderUploadBox={renderUploadBox}

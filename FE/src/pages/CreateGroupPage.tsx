@@ -225,7 +225,7 @@ function CreateGroupPage() {
                 <>
 
                   <p className="text-xs text-gray-500 text-center">
-                    이미지 크기는 100KB ~ 3MB 이내로 등록가능합니다.
+                    이미지 크기는 100KB ~ 10MB 이내로 등록가능합니다.
                   </p>
 
                   <InputGroupPic

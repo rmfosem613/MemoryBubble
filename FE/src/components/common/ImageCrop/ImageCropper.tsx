@@ -30,7 +30,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   allowedAspectRatios = ["1:1", "4:3", "3:4"],
   defaultAspectRatio = "1:1",
   minSize = 100, // 기본 최소 100KB
-  maxSize = 3, // 기본 최대 3MB
+  maxSize = 10, // 기본 최대 10MB
   imageQuality = 0.95, // 기본 품질 95%
   renderPreview,
   renderUploadBox,
