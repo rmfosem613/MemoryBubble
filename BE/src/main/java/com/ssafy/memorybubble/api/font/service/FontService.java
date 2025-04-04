@@ -149,6 +149,7 @@ public class FontService {
                 .fontId(font.getId())
                 .userName(user.getName())
                 .fontName(font.getName())
+                .createdAt(font.getCreatedAt())
                 .files(files)
                 .build();
     }
