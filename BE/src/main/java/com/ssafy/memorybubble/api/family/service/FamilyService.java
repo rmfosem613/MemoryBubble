@@ -144,8 +144,8 @@ public class FamilyService {
                 .toList();
         log.info("family members dto: {}", familyMembersDto);
 
-        // 가족의 썸네일 presignd Url 반환
-        String thumbnailUrl = fileService.getDownloadSignedURL(family.getThumbnail());
+        // 가족의 썸네일 반환
+        String thumbnailUrl = fileService.getDownloadSignedURL(family.getThumbnail())+"&w=100&h=100";
 
         return FamilyInfoResponse.builder()
                 .familyName(family.getName())
