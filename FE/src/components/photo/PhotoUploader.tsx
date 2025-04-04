@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Modal from "@/components/common/Modal/Modal";
-import InputImg from "@/components/common/Modal/InputImg";
-import { getPhotoUploadUrls, convertToWebP, uploadImageToS3 } from "@/apis/photoApi";
-import Alert from "@/components/common/Alert"; // Corrected import path
+import { getPhotoUploadUrls } from "@/apis/photoApi";
+import ImageSelector from "@/components/common/Modal/ImageSelector";
+import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
+import { uploadImageToS3, validateImageSize } from "@/components/common/ImageCrop/imageUtils";
 
 interface PhotoUploaderProps {
   isOpen: boolean;
   onClose: () => void;
   albumId: number | null;
   onUploadComplete: () => Promise<void>;
-  albumSelectComponent?: React.ReactNode; // 옵셔널: 앨범 선택 컴포넌트
+  albumSelectComponent?: React.ReactNode;
 }
 
 const PhotoUploader = ({
@@ -19,143 +20,298 @@ const PhotoUploader = ({
   onUploadComplete,
   albumSelectComponent
 }: PhotoUploaderProps) => {
-  // 사진 업로드 관련 상태
-  const [selectedImages, setSelectedImages] = useState<{ file: File; preview: string }[]>([]);
-  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  // 사용자가 선택한 원본 이미지 파일들
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // Alert 관련
+  // 자르기 완료된 이미지 파일들 (최종 결과)
+  const [croppedImages, setCroppedImages] = useState<{ file: File; preview: string }[]>([]);
+
+  // 현재 자르고 있는 이미지 인덱스
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(-1);
+
+  // 선택된 가로세로 비율
+  const [selectedRatio, setSelectedRatio] = useState<"4:3" | "3:4">("4:3");
+
+  // 업로드 상태
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // 알림 관련 상태
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
 
-  // Alert 표시 함수
+  // 모달이 닫힐 때 상태 초기화
+  const resetState = () => {
+    setSelectedFiles([]);
+    setCroppedImages([]);
+    setCurrentImageIndex(-1);
+    setSelectedRatio("4:3");
+    setIsUploadingPhotos(false);
+    setUploadProgress(0);
+    setShowAlert(false);
+  };
+
+  // 모든 이미지 자르기가 완료되었는지 확인
+  useEffect(() => {
+    if (selectedFiles.length > 0) {
+      const croppedCount = croppedImages.filter(img => img && img.preview).length;
+      const allCropped = croppedCount === selectedFiles.length;
+
+      // 모든 이미지 자르기 완료 시 크로퍼 닫기
+      if (allCropped && currentImageIndex !== -1) {
+        setCurrentImageIndex(-1);
+      }
+    }
+  }, [croppedImages, selectedFiles, currentImageIndex]);
+
+  // 알림 메시지 표시
   const showAlertMessage = (message: string, color: string = "red") => {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
-    
-    // 3초 후 Alert 숨기기
+
     setTimeout(() => {
       setShowAlert(false);
-    }, 3500); // Alert 자체 타이머보다 약간 더 길게 설정
+    }, 3500);
   };
 
-  // 이미지 선택 핸들러
-  const handleImagesSelected = (images: { file: File; preview: string }[]) => {
-    setSelectedImages(images);
+  // 이미지 선택 시 처리
+  const handleImagesSelected = (files: File[]) => {
+    // 최대 5개까지만 선택 가능
+    if (files.length + selectedFiles.length > 5) {
+      showAlertMessage("이미지는 한 번에 최대 5개까지만 업로드할 수 있습니다.", "red");
+      return;
+    }
+
+    // 파일 크기 검증 (100KB ~ 3MB)
+    const validatedFiles = files.filter(file => {
+      const validation = validateImageSize(file, 100, 3);
+      if (!validation.valid) {
+        showAlertMessage(validation.message, "red");
+        return false;
+      }
+      return true;
+    });
+
+    // 유효한 파일이 없으면 종료
+    if (validatedFiles.length === 0) {
+      if (files.length > 0) {
+        showAlertMessage("선택한 모든 이미지의 크기가 유효하지 않습니다. 이미지 크기는 100KB에서 3MB 사이여야 합니다.", "red");
+      }
+      return;
+    }
+
+    // 일부 파일만 유효한 경우 알림
+    if (validatedFiles.length < files.length) {
+      showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 크기 제한(100KB~3MB)을 벗어나 제외되었습니다.`, "red");
+    }
+
+    const newFiles = [...selectedFiles, ...validatedFiles];
+    setSelectedFiles(newFiles);
+
+    // 새로 추가된 첫 번째 이미지부터 자르기 시작
+    setCurrentImageIndex(selectedFiles.length);
   };
 
-  // 사진 업로드 시작 함수
+  // 이미지 제거
+  const handleRemoveImage = (index: number) => {
+    const newFiles = [...selectedFiles];
+    newFiles.splice(index, 1);
+    setSelectedFiles(newFiles);
+
+    // 잘린 이미지도 함께 제거
+    const newCroppedImages = [...croppedImages];
+    newCroppedImages.splice(index, 1);
+    setCroppedImages(newCroppedImages);
+  };
+
+  // 이미지 자르기 완료 처리
+  const handleCropComplete = (file: File, previewUrl: string) => {
+    const newCroppedImages = [...croppedImages];
+    newCroppedImages[currentImageIndex] = { file, preview: previewUrl };
+    setCroppedImages(newCroppedImages);
+
+    // 다음 이미지로 이동
+    if (currentImageIndex < selectedFiles.length - 1) {
+      setTimeout(() => {
+        setCurrentImageIndex(currentImageIndex + 1);
+      }, 300);
+    } else {
+      // 모든 이미지 자르기 완료
+      setCurrentImageIndex(-1);
+    }
+  };
+
+  // 가로세로 비율 변경
+  const handleRatioChange = (ratio: "4:3" | "3:4") => {
+    setSelectedRatio(ratio);
+  };
+
+  // 사진 업로드 시작
   const handlePhotoUploadStart = () => {
-    if (selectedImages.length === 0) {
-      showAlertMessage("업로드할 사진을 선택해주세요.", "red");
+    if (selectedFiles.length === 0) {
+      showAlertMessage("업로드할 이미지를 선택해주세요.", "red");
+      return false;
+    }
+
+    const croppedCount = croppedImages.filter(img => img && img.preview).length;
+    if (croppedCount !== selectedFiles.length) {
+      showAlertMessage("모든 이미지를 먼저 잘라주세요.", "red");
       return false;
     }
 
     if (!albumId) {
-      showAlertMessage("사진을 업로드할 앨범을 선택해주세요.", "red");
+      showAlertMessage("사진을 보관할 앨범을 선택해주세요.", "red");
       return false;
     }
 
     if (isUploadingPhotos) {
-      return false; // 이미 업로드 중이면 중복 실행 방지
+      return false;
     }
 
     setIsUploadingPhotos(true);
-    // 비동기 업로드 프로세스 시작
+    setUploadProgress(0);
     uploadPhotosProcess();
 
-    return false; // 업로드 완료 후 수동으로 모달 닫기
+    return false; // 모달 자동 닫힘 방지
   };
 
-  // 실제 사진 업로드 프로세스 (비동기)
+  // 실제 업로드 처리 함수
   const uploadPhotosProcess = async () => {
     try {
-      if (!albumId || selectedImages.length === 0) {
+      const validCroppedImages = croppedImages.filter(img => img && img.preview);
+
+      if (!albumId || validCroppedImages.length === 0) {
         throw new Error("앨범 또는 이미지가 선택되지 않았습니다.");
       }
 
-      // 1. Presigned URL 요청
+      // S3 업로드용 presigned URL 요청
       const urlsResponse = await getPhotoUploadUrls({
         albumId: albumId,
-        photoLength: selectedImages.length
+        photoLength: validCroppedImages.length
       });
 
-      if (!urlsResponse || urlsResponse.length !== selectedImages.length) {
-        throw new Error("업로드 URL 수신 오류");
+      if (!urlsResponse || urlsResponse.length !== validCroppedImages.length) {
+        throw new Error("업로드 URL을 받는 데 문제가 발생했습니다.");
       }
 
-      // 2. 각 이미지를 WebP로 변환하고 S3에 업로드
-      const totalImages = selectedImages.length;
+      const totalImages = validCroppedImages.length;
       let successCount = 0;
 
       for (let i = 0; i < totalImages; i++) {
         try {
-          // 이미지를 WebP로 변환
-          const imageBlob = await convertToWebP(selectedImages[i].file);
+          const imageFile = validCroppedImages[i].file;
 
           // S3에 업로드
           const uploadSuccess = await uploadImageToS3(
             urlsResponse[i].presignedUrl,
-            imageBlob
+            imageFile,
+            'image/webp'
           );
 
           if (uploadSuccess) {
             successCount++;
+            setUploadProgress(Math.floor((successCount / totalImages) * 100));
           }
-
         } catch (error) {
           console.error(`이미지 ${i + 1} 업로드 실패:`, error);
         }
       }
 
-      // 3. 완료 메시지 및 정리
       if (successCount === 0) {
         showAlertMessage("모든 이미지 업로드에 실패했습니다. 다시 시도해주세요.", "red");
       } else if (successCount < totalImages) {
-        showAlertMessage(`일부 이미지만 업로드되었습니다. (${successCount}/${totalImages})`, "red");
+        showAlertMessage(`일부 이미지만 업로드되었습니다. (${successCount}/${totalImages})`, "green");
+        await onUploadComplete();
+        onClose();
       } else {
         showAlertMessage("모든 이미지가 성공적으로 업로드되었습니다.", "green");
-
-        // 앨범 데이터 새로고침 (사진 수 업데이트를 위해)
         await onUploadComplete();
-
-        // 입력 초기화
-        setSelectedImages([]);
-
-        // 모달 닫기
         onClose();
       }
     } catch (error) {
-      console.error("사진 업로드 오류:", error);
-      showAlertMessage("사진 업로드 중 오류가 발생했습니다.", "red");
+      console.error("사진 업로드 중 오류:", error);
+      showAlertMessage("업로드 중 오류가 발생했습니다.", "red");
     } finally {
       setIsUploadingPhotos(false);
+      setUploadProgress(0);
+      setSelectedFiles([]);
+      setCroppedImages([]);
     }
   };
 
-  return (
-    <>
-      {showAlert && <Alert message={alertMessage} color={alertColor} />}
-      <Modal
-        isOpen={isOpen}
-        onClose={isUploadingPhotos ? undefined : onClose}
-        title="추억 보관하기"
-        confirmButtonText={isUploadingPhotos ? "업로드 중..." : "보관하기"}
-        cancelButtonText={isUploadingPhotos ? undefined : "취소하기"}
-        onConfirm={handlePhotoUploadStart}
-      >
-        <div className="py-2">
-          <p className="mb-4">사진은 최대 5장까지 한 번에 추가할 수 있습니다.</p>
+  // 모달이 열릴 때의 효과 처리
+  useEffect(() => {
+    if (!isOpen) {
+      // 모달이 닫힐 때는 아무것도 하지 않음
+      return;
+    }
+    // 모달이 열릴 때마다 상태 초기화 (다시 열릴 때 깨끗한 상태로)
+    resetState();
+  }, [isOpen]);
 
-          {/* 이미지 선택 컴포넌트 */}
-          <InputImg onImagesSelected={handleImagesSelected} />
+  // 모달 안의 본문 렌더링
+  const renderModalContent = () => {
+    return (
+      <div className="p-4">
+        {/* 이미지 선택기 */}
+        <div className="mb-4">
 
-          {/* 앨범 선택 컴포넌트 (제공된 경우) */}
-          {albumSelectComponent}
+          <ImageSelector
+            onImagesSelected={handleImagesSelected}
+            selectedImages={selectedFiles}
+            onRemoveImage={handleRemoveImage}
+            maxImages={5}
+            previewSize="md"
+          />
+
         </div>
-      </Modal>
-    </>
+
+
+        {/* 앨범 선택 컴포넌트 */}
+        {albumSelectComponent}
+
+        {/* 자르기 모달 표시 */}
+        {currentImageIndex >= 0 && currentImageIndex < selectedFiles.length && (
+          <ImageCropperModal
+            isOpen={currentImageIndex !== -1}
+            onClose={() => setCurrentImageIndex(-1)}
+            imageFile={selectedFiles[currentImageIndex]}
+            aspectRatio={selectedRatio}
+            onCropComplete={handleCropComplete}
+            allowedAspectRatios={["4:3", "3:4"]}
+            modalTitle="이미지 자르기"
+          />
+        )}
+
+        {/* 크기 제한 안내 메시지 */}
+        <div className="text-sm-lg text-gray-400 mb-3 -mt-3">
+          이미지 제한 용량: 100KB ~ 3MB
+        </div>
+
+
+      </div>
+    );
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="추억 보관하기"
+      confirmButtonText="보관하기"
+      cancelButtonText="취소하기"
+      onConfirm={handlePhotoUploadStart}
+      onCancel={onClose}
+      isConfirmDisabled={
+        selectedFiles.length === 0 ||
+        croppedImages.filter(img => img && img.preview).length !== selectedFiles.length ||
+        isUploadingPhotos
+      }
+    >
+      {renderModalContent()}
+    </Modal>
   );
 };
 

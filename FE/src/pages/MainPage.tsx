@@ -9,10 +9,10 @@ import useUserStore from "@/stores/useUserStore";
 // 분리된 컴포넌트들 임포트
 import PhotoUploader from "@/components/photo/PhotoUploader";
 import AlbumCreator from "@/components/album/AlbumCreator";
+import DropDown from "@/components/common/Modal/DropDown";
 
 // 기본 앨범 이미지 불러오기
 import defaultAlbumImage from "@/assets/album/blank.svg";
-import apiClient from "@/apis/apiClient";
 
 function MainPage() {
   const { currentAlbum, fetchAlbumsData, albums, isLoading, error, setActiveIndex } = useAlbumStore();
@@ -137,20 +137,13 @@ function MainPage() {
   // 앨범 선택 컴포넌트 - 사진 업로더에 전달할 컴포넌트
   const AlbumSelector = (
     <div className="relative w-full mb-4">
-      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
-      <select
-        className="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
-        value={selectedAlbumId || ""}
-        onChange={(e) => handleAlbumSelect(Number(e.target.value))}
-        disabled={false}
-      >
-        <option value="" disabled>앨범을 선택해주세요</option>
-        {albums.map((album) => (
-          <option key={album.id} value={album.id}>
-            {album.title}
-          </option>
-        ))}
-      </select>
+      <p className="mb-1 text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
+      <DropDown
+        albums={albums.map(album => ({ id: album.id, title: album.title }))}
+        currentAlbumId={selectedAlbumId}
+        onSelectAlbum={handleAlbumSelect}
+        placeholder="앨범을 선택해주세요"
+      />
     </div>
   );
 

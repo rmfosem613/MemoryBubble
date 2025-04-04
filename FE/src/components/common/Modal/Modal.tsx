@@ -11,6 +11,7 @@ interface ModalProps {
   onClose: () => void; // 모달을 닫기 위한 기본 함수
   onCancel?: () => void | boolean | Promise<boolean>; // 취소 버튼 클릭 시 추가 로직을 위한 함수
   onConfirm?: () => void | boolean | Promise<boolean>; // 확인 버튼 클릭 시 추가 로직을 위한 함수
+  isConfirmDisabled?: boolean; // 확인 버튼 비활성화 여부
 }
 
 function Modal({
@@ -22,6 +23,7 @@ function Modal({
   onClose,
   onCancel,
   onConfirm,
+  isConfirmDisabled = false,
 }: ModalProps) {
   if (!isOpen) return null;
 
@@ -46,6 +48,8 @@ function Modal({
 
   // 확인 버튼 클릭 핸들러
   const handleConfirmClick = async () => {
+    if (isConfirmDisabled) return; // 버튼이 비활성화된 경우 실행하지 않음
+    
     if (onConfirm) {
       const shouldClose = await onConfirm();
       if (shouldClose !== false) {
@@ -81,8 +85,11 @@ function Modal({
             </div>
           )}
           {/* 확인 버튼 */}
-          <div onClick={handleConfirmClick}>
-            <Button name={confirmButtonText} color="blue" />
+          <div onClick={isConfirmDisabled ? undefined : handleConfirmClick}>
+            <Button 
+              name={confirmButtonText} 
+              color={isConfirmDisabled ? "gray" : "blue"} 
+            />
           </div>
         </div>
       </div>
