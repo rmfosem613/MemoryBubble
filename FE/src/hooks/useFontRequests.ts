@@ -15,6 +15,7 @@ export interface FontRequest {
   userName: string;
   fontName: string;
   files: FontFile[];
+  createdAt: string; // 생성날짜 추가
 }
 
 export interface AlertState {
@@ -51,6 +52,8 @@ export const useFontRequests = (getCurrentFile?: () => File | null) => {
     const fetchFontRequests = async () => {
       try {
         const response = await apiClient.get('/api/admin/fonts');
+        console.log('폰트 의뢰 목록:', response.data);
+
         setFontRequests(response.data);
 
         if (response.data.length > 0) {
@@ -89,9 +92,7 @@ export const useFontRequests = (getCurrentFile?: () => File | null) => {
         if (ttfFile) {
           try {
             // 1. 서버에 fontId를 보내 presignedUrl 요청
-            const response = await apiClient.patch(
-              `/api/admin/fonts/${fontId}`,
-            );
+            const response = await apiClient.post(`/api/admin/fonts/${fontId}`);
 
             const { presignedUrl } = response.data;
 
