@@ -259,7 +259,7 @@ function PhotoAlbum() {
         <div className="flex justify-center items-center h-full">
           {/* 이전 이미지 (왼쪽에 약간 보이는 이미지) */}
           {photos.length > 1 && (
-            <div className="absolute left-24 h-full flex items-center opacity-70 transform -translate-x-1/4 scale-90 z-10">
+            <div className="bg-white absolute left-24 h-full flex items-center opacity-70 transform -translate-x-1/4 scale-90 z-10">
               <img
                 src={photos[getPrevIndex()].src}
                 alt={photos[getPrevIndex()].alt}
@@ -274,7 +274,7 @@ function PhotoAlbum() {
             className="relative z-20 perspective-1000 cursor-pointer"
             style={{ perspective: '1000px' }}>
             <div
-              className="relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[500px] flex items-center justify-center"
+              className="bg-white relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[500px] flex items-center justify-center"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
@@ -382,7 +382,7 @@ function PhotoAlbum() {
 
           {/* 다음 이미지 (오른쪽에 약간 보이는 이미지) */}
           {photos.length > 1 && (
-            <div className="absolute right-24 h-full flex items-center opacity-70 transform translate-x-1/4 scale-90 z-10">
+            <div className="bg-white absolute right-24 h-full flex items-center opacity-70 transform translate-x-1/4 scale-90 z-10">
               <img
                 src={photos[getNextIndex()].src}
                 alt={photos[getNextIndex()].alt}
