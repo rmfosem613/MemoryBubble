@@ -1,21 +1,37 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useAlbumStore from '@/stores/useAlbumStore';
 
 export default function useAlbumNavigation() {
   const { nextAlbum, previousAlbum } = useAlbumStore();
-  
-  // Handle wheel events
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault(); // 기본 스크롤 동작 방지
-    
-    if (e.deltaY > 0) {
-      nextAlbum();
-    } else {
-      previousAlbum();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // wheel 이벤트를 DOM API로 직접 처리
+  useEffect(() => {
+    const element = containerRef.current;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      if (e.deltaY > 0) {
+        nextAlbum();
+      } else {
+        previousAlbum();
+      }
+    };
+
+    if (element) {
+      // wheel 이벤트에 대해 passive: false 옵션 명시
+      element.addEventListener('wheel', handleWheel, { passive: false });
     }
-  };
-  
-  // Handle keyboard events (위/아래 화살표 키)
+
+    return () => {
+      if (element) {
+        element.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, [nextAlbum, previousAlbum]);
+
+  // 키보드 이벤트 처리
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -24,12 +40,12 @@ export default function useAlbumNavigation() {
         previousAlbum();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [nextAlbum, previousAlbum]);
-  
-  return { handleWheel };
+
+  return { containerRef };
 }

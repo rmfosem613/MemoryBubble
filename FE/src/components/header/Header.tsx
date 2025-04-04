@@ -38,7 +38,7 @@ const Header = () => {
       <header className="fixed top-0 h-[50px] md:h-[55px] lg:h-[60px] w-full bg-white/30 backdrop-blur-md flex items-center z-[50]">
         <div className="container flex justify-between items-center">
           {/* 항상 표시 - 로고 */}
-          <Link to="/intro" className="order-1 sm:order-none">
+          <Link to="/" className="order-1 sm:order-none">
             <img
               src="/logo-3.svg"
               alt="추억방울"
