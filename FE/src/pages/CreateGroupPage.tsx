@@ -121,7 +121,7 @@ function CreateGroupPage() {
     }
   }
 
-  // Get text color based on step status
+  // 현재 단계에 따른 텍스트 색상 반환
   const getTextColor = (step) => {
     if (step === currentStep) return "text-blue-500"
     if (step < currentStep) return "text-blue-600"
@@ -212,7 +212,7 @@ function CreateGroupPage() {
 
             <hr className="my-8" />
 
-            {/* Content based on current step */}
+            {/* 현재 단계에 따라 컨텐츠 표시 */}
             <div className="transition-opacity duration-300">
               {currentStep === 1 && (
                 <InputGroupName
@@ -240,7 +240,7 @@ function CreateGroupPage() {
             {imageError && <p className="text-red-500 mt-2 text-center">{imageError}</p>}
           </div>
 
-          {/* Buttons fixed to bottom */}
+          {/* 버튼 영역 */}
           <div className="flex justify-end mt-auto">
             <div className="flex space-x-2">
               {currentStep > 1 && (
