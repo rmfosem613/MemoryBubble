@@ -35,7 +35,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
     handleDrop: (e: React.DragEvent<HTMLDivElement>) => void
   ) => (
     <div
-      className="w-[400px] h-[300px] border border-gray-600 flex flex-col items-center justify-center cursor-pointer"
+      className="w-[370px] h-[260px] mt-[10px] border border-gray-600 flex flex-col items-center justify-center cursor-pointer"
       onClick={handleButtonClick}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -46,7 +46,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
   )
 
   return (
-    <div className="flex flex-col items-center justify-center text-center h-[300px]">
+    <div className="flex flex-col items-center justify-center text-center">
       <ImageCropper
         onImageChange={onImageChange}
         initialImage={initialImage}

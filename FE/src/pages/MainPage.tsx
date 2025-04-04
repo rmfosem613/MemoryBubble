@@ -137,7 +137,7 @@ function MainPage() {
   // 앨범 선택 컴포넌트 - 사진 업로더에 전달할 컴포넌트
   const AlbumSelector = (
     <div className="relative w-full mb-4">
-      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
+      <p className="mb-1 text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
       <DropDown
         albums={albums.map(album => ({ id: album.id, title: album.title }))}
         currentAlbumId={selectedAlbumId}

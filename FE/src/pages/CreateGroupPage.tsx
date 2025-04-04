@@ -223,15 +223,18 @@ function CreateGroupPage() {
               )}
               {currentStep === 2 && (
                 <>
+
+                  <p className="text-xs text-gray-500 text-center">
+                    이미지 크기는 100KB ~ 3MB 이내로 등록가능합니다.
+                  </p>
+
                   <InputGroupPic
                     onImageChange={handleImageChange}
                     initialImage={groupImage}
                     initialPreviewUrl={groupImagePreview}
                   />
 
-                  <p className="text-xs text-gray-500 text-center mt-2 mb-2">
-                    이미지 크기는 100KB ~ 3MB 이내로 등록가능합니다.
-                  </p>
+
                 </>
               )}
             </div>

@@ -3,7 +3,7 @@ import Modal from "@/components/common/Modal/Modal";
 import { getPhotoUploadUrls } from "@/apis/photoApi";
 import ImageSelector from "@/components/common/Modal/ImageSelector";
 import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
-import { uploadImageToS3 } from "@/components/common/ImageCrop/imageUtils";
+import { uploadImageToS3, validateImageSize } from "@/components/common/ImageCrop/imageUtils";
 
 interface PhotoUploaderProps {
   isOpen: boolean;
@@ -41,6 +41,17 @@ const PhotoUploader = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
 
+  // 모달이 닫힐 때 상태 초기화
+  const resetState = () => {
+    setSelectedFiles([]);
+    setCroppedImages([]);
+    setCurrentImageIndex(-1);
+    setSelectedRatio("4:3");
+    setIsUploadingPhotos(false);
+    setUploadProgress(0);
+    setShowAlert(false);
+  };
+
   // 모든 이미지 자르기가 완료되었는지 확인
   useEffect(() => {
     if (selectedFiles.length > 0) {
@@ -73,7 +84,30 @@ const PhotoUploader = ({
       return;
     }
 
-    const newFiles = [...selectedFiles, ...files];
+    // 파일 크기 검증 (100KB ~ 3MB)
+    const validatedFiles = files.filter(file => {
+      const validation = validateImageSize(file, 100, 3);
+      if (!validation.valid) {
+        showAlertMessage(validation.message, "red");
+        return false;
+      }
+      return true;
+    });
+
+    // 유효한 파일이 없으면 종료
+    if (validatedFiles.length === 0) {
+      if (files.length > 0) {
+        showAlertMessage("선택한 모든 이미지의 크기가 유효하지 않습니다. 이미지 크기는 100KB에서 3MB 사이여야 합니다.", "red");
+      }
+      return;
+    }
+
+    // 일부 파일만 유효한 경우 알림
+    if (validatedFiles.length < files.length) {
+      showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 크기 제한(100KB~3MB)을 벗어나 제외되었습니다.`, "red");
+    }
+
+    const newFiles = [...selectedFiles, ...validatedFiles];
     setSelectedFiles(newFiles);
 
     // 새로 추가된 첫 번째 이미지부터 자르기 시작
@@ -207,12 +241,23 @@ const PhotoUploader = ({
     }
   };
 
+  // 모달이 열릴 때의 효과 처리
+  useEffect(() => {
+    if (!isOpen) {
+      // 모달이 닫힐 때는 아무것도 하지 않음
+      return;
+    }
+    // 모달이 열릴 때마다 상태 초기화 (다시 열릴 때 깨끗한 상태로)
+    resetState();
+  }, [isOpen]);
+
   // 모달 안의 본문 렌더링
   const renderModalContent = () => {
     return (
       <div className="p-4">
         {/* 이미지 선택기 */}
         <div className="mb-4">
+
           <ImageSelector
             onImagesSelected={handleImagesSelected}
             selectedImages={selectedFiles}
@@ -220,7 +265,9 @@ const PhotoUploader = ({
             maxImages={5}
             previewSize="md"
           />
+
         </div>
+
 
         {/* 앨범 선택 컴포넌트 */}
         {albumSelectComponent}
@@ -237,6 +284,13 @@ const PhotoUploader = ({
             modalTitle="이미지 자르기"
           />
         )}
+
+        {/* 크기 제한 안내 메시지 */}
+        <div className="text-sm-lg text-gray-400 mb-3 -mt-3">
+          이미지 제한 용량: 100KB ~ 3MB
+        </div>
+
+
       </div>
     );
   };
