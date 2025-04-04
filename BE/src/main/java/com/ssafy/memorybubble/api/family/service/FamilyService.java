@@ -145,7 +145,7 @@ public class FamilyService {
         log.info("family members dto: {}", familyMembersDto);
 
         // 가족의 썸네일 반환
-        String thumbnailUrl = fileService.getDownloadSignedURL(family.getThumbnail())+"&w=100&h=100";
+        String thumbnailUrl = fileService.getDownloadSignedURL(family.getThumbnail())+"&w=150&h=150";
 
         return FamilyInfoResponse.builder()
                 .familyName(family.getName())
