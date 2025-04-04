@@ -92,7 +92,9 @@ export const useFontRequests = (getCurrentFile?: () => File | null) => {
         if (ttfFile) {
           try {
             // 1. 서버에 fontId를 보내 presignedUrl 요청
-            const response = await apiClient.post(`/api/admin/fonts/${fontId}`);
+            const response = await apiClient.patch(
+              `/api/admin/fonts/${fontId}`,
+            );
 
             const { presignedUrl } = response.data;
 
