@@ -22,6 +22,7 @@ export const FONT_STEP_CONTENTS: Record<number, StepContent> = {
     content:
       '다운받은 PDF 파일에 나의 손글씨를 작성하여 업로드해주세요. PDF 파일은 A4 용지 크기로 제공되며, 손글씨 작성 시 깔끔하게 작성해주세요.\n\n' +
       'PDF 파일은 여러 번 다운로드 받을 수 있습니다.\n\n' +
+      '다운받은 png 파일명을 변경하지 말고 그대로 업로드 해주세요. \n\n' +
       '작성이 완료되었다면 업로드해 주시기 바랍니다. ',
   },
   3: {
