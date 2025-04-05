@@ -48,6 +48,7 @@ function PhotoAlbum() {
     albumTitle,
     newAlbumName,
     setNewAlbumName,
+    albumContent,
     newAlbumContent,
     setNewAlbumContent,
     isFlipped,
@@ -58,7 +59,7 @@ function PhotoAlbum() {
     currentIndex,
     photoMessages, // API에서 가져온 메시지 데이터0
     setPhotoMessages, // 메시지 데이터 업데이트 함수
-    handleChangeTitle,
+    handleChangeAlbum,
     handleChangeThumnail,
     getPrevIndex,
     getNextIndex,
@@ -206,8 +207,8 @@ function PhotoAlbum() {
   };
 
   // 비동기 함수를 Modal의 onConfirm 속성에 맞는 래퍼 함수로 변환
-  const handleChangeTitleWrapper = () => {
-    handleChangeTitle();
+  const handleChangeAlbumWrapper = () => {
+    handleChangeAlbum();
     return true; // 모달 닫기
   };
 
@@ -235,7 +236,7 @@ function PhotoAlbum() {
             onClick={editAlbumModal.open}>
             <div className="absolute bg-gray-600 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <PencilLine size={18} strokeWidth={1} />
-            <p className="text-subtitle-1-lg">앨범명 수정</p>
+            <p className="text-subtitle-1-lg">앨범 정보 수정</p>
           </div>
           <div
             className="relative flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors"
@@ -411,10 +412,10 @@ function PhotoAlbum() {
       <Modal
         isOpen={editAlbumModal.isOpen}
         onClose={editAlbumModal.close}
-        title="앨범명 수정"
+        title="앨범 정보 수정"
         confirmButtonText="저장하기"
         cancelButtonText="취소하기"
-        onConfirm={handleChangeTitleWrapper}>
+        onConfirm={handleChangeAlbumWrapper}>
         <div>
           <p className="text-subtitle-1-lg font-p-500">
             앨범명과 내용을 수정해주세요 (최대 7글자)
@@ -458,6 +459,7 @@ function PhotoAlbum() {
                   setNewAlbumContent(e.target.value);
                 }
               }}
+              placeholder={albumContent}
               className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
             <div className="flex justify-end mt-1">
