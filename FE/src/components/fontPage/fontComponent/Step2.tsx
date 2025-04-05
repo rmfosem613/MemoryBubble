@@ -52,21 +52,65 @@ function Step2() {
       return;
     }
 
-    // 파일 형식 필터링: .png 확장자만 허용
+    // 유효한 파일명 패턴: 1.png, 2.png, ..., 8.png
+    const validFilePattern = /^[1-8]\.png$/;
+
+    // 이미 업로드된 파일명 목록 생성
+    const existingFileNames = uploadedFiles.map((item) => item.name);
+
+    // 파일 형식 및 이름 필터링
     const validFiles: File[] = [];
     const invalidFiles: string[] = [];
+    const invalidNameFiles: string[] = [];
+    const duplicateFiles: string[] = [];
 
     Array.from(files).forEach((file) => {
-      if (file.name.toLowerCase().endsWith('.png')) {
-        validFiles.push(file);
-      } else {
+      // 파일 확장자 체크
+      if (!file.name.toLowerCase().endsWith('.png')) {
         invalidFiles.push(file.name);
+        return;
       }
+
+      // 파일명 패턴 체크
+      if (!validFilePattern.test(file.name)) {
+        invalidNameFiles.push(file.name);
+        return;
+      }
+
+      // 파일명 중복 체크
+      if (existingFileNames.includes(file.name)) {
+        duplicateFiles.push(file.name);
+        return;
+      }
+
+      validFiles.push(file);
     });
 
-    // 유효하지 않은 파일이 있는 경우 에러 메시지 표시
+    // 에러 메시지 구성
+    const errorMessages = [];
+
+    // 유효하지 않은 확장자 파일이 있는 경우
     if (invalidFiles.length > 0) {
-      setError(`PNG 형식만 업로드할 수 있습니다: ${invalidFiles.join(', ')}`);
+      errorMessages.push(
+        `PNG 형식만 업로드할 수 있습니다: ${invalidFiles.join(', ')}`,
+      );
+    }
+
+    // 유효하지 않은 파일명이 있는 경우
+    if (invalidNameFiles.length > 0) {
+      errorMessages.push(`"1.png"부터 "8.png"까지의 파일명만 허용됩니다`);
+    }
+
+    // 중복 파일이 있는 경우
+    if (duplicateFiles.length > 0) {
+      errorMessages.push(
+        `이미 업로드된 파일입니다: ${duplicateFiles.join(', ')}`,
+      );
+    }
+
+    // 에러 메시지 설정
+    if (errorMessages.length > 0) {
+      setError(errorMessages.join(' '));
 
       // 유효한 파일이 없으면 함수 종료
       if (validFiles.length === 0) {
@@ -79,20 +123,24 @@ function Step2() {
     const allowedCount = Math.min(validFiles.length, remainingFiles);
 
     if (allowedCount < validFiles.length) {
-      setError(
-        `${setError(
-          (prevError) =>
-            `${prevError ? prevError + ' 또한, ' : ''}파일은 최대 ${MAX_FILES}개까지만 업로드할 수 있습니다. ${allowedCount}개만 추가됩니다.`,
-        )}`,
+      errorMessages.push(
+        `파일은 최대 ${MAX_FILES}개까지만 업로드할 수 있습니다. ${allowedCount}개만 추가됩니다.`,
       );
+      setError(errorMessages.join(' '));
     }
 
     // 추가 가능한 파일만 필터링
     const filesToAdd = validFiles.slice(0, allowedCount);
 
+    // 고유 ID 생성 함수 추가
+    const generateUniqueId = () => {
+      return `IMG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    };
+
+    // 수정된 파일 처리 함수의 일부분
     if (filesToAdd.length > 0) {
-      const newFiles: FileItem[] = filesToAdd.map((file, index) => ({
-        id: `IMG_${(uploadedFiles.length + index + 1).toString().padStart(2, '0')}`,
+      const newFiles: FileItem[] = filesToAdd.map((file) => ({
+        id: generateUniqueId(), // 고유 ID 생성
         name: file.name,
         file: file,
       }));
