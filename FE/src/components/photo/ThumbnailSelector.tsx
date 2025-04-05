@@ -11,6 +11,7 @@ interface ThumbnailSelectorProps {
   photoUrl: string | null;
   onUpdateComplete: () => Promise<void>;
   onError?: (message: string, color?: string) => void;
+  onCancelMode?: () => void;
 }
 
 function ThumbnailSelector({
@@ -20,7 +21,8 @@ function ThumbnailSelector({
   selectedPhotoId,
   photoUrl,
   onUpdateComplete,
-  onError
+  onError,
+  onCancelMode
 }: ThumbnailSelectorProps) {
 
   // Alert 관련
@@ -38,6 +40,14 @@ function ThumbnailSelector({
     setTimeout(() => {
       setShowAlert(false);
     }, 3500); // Alert 자체 타이머보다 약간 더 길게 설정
+  };
+
+  // 모달 닫기 및 취소 함수
+  const handleClose = () => {
+    onClose();
+    if (onCancelMode) {
+      onCancelMode();
+    }
   };
 
   // 썸네일 변경 처리 함수
@@ -85,8 +95,9 @@ function ThumbnailSelector({
       // 앨범 정보 새로고침
       await onUpdateComplete();
 
-      // 모달 닫기
-      onClose();
+      // 모달 닫기 및 모드 취소
+      // onClose();
+      handleClose();
     } catch (error) {
       console.error("썸네일 변경 실패:", error);
       const errorMessage = "대표 이미지 변경 중 오류가 발생했습니다.";
