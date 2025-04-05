@@ -12,5 +12,6 @@ import java.util.List;
 @Getter
 public class AlbumDetailDto {
     String albumName;
+    String albumContent;
     List<PhotoDto> photoList;
 }
