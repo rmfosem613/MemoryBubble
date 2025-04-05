@@ -129,10 +129,9 @@ public class AlbumService {
         }
 
         // 내용이 있으면 내용 업데이트
-        if (StringUtils.hasText(request.getAlbumContent())) {
-            album.updateContent(request.getAlbumContent());
-            log.info("update album content: {}", album.getContent());
-        }
+        album.updateContent(request.getAlbumContent());
+        log.info("update album content: {}", album.getContent());
+
     }
 
     public Album getAlbum(Long id) {
