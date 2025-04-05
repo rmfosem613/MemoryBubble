@@ -423,7 +423,7 @@ function PhotoAlbum() {
           <form className="py-4">
             <label
               htmlFor="albumName"
-              className="block mb-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
+              className="block mb-2 text-subtitle-1-lg font-p-700 text-black">
               앨범명
             </label>
             <input
@@ -447,7 +447,7 @@ function PhotoAlbum() {
 
             <label
               htmlFor="albumContent"
-              className="block mb-2 mt-2 text-subtitle-1-lg font-p-700 text-black dark:text-white">
+              className="block mb-2 mt-2 text-subtitle-1-lg font-p-700 text-black">
               앨범 내용
             </label>
             <input
