@@ -15,10 +15,12 @@ interface ImageCropperModalProps {
   aspectRatio: AspectRatioOption;
   onCropComplete: (file: File, previewUrl: string, index: number) => void;
   onAllCropsComplete?: () => void;
+  onCancelAll?: () => void;
   allowedAspectRatios?: AspectRatioOption[];
   imageQuality?: number;
   modalTitle?: string;
   applyButtonText?: string;
+  cancelButtonText?: string;
 }
 
 const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
@@ -28,11 +30,13 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   currentIndex,
   aspectRatio,
   onCropComplete,
+  onCancelAll,
   onAllCropsComplete,
   allowedAspectRatios = ["1:1", "4:3", "3:4"],
   imageQuality = 0.95,
   modalTitle = "이미지 자르기",
   // applyButtonText = "자르기",
+  cancelButtonText = "취소하기",
 }) => {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatioOption>("4:3");
   const [crop, setCrop] = useState<Crop>({
@@ -121,8 +125,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 이미지 크기에 맞게 초기 크롭 영역 조정 (더 넓은 영역으로)
     const newCrop: Crop = {
       unit: '%',
-      width: 80, // 80%로 크롭 영역 확대
-      height: 80 * (1 / aspect),
+      width: 40, // 50%로 크롭 영역 확대
+      height: 30 * (2 / aspect),
       x: 0, // 가운데 정렬을 위해 10%에서 시작
       y: 0,
     };
@@ -132,8 +136,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 초기 completedCrop도 바로 설정
     setCompletedCrop({
       unit: '%',
-      width: 80,
-      height: 80 * (1 / aspect),
+      width: 40,
+      height: 30 * (2 / aspect),
       x: 0,
       y: 0
     });
@@ -152,8 +156,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     // 크롭 영역 너비와 높이 설정 (백분율)
-    const cropWidth = 80;
-    const cropHeight = cropWidth * (1 / aspect);
+    const cropWidth = 40;
+    const cropHeight = 30 * (2 / aspect);
 
     // 마우스 위치를 중심으로 크롭 영역 배치 (이미지 경계 고려)
     let posX = Math.max(0, x - cropWidth / 2);
@@ -195,8 +199,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       // 비율 변경 시에도 왼쪽 상단으로 설정
       const newCrop = {
         unit: '%' as const,
-        width: 80,
-        height: 80 * (1 / aspect),
+        width: 40,
+        height: 30 * (2 / aspect),
         x: 0,
         y: 0,
       };
@@ -205,12 +209,22 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       // 비율 변경 시에도 completedCrop 업데이트
       setCompletedCrop({
         unit: '%',
-        width: 80,
-        height: 80 * (1 / aspect),
+        width: 40,
+        height: 30 * (2 / aspect),
         x: 0,
         y: 0
       });
     }
+  };
+
+  // 모든 이미지 취소 처리
+  const handleCancelAll = () => {
+    // onCancelAll 콜백이 있으면 호출
+    if (onCancelAll) {
+      onCancelAll();
+    }
+    // 모달 닫기
+    onClose();
   };
 
   // 크롭 영역이 유효한지 검사하는 함수
@@ -364,8 +378,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         onClose={onClose}
         title={computedModalTitle}
         confirmButtonText={finalApplyButtonText}
+        cancelButtonText={cancelButtonText}
         onConfirm={handleApplyCrop}
-        onCancel={onClose}
+        onCancel={handleCancelAll}
       >
         {renderModalContent()}
       </Modal>

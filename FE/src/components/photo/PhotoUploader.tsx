@@ -49,7 +49,6 @@ const PhotoUploader = ({
   // 모달이 닫힐 때 상태 초기화
   const resetState = () => {
     setSelectedFiles([]);
-    setCroppedImages([]);
     setCurrentImageIndex(-1);
     setSelectedRatio("4:3");
     setIsUploadingPhotos(false);
@@ -186,19 +185,6 @@ const PhotoUploader = ({
     // null이 아닌 값(유효한 파일)만 필터링
     const validatedFiles = validatedResults.filter(file => file !== null) as File[];
 
-    // 유효한 파일이 없으면 종료
-    // if (validatedFiles.length === 0) {
-    //   if (files.length > 0) {
-    //     showAlertMessage("선택한 모든 이미지 파일이 유효하지 않습니다.", "red");
-    //   }
-    //   return;
-    // }
-
-    // 일부 파일만 유효한 경우 알림
-    // if (validatedFiles.length < files.length) {
-    //   showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 유효하지 않아 제외되었습니다.`, "red");
-    // }
-
     // 나머지 기존 코드와 동일...
     const newFiles = [...selectedFiles, ...validatedFiles];
     setSelectedFiles(newFiles);
@@ -209,6 +195,33 @@ const PhotoUploader = ({
       setIsCropperModalOpen(true);
     }
   };
+
+  const handleCancelAllImages = () => {
+    // 자르는데 성공한 이미지와 자르지 못한 이미지 필터링
+    const processedIndices = new Set();
+
+    // 성공적으로 자른 이미지 인덱스 찾기
+    croppedImages.forEach((img, index) => {
+      if (img && img.preview) {
+        processedIndices.add(index);
+      }
+    });
+
+    // 자르기 완료되었던 이미지는 저장
+    const updatedFiles = selectedFiles.filter((_, index) => processedIndices.has(index));
+    const updatedCroppedImages = croppedImages.filter((img, index) => processedIndices.has(index));
+
+    // 이미지 상태 업데이트
+    setSelectedFiles(updatedFiles);
+    setCroppedImages(updatedCroppedImages);
+    setCurrentImageIndex(-1);
+    setIsCropperModalOpen(false);
+
+    // 이미지 자르기가 취소 되었을 때 alert
+    if (updatedFiles.length < selectedFiles.length) {
+      showAlertMessage(`처리되지 않은 이미지가 취소되었습니다. (${updatedFiles.length}개 성공)`, "red");
+    }
+  }
 
   // 이미지 제거
   const handleRemoveImage = (index: number) => {
@@ -361,7 +374,6 @@ const PhotoUploader = ({
       setIsUploadingPhotos(false);
       setUploadProgress(0);
       setSelectedFiles([]);
-      setCroppedImages([]);
     }
   };
 
@@ -392,7 +404,7 @@ const PhotoUploader = ({
 
           {/* 크기 제한 안내 메시지 */}
           <div className="text-sm-lg text-gray-400 -mt-1">
-            이미지 용량 제한: 100KB ~ 10MB <br/>
+            이미지 용량 제한: 100KB ~ 10MB <br />
             이미지 형식 제한: png, jpg, jpeg
           </div>
         </div>
@@ -445,8 +457,10 @@ const PhotoUploader = ({
           aspectRatio={selectedRatio}
           onCropComplete={handleCropComplete}
           onAllCropsComplete={handleAllCropsComplete}
+          onCancelAll={handleCancelAllImages}
           allowedAspectRatios={["4:3", "3:4"]}
           modalTitle="이미지 자르기"
+          cancelButtonText="취소하기"
         />
       )}
     </>
