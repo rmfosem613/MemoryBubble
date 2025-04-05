@@ -373,6 +373,7 @@ function BasicPhotoAlbumPage() {
         photoUrl={getSelectedThumbnailUrl()}
         onUpdateComplete={fetchAlbumPhotos}
         onError={showAlertMessage}
+        onCancelMode={cancelAllModes}
       />
 
       {/* 사진 업로더 컴포넌트 */}
