@@ -3,6 +3,8 @@ import ReactCrop, { Crop, PercentCrop, centerCrop, makeAspectCrop } from 'react-
 import 'react-image-crop/dist/ReactCrop.css';
 import Modal from '@/components/common/Modal/Modal';
 
+import Alert from '../Alert';
+
 export type AspectRatioOption = "1:1" | "4:3" | "3:4";
 
 interface ImageCropperModalProps {
@@ -56,6 +58,22 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   // 버튼 상태 수정
   const finalApplyButtonText = isLastImage ? "완료" : "다음";
 
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
+
   // 이미지 미리보기 url
   useEffect(() => {
     if (currentImageFile) {
@@ -99,7 +117,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
     setSelectedRatio("4:3");
     const aspect = getAspectValue();
-    
+
     // 이미지 크기에 맞게 초기 크롭 영역 조정 (더 넓은 영역으로)
     const newCrop: Crop = {
       unit: '%',
@@ -152,9 +170,27 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
   };
 
+  // 크롭 영역이 유효한지 검사하는 함수
+  const isCropValid = () => {
+    // 크롭 영역이 없거나 너무 작은 경우 (최소 5% 이상 크기)
+    if (!completedCrop || completedCrop.width < 5 || completedCrop.height < 5) {
+      return false;
+    }
+    return true;
+  };
+
   // 현재 이미지에 대한 자르기 로직
   const handleApplyCrop = async () => {
-    if (!completedCrop || !imgRef.current || !currentImageFile) return;
+    if (!completedCrop || !imgRef.current || !currentImageFile) {
+      showAlertMessage("이미지 영역이 지정되지 않았습니다. 영역을 선택해주세요.", "red");
+      return false;
+    }
+
+    // 크롭 영역이 유효한지 체크
+    if (!isCropValid()) {
+      showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
+      return false;
+    }
 
     const canvas = document.createElement('canvas');
     const image = imgRef.current;
@@ -196,9 +232,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
         const croppedUrl = URL.createObjectURL(blob);
         setIsCropComplete(true);
-        
+
         onCropComplete(croppedFile, croppedUrl, currentIndex);
-        
+
         if (isLastImage && onAllCropsComplete) {
           onAllCropsComplete();
         }
@@ -268,16 +304,20 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={computedModalTitle}
-      confirmButtonText={finalApplyButtonText}
-      onConfirm={handleApplyCrop}
-      onCancel={onClose}
-    >
-      {renderModalContent()}
-    </Modal>
+    <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={computedModalTitle}
+        confirmButtonText={finalApplyButtonText}
+        onConfirm={handleApplyCrop}
+        onCancel={onClose}
+      >
+        {renderModalContent()}
+      </Modal>
+    </>
   );
 };
 
