@@ -13,6 +13,7 @@ import DropDown from "@/components/common/Modal/DropDown";
 
 // 기본 앨범 이미지 불러오기
 import defaultAlbumImage from "@/assets/album/blank.svg";
+import Alert from "@/components/common/Alert";
 
 function MainPage() {
   const { currentAlbum, fetchAlbumsData, albums, isLoading, error, setActiveIndex } = useAlbumStore();
@@ -22,6 +23,22 @@ function MainPage() {
 
   // 앨범 선택 상태 관리
   const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
+
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
 
   // 모달 관련
   const createAlbumModal = useModal();
@@ -79,11 +96,13 @@ function MainPage() {
   // 앨범 생성 완료 핸들러
   const handleAlbumCreated = async () => {
     await fetchAlbumsData();
+    showAlertMessage("앨범이 생성되었습니다.", "green");
   };
 
   // 사진 업로드 완료 핸들러
   const handlePhotosUploaded = async () => {
     await fetchAlbumsData();
+    showAlertMessage("사진이 업로드되었습니다.", "green");
   };
 
   // 로딩 상태 표시
@@ -149,6 +168,8 @@ function MainPage() {
 
   return (
     <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+
       <div className="flex justify-center">
         <div className="container flex justify-end top-[100px] absolute">
           {/* 앨범 리스트 컴포넌트 */}

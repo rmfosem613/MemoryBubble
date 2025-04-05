@@ -5,6 +5,8 @@ import ImageSelector from "@/components/common/Modal/ImageSelector";
 import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
 import { uploadImageToS3, validateImageSize } from "@/components/common/ImageCrop/imageUtils";
 
+import Alert from "../common/Alert";
+
 interface PhotoUploaderProps {
   isOpen: boolean;
   onClose: () => void;
@@ -65,7 +67,7 @@ const PhotoUploader = ({
         // 해당 인덱스의 크롭된 이미지가 없거나 미리보기가 없으면 아직 처리되지 않은 것
         return !croppedImages[index] || !croppedImages[index].preview;
       });
-      
+
       // 처리되지 않은 이미지가 있으면 해당 인덱스부터 시작
       if (uncroppedIndex !== -1) {
         setCurrentImageIndex(uncroppedIndex);
@@ -73,7 +75,7 @@ const PhotoUploader = ({
       }
     }
   }, [selectedFiles, croppedImages, isCropperModalOpen]);
-  
+
   // 모달이 열려있는 상태에서 처리할 이미지가 있는지 확인
   useEffect(() => {
     // 모달이 열려있고, 선택된 이미지가 있는 경우에만 실행
@@ -83,7 +85,7 @@ const PhotoUploader = ({
         const uncroppedIndex = selectedFiles.findIndex((_, index) => {
           return !croppedImages[index] || !croppedImages[index].preview;
         });
-        
+
         if (uncroppedIndex !== -1) {
           setCurrentImageIndex(uncroppedIndex);
         } else {
@@ -116,11 +118,21 @@ const PhotoUploader = ({
 
     // 파일 크기 검증 (100KB ~ 10MB)
     const validatedFiles = files.filter(file => {
-      const validation = validateImageSize(file, 100, 10);
-      if (!validation.valid) {
-        showAlertMessage(validation.message, "red");
+      // 파일 크기를 KB 단위로 변환
+      const fileSizeKB = file.size / 1024;
+
+      // 100KB 미만인 경우
+      if (fileSizeKB < 100) {
+        showAlertMessage(`"${file.name}" 파일 크기가 너무 작습니다. 최소 100KB 이상이어야 합니다.`, "red");
         return false;
       }
+
+      // 3MB 초과인 경우
+      if (fileSizeKB > 3 * 1024) {
+        showAlertMessage(`"${file.name}" 파일 크기가 너무 큽니다. 최대 3MB 이하여야 합니다.`, "red");
+        return false;
+      }
+
       return true;
     });
 
@@ -142,7 +154,7 @@ const PhotoUploader = ({
 
     // 추가된 이미지의 시작 인덱스 (기존 이미지 개수)
     const startIndex = selectedFiles.length;
-    
+
     // 크롭 모달이 닫혀있을 때만 새로 열기
     if (!isCropperModalOpen) {
       setCurrentImageIndex(startIndex);
@@ -167,18 +179,18 @@ const PhotoUploader = ({
   const handleCropComplete = (file: File, previewUrl: string, index: number) => {
     // 현재 이미지의 크롭 결과 저장
     const newCroppedImages = [...croppedImages];
-    
+
     // 배열 길이가 충분하지 않으면 확장
     while (newCroppedImages.length <= index) {
       newCroppedImages.push({ file: new File([], "placeholder"), preview: "" });
     }
-    
+
     newCroppedImages[index] = { file, preview: previewUrl };
     setCroppedImages(newCroppedImages);
-    
+
     // 다음 처리되지 않은 이미지를 찾음
     let nextIndex = index + 1;
-    
+
     // 모달을 닫지 않고 바로 다음 이미지로 이동 (항상 모달은 열린 상태 유지)
     if (nextIndex < selectedFiles.length) {
       // 약간의 지연을 주어 사용자가 현재 이미지 처리가 완료됨을 인지하도록 함
@@ -202,9 +214,9 @@ const PhotoUploader = ({
   };
 
   // 가로세로 비율 변경
-  const handleRatioChange = (ratio: "4:3" | "3:4") => {
-    setSelectedRatio(ratio);
-  };
+  // const handleRatioChange = (ratio: "4:3" | "3:4") => {
+  // setSelectedRatio(ratio);
+  // };
 
   // 이미지 크롭 모달 닫기 처리
   const handleCropperModalClose = () => {
@@ -327,22 +339,26 @@ const PhotoUploader = ({
             onRemoveImage={handleRemoveImage}
             maxImages={5}
             previewSize="md"
+            croppedPreviews={croppedImages.map(img => img?.preview || null)}
           />
+
+          {/* 크기 제한 안내 메시지 */}
+          <div className="text-sm-lg text-red-200 -mt-1">
+            이미지 제한 용량: 100KB ~ 10MB
+          </div>
         </div>
 
         {/* 앨범 선택 컴포넌트 */}
         {albumSelectComponent}
 
-        {/* 크기 제한 안내 메시지 */}
-        <div className="text-sm-lg text-gray-400 mb-3 -mt-3">
-          이미지 제한 용량: 100KB ~ 10MB
-        </div>
+
       </div>
     );
   };
 
   return (
     <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
       <Modal
         isOpen={isOpen}
         onClose={onClose}
@@ -367,15 +383,12 @@ const PhotoUploader = ({
           onClose={() => {
             // 모달 닫기는 모든 이미지 처리 완료 후에만 허용
             // 그렇지 않으면 사용자가 직접 닫으려 할 때 아무 동작도 하지 않음
-            const allImagesCropped = selectedFiles.every((_, index) => 
+            const allImagesCropped = selectedFiles.every((_, index) =>
               croppedImages[index] && croppedImages[index].preview
             );
-            
+
             if (allImagesCropped) {
               handleCropperModalClose();
-            } else {
-              // 닫기 시도했지만 처리 중인 이미지가 있어 닫지 않음을 알림
-              showAlertMessage("모든 이미지 처리가 완료되기 전까지 닫을 수 없습니다.", "red");
             }
           }}
           imageFiles={selectedFiles}
