@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 // import { Link } from 'lucide-react';
-import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
-import useCalendarApi from '@/apis/useCalendarApi';
+import useCalendarEventStore from '@/stores/useCalendarEventStore';
+import { createSchedule } from '@/apis/useCalendarApi';
 import useUserStore from '@/stores/useUserStore';
 // import DropDown from '../common/Modal/DropDown';
 // import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
@@ -14,7 +14,6 @@ interface CalendarEventAddModalProps {
 
 function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
   const { selectDate, addEvent } = useCalendarEventStore();
-  const { createSchedule } = useCalendarApi();
   const { user } = useUserStore();
 
   const [eventTitle, setEventTitle] = useState('');

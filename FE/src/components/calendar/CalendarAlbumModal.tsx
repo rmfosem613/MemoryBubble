@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 import DropDown from '../common/Modal/DropDown';
-import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
-import useCalendarApi from '@/apis/useCalendarApi';
+import useCalendarEventStore from '@/stores/useCalendarEventStore';
+import { linkAlbumToSchedule } from '@/apis/useCalendarApi';
 
 interface CalendarAlbumModalProps {
   isOpen: boolean;
@@ -20,7 +20,6 @@ function CalendarAlbumModal({
   allAlbums, // props에서 받음
 }: CalendarAlbumModalProps) {
   const { updateEvent } = useCalendarEventStore();
-  const { linkAlbumToSchedule } = useCalendarApi();
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
