@@ -7,6 +7,7 @@ interface ImageSelectorProps {
   onRemoveImage?: (index: number) => void;
   className?: string;
   previewSize?: 'sm' | 'md' | 'lg';
+  croppedPreviews?: (string | null)[]; // 크롭된 이미지 미리보기 URL 배열 추가
 }
 
 const ImageSelector: React.FC<ImageSelectorProps> = ({
@@ -15,7 +16,8 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
   selectedImages = [],
   onRemoveImage,
   className = '',
-  previewSize = 'md'
+  previewSize = 'md',
+  croppedPreviews = [] // 기본값 빈 배열
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,6 +58,16 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
     if (onRemoveImage) {
       onRemoveImage(index);
     }
+  };
+
+  // 이미지 소스 URL 결정 (크롭된 버전이 있으면 사용, 없으면 원본)
+  const getImageSrc = (index: number) => {
+    // 크롭 미리보기가 있으면 그것을 사용
+    if (croppedPreviews && croppedPreviews[index]) {
+      return croppedPreviews[index];
+    }
+    // 아니면 원본 이미지 사용
+    return URL.createObjectURL(selectedImages[index]);
   };
 
   return (
@@ -101,9 +113,9 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
           {selectedImages.map((file, index) => (
             <div key={index} className={`relative ${imageSize} flex-shrink-0`}>
               <img
-                src={URL.createObjectURL(file)}
+                src={getImageSrc(index)}
                 alt={`Selected ${index}`}
-                className="w-full h-full object-cover rounded-md"
+                className="border border-gray-300 w-full h-full object-cover rounded-md"
               />
               <button
                 className="absolute top-1 right-1 bg-gray-800 bg-opacity-70 rounded-full w-5 h-5 flex items-center justify-center"

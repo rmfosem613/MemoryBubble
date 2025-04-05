@@ -8,11 +8,11 @@ export type AspectRatioOption = "1:1" | "4:3" | "3:4";
 interface ImageCropperModalProps {
   isOpen: boolean;
   onClose: () => void;
-  imageFiles: File[]; // Changed from single imageFile to array of imageFiles
-  currentIndex: number; // Current image index being cropped
+  imageFiles: File[]; // 이미지 배열 형태로 변경
+  currentIndex: number;
   aspectRatio: AspectRatioOption;
-  onCropComplete: (file: File, previewUrl: string, index: number) => void; // Added index parameter
-  onAllCropsComplete?: () => void; // New callback for when all crops are done
+  onCropComplete: (file: File, previewUrl: string, index: number) => void;
+  onAllCropsComplete?: () => void;
   allowedAspectRatios?: AspectRatioOption[];
   imageQuality?: number;
   modalTitle?: string;
@@ -30,7 +30,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   allowedAspectRatios = ["1:1", "4:3", "3:4"],
   imageQuality = 0.95,
   modalTitle = "이미지 자르기",
-  applyButtonText = "자르기",
+  // applyButtonText = "자르기",
 }) => {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatioOption>("4:3");
   const [crop, setCrop] = useState<Crop>({
@@ -50,13 +50,13 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   const currentImageFile = imageFiles[currentIndex];
   const isLastImage = currentIndex === imageFiles.length - 1;
 
-  // Update modal title to show progress
+  // 제목 상태 수정
   const computedModalTitle = `${modalTitle} (${currentIndex + 1}/${imageFiles.length})`;
 
-  // Update button text for the last image
+  // 버튼 상태 수정
   const finalApplyButtonText = isLastImage ? "완료" : "다음";
 
-  // Create preview URL when current image changes
+  // 이미지 미리보기 url
   useEffect(() => {
     if (currentImageFile) {
       const url = URL.createObjectURL(currentImageFile);
@@ -152,7 +152,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
   };
 
-  // Process the current image crop
+  // 현재 이미지에 대한 자르기 로직
   const handleApplyCrop = async () => {
     if (!completedCrop || !imgRef.current || !currentImageFile) return;
 
@@ -197,11 +197,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         const croppedUrl = URL.createObjectURL(blob);
         setIsCropComplete(true);
         
-        // Call the crop complete callback with the current index
         onCropComplete(croppedFile, croppedUrl, currentIndex);
         
-        // Only notify about completion if this is the last image
-        // Note: We never close the modal from here, only notify parent
         if (isLastImage && onAllCropsComplete) {
           onAllCropsComplete();
         }
