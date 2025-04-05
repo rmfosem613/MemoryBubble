@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import Alert from '../Alert';
 
 interface ImageSelectorProps {
-  onImagesSelected: (files: File[]) => void;
+  onImagesSelected: (files: File[]) => Promise<void>;
   maxImages?: number;
   selectedImages?: File[];
   onRemoveImage?: (index: number) => void;
@@ -51,7 +51,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
   };
 
   // 파일 선택 시 처리
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
 
     const files = Array.from(e.target.files);
@@ -63,7 +63,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
     }
 
     // 선택한 파일 부모 컴포넌트로 전달
-    onImagesSelected(files);
+    await onImagesSelected(files);
 
     // 파일 인풋 초기화
     if (fileInputRef.current) {
@@ -98,7 +98,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
           type="file"
           id="image-upload"
           multiple
-          accept="image/*"
+          accept="image/jpeg,image/png"
           onChange={handleFileSelect}
           className="hidden"
           ref={fileInputRef}

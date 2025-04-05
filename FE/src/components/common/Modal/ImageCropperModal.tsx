@@ -215,8 +215,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
   // 크롭 영역이 유효한지 검사하는 함수
   const isCropValid = () => {
-    // 크롭 영역이 없거나 너무 작은 경우 (최소 5% 이상 크기)
-    if (!completedCrop || completedCrop.width < 75 || completedCrop.height < 75) {
+    // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
+    if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
       return false;
     }
     return true;
