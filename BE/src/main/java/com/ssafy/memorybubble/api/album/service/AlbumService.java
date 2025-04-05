@@ -158,6 +158,7 @@ public class AlbumService {
 
         return AlbumDetailDto.builder()
                 .albumName(album.getName())
+                .albumContent(album.getContent())
                 .photoList(photoDtos)
                 .build();
     }
