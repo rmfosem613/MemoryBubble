@@ -201,10 +201,10 @@ function MainPage() {
 
               {/* 앨범 제목 */}
               <div
-                className="absolute z-10 w-[94%] transition-colors duration-500"
+                className="absolute z-10 w-full transition-colors duration-500"
                 style={{ backgroundColor: currentAlbum.bgColor || '#FFFFFF' }}
               >
-                <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
+                <div className='relative h-[90px] md:h-[110px] lg:h-[140px] w-full overflow-hidden bg-transparent text-left z-10'>
                   {albumImageUrl === defaultAlbumImage ? (
                     // 기본 이미지일 때는 검은색 텍스트로 표시
                     <p className='absolute text-album-1-lg font-p-800 w-[94%] text-gray-200
@@ -214,7 +214,7 @@ function MainPage() {
                   ) : (
                     // 커스텀 이미지일 때는 기존 스타일 유지
                     <p
-                      className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
+                      className='absolute text-album-1-sm md:text-album-1-md lg:text-album-1-lg font-p-800 bg-clip-text w-[94%]
                       drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]'
                       style={{
                         color: "transparent",
