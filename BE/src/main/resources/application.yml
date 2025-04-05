@@ -51,7 +51,7 @@ spring:
       s3:
         bucket: ${aws.bucket}
       cloudfront:
-        domain: https://d257m5puxmn5e1.cloudfront.net
+        domain: https://dc7a8e6v5khzi.cloudfront.net
         key-pair-id: ${cloudfront.key-pair-id}
         private-key-path: ${cloudfront.private-key-path}
 jwt:
