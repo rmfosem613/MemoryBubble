@@ -218,8 +218,10 @@ const PhotoUploader = ({
     setIsCropperModalOpen(false);
 
     // 이미지 자르기가 취소 되었을 때 alert
-    if (updatedFiles.length < selectedFiles.length) {
-      showAlertMessage(`처리되지 않은 이미지가 취소되었습니다. (${updatedFiles.length}개 성공)`, "red");
+    if (updatedFiles.length === 0) {
+      showAlertMessage("모든 이미지가 취소되었습니다.", "red");
+    } else if (updatedFiles.length < selectedFiles.length) {
+      showAlertMessage(`처리되지 않은 이미지가 취소되었습니다. (${updatedFiles.length}개 남음)`, "red");
     }
   }
 
