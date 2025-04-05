@@ -391,8 +391,9 @@ const PhotoUploader = ({
           />
 
           {/* 크기 제한 안내 메시지 */}
-          <div className="text-sm-lg text-red-200 -mt-1">
-            이미지 제한 용량: 100KB ~ 10MB
+          <div className="text-sm-lg text-gray-400 -mt-1">
+            이미지 용량 제한: 100KB ~ 10MB <br/>
+            이미지 형식 제한: png, jpg, jpeg
           </div>
         </div>
 
