@@ -3,6 +3,8 @@ import ReactCrop, { Crop, PercentCrop, centerCrop, makeAspectCrop } from 'react-
 import 'react-image-crop/dist/ReactCrop.css';
 import Modal from '@/components/common/Modal/Modal';
 
+import Alert from '../Alert';
+
 export type AspectRatioOption = "1:1" | "4:3" | "3:4";
 
 interface ImageCropperModalProps {
@@ -56,6 +58,22 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   // 버튼 상태 수정
   const finalApplyButtonText = isLastImage ? "완료" : "다음";
 
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
+
   // 이미지 미리보기 url
   useEffect(() => {
     if (currentImageFile) {
@@ -99,12 +117,12 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
     setSelectedRatio("4:3");
     const aspect = getAspectValue();
-    
+
     // 이미지 크기에 맞게 초기 크롭 영역 조정 (더 넓은 영역으로)
     const newCrop: Crop = {
       unit: '%',
-      width: 30, // 80%로 크롭 영역 확대
-      height: 30 * (1 / aspect),
+      width: 80, // 80%로 크롭 영역 확대
+      height: 80 * (1 / aspect),
       x: 0, // 가운데 정렬을 위해 10%에서 시작
       y: 0,
     };
@@ -114,10 +132,53 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 초기 completedCrop도 바로 설정
     setCompletedCrop({
       unit: '%',
-      width: 30,
-      height: 30 * (1 / aspect),
+      width: 80,
+      height: 80 * (1 / aspect),
       x: 0,
       y: 0
+    });
+  };
+
+  // 마우스 위치 기반 크롭 영역 생성 함수
+  const createCropAtPosition = (e: React.MouseEvent<HTMLElement>) => {
+    if (!imgRef.current) return;
+
+    const aspect = getAspectValue();
+    const img = imgRef.current;
+    const rect = img.getBoundingClientRect();
+
+    // 이미지 내에서의 마우스 위치 계산 (백분율)
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // 크롭 영역 너비와 높이 설정 (백분율)
+    const cropWidth = 80;
+    const cropHeight = cropWidth * (1 / aspect);
+
+    // 마우스 위치를 중심으로 크롭 영역 배치 (이미지 경계 고려)
+    let posX = Math.max(0, x - cropWidth / 2);
+    let posY = Math.max(0, y - cropHeight / 2);
+
+    // 이미지 오른쪽/아래 경계를 넘어가지 않도록 조정
+    if (posX + cropWidth > 100) posX = 100 - cropWidth;
+    if (posY + cropHeight > 100) posY = 100 - cropHeight;
+
+    // 새 크롭 영역 설정
+    const newCrop: Crop = {
+      unit: '%',
+      width: cropWidth,
+      height: cropHeight,
+      x: posX,
+      y: posY,
+    };
+
+    setCrop(newCrop);
+    setCompletedCrop({
+      unit: '%',
+      width: cropWidth,
+      height: cropHeight,
+      x: posX,
+      y: posY
     });
   };
 
@@ -134,8 +195,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       // 비율 변경 시에도 왼쪽 상단으로 설정
       const newCrop = {
         unit: '%' as const,
-        width: 30,
-        height: 30 * (1 / aspect),
+        width: 80,
+        height: 80 * (1 / aspect),
         x: 0,
         y: 0,
       };
@@ -144,17 +205,35 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       // 비율 변경 시에도 completedCrop 업데이트
       setCompletedCrop({
         unit: '%',
-        width: 30,
-        height: 30 * (1 / aspect),
+        width: 80,
+        height: 80 * (1 / aspect),
         x: 0,
         y: 0
       });
     }
   };
 
+  // 크롭 영역이 유효한지 검사하는 함수
+  const isCropValid = () => {
+    // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
+    if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
+      return false;
+    }
+    return true;
+  };
+
   // 현재 이미지에 대한 자르기 로직
   const handleApplyCrop = async () => {
-    if (!completedCrop || !imgRef.current || !currentImageFile) return;
+    if (!completedCrop || !imgRef.current || !currentImageFile) {
+      showAlertMessage("이미지 영역이 지정되지 않았습니다. 영역을 선택해주세요.", "red");
+      return false;
+    }
+
+    // 크롭 영역이 유효한지 체크
+    if (!isCropValid()) {
+      showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
+      return false;
+    }
 
     const canvas = document.createElement('canvas');
     const image = imgRef.current;
@@ -196,9 +275,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
         const croppedUrl = URL.createObjectURL(blob);
         setIsCropComplete(true);
-        
+
         onCropComplete(croppedFile, croppedUrl, currentIndex);
-        
+
         if (isLastImage && onAllCropsComplete) {
           onAllCropsComplete();
         }
@@ -256,9 +335,18 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
                 ref={imgRef}
                 src={previewUrl}
                 alt="Crop Preview"
-                className="max-w-full max-h-full"
-                style={{ maxHeight: 'calc(70vh - 200px)' }}
+                className="max-w-full max-h-full select-none"
+                style={{
+                  maxHeight: 'calc(70vh - 200px)',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none',
+                  pointerEvents: 'auto'
+                }}
                 onLoad={onImageLoad}
+                onClick={createCropAtPosition} // 클릭한 위치에 crop 영역 생성
+                draggable="false"
               />
             </ReactCrop>
           </div>
@@ -268,16 +356,20 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={computedModalTitle}
-      confirmButtonText={finalApplyButtonText}
-      onConfirm={handleApplyCrop}
-      onCancel={onClose}
-    >
-      {renderModalContent()}
-    </Modal>
+    <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={computedModalTitle}
+        confirmButtonText={finalApplyButtonText}
+        onConfirm={handleApplyCrop}
+        onCancel={onClose}
+      >
+        {renderModalContent()}
+      </Modal>
+    </>
   );
 };
 
