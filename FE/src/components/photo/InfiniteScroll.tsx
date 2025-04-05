@@ -16,7 +16,7 @@ const InfiniteScroll = ({
   loadMoreItems,
   hasMore,
   loadingIndicator,
-  className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1",
+  className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 px-1",
 }: InfiniteScrollProps) => {
   // Intersection Observer를 위한 ref
   const observerRef = useRef<HTMLDivElement>(null);

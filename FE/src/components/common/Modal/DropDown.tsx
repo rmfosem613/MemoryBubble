@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-// import useAlbumStore from '@/stores/useAlbumStore';
 
 interface DropDownProps {
   albums: { id: number; title: string }[];
@@ -88,7 +87,7 @@ function DropDown({ albums, currentAlbumId, onSelectAlbum, placeholder = '앨범
       {/* 드롭다운 목록 - 화면 중앙에 고정 위치 */}
       {isOpen && (
         <div
-          className="ml-[-8px] mt-[-18px] fixed z-50 bg-white border border-gray-300 rounded-md overflow-auto"
+          className="mt-[-25px] fixed z-50 bg-white border border-gray-300 rounded-md overflow-auto"
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,

@@ -56,14 +56,14 @@ function Step3() {
           </div>
 
           {/* 업로드된 파일 수량 표시 */}
-          <div className="mb-6 bg-gray-50 rounded-md">
+          <div className="mb-6 bg-gray-50 rounded-md p-3">
             <p className="text-gray-700">
               업로드된 파일:{' '}
               <span className="font-bold">{uploadedFiles.length}개</span>
             </p>
-            {uploadedFiles.length === 0 && (
+            {uploadedFiles.length !== 8 && (
               <p className="text-red-500 mt-1 text-sm">
-                파일을 업로드해야 폰트를 생성할 수 있습니다.
+                8개 파일을 업로드해야 폰트를 생성할 수 있습니다.
               </p>
             )}
           </div>
@@ -76,9 +76,9 @@ function Step3() {
           <div className="mt-6">
             <button
               type="submit"
-              disabled={isSubmitting || uploadedFiles.length === 0}
+              disabled={isSubmitting || uploadedFiles.length !== 8}
               className={`w-full py-3 rounded-md ${
-                isSubmitting || uploadedFiles.length === 0
+                isSubmitting || uploadedFiles.length !== 8
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-500 hover:bg-blue-600'
               } text-white transition-colors`}>

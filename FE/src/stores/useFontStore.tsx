@@ -80,7 +80,7 @@ const useFontStore = create<FontState>((set, get) => ({
     }
 
     if (!fontNameKo.trim()) {
-      set({ submitError: '폰트명을 모두 입력해주세요.' });
+      set({ submitError: '폰트명을 입력해주세요.' });
       return;
     }
 

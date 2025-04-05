@@ -110,7 +110,10 @@ export const useFontDownload = (): UseFontDownloadReturn => {
 
       // 폰트 상태 확인
       if (fontInfo.status !== 'DONE') {
-        showAlert('폰트가 만들어지기 전 입니다! 조금만 기다려 주세요!', 'red');
+        showAlert(
+          '폰트 생성 중입니다! 폰트 생성에는 약 3시간 정도 소요됩니다.',
+          'green',
+        );
         return;
       }
 
@@ -134,7 +137,9 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       if (existingStyle) {
         console.log('이미 로드된 폰트입니다.');
         setFontFamily(fontFamilyName);
+        setFontName(createName);
         setFontLoaded(true);
+        showAlert('폰트가 성공적으로 로드되었습니다.', 'green');
         return;
       }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from "lucide-react";
 
 interface PhotoModalProps {
   photoUrl: string | null;
@@ -13,21 +14,24 @@ function PhotoModal({ photoUrl, onClose }: PhotoModalProps) {
       className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
       onClick={onClose}
     >
-      <div className="relative max-w-4xl max-h-screen p-4">
-        <img
-          src={photoUrl}
-          alt="Enlarged photo"
-          className="max-w-full max-h-full object-contain"
-        />
-        <button
-          className="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 w-10 h-10 rounded-full flex items-center justify-center"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-        >
-          ×
-        </button>
+      <div className="relative w-[90%] h-[66%] lg:w-[60%] sm:h-[80%] p-4 flex items-center justify-center">
+        <div className='absolute w-full h-full bg-white p-2'>
+          <img
+            src={photoUrl}
+            alt="Enlarged photo"
+            className="w-full h-full object-contain"
+            style={{ maxWidth: '100%', maxHeight: '100%' }}
+          />
+          <button
+            className="absolute top-3 right-3 text-blue-500 flex items-center justify-center"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          >
+            <X strokeWidth={4} />
+          </button>
+        </div>
       </div>
     </div>
   );

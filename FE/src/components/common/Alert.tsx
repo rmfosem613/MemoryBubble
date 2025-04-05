@@ -45,7 +45,7 @@ const Alert = ({ message, color }: AlertProps) => {
   const colorClasses = getColorClasses();
 
   return (
-    <div className="fixed top-0 right-[220px] w-full flex justify-end items-center z-[9999] pointer-events-none">
+    <div className="fixed top-0 w-full flex justify-center items-center z-[9999] pointer-events-none">
       <div className={`px-4 py-4 mt-20 flex justify-start items-center space-x-2 min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
         <AlertCircle className={`w-4 h-4 ${colorClasses.text}`} />
         <span className={`font-medium text-sm ${colorClasses.text}`}>{message}</span>
