@@ -32,6 +32,9 @@ const PhotoUploader = ({
   // 선택된 가로세로 비율
   const [selectedRatio, setSelectedRatio] = useState<"4:3" | "3:4">("4:3");
 
+  // 이미지 자르기 모달 표시 여부
+  const [isCropperModalOpen, setIsCropperModalOpen] = useState(false);
+
   // 업로드 상태
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -50,20 +53,47 @@ const PhotoUploader = ({
     setIsUploadingPhotos(false);
     setUploadProgress(0);
     setShowAlert(false);
+    setIsCropperModalOpen(false);
   };
 
-  // 모든 이미지 자르기가 완료되었는지 확인
+  // 이미지 선택 시 자동으로 크롭 모달 열기 - 미처리된 이미지만 대상으로 함
   useEffect(() => {
-    if (selectedFiles.length > 0) {
-      const croppedCount = croppedImages.filter(img => img && img.preview).length;
-      const allCropped = croppedCount === selectedFiles.length;
-
-      // 모든 이미지 자르기 완료 시 크로퍼 닫기
-      if (allCropped && currentImageIndex !== -1) {
-        setCurrentImageIndex(-1);
+    // 선택된 파일이 있고 모달이 닫혀있는 상태에서만 실행
+    if (selectedFiles.length > 0 && !isCropperModalOpen) {
+      // 크롭되지 않은 이미지가 있는지 확인
+      const uncroppedIndex = selectedFiles.findIndex((_, index) => {
+        // 해당 인덱스의 크롭된 이미지가 없거나 미리보기가 없으면 아직 처리되지 않은 것
+        return !croppedImages[index] || !croppedImages[index].preview;
+      });
+      
+      // 처리되지 않은 이미지가 있으면 해당 인덱스부터 시작
+      if (uncroppedIndex !== -1) {
+        setCurrentImageIndex(uncroppedIndex);
+        setIsCropperModalOpen(true);
       }
     }
-  }, [croppedImages, selectedFiles, currentImageIndex]);
+  }, [selectedFiles, croppedImages, isCropperModalOpen]);
+  
+  // 모달이 열려있는 상태에서 처리할 이미지가 있는지 확인
+  useEffect(() => {
+    // 모달이 열려있고, 선택된 이미지가 있는 경우에만 실행
+    if (isCropperModalOpen && selectedFiles.length > 0) {
+      // 현재 인덱스가 범위를 벗어난 경우, 처리되지 않은 첫 번째 이미지를 찾음
+      if (currentImageIndex < 0 || currentImageIndex >= selectedFiles.length) {
+        const uncroppedIndex = selectedFiles.findIndex((_, index) => {
+          return !croppedImages[index] || !croppedImages[index].preview;
+        });
+        
+        if (uncroppedIndex !== -1) {
+          setCurrentImageIndex(uncroppedIndex);
+        } else {
+          // 모든 이미지가 처리된 경우 모달 닫기
+          setIsCropperModalOpen(false);
+          setCurrentImageIndex(-1);
+        }
+      }
+    }
+  }, [isCropperModalOpen, selectedFiles, croppedImages, currentImageIndex]);
 
   // 알림 메시지 표시
   const showAlertMessage = (message: string, color: string = "red") => {
@@ -110,12 +140,19 @@ const PhotoUploader = ({
     const newFiles = [...selectedFiles, ...validatedFiles];
     setSelectedFiles(newFiles);
 
-    // 새로 추가된 첫 번째 이미지부터 자르기 시작
-    setCurrentImageIndex(selectedFiles.length);
+    // 추가된 이미지의 시작 인덱스 (기존 이미지 개수)
+    const startIndex = selectedFiles.length;
+    
+    // 크롭 모달이 닫혀있을 때만 새로 열기
+    if (!isCropperModalOpen) {
+      setCurrentImageIndex(startIndex);
+      setIsCropperModalOpen(true);
+    }
   };
 
   // 이미지 제거
   const handleRemoveImage = (index: number) => {
+    // 선택된 파일 배열에서 제거
     const newFiles = [...selectedFiles];
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
@@ -126,26 +163,53 @@ const PhotoUploader = ({
     setCroppedImages(newCroppedImages);
   };
 
-  // 이미지 자르기 완료 처리
-  const handleCropComplete = (file: File, previewUrl: string) => {
+  // 단일 이미지 자르기 완료 처리
+  const handleCropComplete = (file: File, previewUrl: string, index: number) => {
+    // 현재 이미지의 크롭 결과 저장
     const newCroppedImages = [...croppedImages];
-    newCroppedImages[currentImageIndex] = { file, preview: previewUrl };
-    setCroppedImages(newCroppedImages);
-
-    // 다음 이미지로 이동
-    if (currentImageIndex < selectedFiles.length - 1) {
-      setTimeout(() => {
-        setCurrentImageIndex(currentImageIndex + 1);
-      }, 300);
-    } else {
-      // 모든 이미지 자르기 완료
-      setCurrentImageIndex(-1);
+    
+    // 배열 길이가 충분하지 않으면 확장
+    while (newCroppedImages.length <= index) {
+      newCroppedImages.push({ file: new File([], "placeholder"), preview: "" });
     }
+    
+    newCroppedImages[index] = { file, preview: previewUrl };
+    setCroppedImages(newCroppedImages);
+    
+    // 다음 처리되지 않은 이미지를 찾음
+    let nextIndex = index + 1;
+    
+    // 모달을 닫지 않고 바로 다음 이미지로 이동 (항상 모달은 열린 상태 유지)
+    if (nextIndex < selectedFiles.length) {
+      // 약간의 지연을 주어 사용자가 현재 이미지 처리가 완료됨을 인지하도록 함
+      setTimeout(() => {
+        setCurrentImageIndex(nextIndex);
+      }, 100);
+    } else {
+      // 마지막 이미지 처리 완료 - 모달은 handleAllCropsComplete에서 닫힘
+      handleAllCropsComplete();
+    }
+  };
+
+  // 모든 이미지 자르기 완료 처리
+  const handleAllCropsComplete = () => {
+    // 모든 이미지 처리가 완료되면 모달을 닫음
+    // 부모 컴포넌트에서만 모달을 닫도록 함
+    setTimeout(() => {
+      setIsCropperModalOpen(false);
+      setCurrentImageIndex(-1);
+    }, 500); // 약간의 지연을 주어 마지막 이미지 처리가 시각적으로 완료되는 것을 보여줌
   };
 
   // 가로세로 비율 변경
   const handleRatioChange = (ratio: "4:3" | "3:4") => {
     setSelectedRatio(ratio);
+  };
+
+  // 이미지 크롭 모달 닫기 처리
+  const handleCropperModalClose = () => {
+    setCurrentImageIndex(-1);
+    setIsCropperModalOpen(false);
   };
 
   // 사진 업로드 시작
@@ -257,7 +321,6 @@ const PhotoUploader = ({
       <div className="p-4">
         {/* 이미지 선택기 */}
         <div className="mb-4">
-
           <ImageSelector
             onImagesSelected={handleImagesSelected}
             selectedImages={selectedFiles}
@@ -265,53 +328,66 @@ const PhotoUploader = ({
             maxImages={5}
             previewSize="md"
           />
-
         </div>
-
 
         {/* 앨범 선택 컴포넌트 */}
         {albumSelectComponent}
-
-        {/* 자르기 모달 표시 */}
-        {currentImageIndex >= 0 && currentImageIndex < selectedFiles.length && (
-          <ImageCropperModal
-            isOpen={currentImageIndex !== -1}
-            onClose={() => setCurrentImageIndex(-1)}
-            imageFile={selectedFiles[currentImageIndex]}
-            aspectRatio={selectedRatio}
-            onCropComplete={handleCropComplete}
-            allowedAspectRatios={["4:3", "3:4"]}
-            modalTitle="이미지 자르기"
-          />
-        )}
 
         {/* 크기 제한 안내 메시지 */}
         <div className="text-sm-lg text-gray-400 mb-3 -mt-3">
           이미지 제한 용량: 100KB ~ 10MB
         </div>
-
-
       </div>
     );
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="추억 보관하기"
-      confirmButtonText="보관하기"
-      cancelButtonText="취소하기"
-      onConfirm={handlePhotoUploadStart}
-      onCancel={onClose}
-      isConfirmDisabled={
-        selectedFiles.length === 0 ||
-        croppedImages.filter(img => img && img.preview).length !== selectedFiles.length ||
-        isUploadingPhotos
-      }
-    >
-      {renderModalContent()}
-    </Modal>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="추억 보관하기"
+        confirmButtonText="보관하기"
+        cancelButtonText="취소하기"
+        onConfirm={handlePhotoUploadStart}
+        onCancel={onClose}
+        isConfirmDisabled={
+          selectedFiles.length === 0 ||
+          croppedImages.filter(img => img && img.preview).length !== selectedFiles.length ||
+          isUploadingPhotos
+        }
+      >
+        {renderModalContent()}
+      </Modal>
+
+      {/* 이미지 크로퍼 모달 - 이제 모든 이미지를 순차적으로 처리 */}
+      {selectedFiles.length > 0 && (
+        <ImageCropperModal
+          isOpen={isCropperModalOpen && currentImageIndex >= 0 && currentImageIndex < selectedFiles.length}
+          onClose={() => {
+            // 모달 닫기는 모든 이미지 처리 완료 후에만 허용
+            // 그렇지 않으면 사용자가 직접 닫으려 할 때 아무 동작도 하지 않음
+            const allImagesCropped = selectedFiles.every((_, index) => 
+              croppedImages[index] && croppedImages[index].preview
+            );
+            
+            if (allImagesCropped) {
+              handleCropperModalClose();
+            } else {
+              // 닫기 시도했지만 처리 중인 이미지가 있어 닫지 않음을 알림
+              showAlertMessage("모든 이미지 처리가 완료되기 전까지 닫을 수 없습니다.", "red");
+            }
+          }}
+          imageFiles={selectedFiles}
+          currentIndex={currentImageIndex}
+          aspectRatio={selectedRatio}
+          onCropComplete={handleCropComplete}
+          onAllCropsComplete={handleAllCropsComplete}
+          allowedAspectRatios={["4:3", "3:4"]}
+          modalTitle="이미지 자르기"
+        />
+      )}
+    </>
   );
 };
 
