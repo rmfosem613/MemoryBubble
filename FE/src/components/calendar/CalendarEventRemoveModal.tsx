@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal/Modal';
-import { useCalendarEventStore } from '@/stores/useCalendarEventStore';
-import useCalendarApi from '@/apis/useCalendarApi';
+import useCalendarEventStore from '@/stores/useCalendarEventStore';
+import { deleteSchedule } from '@/apis/useCalendarApi';
 
 interface CalendarEventRemoveModalProps {
   isOpen: boolean;
@@ -20,7 +20,6 @@ function CalendarEventRemoveModal({
   if (!event) return null;
 
   const { removeEvent } = useCalendarEventStore();
-  const { deleteSchedule } = useCalendarApi();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {

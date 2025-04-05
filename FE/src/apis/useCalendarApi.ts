@@ -1,9 +1,8 @@
 import { AxiosResponse } from 'axios';
 import apiClient from './apiClient';
-import { useCallback } from 'react';
 
 // 일정 타입 정의
-interface Schedule {
+export interface Schedule {
   scheduleId: number;
   scheduleContent: string;
   startDate: string;
@@ -12,14 +11,14 @@ interface Schedule {
 }
 
 // 일정 조회 요청 파라미터 타입
-interface FetchSchedulesParams {
+export interface FetchSchedulesParams {
   family_id: number;
   year: number;
   month: number;
 }
 
 // 일정 추가/수정 요청 타입
-interface ScheduleRequest {
+export interface ScheduleRequest {
   familyId: number;
   startDate: string;
   endDate: string;
@@ -28,81 +27,88 @@ interface ScheduleRequest {
 }
 
 // 앨범 연결 요청 타입
-interface LinkAlbumRequest {
+export interface LinkAlbumRequest {
   albumId: number;
 }
 
-export const useCalendarApi = () => {
-  // 일정 목록 조회
-  const fetchSchedules = useCallback(
-    async (
-      params: FetchSchedulesParams,
-    ): Promise<AxiosResponse<Schedule[]>> => {
-      const response = await apiClient.get<Schedule[]>('/api/schedules', {
-        params,
-      });
-      return response;
-    },
-    [],
-  );
-
-  // 일정 추가
-  const createSchedule = useCallback(
-    async (data: ScheduleRequest): Promise<AxiosResponse<Schedule>> => {
-      const response = await apiClient.post<Schedule>('/api/schedules', data);
-      return response;
-    },
-    [],
-  );
-
-  // 앨범 연결
-  const linkAlbumToSchedule = useCallback(
-    async (
-      scheduleId: number,
-      data: LinkAlbumRequest,
-    ): Promise<AxiosResponse<Schedule>> => {
-      const response = await apiClient.post<Schedule>(
-        `/api/schedules/${scheduleId}/link`,
-        data,
-      );
-      return response;
-    },
-    [],
-  );
-
-  // 일정 수정
-  const updateSchedule = useCallback(
-    async (
-      scheduleId: number,
-      data: ScheduleRequest,
-    ): Promise<AxiosResponse<Schedule>> => {
-      const response = await apiClient.patch<Schedule>(
-        `/api/schedules/${scheduleId}`,
-        data,
-      );
-      return response;
-    },
-    [],
-  );
-
-  // 일정 삭제
-  const deleteSchedule = useCallback(
-    async (scheduleId: number): Promise<AxiosResponse<{}>> => {
-      const response = await apiClient.delete<{}>(
-        `/api/schedules/${scheduleId}`,
-      );
-      return response;
-    },
-    [],
-  );
-
-  return {
-    fetchSchedules,
-    createSchedule,
-    linkAlbumToSchedule,
-    updateSchedule,
-    deleteSchedule,
-  };
+// 일정 목록 조회
+export const fetchSchedules = async (
+  params: FetchSchedulesParams,
+): Promise<AxiosResponse<Schedule[]>> => {
+  try {
+    const response = await apiClient.get<Schedule[]>('/api/schedules', {
+      params,
+    });
+    console.log('일정 목록 조회 성공:', response.data);
+    return response;
+  } catch (error) {
+    console.error('일정 목록 조회 실패:', error);
+    throw error;
+  }
 };
 
-export default useCalendarApi;
+// 일정 추가
+export const createSchedule = async (
+  data: ScheduleRequest,
+): Promise<AxiosResponse<Schedule>> => {
+  try {
+    const response = await apiClient.post<Schedule>('/api/schedules', data);
+    console.log('일정 추가 성공:', response.data);
+    return response;
+  } catch (error) {
+    console.error('일정 추가 실패:', error);
+    throw error;
+  }
+};
+
+// 앨범 연결
+export const linkAlbumToSchedule = async (
+  scheduleId: number,
+  data: LinkAlbumRequest,
+): Promise<AxiosResponse<Schedule>> => {
+  try {
+    const response = await apiClient.post<Schedule>(
+      `/api/schedules/${scheduleId}/link`,
+      data,
+    );
+    console.log('앨범 연결 성공:', response.data);
+    return response;
+  } catch (error) {
+    console.error('앨범 연결 실패:', error);
+    throw error;
+  }
+};
+
+// 일정 수정
+export const updateSchedule = async (
+  scheduleId: number,
+  data: ScheduleRequest,
+): Promise<AxiosResponse<Schedule>> => {
+  try {
+    const response = await apiClient.patch<Schedule>(
+      `/api/schedules/${scheduleId}`,
+      data,
+    );
+    console.log('일정 수정 성공:', response.data);
+    return response;
+  } catch (error) {
+    console.error('일정 수정 실패:', error);
+    throw error;
+  }
+};
+
+// 일정 삭제
+export const deleteSchedule = async (
+  scheduleId: number,
+): Promise<AxiosResponse<void>> => {
+  try {
+    const response = await apiClient.delete<void>(
+      `/api/schedules/${scheduleId}`,
+    );
+    console.log('일정 삭제 성공');
+    return response;
+  } catch (error) {
+    console.error('일정 삭제 실패:', error);
+    throw error;
+  }
+};

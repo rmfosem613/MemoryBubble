@@ -1,3 +1,142 @@
+/* 계절별 스타일 - 각 계절마다 색상을 정의합니다 */
+
+/* 겨울 계절 스타일 */
+.winter .fc-today-button.fc-button.fc-button-primary {
+  @apply !bg-winter-200/80 !border-none !py-1 !px-2 hover:!bg-winter-200;
+}
+
+.winter .fc-prev-button.fc-button.fc-button-primary,
+.winter .fc-next-button.fc-button.fc-button-primary {
+  @apply !bg-inherit !p-1 !rounded-full !border-none hover:!bg-winter-100 focus:!shadow-none !flex !justify-center !items-center;
+}
+
+.winter .fc-daygrid-day-frame {
+  @apply !border-2 !border-winter-100 !rounded-[4px];
+}
+
+.winter .fc .fc-day-today .fc-daygrid-day-frame {
+  @apply !bg-winter-100;
+}
+
+.winter .selected-date .fc-daygrid-day-frame {
+  @apply !border-2 !border-winter-200 !rounded-[4px];
+}
+
+.winter .multi-day-event {
+  @apply !bg-winter-300;
+}
+
+.winter .single-day-event {
+  @apply !bg-winter-100 !border-winter-200;
+}
+
+.winter .fc-daygrid-more-link {
+  @apply !text-winter-200;
+}
+
+/* 봄 계절 스타일 */
+.spring .fc-today-button.fc-button.fc-button-primary {
+  @apply !bg-spring-200/80 !border-none !py-1 !px-2 hover:!bg-spring-200;
+}
+
+.spring .fc-prev-button.fc-button.fc-button-primary,
+.spring .fc-next-button.fc-button.fc-button-primary {
+  @apply !bg-inherit !p-1 !rounded-full !border-none hover:!bg-spring-100 focus:!shadow-none !flex !justify-center !items-center;
+}
+
+.spring .fc-daygrid-day-frame {
+  @apply !border-2 !border-spring-100 !rounded-[4px];
+}
+
+.spring .fc .fc-day-today .fc-daygrid-day-frame {
+  @apply !bg-spring-100;
+}
+
+.spring .selected-date .fc-daygrid-day-frame {
+  @apply !border-2 !border-spring-200 !rounded-[4px];
+}
+
+.spring .multi-day-event {
+  @apply !bg-spring-300;
+}
+
+.spring .single-day-event {
+  @apply !bg-spring-100 !border-spring-200;
+}
+
+.spring .fc-daygrid-more-link {
+  @apply !text-spring-200;
+}
+
+/* 여름 계절 스타일 */
+.summer .fc-today-button.fc-button.fc-button-primary {
+  @apply !bg-summer-200/80 !border-none !py-1 !px-2 hover:!bg-summer-200;
+}
+
+.summer .fc-prev-button.fc-button.fc-button-primary,
+.summer .fc-next-button.fc-button.fc-button-primary {
+  @apply !bg-inherit !p-1 !rounded-full !border-none hover:!bg-summer-100 focus:!shadow-none !flex !justify-center !items-center;
+}
+
+.summer .fc-daygrid-day-frame {
+  @apply !border-2 !border-summer-100 !rounded-[4px];
+}
+
+.summer .fc .fc-day-today .fc-daygrid-day-frame {
+  @apply !bg-summer-100;
+}
+
+.summer .selected-date .fc-daygrid-day-frame {
+  @apply !border-2 !border-summer-200 !rounded-[4px];
+}
+
+.summer .multi-day-event {
+  @apply !bg-summer-300;
+}
+
+.summer .single-day-event {
+  @apply !bg-summer-100 !border-summer-200;
+}
+
+.summer .fc-daygrid-more-link {
+  @apply !text-summer-200;
+}
+
+/* 가을 계절 스타일 */
+.autumn .fc-today-button.fc-button.fc-button-primary {
+  @apply !bg-autumn-200/80 !border-none !py-1 !px-2 hover:!bg-autumn-200;
+}
+
+.autumn .fc-prev-button.fc-button.fc-button-primary,
+.autumn .fc-next-button.fc-button.fc-button-primary {
+  @apply !bg-inherit !p-1 !rounded-full !border-none hover:!bg-autumn-100 focus:!shadow-none !flex !justify-center !items-center;
+}
+
+.autumn .fc-daygrid-day-frame {
+  @apply !border-2 !border-autumn-100 !rounded-[4px];
+}
+
+.autumn .fc .fc-day-today .fc-daygrid-day-frame {
+  @apply !bg-autumn-100;
+}
+
+.autumn .selected-date .fc-daygrid-day-frame {
+  @apply !border-2 !border-autumn-200 !rounded-[4px];
+}
+
+.autumn .multi-day-event {
+  @apply !bg-autumn-300;
+}
+
+.autumn .single-day-event {
+  @apply !bg-autumn-100 !border-autumn-200;
+}
+
+.autumn .fc-daygrid-more-link {
+  @apply !text-autumn-200;
+}
+
+/* 나머지 공통 스타일은 그대로 유지 */
 /* 툴바 및 헤더 스타일 */
 .fc-header-toolbar.fc-toolbar.fc-toolbar-ltr {
   @apply !mb-2;
@@ -8,16 +147,9 @@
 .fc-toolbar-chunk {
   @apply !flex !items-center !space-x-3;
 }
-.fc-prev-button.fc-button.fc-button-primary,
-.fc-next-button.fc-button.fc-button-primary {
-  @apply !bg-inherit !p-1 !rounded-full !border-none hover:!bg-winter-100 focus:!shadow-none !flex !justify-center !items-center;
-}
 .fc-icon-chevron-left,
 .fc-icon-chevron-right {
   @apply !text-black !font-p-700;
-}
-.fc-today-button.fc-button.fc-button-primary {
-  @apply !bg-winter-200/80 !border-none !py-1 !px-2 hover:!bg-winter-200;
 }
 
 /* 연속 일정 첫날 및 마지막날을 위한 스타일 */
@@ -36,20 +168,24 @@
 }
 
 /* 날짜 셀  */
-.fc-daygrid-day {
-  @apply !p-0.5 !h-[105px];
-}
-.fc-daygrid-day-frame {
-  @apply !border-2 !border-winter-100 !rounded-[4px];
-}
 .fc-daygrid-day-events {
-  @apply !mb-1;
+  @apply !mb-0.5;
 }
+
 .fc-daygrid-day-number {
-  @apply !pb-0 !pr-2;
+  @apply !pt-0 !pb-0.5 !text-sm lg:!text-base;
 }
-.fc-daygrid-more-link {
-  @apply !w-full;
+
+.fc-daygrid-day-bottom {
+  @apply !text-xs;
+}
+
+.fc-daygrid-day {
+  @apply !p-0.5;
+}
+
+.fc-daygrid-day-frame {
+  @apply lg:!min-h-[105px] lg:!max-h-[105px];
 }
 
 /* 이전달 및 다음달 날짜 */
@@ -63,9 +199,6 @@
 /* 오늘 날짜 */
 .fc .fc-daygrid-day.fc-day-today {
   @apply bg-inherit;
-}
-.fc .fc-day-today .fc-daygrid-day-frame {
-  @apply !bg-winter-100;
 }
 
 /* 요일 */
@@ -82,11 +215,6 @@
   @apply !text-blue-700;
 }
 
-/* 선택된 날짜 스타일 */
-.selected-date .fc-daygrid-day-frame {
-  @apply !border-2 !border-winter-200 !rounded-[4px];
-}
-
 .fc-scroller {
   @apply overflow-auto scrollbar-hide;
 }
@@ -98,4 +226,8 @@
 .fc-daygrid-header,
 .fc-daygrid-body {
   @apply !w-full;
+}
+
+.fc-event-title.fc-sticky {
+  @apply !text-[0px] lg:!text-[13px];
 }
