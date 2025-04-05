@@ -1,6 +1,6 @@
 import { MainAlbumProps } from "@/types/Album";
 import defaultAlbumImage from "@/assets/album/blank.svg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // 확장된 MainAlbum props 타입 (isActive 추가)
 interface EnhancedMainAlbumProps extends MainAlbumProps {
@@ -15,17 +15,40 @@ function MainAlbum({
   photoCount,
   isActive = false
 }: EnhancedMainAlbumProps) {
-  // 앨범 이미지 URL 체크 함수
-  const getAlbumImageUrl = (url) => {
-    // URL이 비어있거나 presigned URL 문자열이 포함된 경우 기본 이미지 반환
-    if (!url || url.includes('presigned')) {
+  const [imgSrc, setImgSrc] = useState<string>(defaultAlbumImage);
+
+  // 앨범 이미지 URL 체크 함수 - MainPage와 동일한 로직 사용
+  const getAlbumImageUrl = (url: string | undefined) => {
+    // URL이 비어있거나 유효하지 않은 경우 기본 이미지 반환
+    if (!url || url === 'undefined' || url === 'null') {
       return defaultAlbumImage;
     }
-    return url+"&w=500&h=500";
+    
+    // presigned URL 문자열이 포함된 경우 기본 이미지 반환
+    if (url.includes('presigned')) {
+      return defaultAlbumImage;
+    }
+    
+    // 유효한 URL인 경우 그대로 반환 (추가 파라미터 없이)
+    return url;
   };
 
-  // 현재 이미지 URL 확인
-  const validImageUrl = getAlbumImageUrl(imageUrl);
+  // 이미지 로딩 실패 처리
+  const handleImageError = () => {
+    console.log('Image failed to load, using default image for:', title);
+    setImgSrc(defaultAlbumImage);
+  };
+
+  // imageUrl이 변경될 때마다 이미지 소스 업데이트
+  useEffect(() => {
+    if (imageUrl) {
+      const processedUrl = getAlbumImageUrl(imageUrl);
+      console.log(`Setting image for album "${title}":`, processedUrl);
+      setImgSrc(processedUrl);
+    } else {
+      setImgSrc(defaultAlbumImage);
+    }
+  }, [imageUrl, title]);
 
   // 활성화 상태에 따른 스타일 설정
   const containerStyle = {
@@ -34,12 +57,6 @@ function MainAlbum({
     transform: isActive ? 'scale(1.02)' : 'scale(1)'
   };
 
-  useEffect(() => {
-    if (isActive) {
-      console.log('Active album bgColor:', bgColor);
-    }
-  }, [isActive, bgColor]);
-
   return (
     <div 
       className="relative rounded-[8px] mb-[3px] transition-all duration-200 hover:brightness-95"
@@ -47,19 +64,22 @@ function MainAlbum({
     >
       <div className="relative z-10 p-[10px] flex flex-row">
         {/* 이미지 영역 */}
-        <div className="relative w-[150px] h-[150px] rounded-[8px]">
+        <div className="relative w-[150px] h-[150px] rounded-[8px] overflow-hidden bg-gray-100">
           <img
-            src={validImageUrl}
+            src={imgSrc}
             className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
-            alt={title}
+            alt={title || "앨범 이미지"}
+            onError={handleImageError}
           />
         </div>
 
         {/* 텍스트 영역 */}
         <div className="flex flex-col gap-1 pl-[10px] w-[50%]">
-          <p className="text-h4-lg font-p-700 mt-auto">{title}</p>
-          <p className="text-p-sm">{description}</p>
-          <p className="text-p-lg mt-auto text-right"><span className="font-bold">{photoCount}</span>의 순간</p>
+          <p className="text-h4-lg font-p-700 mt-auto">{title || "앨범"}</p>
+          <p className="text-p-sm">{description || ""}</p>
+          <p className="text-p-lg mt-auto text-right">
+            <span className="font-bold">{photoCount || 0}</span>의 순간
+          </p>
         </div>
       </div>
       
