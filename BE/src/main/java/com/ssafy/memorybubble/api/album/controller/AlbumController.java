@@ -101,12 +101,12 @@ public class AlbumController {
                     @ApiResponse(responseCode = "401", description = "토큰이 만료되었습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public ResponseEntity<Void> updateAlbum(@AuthenticationPrincipal UserDetails userDetails,
-                                            @PathVariable Long albumId,
-                                            @Valid @RequestBody AlbumUpdateRequest request) {
-        albumService.updateAlbum(Long.valueOf(userDetails.getUsername()), albumId, request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AlbumUpdateResponse> updateAlbum(@AuthenticationPrincipal UserDetails userDetails,
+                                                           @PathVariable Long albumId,
+                                                           @Valid @RequestBody AlbumUpdateRequest request) {
+        return ResponseEntity.ok(albumService.updateAlbum(Long.valueOf(userDetails.getUsername()), albumId, request));
     }
+
 
     @PatchMapping("/{albumId}/thumbnail")
     @Operation(
