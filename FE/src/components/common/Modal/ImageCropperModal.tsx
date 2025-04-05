@@ -293,8 +293,16 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
                 src={previewUrl}
                 alt="Crop Preview"
                 className="max-w-full max-h-full"
-                style={{ maxHeight: 'calc(70vh - 200px)' }}
+                style={{
+                  maxHeight: 'calc(70vh - 200px)',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none',
+                  pointerEvents: 'none'
+                }}
                 onLoad={onImageLoad}
+                draggable="false"
               />
             </ReactCrop>
           </div>
