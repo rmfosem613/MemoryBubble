@@ -32,12 +32,12 @@ public class CloudFrontService {
         Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);    //유효기간 7일
         String resourceUrl = domain + "/" + key;
 
-        log.info("keyPairId: {}", keyPairId);
-        log.info("privateKeyPath: {}", privateKeyPath);
+        // log.info("keyPairId: {}", keyPairId);
+        // log.info("privateKeyPath: {}", privateKeyPath);
 
         // PEM 키 경로 결정
         Path keyPath = Paths.get(getClass().getClassLoader().getResource(privateKeyPath).toURI());
-        log.info("key path: {}", keyPath);
+        // log.info("key path: {}", keyPath);
 
         // 서명 요청 구성
         CannedSignerRequest cannedRequest = CannedSignerRequest.builder()
