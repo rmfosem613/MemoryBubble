@@ -63,26 +63,24 @@ const useAlbumStore = create<AlbumState>((set, get) => ({
   }),
 
   nextAlbum: () => {
-    const { activeIndex, albums, wheelCooldown } = get();
-    if (activeIndex < albums.length - 1 && !wheelCooldown) {
-      set({ wheelCooldown: true });
+    const { activeIndex, albums } = get();
+    // 경계 조건은 유지하되 wheelCooldown 제거
+    if (activeIndex < albums.length - 1) {
       set(state => ({
         activeIndex: state.activeIndex + 1,
         currentAlbum: state.albums[state.activeIndex + 1]
       }));
-      setTimeout(() => set({ wheelCooldown: false }), 500);
     }
   },
 
   previousAlbum: () => {
-    const { activeIndex, wheelCooldown } = get();
-    if (activeIndex > 0 && !wheelCooldown) {
-      set({ wheelCooldown: true });
+    const { activeIndex } = get();
+    // 경계 조건은 유지하되 wheelCooldown 제거
+    if (activeIndex > 0) {
       set(state => ({
         activeIndex: state.activeIndex - 1,
         currentAlbum: state.albums[state.activeIndex - 1]
       }));
-      setTimeout(() => set({ wheelCooldown: false }), 500);
     }
   },
 
