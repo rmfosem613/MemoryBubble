@@ -171,7 +171,7 @@ function MainPage() {
       {showAlert && <Alert message={alertMessage} color={alertColor} />}
 
       <div className="flex justify-center">
-        <div className="container flex justify-end top-[100px] absolute">
+        <div className="container flex justify-center sm:justify-end top-[100px] absolute">
           {/* 앨범 리스트 컴포넌트 */}
           <SlidingAlbumList />
           <div className="fixed z-50 w-[360px] p-4 bottom-[8px] grid grid-cols-2 gap-4">
@@ -194,13 +194,14 @@ function MainPage() {
       >
         <div className="flex w-[90%] ml-0 z-0 relative">
           {/* 영역1 */}
-          <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex overflow-hidden">
+          <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex overflow-hidden invisible sm:visible">
+
             {/* 앨범 이미지 영역 */}
             <div className="flex mb-auto w-full overflow-hidden">
 
               {/* 앨범 제목 */}
               <div
-                className="absolute z-10 w-full transition-colors duration-500"
+                className="absolute z-10 w-[94%] transition-colors duration-500"
                 style={{ backgroundColor: currentAlbum.bgColor || '#FFFFFF' }}
               >
                 <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
