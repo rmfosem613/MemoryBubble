@@ -121,8 +121,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 이미지 크기에 맞게 초기 크롭 영역 조정 (더 넓은 영역으로)
     const newCrop: Crop = {
       unit: '%',
-      width: 30, // 80%로 크롭 영역 확대
-      height: 30 * (1 / aspect),
+      width: 80, // 80%로 크롭 영역 확대
+      height: 80 * (1 / aspect),
       x: 0, // 가운데 정렬을 위해 10%에서 시작
       y: 0,
     };
@@ -132,10 +132,53 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 초기 completedCrop도 바로 설정
     setCompletedCrop({
       unit: '%',
-      width: 30,
-      height: 30 * (1 / aspect),
+      width: 80,
+      height: 80 * (1 / aspect),
       x: 0,
       y: 0
+    });
+  };
+
+  // 마우스 위치 기반 크롭 영역 생성 함수
+  const createCropAtPosition = (e: React.MouseEvent<HTMLElement>) => {
+    if (!imgRef.current) return;
+
+    const aspect = getAspectValue();
+    const img = imgRef.current;
+    const rect = img.getBoundingClientRect();
+
+    // 이미지 내에서의 마우스 위치 계산 (백분율)
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // 크롭 영역 너비와 높이 설정 (백분율)
+    const cropWidth = 80;
+    const cropHeight = cropWidth * (1 / aspect);
+
+    // 마우스 위치를 중심으로 크롭 영역 배치 (이미지 경계 고려)
+    let posX = Math.max(0, x - cropWidth / 2);
+    let posY = Math.max(0, y - cropHeight / 2);
+
+    // 이미지 오른쪽/아래 경계를 넘어가지 않도록 조정
+    if (posX + cropWidth > 100) posX = 100 - cropWidth;
+    if (posY + cropHeight > 100) posY = 100 - cropHeight;
+
+    // 새 크롭 영역 설정
+    const newCrop: Crop = {
+      unit: '%',
+      width: cropWidth,
+      height: cropHeight,
+      x: posX,
+      y: posY,
+    };
+
+    setCrop(newCrop);
+    setCompletedCrop({
+      unit: '%',
+      width: cropWidth,
+      height: cropHeight,
+      x: posX,
+      y: posY
     });
   };
 
@@ -152,8 +195,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       // 비율 변경 시에도 왼쪽 상단으로 설정
       const newCrop = {
         unit: '%' as const,
-        width: 30,
-        height: 30 * (1 / aspect),
+        width: 80,
+        height: 80 * (1 / aspect),
         x: 0,
         y: 0,
       };
@@ -162,8 +205,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       // 비율 변경 시에도 completedCrop 업데이트
       setCompletedCrop({
         unit: '%',
-        width: 30,
-        height: 30 * (1 / aspect),
+        width: 80,
+        height: 80 * (1 / aspect),
         x: 0,
         y: 0
       });
@@ -173,7 +216,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   // 크롭 영역이 유효한지 검사하는 함수
   const isCropValid = () => {
     // 크롭 영역이 없거나 너무 작은 경우 (최소 5% 이상 크기)
-    if (!completedCrop || completedCrop.width < 5 || completedCrop.height < 5) {
+    if (!completedCrop || completedCrop.width < 75 || completedCrop.height < 75) {
       return false;
     }
     return true;
@@ -292,16 +335,17 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
                 ref={imgRef}
                 src={previewUrl}
                 alt="Crop Preview"
-                className="max-w-full max-h-full"
+                className="max-w-full max-h-full select-none"
                 style={{
                   maxHeight: 'calc(70vh - 200px)',
                   userSelect: 'none',
                   WebkitUserSelect: 'none',
                   MozUserSelect: 'none',
                   msUserSelect: 'none',
-                  pointerEvents: 'none'
+                  pointerEvents: 'auto'
                 }}
                 onLoad={onImageLoad}
+                onClick={createCropAtPosition} // 클릭한 위치에 crop 영역 생성
                 draggable="false"
               />
             </ReactCrop>
