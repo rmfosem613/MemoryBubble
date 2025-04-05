@@ -60,9 +60,6 @@ const AlbumCreator = ({
       // 앨범 목록 다시 불러오기
       await onCreateComplete();
 
-      // 성공 메시지
-      alert("앨범이 생성되었습니다.");
-
       // 입력 필드 초기화
       setAlbumName("");
       setAlbumDescription("");

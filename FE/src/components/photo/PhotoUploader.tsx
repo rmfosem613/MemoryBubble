@@ -5,6 +5,8 @@ import ImageSelector from "@/components/common/Modal/ImageSelector";
 import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
 import { uploadImageToS3, validateImageSize } from "@/components/common/ImageCrop/imageUtils";
 
+import Alert from "../common/Alert";
+
 interface PhotoUploaderProps {
   isOpen: boolean;
   onClose: () => void;
@@ -116,11 +118,21 @@ const PhotoUploader = ({
 
     // 파일 크기 검증 (100KB ~ 10MB)
     const validatedFiles = files.filter(file => {
-      const validation = validateImageSize(file, 100, 10);
-      if (!validation.valid) {
-        showAlertMessage(validation.message, "red");
+      // 파일 크기를 KB 단위로 변환
+      const fileSizeKB = file.size / 1024;
+
+      // 100KB 미만인 경우
+      if (fileSizeKB < 100) {
+        showAlertMessage(`"${file.name}" 파일 크기가 너무 작습니다. 최소 100KB 이상이어야 합니다.`, "red");
         return false;
       }
+
+      // 3MB 초과인 경우
+      if (fileSizeKB > 3 * 1024) {
+        showAlertMessage(`"${file.name}" 파일 크기가 너무 큽니다. 최대 3MB 이하여야 합니다.`, "red");
+        return false;
+      }
+
       return true;
     });
 
@@ -202,9 +214,9 @@ const PhotoUploader = ({
   };
 
   // 가로세로 비율 변경
-  const handleRatioChange = (ratio: "4:3" | "3:4") => {
-    setSelectedRatio(ratio);
-  };
+  // const handleRatioChange = (ratio: "4:3" | "3:4") => {
+  // setSelectedRatio(ratio);
+  // };
 
   // 이미지 크롭 모달 닫기 처리
   const handleCropperModalClose = () => {
@@ -329,21 +341,24 @@ const PhotoUploader = ({
             previewSize="md"
             croppedPreviews={croppedImages.map(img => img?.preview || null)}
           />
+
+          {/* 크기 제한 안내 메시지 */}
+          <div className="text-sm-lg text-red-200 -mt-1">
+            이미지 제한 용량: 100KB ~ 10MB
+          </div>
         </div>
 
         {/* 앨범 선택 컴포넌트 */}
         {albumSelectComponent}
 
-        {/* 크기 제한 안내 메시지 */}
-        <div className="text-sm-lg text-gray-400 mb-3 -mt-3">
-          이미지 제한 용량: 100KB ~ 10MB
-        </div>
+
       </div>
     );
   };
 
   return (
     <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
       <Modal
         isOpen={isOpen}
         onClose={onClose}
@@ -374,9 +389,6 @@ const PhotoUploader = ({
 
             if (allImagesCropped) {
               handleCropperModalClose();
-            } else {
-              // 닫기 시도했지만 처리 중인 이미지가 있어 닫지 않음을 알림
-              showAlertMessage("모든 이미지 처리가 완료되기 전까지 닫을 수 없습니다.", "red");
             }
           }}
           imageFiles={selectedFiles}
