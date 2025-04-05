@@ -4,6 +4,8 @@ import InputText from "@/components/common/Modal/InputText";
 import AlbumColorPicker from "./AlbumColorPicker";
 import { createAlbum } from "@/apis/albumApi";
 
+import Alert from "../common/Alert";
+
 interface AlbumCreatorProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,10 +25,26 @@ const AlbumCreator = ({
   const [selectedColor, setSelectedColor] = useState("#f4e2dc"); // 기본 색상
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false);
 
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
+
   // 폼 입력 검증
   const validateAlbumForm = () => {
     if (!albumName.trim()) {
-      alert("앨범 이름을 입력해주세요.");
+      showAlertMessage("앨범 이름을 입력해주세요.","red");
       return false;
     }
     return true;
@@ -68,8 +86,7 @@ const AlbumCreator = ({
       // 모달 닫기
       onClose();
     } catch (error) {
-      console.error("앨범 생성 오류:", error);
-      alert("앨범 생성에 실패했습니다. 다시 시도해주세요.");
+      showAlertMessage("앨범 생성에 실패했습니다. 다시 시도해주세요.","red");
     } finally {
       setIsCreatingAlbum(false);
     }
@@ -81,38 +98,41 @@ const AlbumCreator = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="앨범 생성"
-      confirmButtonText={isCreatingAlbum ? "생성 중..." : "생성하기"}
-      cancelButtonText="취소하기"
-      onConfirm={handleCreateAlbumStart}
-    >
-      <div className="py-2">
-        <p className="mb-4">새로운 추억보관함을 생성해보세요!</p>
-        <p className="text-subtitle-1-lg font-p-500 text-black">앨범 이름 (최대 7자)</p>
-        <InputText
-          value={albumName}
-          onChange={setAlbumName}
-          maxLength={7}
-          placeholder="앨범 이름을 입력해주세요"
-        />
-        <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 한 줄 설명 (최대 60자)</p>
-        <InputText
-          value={albumDescription}
-          onChange={setAlbumDescription}
-          maxLength={60}
-          placeholder="앨범 설명을 입력해주세요"
-        />
-        <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">표지색 정하기</p>
+    <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="앨범 생성"
+        confirmButtonText={isCreatingAlbum ? "생성 중..." : "생성하기"}
+        cancelButtonText="취소하기"
+        onConfirm={handleCreateAlbumStart}
+      >
+        <div className="py-2">
+          <p className="mb-4">새로운 추억보관함을 생성해보세요!</p>
+          <p className="text-subtitle-1-lg font-p-500 text-black">앨범 이름 (최대 7자)</p>
+          <InputText
+            value={albumName}
+            onChange={setAlbumName}
+            maxLength={7}
+            placeholder="앨범 이름을 입력해주세요"
+          />
+          <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 한 줄 설명 (최대 60자)</p>
+          <InputText
+            value={albumDescription}
+            onChange={setAlbumDescription}
+            maxLength={60}
+            placeholder="앨범 설명을 입력해주세요"
+          />
+          <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">표지색 정하기</p>
 
-        <AlbumColorPicker
-          selectedColor={selectedColor}
-          onColorSelect={handleColorSelect}
-        />
-      </div>
-    </Modal>
+          <AlbumColorPicker
+            selectedColor={selectedColor}
+            onColorSelect={handleColorSelect}
+          />
+        </div>
+      </Modal>
+    </>
   );
 };
 
