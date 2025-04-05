@@ -112,7 +112,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       if (fontInfo.status !== 'DONE') {
         showAlert(
           '폰트 생성 중입니다! 폰트 생성에는 약 3시간 정도 소요됩니다.',
-          'red',
+          'green',
         );
         return;
       }
