@@ -113,6 +113,10 @@ function JoinPage() {
         setBirthError("생일을 입력해주세요.");
         return;
       }
+      else if(birth < "1900-01-01" || birth > new Date().toISOString().split('T')[0]) {
+        setBirthError("생일이 올바르지 않습니다.");
+        return;
+      }
 
       setCurrentStep(currentStep + 1);
     } else {
