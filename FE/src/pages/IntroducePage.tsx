@@ -64,7 +64,7 @@ function IntroducePage() {
             }}
           >
             {/* 스크롤 이미지 영역 - 원형 안에만 표시됨 */}
-            <div className='absolute top-0 -left-[500px] w-[calc(100%+800px)]'>
+            <div className='absolute top-0 -left-[700px] w-[calc(100%+600px)]'>
               <div className='flex space-x-3 justify-between'>
                 {/* 첫 번째 ul - 위로 스크롤 */}
                 <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
@@ -101,29 +101,29 @@ function IntroducePage() {
                 <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
                   <ul className='scroll-down w-full'>
                     <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     {/* 복제된 요소들 (무한 스크롤용) */}
                     <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                   </ul>
                 </div>
@@ -132,29 +132,29 @@ function IntroducePage() {
                 <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
                   <ul className='scroll-up w-full'>
                     <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
                       <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     {/* 복제된 요소들 (무한 스크롤용) */}
                     <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
                       <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                   </ul>
                 </div>
@@ -163,29 +163,29 @@ function IntroducePage() {
                 <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
                   <ul className='scroll-down w-full'>
                     <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     {/* 복제된 요소들 (무한 스크롤용) */}
                     <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                   </ul>
                 </div>
@@ -200,10 +200,10 @@ function IntroducePage() {
                       <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     {/* 복제된 요소들 (무한 스크롤용) */}
                     <li className='h-[30%] py-2'>
@@ -213,15 +213,46 @@ function IntroducePage() {
                       <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                   </ul>
                 </div>
 
                 {/* 여섯 번째 ul - 위로 스크롤 */}
+                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
+                  <ul className='scroll-down w-full'>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    {/* 복제된 요소들 (무한 스크롤용) */}
+                    <li className='h-[30%] py-2'>
+                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                    <li className='h-[30%] py-2'>
+                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
+                    </li>
+                  </ul>
+                </div>
+
+                {/* 일곱 번째 ul - 아래로 스크롤 */}
                 <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
                   <ul className='scroll-up w-full'>
                     <li className='h-[30%] py-2'>
@@ -234,7 +265,7 @@ function IntroducePage() {
                       <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
+                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     {/* 복제된 요소들 (무한 스크롤용) */}
                     <li className='h-[30%] py-2'>
@@ -245,37 +276,6 @@ function IntroducePage() {
                     </li>
                     <li className='h-[30%] py-2'>
                       <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 일곱 번째 ul - 아래로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-down w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
                     </li>
                     <li className='h-[30%] py-2'>
                       <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
