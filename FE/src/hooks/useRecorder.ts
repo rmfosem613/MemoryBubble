@@ -20,10 +20,16 @@ export interface RecorderActions {
 
 // 마이크 스트림 정리 함수
 const cleanupMediaStream = (stream: MediaStream | null) => {
-  if (stream) {
+  if (!stream) return;
+
+  try {
     stream.getTracks().forEach(track => {
-      track.stop();
+      track.enabled = false; // 빠른 비활성화
+      track.stop();          // 완전한 정리
     });
+    console.log('오디오 트랙 중지 및 리소스 해제 완료');
+  } catch (error) {
+    console.error('스트림 정리 중 오류:', error);
   }
 };
 
@@ -132,6 +138,13 @@ export function useRecorder(
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
+      }
+
+      // 트랙 비활성화(마이크 엑세스 표시가 더 빨리 사라짐)
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.enabled = false;
+        });
       }
 
       // 브라우저 마이크 완전히 해제 - 모든 트랙 중지
