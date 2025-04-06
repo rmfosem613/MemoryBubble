@@ -41,8 +41,34 @@ function Step2() {
     e.stopPropagation();
   };
 
+  // PNG 파일 시그니처 검증 함수
+  const isPngFile = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (!e.target || !e.target.result) {
+          resolve(false);
+          return;
+        }
+
+        const arr = new Uint8Array(e.target.result as ArrayBuffer).subarray(
+          0,
+          8,
+        );
+        const header = Array.from(arr)
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+        // PNG 시그니처: 89 50 4E 47 0D 0A 1A 0A
+        const isPng = header.toLowerCase() === '89504e470d0a1a0a';
+        resolve(isPng);
+      };
+      reader.onerror = () => resolve(false);
+      reader.readAsArrayBuffer(file.slice(0, 8));
+    });
+  };
+
   // 파일 처리 함수 수정
-  const processFiles = (files: FileList) => {
+  const processFiles = async (files: FileList) => {
     // 에러 메시지 초기화
     setError(null);
 
@@ -51,6 +77,9 @@ function Step2() {
       setError(`최대 ${MAX_FILES}개까지만 업로드할 수 있습니다.`);
       return;
     }
+
+    // 파일 크기 제한: 600KB
+    const MAX_FILE_SIZE = 600 * 1024; // 600KB를 바이트로 변환
 
     // 유효한 파일명 패턴: 1.png, 2.png, ..., 8.png
     const validFilePattern = /^[1-8]\.png$/;
@@ -63,31 +92,70 @@ function Step2() {
     const invalidFiles: string[] = [];
     const invalidNameFiles: string[] = [];
     const duplicateFiles: string[] = [];
+    const oversizedFiles: string[] = [];
+    const fakePngFiles: string[] = [];
+
+    // 모든 파일에 대해 비동기 검증을 위한 Promise 배열
+    const fileChecks: Promise<void>[] = [];
 
     Array.from(files).forEach((file) => {
-      // 파일 확장자 체크
-      if (!file.name.toLowerCase().endsWith('.png')) {
-        invalidFiles.push(file.name);
-        return;
-      }
+      const check = async () => {
+        // 파일 크기 체크
+        if (file.size > MAX_FILE_SIZE) {
+          oversizedFiles.push(file.name);
+          return;
+        }
 
-      // 파일명 패턴 체크
-      if (!validFilePattern.test(file.name)) {
-        invalidNameFiles.push(file.name);
-        return;
-      }
+        // 파일 확장자 체크
+        if (!file.name.toLowerCase().endsWith('.png')) {
+          invalidFiles.push(file.name);
+          return;
+        }
 
-      // 파일명 중복 체크
-      if (existingFileNames.includes(file.name)) {
-        duplicateFiles.push(file.name);
-        return;
-      }
+        // 파일명 패턴 체크
+        if (!validFilePattern.test(file.name)) {
+          invalidNameFiles.push(file.name);
+          return;
+        }
 
-      validFiles.push(file);
+        // 파일명 중복 체크
+        if (existingFileNames.includes(file.name)) {
+          duplicateFiles.push(file.name);
+          return;
+        }
+
+        // PNG 시그니처 체크
+        const isRealPng = await isPngFile(file);
+        if (!isRealPng) {
+          fakePngFiles.push(file.name);
+          return;
+        }
+
+        validFiles.push(file);
+      };
+
+      fileChecks.push(check());
     });
+
+    // 모든 파일 검증이 완료될 때까지 대기
+    await Promise.all(fileChecks);
 
     // 에러 메시지 구성
     const errorMessages = [];
+
+    // 가짜 PNG 파일이 있는 경우
+    if (fakePngFiles.length > 0) {
+      errorMessages.push(
+        `유효하지 않은 PNG 파일입니다: ${fakePngFiles.join(', ')}`,
+      );
+    }
+
+    // 파일 크기 초과 파일이 있는 경우
+    if (oversizedFiles.length > 0) {
+      errorMessages.push(
+        `파일 크기는 600KB 이하여야 합니다: ${oversizedFiles.join(', ')}`,
+      );
+    }
 
     // 유효하지 않은 확장자 파일이 있는 경우
     if (invalidFiles.length > 0) {
