@@ -18,6 +18,15 @@ export interface RecorderActions {
   formatTime: (seconds: number) => string;
 }
 
+// 마이크 스트림 정리 함수
+const cleanupMediaStream = (stream: MediaStream | null) => {
+  if (stream) {
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+};
+
 // 오디오 녹음 및 재생 기능을 제공하는 커스텀 훅
 export function useRecorder(
   onPlayingChange: (isPlaying: boolean) => void,
@@ -37,6 +46,7 @@ export function useRecorder(
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // 시간 포맷 함수
   const formatTime = (seconds: number) => {
@@ -45,10 +55,15 @@ export function useRecorder(
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // 녹음 시작 함수
+  // 녹음 시작 함수 - 권한 처리는 상위 컴포넌트에서 수행
   const startRecording = async () => {
     try {
+      // 이전 스트림이 있다면 정리
+      cleanupMediaStream(streamRef.current);
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -73,9 +88,6 @@ export function useRecorder(
             recordingDuration: recordedTime
           });
         }
-
-        // 스트림 트랙 중지
-        stream.getTracks().forEach(track => track.stop());
       };
 
       // 녹음 시작
@@ -85,6 +97,10 @@ export function useRecorder(
       onRecordingChange(true);
 
       // 타이머 시작
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+
       timerRef.current = window.setInterval(() => {
         setCurrentTime(prev => {
           const newTime = prev + 1;
@@ -117,6 +133,10 @@ export function useRecorder(
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
+
+      // 브라우저 마이크 완전히 해제 - 모든 트랙 중지
+      cleanupMediaStream(streamRef.current);
+      streamRef.current = null;
     }
   };
 
@@ -127,11 +147,18 @@ export function useRecorder(
       audioRef.current.src = '';
     }
 
+    // 마이크 해제 확인
+    cleanupMediaStream(streamRef.current);
+    streamRef.current = null;
+
     // 타이머 정리
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+
+    // MediaRecorder 정리
+    mediaRecorderRef.current = null;
 
     setRecordState('inactive'); // 녹음 상태 비활성화
     setIsPlaying(false);
@@ -163,6 +190,10 @@ export function useRecorder(
         onPlayingChange(true);
 
         // 재생 타이머 시작
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+
         timerRef.current = window.setInterval(() => {
           if (audioRef.current) {
             const currentSec = Math.floor(audioRef.current.currentTime);
@@ -174,7 +205,7 @@ export function useRecorder(
     }
   };
 
-  // 오디오 재생 종료 감지
+  // 오디오 재생 종료 감지 및 정리
   useEffect(() => {
     const handleAudioEnded = () => {
       setIsPlaying(false);
@@ -196,10 +227,15 @@ export function useRecorder(
     };
     createAudioElement();
 
+    // 컴포넌트 마운트 시 마이크 상태 확인 및 정리
+    cleanupMediaStream(streamRef.current);
+
     return () => {
       // 오디오 제거
       if (audioRef.current) {
         audioRef.current.removeEventListener('ended', handleAudioEnded);
+        audioRef.current.pause();
+        audioRef.current.src = '';
       }
 
       // 컴포넌트 언마운트 시 타이머 정리
@@ -207,6 +243,20 @@ export function useRecorder(
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
+
+      // 컴포넌트 언마운트 시 마이크 완전히 해제
+      cleanupMediaStream(streamRef.current);
+      streamRef.current = null;
+
+      // MediaRecorder 정리
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        try {
+          mediaRecorderRef.current.stop();
+        } catch (error) {
+          // 이미 정지된 상태에서 stop 호출 시 오류 무시
+        }
+      }
+      mediaRecorderRef.current = null;
     };
   }, [onPlayingChange]);
 
