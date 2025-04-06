@@ -8,7 +8,7 @@ function CalendarHeader() {
   const seasonSvg = getSeasonSvg(selectDate);
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full w-[320px]">
       <img
         src={seasonSvg}
         alt="캘린더 배경"
