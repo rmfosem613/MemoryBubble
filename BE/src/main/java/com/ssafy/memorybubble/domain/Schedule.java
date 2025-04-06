@@ -27,7 +27,7 @@ public class Schedule {
     @JoinColumn(name = "album_id")
     private Album album;
 
-    @Column(name = "schedule_content", nullable = false, length = 180)
+    @Column(name = "schedule_content", nullable = false, length = 200)
     private String content;
 
     @Column(nullable = false)

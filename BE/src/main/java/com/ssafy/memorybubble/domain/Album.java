@@ -25,7 +25,7 @@ public class Album {
     @Column(name = "album_name", nullable = false, length = 30)
     private String name;
 
-    @Column(name = "album_content", nullable = false, length = 200)
+    @Column(name = "album_content", nullable = false, length = 250)
     private String content;
 
     @Column(name = "album_thumbnail")
