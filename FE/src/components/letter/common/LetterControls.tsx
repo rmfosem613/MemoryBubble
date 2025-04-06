@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import DatePicker from '@/components/common/DatePicker';
 import LetterDropdown from '@/components/letter/common/LetterDropDown';
 import ColorSelector from '@/components/letter/common/ColorSelector';
 import { useLetterStore } from '@/stores/useLetterStore';
@@ -87,7 +86,11 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
 
         {/* DatePicker */}
         <div className="mr-[12px] mb-[30px]">
-          <DatePicker onChange={handleDateChange} />
+          <input
+            type="date"
+            className="w-full border rounded-[8px] border-gray-300 p-2 text-sm"
+            min={new Date().toISOString().split('T')[0]}
+          />
         </div>
 
         {/* 색상 */}
