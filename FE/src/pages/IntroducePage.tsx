@@ -14,6 +14,9 @@ import pic10 from '@/assets/intro/10.png'
 function IntroducePage() {
   const [curtainHeight, setCurtainHeight] = useState(100);
 
+  const textRef = useRef(null);
+  const imageAreaRef = useRef(null);
+
   useEffect(() => {
     // 페이지가 로드되면 약간의 지연 후 커튼을 아래로 사라지게 함
     const timer = setTimeout(() => {
@@ -41,6 +44,79 @@ function IntroducePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // 텍스트 오버레이 효과를 위한 코드
+  useEffect(() => {
+    if (!textRef.current || !imageAreaRef.current) return;
+
+    // 텍스트 영역 내의 각 문자를 개별 span으로 분리하는 함수
+    const splitTextIntoSpans = () => {
+      const textElement = textRef.current;
+      const originalText = textElement.innerText;
+      let newHtml = '';
+
+      // 각 문자를 span으로 감싸기
+      for (let i = 0; i < originalText.length; i++) {
+        if (originalText[i] === '\n') {
+          newHtml += '<br/>';
+        } else if (originalText[i] === ' ') {
+          newHtml += '<span class="text-char">&nbsp;</span>';
+        } else {
+          newHtml += `<span class="text-char">${originalText[i]}</span>`;
+        }
+      }
+
+      textElement.innerHTML = newHtml;
+      return textElement.querySelectorAll('.text-char');
+    };
+
+    // 초기 span 분리
+    const charSpans = splitTextIntoSpans();
+
+    // 오버레이 감지와 업데이트 함수
+    const updateOverlayEffect = () => {
+      const imageRect = imageAreaRef.current.getBoundingClientRect();
+
+      charSpans.forEach(span => {
+        const spanRect = span.getBoundingClientRect();
+
+        // 이미지 영역과 텍스트 영역의 겹침 여부 확인
+        const isOverlapping = !(
+          spanRect.right < imageRect.left ||
+          spanRect.left > imageRect.right ||
+          spanRect.bottom < imageRect.top ||
+          spanRect.top > imageRect.bottom
+        );
+
+        // 겹치는 부분은 검은색, 겹치지 않는 부분은 하얀색으로 설정
+        if (isOverlapping) {
+          span.style.color = 'white';
+        } else {
+          span.style.color = 'black';
+        }
+      });
+    };
+
+    // 초기 업데이트
+    updateOverlayEffect();
+
+    // 스크롤 및 리사이즈 이벤트에서 업데이트
+    const handleUpdate = () => {
+      requestAnimationFrame(updateOverlayEffect);
+    };
+
+    window.addEventListener('scroll', handleUpdate);
+    window.addEventListener('resize', handleUpdate);
+
+    // 이미지 영역이 애니메이션될 경우 지속적으로 업데이트
+    const animationInterval = setInterval(handleUpdate, 50);
+
+    return () => {
+      window.removeEventListener('scroll', handleUpdate);
+      window.removeEventListener('resize', handleUpdate);
+      clearInterval(animationInterval);
+    };
+  }, []);
+
   return (
     <>
       <div className='flex h-screen relative overflow-hidden'>
@@ -48,7 +124,7 @@ function IntroducePage() {
         <div className='container pt-[60px]'>
           {/* 이미지 스크롤 영역 */}
           <div className='flex h-full w-full'>
-            <div className='fixed -right-[40px] -bottom-[350px]'>
+            <div className='fixed -right-[40px] -bottom-[350px]' ref={imageAreaRef}>
               <div className='w-[1000px] h-[1000px] flex justify-center'>
                 <div className='flex space-x-3 rotate-6 rounded-full overflow-hidden justify-between'>
 
@@ -214,12 +290,11 @@ function IntroducePage() {
           {/* 글자 영역 */}
           <div className='fixed bottom-10 left-10 z-10'>
             <p
-              className='font-p-800 text-[75px] text-white'
+              ref={textRef}
+              className='font-p-800 text-[75px]'
               style={{
                 lineHeight: "90px",
                 WebkitTextStroke: '1px black',
-                mixBlendMode: 'difference',
-                color: 'white'
               }}
             >
               소중한 추억을 간직하는 공간, <br />
