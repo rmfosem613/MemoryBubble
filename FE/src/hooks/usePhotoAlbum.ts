@@ -13,6 +13,7 @@ export interface Photo {
 
 export const usePhotoAlbum = () => {
   const [albumTitle, setAlbumTitle] = useState('앨범 제목');
+  const [albumContent, setAlbumContent] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,6 +77,8 @@ export const usePhotoAlbum = () => {
         const response = await apiClient.get(`/api/albums/${id}`);
         console.log('앨범 사진:', response.data);
         setAlbumTitle(response.data.albumName || '앨범 제목'); // 앨범 제목 설정
+        setAlbumContent(response.data.albumContent || ''); // 앨범 내용 설정
+        setNewAlbumContent(response.data.albumContent || '');
 
         // API 응답에서 photoList 배열 추출
         const photoList = response.data.photoList || [];
@@ -159,8 +162,8 @@ export const usePhotoAlbum = () => {
     }
   };
 
-  // 앨범 제목 변경 핸들러
-  const handleChangeTitle = async () => {
+  // 앨범 제목, 내용 변경 핸들러
+  const handleChangeAlbum = async () => {
     try {
       if (!id) {
         throw new Error('앨범 ID가 유효하지 않습니다.');
@@ -178,13 +181,12 @@ export const usePhotoAlbum = () => {
       console.log('앨범 정보 수정 성공:', response.data);
 
       // 성공 시 로컬 상태 업데이트
-      if (newAlbumName) {
-        setAlbumTitle(newAlbumName);
-      }
+      setAlbumTitle(response.data.albumName);
+      setAlbumContent(response.data.albumContent);
 
       // 입력 필드 초기화
       setNewAlbumName('');
-      setNewAlbumContent('');
+      setNewAlbumContent(response.data.albumContent);
     } catch (error) {
       console.error('앨범 정보 수정 실패:', error);
     }
@@ -305,6 +307,7 @@ export const usePhotoAlbum = () => {
 
   return {
     albumTitle,
+    albumContent,
     newAlbumName,
     setNewAlbumName,
     newAlbumContent,
@@ -318,7 +321,7 @@ export const usePhotoAlbum = () => {
     isLoading,
     error,
     currentIndex,
-    handleChangeTitle,
+    handleChangeAlbum,
     handleChangeThumnail,
     getPrevIndex,
     getNextIndex,
