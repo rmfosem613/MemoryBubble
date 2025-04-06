@@ -12,4 +12,5 @@ import lombok.Data;
 public class FamilyRequest {
     @NotBlank @Size(min = 1, max = 10, message = "앨범 내용은 1자 이상 10자 이하여야 합니다")
     String familyName;
+    Boolean isThumbnailUpdate;
 }
