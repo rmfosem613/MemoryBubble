@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import apiClient from '@/apis/apiClient';
 import axios from 'axios';
 
-import test1 from '@/assets/images/test1.png';
-import test2 from '@/assets/images/test2.png';
-// import test3 from '@/assets/images/test3.png';
+import need from '@/assets/images/Need.png';
+import watchout from '@/assets/images/Watchout.png';
 
 function Step1() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -13,16 +12,12 @@ function Step1() {
   const items = [
     {
       id: 1,
-      image: test1,
+      image: need,
     },
     {
       id: 2,
-      image: test2,
+      image: watchout,
     },
-    // {
-    //   id: 3,
-    //   image: test3,
-    // },
   ];
 
   const totalPages = items.length + 1;
@@ -97,7 +92,7 @@ function Step1() {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <div className="w-40 h-40 mb-4 flex items-center justify-center">
+              <div className="w-full h-full flex items-center justify-center">
                 <img
                   src={items[currentPage].image}
                   alt="image"

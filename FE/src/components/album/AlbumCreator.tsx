@@ -115,14 +115,14 @@ const AlbumCreator = ({
             value={albumName}
             onChange={setAlbumName}
             maxLength={7}
-            placeholder="앨범 이름을 입력해주세요"
+            placeholder="앨범 이름을 입력해주세요 (필수)"
           />
           <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 한 줄 설명 (최대 60자)</p>
           <InputText
             value={albumDescription}
             onChange={setAlbumDescription}
             maxLength={60}
-            placeholder="앨범 설명을 입력해주세요"
+            placeholder="앨범 설명을 입력해주세요 (선택)"
           />
           <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">표지색 정하기</p>
 
