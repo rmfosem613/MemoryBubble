@@ -9,6 +9,7 @@ type ColorTheme = 'spring' | 'summer' | 'autumn' | 'winter' | null;
 // 카세트 데이터 타입 정의
 interface CassetteData {
   isRecorded?: boolean;
+  isRecording?:boolean;
   recordingUrl?: string | null;
   recordingDuration?: number;
 }
@@ -45,6 +46,7 @@ export const useLetterStore = create<LetterState>((set) => ({
   letterType: 'TEXT',
   cassetteData: {
     isRecorded: false,
+    isRecording:false,
     recordingUrl: null,
     recordingDuration: 0
   },
