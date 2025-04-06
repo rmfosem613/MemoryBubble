@@ -9,6 +9,7 @@ type ColorTheme = 'spring' | 'summer' | 'autumn' | 'winter' | null;
 // 카세트 데이터 타입 정의
 interface CassetteData {
   isRecorded?: boolean;
+  isRecording?: boolean;
   recordingUrl?: string | null;
   recordingDuration?: number;
 }
@@ -21,11 +22,15 @@ interface LetterMember {
 
 // 편지 상태 인터페이스
 interface LetterState {
-  
+
   // 편지 타입
   letterType: LetterType;
   cassetteData: CassetteData;
-  
+
+  // 텍스트 편지 내용
+  textContent: string;
+  setTextContent: (content: string) => void;
+
   // 색상 테마
   selectedColor: ColorTheme;
   setSelectedColor: (color: ColorTheme) => void;
@@ -45,18 +50,23 @@ export const useLetterStore = create<LetterState>((set) => ({
   letterType: 'TEXT',
   cassetteData: {
     isRecorded: false,
+    isRecording: false,
     recordingUrl: null,
     recordingDuration: 0
   },
-  
+
+  // 텍스트 편지 내용
+  textContent: '',
+  setTextContent: (content) => set({ textContent: content }),
+
   // 색상 테마 초기값 - winter로 설정
   selectedColor: 'winter',
   setSelectedColor: (color) => set({ selectedColor: color }),
-  
+
   // 멤버 초기값
   selectedMember: null,
   setSelectedMember: (member) => set({ selectedMember: member }),
-  
+
   // 카세트 관련 함수
   setLetterType: (type) => set({ letterType: type }),
   updateCassetteData: (data) => set((state) => ({
@@ -70,7 +80,7 @@ type StorageType = 'new' | 'received';
 
 // 편지 보관함 인터페이스
 interface StorageState {
-  
+
   // 편지 타입
   storageType: StorageType;
 }
