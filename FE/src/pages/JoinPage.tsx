@@ -48,7 +48,10 @@ function JoinPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  // const [phoneNumber, setPhoneNumber] = useState("");
+  const [phonePrefix, setPhonePrefix] = useState('010');
+  const [phoneMiddle, setPhoneMiddle] = useState('');
+  const [phoneSuffix, setPhoneSuffix] = useState('');
   const [birth, setBirth] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null)
@@ -88,8 +91,16 @@ function JoinPage() {
         hasError = true;
       }
 
-      if (!phoneNumber) {
+      /*if (!phoneNumber) {
         setPhoneError("전화번호를 입력해주세요.");
+        hasError = true;
+      }*/
+
+      if(!phonePrefix || !phoneMiddle || !phoneSuffix) {
+        setPhoneError("전화번호를 입력해주세요.");
+        hasError = true;
+      } else if (phoneMiddle.length !== 4 || phoneSuffix.length !== 4) {
+        setPhoneError("전화번호 형식이 올바르지 않습니다.");
         hasError = true;
       }
 
@@ -117,6 +128,8 @@ function JoinPage() {
 
         // 성별을 API 포맷에 맞게 변환
         const genderCode = gender === "여자" ? "F" : "M";
+        // 휴대폰번호 변환
+        const phoneNumber = `${phonePrefix}-${phoneMiddle}-${phoneSuffix}`;
 
         // 가족 가입 API 호출 (useUserApi 사용)
         const response = await joinFamily({
@@ -215,10 +228,23 @@ function JoinPage() {
     setGenderError("");
   };
 
-  const handlePhoneChange = (value) => {
+  /*const handlePhoneChange = (value) => {
     setPhoneNumber(value);
     setPhoneError("");
-  };
+  };*/
+
+  const handlePhonePrefix = (value) => {
+    setPhonePrefix(value);
+    setPhoneError("");
+  }
+  const handlePhoneMiddle = (value) => {
+    setPhoneMiddle(value);
+    setPhoneError("");
+  }
+  const handlePhoneSuffix = (value) => {
+    setPhoneSuffix(value);
+    setPhoneError("");
+  }
 
   const handleBirthChange = (value) => {
     setBirth(value);
@@ -291,13 +317,17 @@ function JoinPage() {
                 <InputInfo
                   onNameChange={handleNameChange}
                   onGenderChange={handleGenderChange}
-                  onPhoneChange={handlePhoneChange}
+                  onPhonePrefixChange={handlePhonePrefix}
+                  onPhoneMiddleChange={handlePhoneMiddle}
+                  onPhoneSuffixChange={handlePhoneSuffix}
                   nameError={nameError}
                   genderError={genderError}
                   phoneError={phoneError}
                   initialName={name}
                   initialGender={gender}
-                  initialPhone={phoneNumber}
+                  initialPhonePrefix={phonePrefix}
+                  initialPhoneMiddle={phoneMiddle}
+                  initialPhoneSuffix={phoneSuffix}
                 />
               )}
               {currentStep === 2 && (
