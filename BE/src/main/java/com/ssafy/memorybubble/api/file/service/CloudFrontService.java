@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
-import software.amazon.awssdk.services.cloudfront.model.CannedSignerRequest;
+import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
 import software.amazon.awssdk.services.cloudfront.url.SignedUrl;
 
 import java.nio.file.Path;
@@ -29,26 +29,28 @@ public class CloudFrontService {
 
     public String generateSignedUrl(String key) throws Exception {
         CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();
-        Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);    //유효기간 7일
-        String resourceUrl = domain + "/" + key;
+        Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);
 
-        // log.info("keyPairId: {}", keyPairId);
-        // log.info("privateKeyPath: {}", privateKeyPath);
+        // 와일드카드를 포함한 리소스 URL
+        String resourceUrl = domain + "/" + key + "*";  // 쿼리 파라미터 허용
 
         // PEM 키 경로 결정
         Path keyPath = Paths.get(getClass().getClassLoader().getResource(privateKeyPath).toURI());
-        // log.info("key path: {}", keyPath);
 
         // 서명 요청 구성
-        CannedSignerRequest cannedRequest = CannedSignerRequest.builder()
+        CustomSignerRequest customRequest = CustomSignerRequest.builder()
                 .resourceUrl(resourceUrl)
                 .privateKey(keyPath)
                 .keyPairId(keyPairId)
                 .expirationDate(expirationDate)
                 .build();
 
-        SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCannedPolicy(cannedRequest);
-        log.info("signedUrl.url(): {}", signedUrl.url());
-        return signedUrl.url();
+        SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCustomPolicy(customRequest);
+
+        // URL에서 와일드카드(*) 제거 후 반환
+        String finalUrl = signedUrl.url().replace("/" + key + "*", "/" + key);
+        log.info("finalUrl: {}", finalUrl);
+
+        return finalUrl;
     }
 }
