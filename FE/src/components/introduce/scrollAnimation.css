@@ -43,3 +43,26 @@
 .text-overlay-container p:last-child {
   mix-blend-mode: difference;
 }
+
+/* 망원경 마스크 효과 */
+.telescope-mask {
+  position: relative;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* 스크롤 이미지 영역을 망원경 내부에서만 보이도록 처리 */
+.telescope-view-container {
+  position: relative;
+}
+
+/* 망원경 외부 영역 오버레이 */
+.telescope-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+}
