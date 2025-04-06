@@ -106,7 +106,7 @@ public class FamilyService {
 
         //유저의 정보가 이미 기입되어 있으면 가입한 것이므로 예외 반환
         if (user.getProfile() != null || user.getBirth() != null || user.getPhoneNumber() != null || user.getGender() != null) {
-           throw new FamilyException(ALREADY_JOINED);
+            throw new FamilyException(ALREADY_JOINED);
         }
 
         // joinRequest의 familyId로 family 찾기, 없으면 예외 반환
@@ -161,13 +161,24 @@ public class FamilyService {
         Family family = Validator.validateAndGetFamily(user, familyId);
         log.info("family: {}", family);
 
-        // 가족 이름 수정
-        family.updateFamilyName(request.getFamilyName());
-        log.info("updated family: {}", family);
-
-        // 기존 thumbnail(fileName)으로 가족 이미지 업로드용 presigned Url 반환
         String key = family.getThumbnail();
-        String presignedUrl = fileService.getUploadPresignedUrl(key);
+        String presignedUrl = null; // 변경되지 않았다면 업로드하지 않으므로 null
+
+        // 새로운 이미지로 변경하는 경우
+        if (request.getIsThumbnailUpdate()) {
+            // 기존 thumbnail 삭제
+            fileService.deleteFile(key);
+
+            // 새로운 thumbnail 생성
+            key = "family/" + UUID.randomUUID();
+            presignedUrl = fileService.getUploadPresignedUrl(key);
+
+            family.updateFamilyNameAndThumbnail(request.getFamilyName(), key);
+        } else {
+            family.updateFamilyName(request.getFamilyName());
+        }
+
+        log.info("updated family: {}", family);
 
         // presignedURL 반환
         return FamilyResponse.builder()
