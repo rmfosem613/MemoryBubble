@@ -29,30 +29,30 @@ function SeasonalTemplate({ selectedColor }: SeasonTemplateProps) {
     case 'spring':
       return (
         <>
-          <img src={cherry} className="absolute top-[10px] right-[10px] z-0 w-[110px] lg:w-[130px] md:w-[120px]" />
-          <img src={sweet} className="absolute bottom-0 left-0 z-0 w-[140px] lg:w-[160px] md:w-[150px]" />
+          <img src={cherry} className="absolute top-[10px] right-[10px] z-0 w-[110px] lg:w-[130px] md:w-[120px] select-none" />
+          <img src={sweet} className="absolute bottom-0 left-0 z-0 w-[140px] lg:w-[160px] md:w-[150px] select-none" />
         </>
       );
     case 'summer':
       return (
         <>
-          <img src={seashell} className="absolute top-[10px] left-[10px] z-0 w-[90px] lg:w-[110px] md:w-[110px]" />
-          <img src={turtle} className="absolute bottom-[0px] right-[10px] z-0 w-[180px] lg:w-[200px] md:w-[190px]" />
+          <img src={seashell} className="absolute top-[10px] left-[10px] z-0 w-[90px] lg:w-[110px] md:w-[110px] select-none" />
+          <img src={turtle} className="absolute bottom-[0px] right-[10px] z-0 w-[180px] lg:w-[200px] md:w-[190px] select-none" />
         </>
       );
     case 'autumn':
       return (
         <>
-          <img src={plant} className="absolute bottom-0 left-0 z-0 w-[140px] lg:w-[160px] md:w-[150px]" />
-          <img src={tree} className="absolute bottom-[-10px] right-[-8px] z-0 w-[250px] lg:w-[270px] md:w-[260px]" />
+          <img src={plant} className="absolute bottom-0 left-0 z-0 w-[140px] lg:w-[160px] md:w-[150px] select-none" />
+          <img src={tree} className="absolute bottom-[-10px] right-[-8px] z-0 w-[250px] lg:w-[270px] md:w-[260px] select-none" />
         </>
       );
     case 'winter':
     default:
       return (
         <>
-          <img src={snow} className="absolute bottom-[-70px] left-[-60px] z-0 w-[300px] lg:w-[350px] md:w-[320px]" />
-          <img src={snowman} className="absolute bottom-[-30px] right-[10px] z-0 w-[200px] lg:w-[250px] md:w-[230px]" />
+          <img src={snow} className="absolute bottom-[-70px] left-[-60px] z-0 w-[300px] lg:w-[350px] md:w-[320px] select-none" />
+          <img src={snowman} className="absolute bottom-[-30px] right-[10px] z-0 w-[200px] lg:w-[250px] md:w-[230px] select-none" />
         </>
       );
   }
