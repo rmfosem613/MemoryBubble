@@ -115,7 +115,7 @@ public class AlbumService {
     }
 
     @Transactional
-    public void updateAlbum(Long userId, Long albumId, AlbumUpdateRequest request) {
+    public AlbumUpdateResponse updateAlbum(Long userId, Long albumId, AlbumUpdateRequest request) {
         User user = userService.getUser(userId);
         Album album = getAlbum(albumId);
 
@@ -132,7 +132,12 @@ public class AlbumService {
         album.updateContent(request.getAlbumContent());
         log.info("update album content: {}", album.getContent());
 
+        return AlbumUpdateResponse.builder()
+                .albumName(album.getName())
+                .albumContent(album.getContent())
+                .build();
     }
+
 
     public Album getAlbum(Long id) {
         return albumRepository.findById(id).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
