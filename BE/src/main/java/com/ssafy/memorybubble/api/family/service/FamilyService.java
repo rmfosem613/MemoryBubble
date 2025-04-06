@@ -42,7 +42,7 @@ public class FamilyService {
 
         // 유저가 이미 가족이 있으면 예외 반환
         if (user.getFamily() != null) {
-           throw new FamilyException(ALREADY_FAMILY_EXIST);
+            throw new FamilyException(ALREADY_FAMILY_EXIST);
         }
 
         // UUID로 presigendUrl 생성, 가족 이미지 업로드 용 presigned Url 반환
