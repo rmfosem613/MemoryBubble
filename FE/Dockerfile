@@ -13,17 +13,8 @@ RUN npm ci
 # 소스 코드 복사
 COPY . .
 
-# 퍼블릭 디렉토리와 에셋 확인 (디버깅 용)
-RUN ls -la /app/src/assets
-
-# 환경 변수 파일 복사 (필요한 경우)
-# COPY .env .env
-
 # React 애플리케이션 빌드
 RUN npm run build
-
-# 빌드된 결과물 확인 (디버깅 용)
-RUN ls -la /app/dist
 
 # 실행 단계
 FROM nginx:alpine
@@ -38,7 +29,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # 3000 포트 노출
-# EXPOSE 80
 EXPOSE 3000
 
 # nginx 실행
