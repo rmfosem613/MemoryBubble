@@ -34,6 +34,8 @@ import Header from './components/header/Header';
 import AdminPage from './pages/AdminPage';
 import TestKakaoLogin from './pages/TestKakaoLogin';
 import OAuthCallback from './components/oauth/OAuthCallback';
+import LandingPage from './pages/LandingPage';
+import IntroducePage from './pages/IntroducePage';
 // import PWAInstaller from './components/PWAInstaller';
 
 type NotificationPayload = {
@@ -85,6 +87,8 @@ function App() {
         <Header />
         <Routes>
           <Route path="/intro" element={<IntroPage />} />
+          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/introduce" element={<IntroducePage />} />
 
           {/* 인증이 필요 없는 경로 (로그인하지 않은 사용자만 접근 가능) */}
           <Route element={<NonAuthRoute />}>

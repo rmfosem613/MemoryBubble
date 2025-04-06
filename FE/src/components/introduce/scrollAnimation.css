@@ -1,0 +1,35 @@
+/* 무한 스크롤을 위한 컨테이너 설정 */
+.scroll-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 위로 스크롤되는 애니메이션 */
+.scroll-up {
+  animation: scrollUp 60s linear infinite;
+  position: relative;
+}
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(-100% / 2));
+  }
+}
+
+/* 아래로 스크롤되는 애니메이션 */
+.scroll-down {
+  animation: scrollDown 60s linear infinite;
+  position: relative;
+}
+
+@keyframes scrollDown {
+  0% {
+    transform: translateY(calc(-100% / 2));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
