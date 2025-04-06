@@ -14,7 +14,7 @@ function TextLetterContent({
   content,
   onContentChange,
 }: TextLetterContentProps) {
-  const { selectedColor, selectedMember } = useLetterStore();
+  const { selectedColor, selectedMember, setTextContent } = useLetterStore();
   const [senderName, setSenderName] = useState<string>('');
   const { fetchUserProfile } = useUserApi();
   const { user } = useUserStore();
@@ -47,6 +47,7 @@ function TextLetterContent({
     // 400자 제한 적용
     if (newValue.length <= maxLength) {
       onContentChange(newValue);
+      setTextContent(newValue);
     }
   };
 

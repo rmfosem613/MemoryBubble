@@ -9,6 +9,8 @@ function LetterTypeSelector() {
   const [alertColor, setAlertColor] = useState("red");
   const [pendingType, setPendingType] = useState<'TEXT' | 'AUDIO' | null>(null);
 
+  const { textContent } = useLetterStore();
+
   // 알림 메시지 표시
   const showAlertMessage = (message: string, color: string = "red") => {
     setAlertMessage(message);
@@ -32,6 +34,15 @@ function LetterTypeSelector() {
       // 녹음된 내용만 있는 경우
       else if (cassetteData.isRecorded) {
         showAlertMessage('보내지 않은 카세트 편지가 있습니다. 녹음 상태를 초기화해 주세요.', 'red');
+        setPendingType(type);
+        return;
+      }
+    }
+
+    if (letterType === 'TEXT' && type === 'AUDIO') {
+      // 텍스트 편지에 내용이 있는지 확인
+      if (textContent && textContent.trim() !== '') {
+        showAlertMessage('작성 중이던 편지가 있습니다. 내용을 모두 지우고 이동할 수 있습니다.', 'red');
         setPendingType(type);
         return;
       }

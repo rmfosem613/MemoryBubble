@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Title from '@/components/common/Title';
 import LetterTypeSelector from '@/components/letter/common/LetterTypeSelector';
@@ -16,7 +16,6 @@ import Alert from '@/components/common/Alert';
 
 function WriteLetterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [textContent, setTextContent] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const navigate = useNavigate();
   const { uploadImageWithPresignedUrl } = useUserApi();
@@ -26,7 +25,9 @@ function WriteLetterPage() {
     letterType,
     selectedColor,
     selectedMember,
-    cassetteData
+    cassetteData,
+    textContent,
+    setTextContent
   } = useLetterStore();
 
   // 알림 관련 상태
@@ -55,6 +56,11 @@ function WriteLetterPage() {
       console.error('오디오 파일 변환 실패:', error);
       throw error;
     }
+  };
+
+  // 편지 내용 변경 핸들러
+  const handleContentChange = (content: string) => {
+    setTextContent(content);
   };
 
   // 편지 보내기 처리 함수
@@ -151,7 +157,7 @@ function WriteLetterPage() {
               {/* 편지 레이아웃 */}
               <div className="row-span-10">
                 {letterType === 'TEXT' ?
-                  <TextLetterContent onContentChange={setTextContent} content={textContent} /> :
+                  <TextLetterContent onContentChange={handleContentChange} content={textContent} /> :
                   <CassetteContent selectedDate={selectedDate} />
                 }
               </div>
