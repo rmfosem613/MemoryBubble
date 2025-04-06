@@ -48,6 +48,7 @@ interface Family {
 // 가족 정보 수정 요청 타입
 interface UpdateFamilyRequest {
   familyName: string;
+  isThumbnailUpdate: boolean;
 }
 
 interface UpdateFamilyResponse {
@@ -93,6 +94,7 @@ interface UpdateUserProfileRequest {
   gender?: 'M' | 'F';
   name?: string;
   phoneNumber?: string;
+  isProfileUpdate?: boolean;
 }
 
 // 프로필 수정 응답 타입 (이미지 업로드용)
