@@ -174,6 +174,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
       birth?: string;
       phoneNumber?: string;
       gender?: 'M' | 'F';
+      isProfileUpdate?: boolean;
     } = {};
 
     // 변경된 필드만 추가
@@ -189,6 +190,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
     if (user.gender !== newUser.gender) {
       updateData.gender = newUser.gender as 'M' | 'F' | null;
     }
+    updateData.isProfileUpdate = profileFile ? true : false;
 
     // 변경사항이 없고 이미지도 변경되지 않았으면 API 호출 없이 모달 닫기
     if (Object.keys(updateData).length === 0 && !profileFile) {
@@ -203,6 +205,9 @@ export const useProfileEditModal = (isOpen: boolean) => {
         const response = await updateUserProfile(user.userId, updateData);
         if (response.status === 200) {
           setUser(updateData);
+          setUser({
+            profileUrl: profileImage,
+          });
 
           // 이미지 업로드 처리
           if (profileFile && response.data.presignedUrl) {
@@ -211,16 +216,13 @@ export const useProfileEditModal = (isOpen: boolean) => {
                 response.data.presignedUrl,
                 profileFile,
               );
-              setUser({
-                profileUrl: profileImage,
-              });
             } catch (uploadError) {
               alert('프로필은 수정되었으나, 이미지 수정에 실패했습니다.');
               return false;
             }
           }
-
           alert('프로필 정보가 수정되었습니다. ');
+
           return true; // 모달 닫기
         } else {
           alert('프로필 정보 수정 중 오류가 발생했습니다. ');

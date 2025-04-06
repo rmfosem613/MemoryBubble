@@ -81,6 +81,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
 
       const response = await updateFamilyInfo(user.familyId, {
         familyName: groupName,
+        isThumbnailUpdate: thumbnail ? true : false
       });
 
       if (response.status === 200) {
