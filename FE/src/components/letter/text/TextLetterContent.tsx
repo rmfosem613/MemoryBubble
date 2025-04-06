@@ -18,6 +18,7 @@ function TextLetterContent({
   const [senderName, setSenderName] = useState<string>('');
   const { fetchUserProfile } = useUserApi();
   const { user } = useUserStore();
+  const maxLength = 400
 
   // 현재 사용자 정보 조회
   useEffect(() => {
@@ -40,7 +41,13 @@ function TextLetterContent({
   }, [fetchUserProfile]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onContentChange(e.target.value);
+    // onContentChange(e.target.value);
+    const newValue = e.target.value;
+
+    // 400자 제한 적용
+    if (newValue.length <= maxLength) {
+      onContentChange(newValue);
+    }
   };
 
   return (
@@ -88,7 +95,11 @@ function TextLetterContent({
           value={content}
           onChange={handleTextChange}
           placeholder="여기에 편지 내용을 입력하세요"
+          maxLength={maxLength}
         />
+        <div className="text-left text-gray-500 mt-1">
+          {content.length}/{maxLength}
+        </div>
       </div>
     </LetterContainer>
   );
