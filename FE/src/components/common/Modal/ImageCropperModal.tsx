@@ -41,8 +41,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   const [selectedRatio, setSelectedRatio] = useState<AspectRatioOption>("4:3");
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
-    width: 10,
-    height: 10,
+    width: 40,
+    height: 30,
     x: 0,
     y: 0,
   });
@@ -126,7 +126,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     const newCrop: Crop = {
       unit: '%',
       width: 40, // 50%로 크롭 영역 확대
-      height: 30 * (2 / aspect),
+      height: 30 * (1 / aspect),
       x: 0, // 가운데 정렬을 위해 10%에서 시작
       y: 0,
     };
@@ -137,7 +137,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     setCompletedCrop({
       unit: '%',
       width: 40,
-      height: 30 * (2 / aspect),
+      height: 30 * (1 / aspect),
       x: 0,
       y: 0
     });
@@ -157,7 +157,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
     // 크롭 영역 너비와 높이 설정 (백분율)
     const cropWidth = 40;
-    const cropHeight = 30 * (2 / aspect);
+    const cropHeight = 30 * (1 / aspect);
 
     // 마우스 위치를 중심으로 크롭 영역 배치 (이미지 경계 고려)
     let posX = Math.max(0, x - cropWidth / 2);
@@ -200,7 +200,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       const newCrop = {
         unit: '%' as const,
         width: 40,
-        height: 30 * (2 / aspect),
+        height: 30 * (1 / aspect),
         x: 0,
         y: 0,
       };
@@ -210,7 +210,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       setCompletedCrop({
         unit: '%',
         width: 40,
-        height: 30 * (2 / aspect),
+        height: 30 * (1 / aspect),
         x: 0,
         y: 0
       });
