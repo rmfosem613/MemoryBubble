@@ -1,22 +1,27 @@
 import { useEffect, useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Check, X } from "lucide-react";
 
 interface AlertProps {
   message: string;
   color: string;
+  confirmButton?: () => void;
+  cancelButton?: () => void;
+  showButtons?: boolean;
 }
 
-// color 예시 : green, red
-const Alert = ({ message, color }: AlertProps) => {
+// color 예시 : green, red, gray
+const Alert = ({ message, color, confirmButton, cancelButton, showButtons = false }: AlertProps) => {
   const [visible, setVisible] = useState(true);
 
-  // 3초 뒤에 alert창 사라짐
+  // 버튼이 없는 경우에만 자동으로 사라짐
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!showButtons) {
+      const timer = setTimeout(() => {
+        setVisible(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showButtons]);
 
   if (!visible) return null;
 
@@ -25,13 +30,13 @@ const Alert = ({ message, color }: AlertProps) => {
       return {
         border: "border-red-200",
         bg: "bg-red-100",
-        text: "text-red-200"
+        text: "text-red-700"
       };
     } else if (color === "green") {
       return {
         border: "border-green-200",
         bg: "bg-green-100",
-        text: "text-green-200"
+        text: "text-green-700"
       };
     } else {
       return {
@@ -44,11 +49,43 @@ const Alert = ({ message, color }: AlertProps) => {
 
   const colorClasses = getColorClasses();
 
+  // 확인 버튼 클릭 핸들러
+  const handleConfirm = () => {
+    if (confirmButton) confirmButton();
+    setVisible(false);
+  };
+
+  // 취소 버튼 클릭 핸들러
+  const handleCancel = () => {
+    if (cancelButton) cancelButton();
+    setVisible(false);
+  };
+
   return (
-    <div className="fixed top-0 w-full flex justify-center items-center z-[9999] pointer-events-none">
-      <div className={`px-4 py-4 mt-20 flex justify-start items-center space-x-2 min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
-        <AlertCircle className={`w-4 h-4 ${colorClasses.text}`} />
-        <span className={`font-medium text-sm ${colorClasses.text}`}>{message}</span>
+    <div className="fixed top-0 w-full flex justify-center items-center z-[9999] pointer-events-auto">
+      <div className={`px-4 py-4 mt-20 flex flex-col min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
+        <div className="flex justify-between items-center space-x-6">
+          <div className="flex space-x-2 items-center">
+            <AlertCircle className={`w-4 h-4 ${colorClasses.text}`} />
+            <span className={`font-medium text-sm ${colorClasses.text}`}>{message}</span>
+          </div>
+          {showButtons && (
+            <div className="flex space-x-2">
+              <button
+                onClick={handleCancel}
+                className={`flex items-center text-red-300`}>
+                <X className="w-5 h-5" strokeWidth={2} />
+              </button>
+              {/* <button
+                onClick={handleConfirm}
+                className={`flex items-center p-1  text-green-200`}>
+                <Check className="w-5 h-5" strokeWidth={3} />
+              </button> */}
+            </div>
+          )}
+        </div>
+
+
       </div>
     </div>
   );

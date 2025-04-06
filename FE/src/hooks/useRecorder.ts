@@ -38,7 +38,7 @@ export function useRecorder(
   onPlayingChange: (isPlaying: boolean) => void,
   onRecordingChange: (isRecording: boolean) => void
 ): [RecorderState, RecorderActions] {
-  const { cassetteData, updateCassetteData } = useLetterStore();
+  const { cassetteData, updateCassetteData, letterType } = useLetterStore();
 
   // 녹음 상태 관리
   const [recordState, setRecordState] = useState<'inactive' | 'recording' | 'recorded'>('inactive');
@@ -60,6 +60,13 @@ export function useRecorder(
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  useEffect(() => {
+    if (letterType === 'TEXT' && recordState === 'recording') {
+      stopRecording();
+      resetRecording();
+    }
+  }, [letterType]);
 
   // 녹음 시작 함수 - 권한 처리는 상위 컴포넌트에서 수행
   const startRecording = async () => {
@@ -90,6 +97,7 @@ export function useRecorder(
           audioRef.current.src = audioUrl;
           updateCassetteData({
             isRecorded: true,
+            isRecording: false,
             recordingUrl: audioUrl,
             recordingDuration: recordedTime
           });
@@ -101,6 +109,11 @@ export function useRecorder(
       setRecordState('recording');
       setCurrentTime(0);
       onRecordingChange(true);
+
+      updateCassetteData({
+        ...cassetteData,
+        isRecording: true
+      });
 
       // 타이머 시작
       if (timerRef.current) {
@@ -179,7 +192,7 @@ export function useRecorder(
     setCurrentTime(0); // 시간 초기화
     setRecordedTime(0);
     setProgressWidth(0);
-    updateCassetteData({ isRecorded: false, recordingUrl: null, recordingDuration: 0 });
+    updateCassetteData({ isRecorded: false, isRecording: false, recordingUrl: null, recordingDuration: 0 });
   };
 
   // 녹음 재생 함수
