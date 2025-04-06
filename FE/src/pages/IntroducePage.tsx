@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import '@/components/introduce/scrollAnimation.css'; // 스크롤 스타일 import
+import '@/components/introduce/scrollAnimation.css';
 
 import pic1 from '@/assets/intro/1.png'
 import pic2 from '@/assets/intro/2.png'
@@ -13,8 +13,7 @@ import pic10 from '@/assets/intro/10.png'
 
 function IntroducePage() {
   const [curtainHeight, setCurtainHeight] = useState(100);
-
-  const textRef = useRef(null);
+  const textContainerRef = useRef(null);
   const imageAreaRef = useRef(null);
 
   useEffect(() => {
@@ -42,79 +41,6 @@ function IntroducePage() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, []);
-
-  // 텍스트 오버레이 효과를 위한 코드
-  useEffect(() => {
-    if (!textRef.current || !imageAreaRef.current) return;
-
-    // 텍스트 영역 내의 각 문자를 개별 span으로 분리하는 함수
-    const splitTextIntoSpans = () => {
-      const textElement = textRef.current;
-      const originalText = textElement.innerText;
-      let newHtml = '';
-
-      // 각 문자를 span으로 감싸기
-      for (let i = 0; i < originalText.length; i++) {
-        if (originalText[i] === '\n') {
-          newHtml += '<br/>';
-        } else if (originalText[i] === ' ') {
-          newHtml += '<span class="text-char">&nbsp;</span>';
-        } else {
-          newHtml += `<span class="text-char">${originalText[i]}</span>`;
-        }
-      }
-
-      textElement.innerHTML = newHtml;
-      return textElement.querySelectorAll('.text-char');
-    };
-
-    // 초기 span 분리
-    const charSpans = splitTextIntoSpans();
-
-    // 오버레이 감지와 업데이트 함수
-    const updateOverlayEffect = () => {
-      const imageRect = imageAreaRef.current.getBoundingClientRect();
-
-      charSpans.forEach(span => {
-        const spanRect = span.getBoundingClientRect();
-
-        // 이미지 영역과 텍스트 영역의 겹침 여부 확인
-        const isOverlapping = !(
-          spanRect.right < imageRect.left ||
-          spanRect.left > imageRect.right ||
-          spanRect.bottom < imageRect.top ||
-          spanRect.top > imageRect.bottom
-        );
-
-        // 겹치는 부분은 검은색, 겹치지 않는 부분은 하얀색으로 설정
-        if (isOverlapping) {
-          span.style.color = 'white';
-        } else {
-          span.style.color = 'black';
-        }
-      });
-    };
-
-    // 초기 업데이트
-    updateOverlayEffect();
-
-    // 스크롤 및 리사이즈 이벤트에서 업데이트
-    const handleUpdate = () => {
-      requestAnimationFrame(updateOverlayEffect);
-    };
-
-    window.addEventListener('scroll', handleUpdate);
-    window.addEventListener('resize', handleUpdate);
-
-    // 이미지 영역이 애니메이션될 경우 지속적으로 업데이트
-    const animationInterval = setInterval(handleUpdate, 50);
-
-    return () => {
-      window.removeEventListener('scroll', handleUpdate);
-      window.removeEventListener('resize', handleUpdate);
-      clearInterval(animationInterval);
-    };
   }, []);
 
   return (
@@ -287,20 +213,85 @@ function IntroducePage() {
             </div>
           </div>
 
-          {/* 글자 영역 */}
-          <div className='fixed bottom-10 left-10 z-10'>
-            <p
-              ref={textRef}
-              className='font-p-800 text-[75px]'
-              style={{
-                lineHeight: "90px",
-                WebkitTextStroke: '1px black',
-              }}
-            >
-              소중한 추억을 간직하는 공간, <br />
-              추억방울과 함께하세요
-            </p>
+          {/* 글자 영역 - 수정된 부분 */}
+          <div className='fixed bottom-10 left-10 z-10' ref={textContainerRef}>
+            <div className="relative">
+              {/* 기본 텍스트 (검은색) - 항상 보이는 텍스트 */}
+              <p
+                className='font-p-800 text-[75px]'
+                style={{
+                  lineHeight: "90px",
+                  WebkitTextStroke: '1px black',
+                  color: 'black',
+                }}
+              >
+                소중한 추억을 간직하는 공간, <br />
+                추억방울과 함께하세요
+              </p>
+              
+              {/* 클리핑 마스크로 작동할 이미지 영역 참조 요소 */}
+              <div 
+                className='absolute top-0 left-0 w-full h-full pointer-events-none'
+                style={{
+                  clipPath: 'url(#textMask)',
+                  WebkitClipPath: 'url(#textMask)',
+                }}
+              >
+                {/* 이미지와 겹치는 영역에만 보일 흰색 텍스트 */}
+                <p
+                  className='font-p-800 text-[75px]'
+                  style={{
+                    lineHeight: "90px",
+                    WebkitTextStroke: '1px black',
+                    color: 'white',
+                  }}
+                >
+                  소중한 추억을 간직하는 공간, <br />
+                  추억방울과 함께하세요
+                </p>
+              </div>
+            </div>
           </div>
+          
+          {/* SVG 클리핑 마스크 정의 */}
+          <svg className="absolute" style={{ width: 0, height: 0, position: 'absolute' }}>
+            <defs>
+              <clipPath id="textMask" clipPathUnits="objectBoundingBox">
+                <path ref={path => {
+                  if (path && imageAreaRef.current) {
+                    // 컴포넌트 마운트 후 이미지 영역의 위치를 기반으로 클리핑 패스 동적 업데이트
+                    const updateClipPath = () => {
+                      const imageRect = imageAreaRef.current.getBoundingClientRect();
+                      const textRect = textContainerRef.current.getBoundingClientRect();
+                      
+                      // 텍스트 기준으로 상대적인 위치 계산
+                      const x = (imageRect.left - textRect.left) / textRect.width;
+                      const y = (imageRect.top - textRect.top) / textRect.height;
+                      const width = imageRect.width / textRect.width;
+                      const height = imageRect.height / textRect.height;
+                      
+                      // 클리핑 패스 업데이트
+                      path.setAttribute('d', `M ${x} ${y} h ${width} v ${height} h -${width} z`);
+                    };
+                    
+                    updateClipPath();
+                    window.addEventListener('scroll', updateClipPath);
+                    window.addEventListener('resize', updateClipPath);
+                    
+                    // 애니메이션 동기화
+                    const interval = setInterval(updateClipPath, 16);
+                    
+                    // 클린업
+                    return () => {
+                      window.removeEventListener('scroll', updateClipPath);
+                      window.removeEventListener('resize', updateClipPath);
+                      clearInterval(interval);
+                    };
+                  }
+                }} />
+              </clipPath>
+            </defs>
+          </svg>
         </div>
 
         {/* 검은색 커튼 - 위에서 아래로 사라짐 */}

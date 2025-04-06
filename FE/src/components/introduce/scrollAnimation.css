@@ -1,10 +1,4 @@
-/* 기존 애니메이션 스타일 유지 */
-.text-char {
-  display: inline-block;
-  transition: color 0.2s ease;
-}
-
-/* 무한 스크롤을 위한 컨테이너 설정 */
+/* 기존 스크롤 애니메이션 */
 .scroll-container {
   position: relative;
   overflow: hidden;
@@ -40,26 +34,12 @@
   }
 }
 
-/* 새로운 텍스트 오버레이 스타일 */
+/* 텍스트 오버레이 효과를 위한 스타일 */
 .text-overlay-container {
   position: relative;
 }
 
-.text-base {
-  position: absolute;
-  font-size: 75px;
-  font-weight: 800;
-  line-height: 90px;
-  -webkit-text-stroke: 1px black;
-  color: black;
-}
-
-.text-blend {
-  position: absolute;
-  font-size: 75px;
-  font-weight: 800;
-  line-height: 90px;
-  -webkit-text-stroke: 1px black;
-  color: white;
+/* 텍스트 블렌드 모드 효과 - 이미지와 겹치는 부분만 색상 변경 */
+.text-overlay-container p:last-child {
   mix-blend-mode: difference;
 }
