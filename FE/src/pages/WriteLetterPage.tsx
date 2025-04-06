@@ -74,7 +74,7 @@ function WriteLetterPage() {
     // selectedColor가 없는 경우 기본값으로 winter 사용
     const themeColor = selectedColor || 'winter';
 
-    // 텍스트 편지인 경우 내용 확인
+    // 텍스트 편지인 경우 내용 확인 (공백만 있는 경우도 체크)
     if (letterType === 'TEXT' && !textContent.trim()) {
       showAlertMessage('편지 내용을 입력해주세요.', "red");
       return;
@@ -94,10 +94,15 @@ function WriteLetterPage() {
         ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
         : new Date().toISOString().split('T')[0];
 
+      // 텍스트 편지의 경우 줄바꿈을 <br/>로 변환
+      const processedContent = letterType === 'TEXT' 
+        ? textContent.replace(/\n/g, '<br/>') 
+        : '';
+        
       // API 요청 데이터 구성
       const letterRequest: SendLetterRequest = {
         type: letterType,
-        content: letterType === 'TEXT' ? textContent : '',  // AUDIO 타입인 경우 content는 빈 문자열로 설정
+        content: processedContent,  // 변환된 내용 또는 AUDIO 타입인 경우 빈 문자열
         openAt: formattedDate,
         backgroundColor: themeColor,
         receiverId: parseInt(selectedMember.id, 10)

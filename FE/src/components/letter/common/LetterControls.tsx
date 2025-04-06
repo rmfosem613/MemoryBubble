@@ -90,6 +90,7 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
             type="date"
             className="w-full border rounded-[8px] border-gray-300 p-2 text-sm"
             min={new Date().toISOString().split('T')[0]}
+            value={new Date().toISOString().split('T')[0]}
           />
         </div>
 
