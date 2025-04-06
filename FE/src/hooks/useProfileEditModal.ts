@@ -45,7 +45,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
         phoneNumber: '',
       });
     }
-  }, [isOpen, user, user.profileUrl]);
+  }, [isOpen, user]);
 
   // 입력 핸들러
   const handleInputChange = (
