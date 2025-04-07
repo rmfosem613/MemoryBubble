@@ -17,7 +17,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
   useEffect(() => {
     if (isOpen) {
       setGroupName(family.familyName);
-      setThumbnailPreview(family.thumbnailUrl);
+      setThumbnailPreview(family.thumbnailUrl+"&w=250");
       setThumbnail(null);
       setErrorMessage('');
     }
