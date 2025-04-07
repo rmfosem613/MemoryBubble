@@ -24,7 +24,8 @@ interface UseFontDownloadReturn {
   fontLoaded: boolean;
   fontFamily: string | null;
   fontName: string | null;
-  alertState: AlertState | null; // Alert 상태 추가
+  alertState: AlertState | null;
+  showAlert: (message: string, color: 'red' | 'green' | 'gray') => void;
 }
 
 export const useFontDownload = (): UseFontDownloadReturn => {
@@ -189,30 +190,17 @@ export const useFontDownload = (): UseFontDownloadReturn => {
     }
   };
 
+  // 폰트 삭제 함수 - 이제 이 함수는 모달을 표시하는 용도로만 사용
+  // 실제 삭제 로직은 FontDeleteModal 컴포넌트에서 처리
   const resetFont = useCallback(async (fontId: string) => {
     try {
-      const response = await apiClient.delete(`/api/fonts/${fontId}`);
-      console.log('폰트 삭제 결과:', response);
-
-      // 스타일 요소 제거
-      const styleElement = document.getElementById(`font-style-${fontId}`);
-      if (styleElement) {
-        styleElement.remove();
-      }
-
-      // 성공 메시지나 추가 처리가 필요하면 여기에 구현
-      console.log(`폰트 ID ${fontId} 삭제 완료`);
-      showAlert('폰트가 성공적으로 삭제되었습니다.', 'green');
-
-      // 상태 초기화
-      setFontLoaded(false);
-      setFontFamily(null);
-
-      // 페이지 리로드
-      window.location.reload();
+      // 이 함수는 이제 직접적인 삭제를 수행하지 않음
+      // 호환성을 위해 유지하지만 실제 처리는 FontDeleteModal에서 함
+      return Promise.resolve();
     } catch (error) {
       console.error('폰트 삭제 중 오류 발생:', error);
       showAlert('폰트 삭제 중 오류가 발생했습니다.', 'red');
+      return Promise.reject(error);
     }
   }, []);
 
@@ -228,7 +216,8 @@ export const useFontDownload = (): UseFontDownloadReturn => {
     fontLoaded,
     fontFamily,
     fontName,
-    alertState, // 알림 상태 반환
+    alertState,
+    showAlert, // 외부에서 알림을 표시할 수 있도록 함수 노출
   };
 };
 
