@@ -151,7 +151,7 @@ function MainPage() {
   }
 
   // 앨범 이미지 URL 확인
-  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl);
+  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl)+"&w=1000";
 
   // 앨범 선택 컴포넌트 - 사진 업로더에 전달할 컴포넌트
   const AlbumSelector = (

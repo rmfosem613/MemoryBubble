@@ -113,7 +113,7 @@ function SlidingAlbumList({ onAlbumChange }: SlidingAlbumListProps) {
               <MainAlbum
                 title={album.title}
                 description={album.description}
-                imageUrl={album.imageUrl}
+                imageUrl={album.imageUrl+"&w=300&h=300"}
                 bgColor={album.bgColor}
                 photoCount={album.photoCount}
                 isActive={isActiveAlbum(index)}

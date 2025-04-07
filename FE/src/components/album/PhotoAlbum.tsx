@@ -307,7 +307,7 @@ function PhotoAlbum() {
               {/* 앞면 - 사진 */}
               {photos && photos.length > 0 ? (
                 <img
-                  src={photos[currentIndex].src}
+                  src={photos[currentIndex].src+"&w=800"}
                   alt={photos[currentIndex].alt}
                   className="max-w-full max-h-full object-contain absolute"
                   style={{
