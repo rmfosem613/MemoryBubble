@@ -43,7 +43,7 @@ const useImageCropper = ({
   const [crop, setCrop] = useState<Crop>(getInitialCrop(defaultAspectRatio));
   const [completedCrop, setCompletedCrop] = useState<Crop | null>(null);
   const [error, setError] = useState<string>("");
-  
+
   // 참조 객체
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -53,10 +53,10 @@ const useImageCropper = ({
   function getInitialCrop(ratio: AspectRatioOption): Crop {
     const aspectMap = {
       "1:1": 1,
-      "4:3": 4/3,
-      "3:4": 3/4
+      "4:3": 4 / 3,
+      "3:4": 3 / 4
     };
-    
+
     return {
       unit: '%',
       width: 20,
@@ -118,6 +118,7 @@ const useImageCropper = ({
   // 파일 입력 필드 클릭 이벤트 핸들러
   const handleButtonClick = (): void => {
     if (fileInputRef.current) {
+      fileInputRef.current.value = ''
       fileInputRef.current.click();
     }
   };
@@ -155,8 +156,8 @@ const useImageCropper = ({
 
     const aspectMap = {
       "1:1": 1,
-      "4:3": 4/3,
-      "3:4": 3/4
+      "4:3": 4 / 3,
+      "3:4": 3 / 4
     };
 
     setCrop(prev => ({
@@ -174,10 +175,10 @@ const useImageCropper = ({
   const handleResetCrop = (): void => {
     const aspectMap = {
       "1:1": 1,
-      "4:3": 4/3,
-      "3:4": 3/4
+      "4:3": 4 / 3,
+      "3:4": 3 / 4
     };
-    
+
     const aspectRatio = aspectMap[selectedRatio];
 
     // 이미지 전체에 대한 선택된 비율의 크롭 영역 계산
@@ -211,7 +212,7 @@ const useImageCropper = ({
       const defaultCrop = {
         unit: '%',
         width: 20,
-        height: aspectRatio === 1 ? 20 : (aspectRatio === 4/3 ? 15 : 26.67),
+        height: aspectRatio === 1 ? 20 : (aspectRatio === 4 / 3 ? 15 : 26.67),
         x: 0,
         y: 0,
         aspect: aspectRatio
@@ -298,7 +299,7 @@ const useImageCropper = ({
   // 크롭 취소 버튼 클릭 시 실행되는 함수
   const handleCancelCrop = (): void => {
     setShowCropper(false);
-    
+
     // 이미지가 원래 있었는지 없었는지에 따라 다르게 처리
     if (!initialImage || !initialPreviewUrl) {
       setImage(null);
@@ -327,7 +328,7 @@ const useImageCropper = ({
             reject(new Error('캔버스 컨텍스트를 생성할 수 없습니다.'));
             return;
           }
-          
+
           ctx.drawImage(img, 0, 0);
 
           // WebP 형식으로 변환 (설정된 품질로)
@@ -359,11 +360,11 @@ const useImageCropper = ({
     selectedRatio,
     crop,
     error,
-    
+
     // 참조
     fileInputRef,
     imgRef,
-    
+
     // 핸들러 및 유틸리티 함수
     handleImageChange,
     handleButtonClick,
@@ -377,7 +378,7 @@ const useImageCropper = ({
     setCrop,
     convertToWebP,
     setShowCropper,
-    
+
     // 설정 값
     allowedAspectRatios,
     minSize,
