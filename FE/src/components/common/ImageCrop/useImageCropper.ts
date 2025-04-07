@@ -1,5 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { type Crop as LibCrop } from 'react-image-crop';
+
+import Alert from '../Alert';
 
 // 확장된 Crop 인터페이스 정의
 interface Crop extends LibCrop {
@@ -43,6 +45,9 @@ const useImageCropper = ({
   const [crop, setCrop] = useState<Crop>(getInitialCrop(defaultAspectRatio));
   const [completedCrop, setCompletedCrop] = useState<Crop | null>(null);
   const [error, setError] = useState<string>("");
+
+  // 중복 클릭 방지를 위한 디바운싱 처리용 ref
+  const isProcessingRatio = useRef<boolean>(false);
 
   // 참조 객체
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -101,6 +106,7 @@ const useImageCropper = ({
         setPreviewUrl(previewResult);
         // 기본 비율 설정
         setSelectedRatio(defaultAspectRatio);
+        setCrop(getInitialCrop(defaultAspectRatio));
         // 이미지 로드 상태 초기화
         imageLoaded.current = false;
         // 크롭 화면 보여주기
@@ -118,7 +124,7 @@ const useImageCropper = ({
   // 파일 입력 필드 클릭 이벤트 핸들러
   const handleButtonClick = (): void => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = '';
       fileInputRef.current.click();
     }
   };
@@ -150,38 +156,53 @@ const useImageCropper = ({
     setCompletedCrop(crop);
   };
 
-  // 비율 변경 핸들러
-  const handleRatioChange = (ratio: AspectRatioOption): void => {
+  // 비율 변경 핸들러 (useCallback으로 래핑하고 디바운싱 로직 추가)
+  const handleRatioChange = useCallback((ratio: AspectRatioOption): void => {
+    // 이미 처리 중인 경우 중복 호출 방지
+    if (isProcessingRatio.current || ratio === selectedRatio) {
+      return;
+    }
+
+    // 처리 중임을 표시
+    isProcessingRatio.current = true;
+
+    const aspectMap = {
+      "1:1": 1,
+      "4:3": 4 / 3,
+      "3:4": 3 / 4
+    };
+
+    // 비율 설정과 crop 업데이트를 한 번에 처리
     setSelectedRatio(ratio);
 
-    const aspectMap = {
-      "1:1": 1,
-      "4:3": 4 / 3,
-      "3:4": 3 / 4
-    };
-
-    setCrop(prev => ({
-      ...prev,
+    const newCrop = {
+      ...crop,
       aspect: aspectMap[ratio]
-    }) as Crop);
+    } as Crop;
 
-    // 이미지가 로드된 상태라면 crop 영역 재설정
+    setCrop(newCrop);
+
+    // 이미지가 로드되었으면 crop 영역 재설정
     if (imgRef.current) {
-      handleResetCrop();
+      handleResetCropWithRatio(ratio);
     }
-  };
 
-  // 크롭 영역 초기화 버튼 클릭 시 실행되는 함수
-  const handleResetCrop = (): void => {
+    // 중복 클릭 방지를 위한 타이머 설정 (300ms 후 처리 가능 상태로 변경)
+    setTimeout(() => {
+      isProcessingRatio.current = false;
+    }, 300);
+  }, [selectedRatio, crop]);
+
+  // 특정 비율로 crop 영역 재설정하는 함수 (비율 변경 시 호출되는 별도 함수)
+  const handleResetCropWithRatio = (ratio: AspectRatioOption): void => {
     const aspectMap = {
       "1:1": 1,
       "4:3": 4 / 3,
       "3:4": 3 / 4
     };
 
-    const aspectRatio = aspectMap[selectedRatio];
+    const aspectRatio = aspectMap[ratio];
 
-    // 이미지 전체에 대한 선택된 비율의 크롭 영역 계산
     if (imgRef.current) {
       const { width, height } = imgRef.current;
 
@@ -205,23 +226,14 @@ const useImageCropper = ({
       } as Crop;
 
       setCrop(percentCrop);
-      // 초기 영역도 completedCrop으로 설정하여 적용 버튼 클릭 시 사용될 수 있도록 함
       setCompletedCrop(percentCrop);
-    } else {
-      // imgRef.current가 없는 경우 기본값으로 설정
-      const defaultCrop = {
-        unit: '%',
-        width: 20,
-        height: aspectRatio === 1 ? 20 : (aspectRatio === 4 / 3 ? 15 : 26.67),
-        x: 0,
-        y: 0,
-        aspect: aspectRatio
-      } as Crop;
-
-      setCrop(defaultCrop);
-      setCompletedCrop(defaultCrop);
     }
   };
+
+  // 크롭 영역 초기화 버튼 클릭 시 실행되는 함수
+  const handleResetCrop = useCallback((): void => {
+    handleResetCropWithRatio(selectedRatio);
+  }, [selectedRatio]);
 
   // 크롭 적용 버튼 클릭 시 실행되는 함수
   const handleApplyCrop = (): Promise<ImageCropResult> => {
@@ -241,6 +253,17 @@ const useImageCropper = ({
       // 크롭된 영역의 실제 픽셀 크기 계산
       const pixelWidth = cropToUse.width * scaleX;
       const pixelHeight = cropToUse.height * scaleY;
+
+      // 원본 이미지 크기 대비 크롭 영역 비율 계산
+      const originalArea = imgRef.current.width * imgRef.current.height;
+      const cropArea = cropToUse.width * cropToUse.height;
+      const cropRatio = (cropArea / originalArea) * 100;
+
+      // 크롭 영역이 원본 이미지의 30% 미만인 경우 경고
+      if (cropRatio < 30) {
+        reject(new Error('IMAGE_TOO_SMALL'));
+        return;
+      }
 
       // 고화질 이미지를 위해 캔버스 사이즈 설정 (원본 해상도 유지)
       canvas.width = pixelWidth;
