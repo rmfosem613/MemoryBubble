@@ -58,7 +58,7 @@ const Section = () => {
       <section
         ref={sectionRefs.handwriting}
         className="min-h-screen flex items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-autumn-100/30">
-        <div className="container flex flex-col gap-6 items-center mb-4">
+        <div className="container flex flex-col gap- items-center mb-4">
           {/* 제목 */}
           <div className="flex flex-col gap-2">
             <h2 className="flex items-center">
@@ -101,11 +101,11 @@ const Section = () => {
               </p>
             </div>
           </div>
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-[90%] md:w-full">
             <img
               src="intro-postcard.gif"
               alt="갤러리"
-              className="rounded-lg shadow-md w-[60%] md:w-full"
+              className="rounded-lg shadow-md"
             />
           </div>
         </div>
