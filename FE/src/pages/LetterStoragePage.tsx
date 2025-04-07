@@ -43,8 +43,8 @@ function LetterStoragePage() {
 
       </div>
 
-      <img src={postBox} className='absolute bottom-0 ml-[110px] w-[120px]'/>
-      <img src={doll} className='absolute bottom-0 mr-[130px] right-0'/>
+      <img src={postBox} className='absolute bottom-0 ml-[110px] w-[120px] invisible lg:visible'/>
+      <img src={doll} className='absolute bottom-0 mr-[130px] right-0 invisible lg:visible'/>
     </>
   )
 }
