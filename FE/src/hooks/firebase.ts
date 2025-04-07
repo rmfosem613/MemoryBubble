@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage, Messaging } from "firebase/messaging";
+import apiClient from '@/apis/apiClient.ts';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,6 +26,9 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
       });
       if (token) {
         console.log('FCM 토큰:', token);
+        await apiClient.post('/api/fcm', {
+          token: token
+        })
         return token;
       }
     }

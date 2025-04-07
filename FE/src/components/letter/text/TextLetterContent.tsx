@@ -4,6 +4,7 @@ import LetterContainer from '@/components/letter/common/LetterContainer';
 import SeasonalDecorations from '@/components/letter/common/SeasonTemplate';
 import { useUserApi } from '@/apis/useUserApi';
 import useUserStore from '@/stores/useUserStore';
+import { useCustomFont } from './useCustomFont'; // 커스텀 폰트 훅 import
 
 interface TextLetterContentProps {
   content: string;
@@ -18,7 +19,10 @@ function TextLetterContent({
   const [senderName, setSenderName] = useState<string>('');
   const { fetchUserProfile } = useUserApi();
   const { user } = useUserStore();
-  const maxLength = 400
+  const maxLength = 300;
+
+  // 커스텀 폰트 훅 사용
+  const { fontLoaded, fontFamily } = useCustomFont();
 
   // 현재 사용자 정보 조회
   useEffect(() => {
@@ -38,10 +42,9 @@ function TextLetterContent({
     };
 
     loadUserProfile();
-  }, [fetchUserProfile]);
+  }, [fetchUserProfile, user.userId]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // onContentChange(e.target.value);
     const newValue = e.target.value;
 
     // 400자 제한 적용
@@ -49,6 +52,16 @@ function TextLetterContent({
       onContentChange(newValue);
       setTextContent(newValue);
     }
+  };
+
+  // 폰트 스타일 계산
+  const getTextareaStyle = () => {
+    return {
+      backgroundColor: 'transparent',
+      lineHeight: '340%',
+      outline: 'none',
+      fontFamily: fontLoaded && fontFamily ? fontFamily : 'pretendard', // 커스텀 폰트 또는 기본 폰트
+    };
   };
 
   return (
@@ -87,11 +100,7 @@ function TextLetterContent({
       <div className="absolute top-[-10px] mt-[60px] z-30 flex flex-col w-full pr-[40px]">
         <textarea
           className="resize-none h-[370px]"
-          style={{
-            backgroundColor: 'transparent',
-            lineHeight: '340%',
-            outline: 'none',
-          }}
+          style={getTextareaStyle()}
           rows={9}
           value={content}
           onChange={handleTextChange}
