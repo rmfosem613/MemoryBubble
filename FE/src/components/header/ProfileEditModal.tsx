@@ -100,6 +100,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
             value={newUser.birth || ''}
             onChange={handleInputChange}
             className={`${STYLES.input} w-full`}
+            min="1900-01-01"
             max={new Date().toISOString().split('T')[0]}
           />
           {errors.birth && <p className={STYLES.errorText}>{errors.birth}</p>}
