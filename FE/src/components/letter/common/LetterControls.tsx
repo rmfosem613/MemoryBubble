@@ -19,6 +19,14 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
   const { fetchFamilyInfo } = useUserApi();
   const { user } = useUserStore();
 
+  const [selectedDate, setSelectedDate] = useState('');
+
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    setSelectedDate(formattedDate);
+  }, []);
+
   // 가족 구성원 정보 조회
   useEffect(() => {
     const loadFamilyMembers = async () => {
@@ -84,13 +92,13 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
           설정 시, 해당 날짜에 열람 가능합니다.
         </p>
 
-        {/* DatePicker */}
         <div className="mr-[12px] mb-[30px]">
           <input
             type="date"
             className="w-full border rounded-[8px] border-gray-300 p-2 text-sm"
             min={new Date().toISOString().split('T')[0]}
-            value={new Date().toISOString().split('T')[0]}
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
           />
         </div>
 
