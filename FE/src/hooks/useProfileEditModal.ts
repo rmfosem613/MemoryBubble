@@ -33,7 +33,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
     if (isOpen) {
       const parts = user.phoneNumber?.split('-') || ['010', '', ''];
       setNewUser(user);
-      setProfileImage(user.profileUrl || '');
+      setProfileImage(user.profileUrl+"&w=200" || '');
       // 전화번호 분리
       setPhonePrefix(parts[0] || '010');
       setPhoneMiddle(parts[1] || '');

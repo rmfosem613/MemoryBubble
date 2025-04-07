@@ -64,7 +64,7 @@ const UserInfo = () => {
         )}
         {/*  헤더 - 프로필 사진 */}
         <img
-          src={user.profileUrl}
+          src={user.profileUrl+"&w=80&h=80"}
           alt="프로필 이미지"
           className="h-10 w-10 md:h-11 md:w-11 rounded-full object-cover bg-white cursor-pointer"
           onClick={(e) => {
@@ -80,7 +80,7 @@ const UserInfo = () => {
             <div className="p-3 flex flex-col items-center space-y-2 bg-blue-50">
               {/* 그룹 이미지 */}
               <img
-                src={family.thumbnailUrl}
+                src={family.thumbnailUrl+"&w=180&h=180"}
                 alt="그룹 이미지"
                 className="h-24 w-24 rounded-full object-cover bg-white"
               />
@@ -136,7 +136,7 @@ const UserInfo = () => {
               {/* 현재 사용자 */}
               <div className="flex items-center space-x-3 p-3 border-b border-gray-200">
                 <img
-                  src={user.profileUrl}
+                  src={user.profileUrl+"&w=80&h=80"}
                   alt="프로필 이미지"
                   className="h-11 w-11 rounded-full object-cover bg-white"
                 />
