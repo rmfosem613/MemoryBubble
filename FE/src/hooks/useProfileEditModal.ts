@@ -71,10 +71,34 @@ export const useProfileEditModal = (isOpen: boolean) => {
         ...prev,
         birth: value,
       }));
-      setErrors((prev) => ({
-        ...prev,
-        birth: value ? '' : '생년월일을 입력해주세요',
-      }));
+      if (!value) {
+        setErrors((prev) => ({
+          ...prev,
+          birth: '생년월일을 입력해주세요',
+        }));
+      } else {
+        // 생년월일 범위 검사
+        const birthDate = new Date(value);
+        const minDate = new Date('1900-01-01');
+        const maxDate = new Date(); // 현재 날짜
+
+        if (isNaN(birthDate.getTime())) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '유효한 날짜 형식이 아닙니다',
+          }));
+        } else if (birthDate < minDate || birthDate > maxDate) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '생일이 올바르지 않습니다.',
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '',
+          }));
+        }
+      }
     } else {
       // 일반 필드는 newUser 객체에 직접 업데이트
       setNewUser((prev) => ({
@@ -127,6 +151,40 @@ export const useProfileEditModal = (isOpen: boolean) => {
           ...prev,
           name: '',
         }));
+      }
+    }
+    else if (name === 'birth') {
+      setNewUser((prev) => ({
+        ...prev,
+        birth: value.trim(),
+      }));
+      if (!value.trim()) {
+        setErrors((prev) => ({
+          ...prev,
+          birth: '생년월일을 입력해주세요',
+        }));
+      } else {
+        // 생년월일 범위 검사
+        const birthDate = new Date(value);
+        const minDate = new Date('1900-01-01');
+        const maxDate = new Date(); // 현재 날짜
+
+        if (isNaN(birthDate.getTime())) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '유효한 날짜 형식이 아닙니다',
+          }));
+        } else if (birthDate < minDate || birthDate > maxDate) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '생일이 올바르지 않습니다.',
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '',
+          }));
+        }
       }
     }
   };
