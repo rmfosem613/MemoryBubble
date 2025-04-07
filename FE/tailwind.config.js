@@ -169,7 +169,7 @@ module.exports = {
           },
         ],
         "h-logo-lg": [ // 헤더에 로고
-          "20px",
+          "18px",
           {
             lineHeight: "30px",
             letterSpacing: "-0.4px",
@@ -177,26 +177,10 @@ module.exports = {
           },
         ],
         "album-1-lg": [
-          "165px",
+          "130px",
           {
-            lineHeight: "246px",
+            lineHeight: "190px",
             letterSpacing: "-2px",
-            // fontWeight: "400",
-          },
-        ],
-        "album-2-lg": [
-          "140px",
-          {
-            lineHeight: "249px",
-            letterSpacing: "-0.4px",
-            // fontWeight: "400",
-          },
-        ],
-        "album-3-lg": [
-          "120px",
-          {
-            lineHeight: "264px",
-            letterSpacing: "-0.4px",
             // fontWeight: "400",
           },
         ],
@@ -280,30 +264,16 @@ module.exports = {
           },
         ],
         "h-logo-md": [
-          "18px",
+          "17px",
           {
             lineHeight: "27px",
             letterSpacing: "-0.4px",
           },
         ],
         "album-1-md": [
-          "150px",
+          "90px",
           {
             lineHeight: "160px",
-            letterSpacing: "-0.4px",
-          },
-        ],
-        "album-2-md": [
-          "130px",
-          {
-            lineHeight: "150px",
-            letterSpacing: "-0.4px",
-          },
-        ],
-        "album-3-md": [
-          "110px",
-          {
-            lineHeight: "140px",
             letterSpacing: "-0.4px",
           },
         ],
@@ -387,9 +357,16 @@ module.exports = {
           },
         ],
         "h-logo-sm": [
-          "16px",
+          "15px",
           {
             lineHeight: "24px",
+            letterSpacing: "-0.4px",
+          },
+        ],
+        "album-1-sm": [
+          "60px",
+          {
+            lineHeight: "140px",
             letterSpacing: "-0.4px",
           },
         ],

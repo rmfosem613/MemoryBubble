@@ -6,10 +6,24 @@ interface FileItem {
   id: string;
   name: string;
   file: File;
+  realType: string; // 실제 파일 타입 정보 추가
 }
 
 // 최대 파일 개수 상수 정의
 const MAX_FILES = 8;
+
+// 허용된 파일 타입 정의 (JPG와 PNG만)
+const ALLOWED_FILE_TYPES = [
+  { type: 'png', mimeType: 'image/png', signature: '89504e470d0a1a0a' },
+  {
+    type: 'jpg',
+    mimeType: 'image/jpeg',
+    signatures: ['ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffdb', 'ffd8ffe3'],
+  },
+];
+
+// 허용된 파일 타입 문자열 (오류 메시지 표시용)
+const ALLOWED_TYPE_NAMES = 'JPG, PNG';
 
 function Step2() {
   // Zustand 스토어에서 필요한 상태와 함수 가져오기
@@ -41,8 +55,63 @@ function Step2() {
     e.stopPropagation();
   };
 
-  // 파일 추가 처리 함수 (중복 코드 방지)
-  const processFiles = (files: FileList) => {
+  // 파일 시그니처 검증 함수
+  const checkFileSignature = async (
+    file: File,
+  ): Promise<{ isValid: boolean; fileType: string | null }> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (!e.target || !e.target.result) {
+          resolve({ isValid: false, fileType: null });
+          return;
+        }
+
+        const arr = new Uint8Array(e.target.result as ArrayBuffer).subarray(
+          0,
+          8,
+        );
+        const header = Array.from(arr)
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+
+        // PNG 시그니처 확인
+        if (
+          header
+            .toLowerCase()
+            .startsWith(ALLOWED_FILE_TYPES[0].signature.toLowerCase())
+        ) {
+          resolve({ isValid: true, fileType: 'png' });
+          return;
+        }
+
+        // JPG 시그니처 확인
+        const jpgSignatures = ALLOWED_FILE_TYPES[1].signatures;
+        for (const sig of jpgSignatures) {
+          if (header.toLowerCase().startsWith(sig.toLowerCase())) {
+            resolve({ isValid: true, fileType: 'jpg' });
+            return;
+          }
+        }
+
+        // 시그니처가 일치하지 않음
+        resolve({ isValid: false, fileType: null });
+      };
+      reader.onerror = () => resolve({ isValid: false, fileType: null });
+      reader.readAsArrayBuffer(file.slice(0, 8));
+    });
+  };
+
+  // 수정된 파일명 패턴 검사 - 이제 숫자만 확인
+  const isValidFileName = (filename: string): boolean => {
+    // 파일명에서 확장자 제외한 부분만 가져오기
+    const nameWithoutExt = filename.split('.')[0];
+    // 1부터 8까지의 숫자인지 확인
+    return /^[1-8]$/.test(nameWithoutExt);
+  };
+
+  // 파일 처리 함수 수정
+  const processFiles = async (files: FileList) => {
     // 에러 메시지 초기화
     setError(null);
 
@@ -52,23 +121,123 @@ function Step2() {
       return;
     }
 
-    // 추가 가능한 파일 수 확인
-    const allowedCount = Math.min(files.length, remainingFiles);
+    // 파일 크기 제한: 600KB
+    const MAX_FILE_SIZE = 600 * 1024; // 600KB를 바이트로 변환
 
-    if (allowedCount < files.length) {
-      setError(
-        `파일은 최대 ${MAX_FILES}개까지만 업로드할 수 있습니다. ${allowedCount}개만 추가됩니다.`,
+    // 이미 업로드된 파일명 목록 생성
+    const existingFileNames = uploadedFiles.map((item) => item.name);
+
+    // 파일 형식 및 이름 필터링
+    const validFiles: Array<{ file: File; realType: string }> = [];
+    const invalidFiles: string[] = [];
+    const invalidNameFiles: string[] = [];
+    const duplicateFiles: string[] = [];
+    const oversizedFiles: string[] = [];
+
+    // 모든 파일에 대해 비동기 검증을 위한 Promise 배열
+    const fileChecks: Promise<void>[] = [];
+
+    Array.from(files).forEach((file) => {
+      const check = async () => {
+        // 파일 크기 체크
+        if (file.size > MAX_FILE_SIZE) {
+          oversizedFiles.push(file.name);
+          return;
+        }
+
+        // 파일명 중복 체크
+        if (existingFileNames.includes(file.name)) {
+          duplicateFiles.push(file.name);
+          return;
+        }
+
+        // 파일명 패턴 체크
+        if (!isValidFileName(file.name)) {
+          invalidNameFiles.push(file.name);
+          return;
+        }
+
+        // 파일 시그니처 체크 - 실제 형식만 확인
+        const { isValid, fileType } = await checkFileSignature(file);
+        if (!isValid) {
+          invalidFiles.push(file.name);
+          return;
+        }
+
+        validFiles.push({ file, realType: fileType as string });
+      };
+
+      fileChecks.push(check());
+    });
+
+    // 모든 파일 검증이 완료될 때까지 대기
+    await Promise.all(fileChecks);
+
+    // 에러 메시지 구성
+    const errorMessages = [];
+
+    // 파일 크기 초과 파일이 있는 경우
+    if (oversizedFiles.length > 0) {
+      errorMessages.push(
+        `파일 크기는 600KB 이하여야 합니다: ${oversizedFiles.join(', ')}`,
       );
     }
 
-    // 추가 가능한 파일만 필터링
-    const filesToAdd = Array.from(files).slice(0, allowedCount);
+    // 유효하지 않은 형식 파일이 있는 경우
+    if (invalidFiles.length > 0) {
+      errorMessages.push(
+        `${ALLOWED_TYPE_NAMES} 형식만 업로드할 수 있습니다: ${invalidFiles.join(', ')}`,
+      );
+    }
 
+    // 유효하지 않은 파일명이 있는 경우
+    if (invalidNameFiles.length > 0) {
+      errorMessages.push(`"1"부터 "8"까지의 파일명만 허용됩니다`);
+    }
+
+    // 중복 파일이 있는 경우
+    if (duplicateFiles.length > 0) {
+      errorMessages.push(
+        `이미 업로드된 파일입니다: ${duplicateFiles.join(', ')}`,
+      );
+    }
+
+    // 에러 메시지 설정
+    if (errorMessages.length > 0) {
+      setError(errorMessages.join(' '));
+
+      // 유효한 파일이 없으면 함수 종료
+      if (validFiles.length === 0) {
+        return;
+      }
+    }
+
+    // 추가 가능한 파일 수 확인
+    const remainingFiles = MAX_FILES - uploadedFiles.length;
+    const allowedCount = Math.min(validFiles.length, remainingFiles);
+
+    if (allowedCount < validFiles.length) {
+      errorMessages.push(
+        `파일은 최대 ${MAX_FILES}개까지만 업로드할 수 있습니다. ${allowedCount}개만 추가됩니다.`,
+      );
+      setError(errorMessages.join(' '));
+    }
+
+    // 추가 가능한 파일만 필터링
+    const filesToAdd = validFiles.slice(0, allowedCount);
+
+    // 고유 ID 생성 함수 추가
+    const generateUniqueId = () => {
+      return `IMG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    };
+
+    // 수정된 파일 처리 함수의 일부분
     if (filesToAdd.length > 0) {
-      const newFiles: FileItem[] = filesToAdd.map((file, index) => ({
-        id: `IMG_${(uploadedFiles.length + index + 1).toString().padStart(2, '0')}`,
+      const newFiles: FileItem[] = filesToAdd.map(({ file, realType }) => ({
+        id: generateUniqueId(), // 고유 ID 생성
         name: file.name,
         file: file,
+        realType: realType, // 실제 파일 타입 정보 추가
       }));
 
       // Zustand 스토어에 파일 추가
@@ -148,9 +317,7 @@ function Step2() {
               <div
                 key={file.id}
                 className="border rounded-lg p-4 flex flex-col items-center flex-shrink-0 w-36 h-36">
-                <div className="w-12 h-12 mb-2">
-                  <FileCheck strokeWidth={1} width={'50px'} height={'50px'} />
-                </div>
+                <FileCheck strokeWidth={1} width={'50px'} height={'50px'} />
                 <div className="text-sm font-medium line-clamp-2 text-center w-full overflow-hidden">
                   {file.name}
                 </div>
@@ -179,7 +346,7 @@ function Step2() {
             : remainingFiles === 0
               ? 'border-gray-400 bg-gray-100 cursor-not-allowed'
               : 'border-gray-900'
-        } rounded-lg p-8 transition-colors`}
+        } rounded-lg p-4 transition-colors`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -187,8 +354,8 @@ function Step2() {
         <div className="flex flex-col items-center justify-center">
           <div className="w-16 h-16 mb-4">
             <File
-              strokeWidth={0.5}
-              width={'75px'}
+              strokeWidth={1}
+              width={'59px'}
               height={'75px'}
               color={remainingFiles === 0 ? '#9CA3AF' : '#000000'}
             />
@@ -212,6 +379,7 @@ function Step2() {
                 multiple
                 onChange={handleFileUpload}
                 className="hidden"
+                // accept 속성 제거 - 모든 파일을 선택할 수 있게 함
               />
             )}
           </label>
@@ -219,7 +387,7 @@ function Step2() {
           <div
             className={`text-sm ${remainingFiles === 0 ? 'text-gray-500' : 'text-gray-900'}`}>
             {remainingFiles > 0
-              ? '또는 파일을 업로드 하려면 파일을 여기에 끌어서 놓아주세요'
+              ? `또는 ${ALLOWED_TYPE_NAMES} 형식의 파일을 여기에 끌어서 놓아주세요`
               : '최대 파일 개수에 도달했습니다. 파일을 삭제하고 다시 시도하세요.'}
           </div>
         </div>

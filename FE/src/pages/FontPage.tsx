@@ -4,6 +4,7 @@ import ProgressBar from '@/components/fontPage/ProgressBar';
 import FontDownload from '@/components/fontPage/FontDownload';
 import { useFontStep } from '@/hooks/useFontStep';
 import React, { useEffect, useState } from 'react';
+import useFontStore from '@/stores/useFontStore';
 
 import apiClient from '@/apis/apiClient';
 
@@ -11,10 +12,18 @@ function FontPage() {
   const { steps, currentStep, handlePreviousStep, handleNextStep } =
     useFontStep();
 
+  const { clearFiles, setFontNameKo } = useFontStore();
+
   // fontId 상태 추가
   const [fontId, setFontId] = useState<string | null>(null);
   // 로딩 상태 추가 (필요시)
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // 페이지가 마운트될 때 스토어 초기화
+    clearFiles();
+    setFontNameKo('');
+  }, []); // 빈 의존성 배열로 마운트 시에만 실행
 
   useEffect(() => {
     const fetchFonts = async () => {

@@ -12,4 +12,11 @@ export const iconStyle = {
     text: "text-blue-500",
     border: "border-blue-500",
   },
+  
+  // 회색 버튼 (비활성화용)
+  gray: {
+    bg: "bg-gray-300",
+    text: "text-gray-500",
+    border: "border-gray-300",
+  },
 };

@@ -5,10 +5,16 @@ import axios from 'axios';
 interface FontResponse {
   fontId: string | null;
   fontName: string | null;
-  fontNameEng: string | null;
   createdAt: string | null;
   presignedUrl: string | null;
   fileName: string | null;
+  status: string | null;
+}
+
+interface AlertState {
+  visible: boolean;
+  message: string;
+  color: 'red' | 'green' | 'gray';
 }
 
 interface UseFontDownloadReturn {
@@ -17,13 +23,26 @@ interface UseFontDownloadReturn {
   loadFont: () => Promise<void>;
   fontLoaded: boolean;
   fontFamily: string | null;
-  fontName: string | null; // fontName 추가
+  fontName: string | null;
+  alertState: AlertState | null;
+  showAlert: (message: string, color: 'red' | 'green' | 'gray') => void;
 }
 
 export const useFontDownload = (): UseFontDownloadReturn => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [fontFamily, setFontFamily] = useState<string | null>(null);
   const [fontName, setFontName] = useState<string | null>(null);
+  const [alertState, setAlertState] = useState<AlertState | null>(null);
+
+  // Alert 표시 함수
+  const showAlert = (message: string, color: 'red' | 'green' | 'gray') => {
+    setAlertState({ visible: true, message, color });
+
+    // 3초 후에 알림 숨기기
+    setTimeout(() => {
+      setAlertState(null);
+    }, 3000);
+  };
 
   // 폰트 정보 가져오는 함수
   const getFontInfo = async (): Promise<FontResponse> => {
@@ -69,11 +88,14 @@ export const useFontDownload = (): UseFontDownloadReturn => {
         window.URL.revokeObjectURL(downloadUrl);
 
         console.log('폰트 다운로드 완료');
+        showAlert('폰트 다운로드가 완료되었습니다.', 'green');
       } else {
         console.error('다운로드할 presignedUrl이 없습니다.');
+        showAlert('다운로드할 폰트 정보가 없습니다.', 'red');
       }
     } catch (error) {
       console.error('폰트 다운로드 중 오류 발생:', error);
+      showAlert('폰트 다운로드 중 오류가 발생했습니다.', 'red');
     }
   };
 
@@ -86,7 +108,16 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       // 폰트 정보 가져오기
       const fontInfo = await getFontInfo();
       console.log('폰트 정보 (로드용):', fontInfo);
-      // console.log('폰트 정보 (로드용):', fontInfo.fontName);
+
+      // 폰트 상태 확인
+      if (fontInfo.status !== 'DONE') {
+        showAlert(
+          '폰트 생성 중입니다! 폰트 생성에는 약 3시간 정도 소요됩니다.',
+          'green',
+        );
+        return;
+      }
+
       const createName = fontInfo.fontName;
 
       // presignedUrl이 없는 경우 (폰트가 아직 없음)
@@ -107,7 +138,9 @@ export const useFontDownload = (): UseFontDownloadReturn => {
       if (existingStyle) {
         console.log('이미 로드된 폰트입니다.');
         setFontFamily(fontFamilyName);
+        setFontName(createName);
         setFontLoaded(true);
+        showAlert('폰트가 성공적으로 로드되었습니다.', 'green');
         return;
       }
 
@@ -143,39 +176,31 @@ export const useFontDownload = (): UseFontDownloadReturn => {
         setFontFamily(fontFamilyName);
         setFontName(createName);
         setFontLoaded(true);
-      } catch (loadError) {
-        console.error('폰트 로드 실패:', loadError);
+        showAlert('폰트가 성공적으로 로드되었습니다.', 'green');
+      } catch (error) {
+        console.error('폰트 로드 실패:', error);
+        showAlert('폰트가 만들어지기 전 입니다! 조금만 기다려 주세요!', 'red');
         style.remove(); // 실패 시 스타일 제거
       }
     } catch (error) {
       console.error('폰트 로드 중 오류 발생:', error);
       setFontFamily('pretendard'); // 오류 발생 시 기본 폰트 사용
       setFontLoaded(false);
+      showAlert('폰트 로드 중 오류가 발생했습니다.', 'red');
     }
   };
 
+  // 폰트 삭제 함수 - 이제 이 함수는 모달을 표시하는 용도로만 사용
+  // 실제 삭제 로직은 FontDeleteModal 컴포넌트에서 처리
   const resetFont = useCallback(async (fontId: string) => {
     try {
-      const response = await apiClient.delete(`/api/fonts/${fontId}`);
-      console.log('폰트 삭제 결과:', response);
-
-      // 스타일 요소 제거
-      const styleElement = document.getElementById(`font-style-${fontId}`);
-      if (styleElement) {
-        styleElement.remove();
-      }
-
-      // 성공 메시지나 추가 처리가 필요하면 여기에 구현
-      console.log(`폰트 ID ${fontId} 삭제 완료`);
-
-      // 상태 초기화
-      setFontLoaded(false);
-      setFontFamily(null);
-
-      // 페이지 리로드
-      window.location.reload();
+      // 이 함수는 이제 직접적인 삭제를 수행하지 않음
+      // 호환성을 위해 유지하지만 실제 처리는 FontDeleteModal에서 함
+      return Promise.resolve();
     } catch (error) {
       console.error('폰트 삭제 중 오류 발생:', error);
+      showAlert('폰트 삭제 중 오류가 발생했습니다.', 'red');
+      return Promise.reject(error);
     }
   }, []);
 
@@ -191,6 +216,8 @@ export const useFontDownload = (): UseFontDownloadReturn => {
     fontLoaded,
     fontFamily,
     fontName,
+    alertState,
+    showAlert, // 외부에서 알림을 표시할 수 있도록 함수 노출
   };
 };
 

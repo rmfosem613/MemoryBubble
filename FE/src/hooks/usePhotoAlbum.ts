@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 // import useAlbumStore from '@/stores/useAlbumStore';
 import apiClient from '@/apis/apiClient';
+import useUserstore from '@/stores/useUserStore';
+import useFontStore from '@/stores/useFontStore';
 
 export interface Photo {
   id: number;
@@ -11,6 +13,7 @@ export interface Photo {
 
 export const usePhotoAlbum = () => {
   const [albumTitle, setAlbumTitle] = useState('앨범 제목');
+  const [albumContent, setAlbumContent] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +31,15 @@ export const usePhotoAlbum = () => {
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
 
   const { id } = useParams();
-  // const { albums } = useAlbumStore();
+  const { user } = useUserstore();
+  const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
+
+  // 컴포넌트 마운트 시 가족 폰트 정보 미리 로드
+  useEffect(() => {
+    if (!isFamilyFontsLoaded && user && user.familyId) {
+      fetchFamilyFonts(user.familyId);
+    }
+  }, [isFamilyFontsLoaded, fetchFamilyFonts, user]);
 
   useEffect(() => {
     const fetchAllAlbums = async () => {
@@ -66,6 +77,8 @@ export const usePhotoAlbum = () => {
         const response = await apiClient.get(`/api/albums/${id}`);
         console.log('앨범 사진:', response.data);
         setAlbumTitle(response.data.albumName || '앨범 제목'); // 앨범 제목 설정
+        setAlbumContent(response.data.albumContent || ''); // 앨범 내용 설정
+        setNewAlbumContent(response.data.albumContent || '');
 
         // API 응답에서 photoList 배열 추출
         const photoList = response.data.photoList || [];
@@ -149,8 +162,8 @@ export const usePhotoAlbum = () => {
     }
   };
 
-  // 앨범 제목 변경 핸들러
-  const handleChangeTitle = async () => {
+  // 앨범 제목, 내용 변경 핸들러
+  const handleChangeAlbum = async () => {
     try {
       if (!id) {
         throw new Error('앨범 ID가 유효하지 않습니다.');
@@ -168,13 +181,12 @@ export const usePhotoAlbum = () => {
       console.log('앨범 정보 수정 성공:', response.data);
 
       // 성공 시 로컬 상태 업데이트
-      if (newAlbumName) {
-        setAlbumTitle(newAlbumName);
-      }
+      setAlbumTitle(response.data.albumName);
+      setAlbumContent(response.data.albumContent);
 
       // 입력 필드 초기화
       setNewAlbumName('');
-      setNewAlbumContent('');
+      setNewAlbumContent(response.data.albumContent);
     } catch (error) {
       console.error('앨범 정보 수정 실패:', error);
     }
@@ -202,17 +214,17 @@ export const usePhotoAlbum = () => {
     setIsFlipped(!isFlipped);
   };
 
-  // 카드 뒤집기 토글(axios 요청 포함)
+  // 카드 뒤집기 토글(axios 요청 포함) - 폰트 로딩 로직 수정
   const toggleFlipWithPostCard = async () => {
+    // 현재 사진의 메시지 데이터 가져오기
     const currentPhotoId = photos[currentIndex].id;
     try {
       const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
-      console.log(response.data);
-      // 받아온 메시지 데이터를 상태에 저장
+      console.log(response.data, "'포스트 카드 데이터');");
+
       if (response.data && Array.isArray(response.data)) {
         setPhotoMessages(response.data);
       } else {
-        // 데이터 형식이 다른 경우 빈 배열로 초기화
         setPhotoMessages([]);
       }
     } catch (error) {
@@ -267,8 +279,35 @@ export const usePhotoAlbum = () => {
     return currentIndex === photos.length - 1 ? 0 : currentIndex + 1;
   };
 
+  // 앨범 사진 목록 새로고침 함수
+  const refreshPhotos = async () => {
+    try {
+      if (!id) {
+        throw new Error('앨범 ID가 유효하지 않습니다.');
+      }
+
+      const response = await apiClient.get(`/api/albums/${id}`);
+      console.log('앨범 사진 새로고침:', response.data);
+
+      // API 응답에서 photoList 배열 추출
+      const photoList = response.data.photoList || [];
+
+      // Photo 인터페이스에 맞게 데이터 변환
+      const formattedPhotos: Photo[] = photoList.map((photo: any) => ({
+        id: photo.photoId,
+        src: photo.photoUrl,
+        alt: `앨범 사진 ${photo.photoId}`,
+      }));
+
+      setPhotos(formattedPhotos);
+    } catch (error) {
+      console.error('사진 목록 새로고침 실패:', error);
+    }
+  };
+
   return {
     albumTitle,
+    albumContent,
     newAlbumName,
     setNewAlbumName,
     newAlbumContent,
@@ -276,14 +315,13 @@ export const usePhotoAlbum = () => {
     isFlipped,
     toggleFlip,
     toggleFlipWithPostCard,
-    // currentAlbum,
     photos,
     photoMessages,
     setPhotoMessages,
     isLoading,
     error,
     currentIndex,
-    handleChangeTitle,
+    handleChangeAlbum,
     handleChangeThumnail,
     getPrevIndex,
     getNextIndex,
@@ -294,5 +332,7 @@ export const usePhotoAlbum = () => {
     setTargetAlbumId,
     handleMovePhoto,
     albumId: id, // 현재 앨범 ID 반환
+    refreshPhotos,
+    fontInfoList: familyFonts,
   };
 };

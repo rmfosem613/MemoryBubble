@@ -58,7 +58,7 @@ export const useLetterPositions = (
 
     // 모든 편지를 중앙에 배치 (살짝 겹쳐서 쌓여있는 효과)
     letters.forEach((letter, index) => {
-      const id = `${letter.type}-${letter.color}-${index}`;
+      const id = `${letter.type}-${letter.backgroundColor}-${index}`;
 
       // 약간의 오프셋 추가 (중앙에서 살짝 겹쳐져 보이도록)
       const offsetX = Math.random() * 10 - 5; // -5부터 5까지의 랜덤값
@@ -91,11 +91,11 @@ export const useLetterPositions = (
 
     // 기존 z-index 유지하고 회전 추가
     letters.forEach((letter, index) => {
-      const id = `${letter.type}-${letter.color}-${index}`;
+      const id = `${letter.type}-${letter.backgroundColor}-${index}`;
 
       // 이미지 크기
       const imageWidth = 200;
-      const imageHeight = letter.type === 'letter' ? 100 : 120;
+      const imageHeight = letter.type === 'TEXT' ? 100 : 120;
 
       // 완전 무작위 위치 생성
       const randomX =

@@ -14,4 +14,6 @@ export interface SlidingAlbumListProps {
 }
 
 // id 제거한 albumData 인터페이스
-export type MainAlbumProps = Omit<AlbumData, 'id'>;
+export interface MainAlbumProps extends Omit<AlbumData, 'id'> {
+  isActive?: boolean;
+} 

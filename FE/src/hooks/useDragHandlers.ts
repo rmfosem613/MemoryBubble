@@ -61,7 +61,7 @@ export const useDragHandlers = (
       }
 
       // 이미지 크기
-      const imageSize = draggedLetter.type === 'letter' ? 100 : 120;
+      const imageSize = draggedLetter.type === 'TEXT' ? 100 : 120;
 
       // 새 위치 계산
       let newX = currentPosition.x + delta.x;

@@ -1,4 +1,5 @@
-import React, { ReactNode, MouseEvent } from 'react';
+import React, { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import Button from '../Button/Button';
 
 interface ModalProps {
@@ -8,8 +9,9 @@ interface ModalProps {
   cancelButtonText?: string;
   confirmButtonText?: string;
   onClose: () => void; // 모달을 닫기 위한 기본 함수
-  onCancel?: () => void | boolean; // 취소 버튼 클릭 시 추가 로직을 위한 함수
-  onConfirm?: () => void | boolean; // 확인 버튼 클릭 시 추가 로직을 위한 함수
+  onCancel?: () => void | boolean | Promise<boolean>; // 취소 버튼 클릭 시 추가 로직을 위한 함수
+  onConfirm?: () => void | boolean | Promise<boolean>; // 확인 버튼 클릭 시 추가 로직을 위한 함수
+  isConfirmDisabled?: boolean; // 확인 버튼 비활성화 여부
 }
 
 function Modal({
@@ -21,20 +23,21 @@ function Modal({
   onClose,
   onCancel,
   onConfirm,
+  isConfirmDisabled = false,
 }: ModalProps) {
   if (!isOpen) return null;
 
-  // 배경 클릭 시 모달 닫기 핸들러
-  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  // // 배경 클릭 시 모달 닫기 핸들러
+  // const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
+  //   if (e.target === e.currentTarget) {
+  //     onClose();
+  //   }
+  // };
 
   // 취소 버튼 클릭 핸들러
-  const handleCancelClick = () => {
+  const handleCancelClick = async () => {
     if (onCancel) {
-      const shouldClose = onCancel();
+      const shouldClose = await onCancel();
       if (shouldClose !== false) {
         onClose();
       }
@@ -44,9 +47,11 @@ function Modal({
   };
 
   // 확인 버튼 클릭 핸들러
-  const handleConfirmClick = () => {
+  const handleConfirmClick = async () => {
+    if (isConfirmDisabled) return; // 버튼이 비활성화된 경우 실행하지 않음
+    
     if (onConfirm) {
-      const shouldClose = onConfirm();
+      const shouldClose = await onConfirm();
       if (shouldClose !== false) {
         onClose();
       }
@@ -55,13 +60,12 @@ function Modal({
     }
   };
 
-  return (
+  const modalContent = (
     <div
       // 백드롭 (배경 어둡게 및 블러 처리)
-      className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]"
-      onClick={handleBackdropClick}>
+      className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-[2px]">
       {/* 모달 컨테이너 */}
-      <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh]">
+      <div className="flex flex-col mx-5 bg-white rounded-lg w-[543px] min-h-[200px] max-h-[80vh] font-pretendard font-normal">
         {/* 제목 영역 */}
         <h1 className="font-p-700 text-h3-sm p-5 pb-1 md:p-6 md:pb-1 lg:p-7 lg:pb-1 border-b-2 border-dashed border-gray-300 md:text-h3-md lg:text-h3-lg">
           {title}
@@ -81,13 +85,18 @@ function Modal({
             </div>
           )}
           {/* 확인 버튼 */}
-          <div onClick={handleConfirmClick}>
-            <Button name={confirmButtonText} color="blue" />
+          <div onClick={isConfirmDisabled ? undefined : handleConfirmClick}>
+            <Button 
+              name={confirmButtonText} 
+              color={isConfirmDisabled ? "gray" : "blue"} 
+            />
           </div>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default Modal;

@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import apiClient from '@/apis/apiClient';
 import axios from 'axios';
 
-import test1 from '@/assets/images/test1.png';
-import test2 from '@/assets/images/test2.png';
-import test3 from '@/assets/images/test3.png';
+import need from '@/assets/images/Need.png';
+import watchout from '@/assets/images/Watchout.png';
 
 function Step1() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -13,15 +12,11 @@ function Step1() {
   const items = [
     {
       id: 1,
-      image: test1,
+      image: need,
     },
     {
       id: 2,
-      image: test2,
-    },
-    {
-      id: 3,
-      image: test3,
+      image: watchout,
     },
   ];
 
@@ -86,19 +81,18 @@ function Step1() {
           {currentPage === totalPages - 1 ? (
             <div className="flex flex-col items-center">
               <p className=" text-gray-800 text-center font-subtitle-2-lg">
-                이제 템플릿을 다운로드 받아주세요!
-                <br />
-                나만의 손글씨로 템플릿을 작성하여 폰트를 만들어보세요.
+                이제 템플릿을 다운로드하여 나만의 손글씨로 작성해 폰트를
+                만들어보세요!
               </p>
               <button
                 onClick={handleDownloadPDF}
-                className="px-8 py-3 bg-blue-500 text-white rounded-md transition-colors text-lg mt-4">
+                className="px-6 py-3 bg-blue-500 text-white rounded-md transition-colors text-subtitle-2-lg mt-4">
                 템플릿 다운로드
               </button>
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <div className="w-40 h-40 mb-4 flex items-center justify-center">
+              <div className="w-full h-full flex items-center justify-center">
                 <img
                   src={items[currentPage].image}
                   alt="image"

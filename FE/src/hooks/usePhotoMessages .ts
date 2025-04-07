@@ -69,6 +69,17 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
           }
         }
       });
+
+      // 컴포넌트 언마운트 시 미디어 리소스 정리
+      if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+        const tracks = mediaRecorderRef.current.stream.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
+        });
+      }
+
+      // MediaRecorder 참조 정리
+      mediaRecorderRef.current = null;
     };
   }, [currentlyPlayingId, messages.length]);
 
@@ -119,6 +130,23 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
     }
   };
 
+  // 메시지 목록 새로고침 함수
+  const refreshMessages = async () => {
+    if (photos && currentIndex !== undefined && photos.length > 0) {
+      try {
+        const currentPhotoId = photos[currentIndex].id;
+        const response = await apiClient.get(`/api/photos/${currentPhotoId}`);
+        if (response.data && Array.isArray(response.data)) {
+          // 서버에서 가져온 메시지 목록 설정 (이 함수를 호출한 컴포넌트에서 처리)
+          return response.data;
+        }
+      } catch (error) {
+        console.error('메시지 목록 업데이트 실패:', error);
+      }
+    }
+    return null;
+  };
+
   // 녹음 시작 함수
   const startRecording = async () => {
     try {
@@ -149,7 +177,7 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
       };
 
       // 녹음 완료 시
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         if (audioChunksRef.current.length === 0) {
           return;
         }
@@ -157,15 +185,75 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
         const mimeType = mediaRecorder.mimeType || 'audio/webm';
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
 
+        console.log('녹음된 오디오 Blob:', audioBlob);
+        console.log('오디오 Blob 크기:', audioBlob.size, 'bytes');
+        console.log('오디오 MIME 타입:', audioBlob.type);
+
         if (audioBlob.size === 0) {
           return;
         }
 
-        const audioUrl = URL.createObjectURL(audioBlob);
+        try {
+          // 현재 사진 ID 가져오기
+          if (photos && currentIndex !== undefined && photos.length > 0) {
+            const currentPhotoId = photos[currentIndex].id;
 
-        // 재생 가능 확인 후 메시지 추가
-        const testAudio = new Audio(audioUrl);
-        testAudio.oncanplay = () => {
+            // 1. AUDIO 타입의 메시지 생성 요청
+            const messageData = {
+              type: 'AUDIO',
+              content: null,
+            };
+
+            // API 요청 보내기
+            const response = await apiClient.post(
+              `/api/photos/${currentPhotoId}/review`,
+              messageData,
+            );
+
+            console.log('오디오 메시지 생성 성공:', response.data);
+
+            // 2. 받은 presignedUrl에 오디오 파일 업로드
+            const { presignedUrl } = response.data;
+
+            console.log('생성된 presignedUrl:', presignedUrl);
+
+            // 3. presignedUrl에 PUT 요청으로 파일 업로드
+            const uploadResponse = await fetch(presignedUrl, {
+              method: 'PUT',
+              body: audioBlob,
+              headers: {
+                'Content-Type': audioBlob.type,
+              },
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error(
+                `Upload failed with status: ${uploadResponse.status}`,
+              );
+            }
+
+            console.log('오디오 파일 업로드 성공!');
+
+            // 4. 새로운 메시지 목록 가져오기 시도
+            const updatedMessages = await refreshMessages();
+            return updatedMessages;
+          }
+
+          // 스트림 트랙 중지
+          if (mediaRecorder && mediaRecorder.stream) {
+            const tracks = mediaRecorder.stream.getTracks();
+            tracks.forEach((track) => {
+              track.stop();
+            });
+          }
+        } catch (error) {
+          console.error('오디오 메시지 처리 실패:', error);
+
+          // 오류 발생 시 로컬에서라도 재생할 수 있도록 URL 생성
+          const audioUrl = URL.createObjectURL(audioBlob);
+          console.log('생성된 오디오 URL (로컬):', audioUrl);
+
+          // 로컬 메시지 추가
           const newAudioMessage: Message = {
             id: generateId(),
             type: 'audio',
@@ -175,14 +263,15 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
           };
 
           setMessages((prev) => [...prev, newAudioMessage]);
-        };
-
-        testAudio.onerror = () => {
-          alert('오디오 녹음에 문제가 있습니다. 다시 시도해보세요.');
-        };
+          alert('오디오 업로드에 실패했습니다. 네트워크 연결을 확인해주세요.');
+        }
 
         // 스트림 트랙 중지
-        stream.getTracks().forEach((track) => track.stop());
+        if (stream) {
+          stream.getTracks().forEach((track) => {
+            track.stop();
+          });
+        }
       };
 
       // 녹음 시작
@@ -200,34 +289,64 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
       mediaRecorderRef.current.state !== 'inactive'
     ) {
       mediaRecorderRef.current.stop();
+
+      // 백업 중지 메커니즘
+      setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+          const tracks = mediaRecorderRef.current.stream.getTracks();
+          tracks.forEach((track) => {
+            track.stop();
+          });
+        }
+      }, 300);
+
+      setIsRecording(false);
+    } else {
       setIsRecording(false);
     }
   };
 
-  // 오디오 재생 또는 일시정지 함수
-  const toggleAudioPlayback = (messageId: string) => {
-    const audioMessage = messages.find((msg) => msg.id === messageId);
-    if (!audioMessage || audioMessage.type !== 'audio') {
-      return;
-    }
+  // 오디오 재생 또는 일시정지 함수 - 수정된 버전
+  const toggleAudioPlayback = (messageIdOrUrl: string, isDirectUrl = false) => {
+    // 직접 URL인 경우와 메시지 ID인 경우를 구분하여 처리
+    let audioUrl: string;
+    let messageId: string;
 
-    // 오디오 URL이 유효하지 않은 경우
-    if (!audioMessage.content || !audioMessage.content.startsWith('blob:')) {
-      return;
+    if (isDirectUrl) {
+      // 직접 URL이 전달된 경우
+      audioUrl = messageIdOrUrl;
+      messageId = messageIdOrUrl; // URL 자체를 ID로 사용
+    } else {
+      // 메시지 ID가 전달된 경우 (기존 로직)
+      const audioMessage = messages.find((msg) => msg.id === messageIdOrUrl);
+      if (!audioMessage || audioMessage.type !== 'audio') {
+        return;
+      }
+
+      // 오디오 URL이 유효하지 않은 경우 (blob: 체크 제거)
+      if (!audioMessage.content) {
+        return;
+      }
+
+      audioUrl = audioMessage.content;
+      messageId = messageIdOrUrl;
     }
 
     // 이미 재생 중인 경우 일시정지
-    if (audioMessage.isPlaying) {
+    if (currentlyPlayingId === messageId) {
       try {
         if (audioPlayerRef.current) {
           audioPlayerRef.current.pause();
         }
 
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.id === messageId ? { ...msg, isPlaying: false } : msg,
-          ),
-        );
+        if (!isDirectUrl) {
+          // 메시지 ID인 경우만 메시지 상태 업데이트
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === messageId ? { ...msg, isPlaying: false } : msg,
+            ),
+          );
+        }
 
         setCurrentlyPlayingId(null);
       } catch (error) {
@@ -237,19 +356,22 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
     // 재생 시작
     else {
       // 이미 재생 중인 다른 오디오가 있으면 중지
-      if (currentlyPlayingId && currentlyPlayingId !== messageId) {
+      if (currentlyPlayingId) {
         try {
           if (audioPlayerRef.current) {
             audioPlayerRef.current.pause();
           }
 
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.id === currentlyPlayingId
-                ? { ...msg, isPlaying: false }
-                : msg,
-            ),
-          );
+          if (!isDirectUrl) {
+            // 메시지 ID인 경우만 메시지 상태 업데이트
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === currentlyPlayingId
+                  ? { ...msg, isPlaying: false }
+                  : msg,
+              ),
+            );
+          }
         } catch (error) {
           console.error('기존 오디오 중지 중 오류:', error);
         }
@@ -261,21 +383,27 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
         // 오류 이벤트 리스너 추가
         newAudio.onerror = () => {
           // 오류 발생 시 상태 정리
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.id === messageId ? { ...msg, isPlaying: false } : msg,
-            ),
-          );
+          if (!isDirectUrl) {
+            // 메시지 ID인 경우만 메시지 상태 업데이트
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === messageId ? { ...msg, isPlaying: false } : msg,
+              ),
+            );
+          }
           setCurrentlyPlayingId(null);
         };
 
         // 재생 완료 이벤트 리스너 추가
         newAudio.onended = () => {
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.id === messageId ? { ...msg, isPlaying: false } : msg,
-            ),
-          );
+          if (!isDirectUrl) {
+            // 메시지 ID인 경우만 메시지 상태 업데이트
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === messageId ? { ...msg, isPlaying: false } : msg,
+              ),
+            );
+          }
           setCurrentlyPlayingId(null);
         };
 
@@ -288,26 +416,33 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
           newAudio
             .play()
             .then(() => {
-              setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                  msg.id === messageId ? { ...msg, isPlaying: true } : msg,
-                ),
-              );
+              if (!isDirectUrl) {
+                // 메시지 ID인 경우만 메시지 상태 업데이트
+                setMessages((prevMessages) =>
+                  prevMessages.map((msg) =>
+                    msg.id === messageId ? { ...msg, isPlaying: true } : msg,
+                  ),
+                );
+              }
 
               setCurrentlyPlayingId(messageId);
             })
-            .catch(() => {
+            .catch((error) => {
+              console.error('오디오 재생 실패:', error);
               // 오류 발생 시 상태 정리
-              setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                  msg.id === messageId ? { ...msg, isPlaying: false } : msg,
-                ),
-              );
+              if (!isDirectUrl) {
+                // 메시지 ID인 경우만 메시지 상태 업데이트
+                setMessages((prevMessages) =>
+                  prevMessages.map((msg) =>
+                    msg.id === messageId ? { ...msg, isPlaying: false } : msg,
+                  ),
+                );
+              }
             });
         };
 
         // src 설정 및 로드 시작
-        newAudio.src = audioMessage.content;
+        newAudio.src = audioUrl;
         newAudio.load();
 
         // 기존 오디오 객체 정리 후 새 객체로 교체
@@ -349,5 +484,6 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
     toggleAudioPlayback,
     handleRecordButtonClick,
     sortedMessages,
+    refreshMessages,
   };
 };

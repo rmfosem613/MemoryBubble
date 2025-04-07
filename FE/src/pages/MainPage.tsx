@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SlidingAlbumList from "@/components/album/SlidingAlbumList";
 import useAlbumStore from "@/stores/useAlbumStore";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useModal from "@/hooks/useModal";
 import Loading from "./LoadingPage";
 import useUserStore from "@/stores/useUserStore";
@@ -9,18 +9,36 @@ import useUserStore from "@/stores/useUserStore";
 // 분리된 컴포넌트들 임포트
 import PhotoUploader from "@/components/photo/PhotoUploader";
 import AlbumCreator from "@/components/album/AlbumCreator";
+import DropDown from "@/components/common/Modal/DropDown";
 
 // 기본 앨범 이미지 불러오기
 import defaultAlbumImage from "@/assets/album/blank.svg";
-import apiClient from "@/apis/apiClient";
+import Alert from "@/components/common/Alert";
 
 function MainPage() {
-  const { currentAlbum, fetchAlbumsData, albums, isLoading, error } = useAlbumStore();
+  const { currentAlbum, fetchAlbumsData, albums, isLoading, error, setActiveIndex } = useAlbumStore();
   const navigate = useNavigate();
   const { user, setUser } = useUserStore();
-  
+  const location = useLocation();
+
   // 앨범 선택 상태 관리
   const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
+
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
 
   // 모달 관련
   const createAlbumModal = useModal();
@@ -38,27 +56,21 @@ function MainPage() {
     }
   }, [currentAlbum]);
 
-  // familyId를 store에서 불러오기
-  // useEffect(() => {
-  //   const handle = async () => {
-  //     const userResponse = await apiClient.get("/api/users/me")
-  //     const { familyId } = userResponse.data
-  //     console.log("main : " + familyId)
-  //     setUser({
-  //       familyId
-  //     })
-  //   }
-
-  //   handle()
-  // }, [setUser]);
+  // 페이지 접근 시 항상 첫 번째 앨범으로 초기화
+  useEffect(() => {
+    if (albums.length > 0) {
+      // 항상 첫 번째 앨범(index 0)으로 설정
+      setActiveIndex(0);
+    }
+  }, [albums, setActiveIndex, location.pathname]);
 
   // 앨범 클릭 시 해당 앨범 상세 페이지로 이동
   const handleAlbumClick = () => {
     if (!currentAlbum) return;
-    
+
     // 앨범 리스트의 인덱스 확인
     const { activeIndex } = useAlbumStore.getState();
-    
+
     // 첫 번째 앨범(인덱스 0)인 경우 BasicPhotoAlbumPage로, 그 외에는 PhotoAlbumPage로 이동
     if (activeIndex === 0) {
       navigate('/album/basic');
@@ -84,11 +96,13 @@ function MainPage() {
   // 앨범 생성 완료 핸들러
   const handleAlbumCreated = async () => {
     await fetchAlbumsData();
+    showAlertMessage("앨범이 생성되었습니다.", "green");
   };
 
   // 사진 업로드 완료 핸들러
   const handlePhotosUploaded = async () => {
     await fetchAlbumsData();
+    showAlertMessage("사진이 업로드되었습니다.", "green");
   };
 
   // 로딩 상태 표시
@@ -137,38 +151,51 @@ function MainPage() {
   }
 
   // 앨범 이미지 URL 확인
-  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl);
+  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl)+"&w=1000";
 
   // 앨범 선택 컴포넌트 - 사진 업로더에 전달할 컴포넌트
   const AlbumSelector = (
     <div className="relative w-full mb-4">
-      <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
-      <select
-        className="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
-        value={selectedAlbumId || ""}
-        onChange={(e) => handleAlbumSelect(Number(e.target.value))}
-        disabled={false}
-      >
-        <option value="" disabled>앨범을 선택해주세요</option>
-        {albums.map((album) => (
-          <option key={album.id} value={album.id}>
-            {album.title}
-          </option>
-        ))}
-      </select>
+      <p className="mb-1 text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
+      <DropDown
+        albums={albums.map(album => ({ id: album.id, title: album.title }))}
+        currentAlbumId={selectedAlbumId}
+        onSelectAlbum={handleAlbumSelect}
+        placeholder="앨범을 선택해주세요"
+      />
     </div>
   );
 
   return (
     <>
-      {/* 여기서부터 MainPage */}
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+
+      <div className="flex justify-center">
+        <div className="container flex justify-center sm:justify-end top-[100px] absolute">
+          {/* 앨범 리스트 컴포넌트 */}
+          <SlidingAlbumList />
+          <div className="fixed z-50 w-[360px] p-4 bottom-[8px] grid grid-cols-2 gap-4">
+            <button
+              onClick={createAlbumModal.open}
+              className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
+              <p className="text-subtitle-1-lg font-p-500">앨범 생성</p>
+            </button>
+            <button
+              onClick={addPhotoModal.open}
+              className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
+              <p className="text-subtitle-1-lg font-p-500">사진 추가</p>
+            </button>
+          </div>
+        </div>
+      </div>
       <div
         className="h-screen transition-colors duration-500 overflow-hidden scrollbar-hide"
         style={{ backgroundColor: currentAlbum.bgColor || '#FFFFFF' }}
       >
         <div className="flex w-[90%] ml-0 z-0 relative">
           {/* 영역1 */}
-          <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex overflow-hidden">
+          <div className="flex-[80] h-screen text-white text-center pt-[65px] justyfi-center item-center relative flex overflow-hidden invisible sm:visible">
+
             {/* 앨범 이미지 영역 */}
             <div className="flex mb-auto w-full overflow-hidden">
 
@@ -177,7 +204,7 @@ function MainPage() {
                 className="absolute z-10 w-full transition-colors duration-500"
                 style={{ backgroundColor: currentAlbum.bgColor || '#FFFFFF' }}
               >
-                <div className='relative h-[180px] w-full overflow-hidden bg-transparent text-left z-10'>
+                <div className='relative h-[90px] md:h-[110px] lg:h-[140px] w-full overflow-hidden bg-transparent text-left z-10'>
                   {albumImageUrl === defaultAlbumImage ? (
                     // 기본 이미지일 때는 검은색 텍스트로 표시
                     <p className='absolute text-album-1-lg font-p-800 w-[94%] text-gray-200
@@ -187,7 +214,7 @@ function MainPage() {
                   ) : (
                     // 커스텀 이미지일 때는 기존 스타일 유지
                     <p
-                      className='absolute text-album-1-lg font-p-800 bg-clip-text w-[94%]
+                      className='absolute text-album-1-sm md:text-album-1-md lg:text-album-1-lg font-p-800 bg-clip-text w-[94%]
                       drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]'
                       style={{
                         color: "transparent",
@@ -209,30 +236,14 @@ function MainPage() {
                 alt={currentAlbum.title}
               />
             </div>
-
           </div>
 
           {/* 영역2 - 앨범 리스트 뒤에 보이지 않는 영역 */}
           <div className="flex-[30]" />
 
-          {/* 앨범 리스트 컴포넌트 */}
-          <div className="h-full">
-            <SlidingAlbumList />
-            <div className="fixed w-[360px] p-4 mr-auto ml-[-380px] bottom-[8px] z-40 grid grid-cols-2 gap-4">
-              <button
-                onClick={createAlbumModal.open}
-                className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
-                <p className="text-subtitle-1-lg font-p-500">앨범 생성</p>
-              </button>
-              <button
-                onClick={addPhotoModal.open}
-                className="flex cursor-pointer justify-center bg-white pt-[14px] pb-[14px] rounded-[8px] shadow-md">
-                <p className="text-subtitle-1-lg font-p-500">사진 추가</p>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
+
 
       {/* 앨범 생성 컴포넌트 */}
       <AlbumCreator

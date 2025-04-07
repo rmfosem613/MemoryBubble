@@ -9,6 +9,7 @@ export interface User {
   phoneNumber: string | null;
   gender: 'F' | 'M' | null;
   familyId: number | null;
+  role: 'USER' | 'ADMIN' | null;
 }
 
 interface FamilyMember {
@@ -28,11 +29,9 @@ export interface Family {
 interface UserStore {
   user: User;
   family: Family;
-  isUnread: boolean;
 
   setUser: (user: Partial<User>) => void;
   setFamily: (family: Partial<Family>) => void;
-  setIsUnread: (show: boolean) => void;
   resetUser: () => void;
 }
 
@@ -45,6 +44,7 @@ const initialUser: User = {
   phoneNumber: null,
   gender: null,
   familyId: null,
+  role: null,
 };
 
 const initialFamily: Family = {
@@ -58,26 +58,22 @@ const useUserStore = create<UserStore>((set) => ({
   // 상태
   user: initialUser,
   family: initialFamily,
-  isUnread: false,
 
   // 액션
-  setUser: (userData) =>
+  setUser: (user) =>
     set((state) => ({
-      user: { ...state.user, ...userData },
+      user: { ...state.user, ...user },
     })),
 
-  setFamily: (familyData) =>
+  setFamily: (family) =>
     set((state) => ({
-      family: { ...state.family, ...familyData },
+      family: { ...state.family, ...family },
     })),
-
-  setIsUnread: (isUnread) => set({ isUnread }),
 
   resetUser: () =>
     set({
       user: initialUser,
       family: initialFamily,
-      isUnread: false,
     }),
 }));
 

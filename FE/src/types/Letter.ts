@@ -1,5 +1,5 @@
 // 편지 타입 정의
-export type LetterType = 'text' | 'cassette';
+export type LetterType = 'TEXT' | 'AUDIO';
 
 // 색상 테마 타입 정의
 export type ColorTheme = 'spring' | 'summer' | 'autumn' | 'winter' | null;
@@ -35,7 +35,7 @@ export interface LetterState {
   // 편지 타입
   letterType: LetterType;
   cassetteData: CassetteData;
-  
+
   // 색상 테마
   selectedColor: ColorTheme;
   setSelectedColor: (color: ColorTheme) => void;
@@ -51,13 +51,15 @@ export interface LetterState {
 
 // 편지 보관함 편지 타입 정의
 export interface LetterData {
-  type: 'letter' | 'cassette'
-  color: 'spring' | 'summer' | 'autumn' | 'winter'
-  name: string
-  state: '읽음' | '안읽음'
-  date: string
-  contents?: string
+  letterId: number;
+  type: 'TEXT' | 'AUDIO';
+  backgroundColor: 'spring' | 'summer' | 'autumn' | 'winter';
+  senderName: string;
+  isRead: boolean;
+  openAt: string;
+  // createdAt: string; 이거는 안쓰는거 같아서 주석처리
+  // contents?: string; 이거는 편지 상세에서만 필요
 }
 
 // 편지 보관함 타입
-export type StorageType = 'new' | 'received'
+export type StorageType = 'new' | 'received';

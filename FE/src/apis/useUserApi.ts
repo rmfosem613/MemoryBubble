@@ -48,6 +48,13 @@ interface Family {
 // 가족 정보 수정 요청 타입
 interface UpdateFamilyRequest {
   familyName: string;
+  isThumbnailUpdate: boolean;
+}
+
+interface UpdateFamilyResponse {
+  familyId: number;
+  presignedUrl: string;
+  fileName: string;
 }
 
 // 유저 정보 등록 요청 타입
@@ -87,10 +94,11 @@ interface UpdateUserProfileRequest {
   gender?: 'M' | 'F';
   name?: string;
   phoneNumber?: string;
+  isProfileUpdate?: boolean;
 }
 
-// 프로필/가족 수정 응답 타입 (이미지 업로드용)
-interface UpdateWithImageResponse {
+// 프로필 수정 응답 타입 (이미지 업로드용)
+interface UpdateUserProfileResponse {
   presignedUrl: string;
   fileName: string;
 }
@@ -149,8 +157,8 @@ export const useUserApi = () => {
     async (
       familyId: number,
       data: UpdateFamilyRequest,
-    ): Promise<AxiosResponse<UpdateWithImageResponse>> => {
-      const response = await apiClient.patch<UpdateWithImageResponse>(
+    ): Promise<AxiosResponse<UpdateFamilyResponse>> => {
+      const response = await apiClient.patch<UpdateFamilyResponse>(
         `/api/family/${familyId}`,
         data,
       );
@@ -195,8 +203,8 @@ export const useUserApi = () => {
     async (
       userId: number,
       data: UpdateUserProfileRequest,
-    ): Promise<AxiosResponse<UpdateWithImageResponse>> => {
-      const response = await apiClient.patch<UpdateWithImageResponse>(
+    ): Promise<AxiosResponse<UpdateUserProfileResponse>> => {
+      const response = await apiClient.patch<UpdateUserProfileResponse>(
         `/api/users/${userId}`,
         data,
       );
@@ -211,7 +219,7 @@ export const useUserApi = () => {
     return response;
   }, []);
 
-  // presignedUrl로 이미지 업로드
+  // presignedUrl로 이미지, 카세트 업로드
   const uploadImageWithPresignedUrl = useCallback(
     async (presignedUrl: string, file: File): Promise<AxiosResponse<void>> => {
       const response = await axios.put<void>(presignedUrl, file, {
@@ -223,6 +231,16 @@ export const useUserApi = () => {
     },
     [],
   );
+
+  // 읽지 않은 편지 확인
+  const checkUnreadLetter = useCallback(async (): Promise<
+    AxiosResponse<{ isUnread: boolean }>
+  > => {
+    const response = await apiClient.get<{ isUnread: boolean }>(
+      '/api/users/letter',
+    );
+    return response;
+  }, []);
 
   return {
     // 가족 관련 API
@@ -238,6 +256,7 @@ export const useUserApi = () => {
     fetchUserProfile,
     updateUserProfile,
     logout,
+    checkUnreadLetter,
 
     // 유틸리티
     uploadImageWithPresignedUrl,

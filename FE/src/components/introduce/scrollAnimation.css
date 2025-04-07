@@ -1,0 +1,81 @@
+/* 기존 스크롤 애니메이션 */
+.scroll-container {
+  position: relative;
+  /* overflow: hidden; */
+}
+
+/* 위로 스크롤되는 애니메이션 */
+.scroll-up {
+  animation: scrollUp 60s linear infinite;
+  position: relative;
+}
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(-100% / 2));
+  }
+}
+
+/* 아래로 스크롤되는 애니메이션 */
+.scroll-down {
+  animation: scrollDown 60s linear infinite;
+  position: relative;
+}
+
+@keyframes scrollDown {
+  0% {
+    transform: translateY(calc(-100% / 2));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* 텍스트 오버레이 효과를 위한 스타일 */
+.text-overlay-container {
+  position: relative;
+}
+
+/* 텍스트 블렌드 모드 효과 - 이미지와 겹치는 부분만 색상 변경 */
+.text-overlay-container p:last-child {
+  mix-blend-mode: difference;
+}
+
+/* 망원경 마스크 효과 */
+.telescope-mask {
+  position: relative;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* 스크롤 이미지 영역을 망원경 내부에서만 보이도록 처리 */
+.telescope-view-container {
+  position: relative;
+}
+
+/* 망원경 외부 영역 오버레이 */
+.telescope-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+}
+
+/* 스크롤 콘텐츠 영역 - 크기 고정 */
+.scroll-content {
+  transform-origin: top left;
+  width: 100%;
+  height: 50%;
+  will-change: transform;
+}
+
+/* 망원경 확대 애니메이션을 부드럽게 만들기 위한 트랜지션 */
+.telescope-expanding {
+  transition: width 0.3s ease-out, height 0.3s ease-out;
+}
