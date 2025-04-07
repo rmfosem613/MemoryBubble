@@ -73,7 +73,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
   const { user } = useUserStore();
-  
+
   // 오디오 재생을 위한 ref 추가
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -102,16 +102,16 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
         unsubscribeRef.current.classList.add('show-game');
         unsubscribeRef.current.classList.remove('hide-game');
       }
-      
+
       // 오디오 엘리먼트 생성 (AUDIO 타입인 경우)
       if (letter.type === 'AUDIO' && letter.content) {
         audioRef.current = new Audio(letter.content);
-        
+
         // 오디오 이벤트 리스너 추가
         audioRef.current.addEventListener('ended', () => {
           setIsPlaying(false);
         });
-        
+
         audioRef.current.addEventListener('error', (e) => {
           console.error('오디오 재생 오류:', e);
           setIsPlaying(false);
@@ -138,22 +138,22 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
         return () => clearTimeout(timer);
       }
     }
-    
+
     // 컴포넌트 언마운트 시 오디오 정리
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.removeEventListener('ended', () => {});
-        audioRef.current.removeEventListener('error', () => {});
+        audioRef.current.removeEventListener('ended', () => { });
+        audioRef.current.removeEventListener('error', () => { });
         audioRef.current = null;
       }
     };
   }, [isOpen, letter]);
-  
+
   // 오디오 재생/일시정지 처리
   const handlePlayPause = () => {
     if (!audioRef.current || !letter || letter.type !== 'AUDIO') return;
-    
+
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -163,7 +163,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
         setIsPlaying(false);
       });
     }
-    
+
     setIsPlaying(!isPlaying);
   };
 
@@ -239,6 +239,13 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
     .animate-spin-slow {
       animation: spin-slow 4s linear infinite;
     }
+    
+    /* 편지 내용 배경 라인 - 텍스트 크기 증가에 맞춰 조정 */
+    .letter-background-lines {
+      background-size: 100% 60px;
+      background-image: linear-gradient(transparent 59px, rgba(200, 200, 200, 0.5) 1px);
+      line-height: 60px;
+    }
   `;
 
   // Wave Animation Component
@@ -262,6 +269,71 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
     </div>
   );
 
+  // 계절별 테마 장식 렌더링 함수
+  const renderSeasonalDecorations = () => {
+    if (letter.backgroundColor === 'spring') {
+      return (
+        <>
+          <img
+            src={cherry}
+            className="absolute top-0 right-0 z-0 w-[190px] select-none"
+            alt="봄 장식"
+          />
+          <img
+            src={sweet}
+            className="absolute bottom-0 left-0 z-0 w-[200px] select-none"
+            alt="봄 장식"
+          />
+        </>
+      );
+    } else if (letter.backgroundColor === 'summer') {
+      return (
+        <>
+          <img
+            src={seashell}
+            className="absolute top-[0px] left-[0px] z-0 w-[150px] select-none"
+            alt="여름 장식"
+          />
+          <img
+            src={turtle}
+            className="absolute bottom-[0px] right-[0px] z-0 w-[280px] select-none"
+            alt="여름 장식"
+          />
+        </>
+      );
+    } else if (letter.backgroundColor === 'autumn') {
+      return (
+        <>
+          <img
+            src={plant}
+            className="absolute bottom-0 left-0 z-0 w-[210px] select-none"
+            alt="가을 장식"
+          />
+          <img
+            src={tree}
+            className="absolute bottom-[0px] right-[-10px] z-0 w-[350px] select-none"
+            alt="가을 장식"
+          />
+        </>
+      );
+    } else { // winter
+      return (
+        <>
+          <img
+            src={snow}
+            className="absolute bottom-0 left-[-90px] z-0 w-[380px] select-none"
+            alt="겨울 장식"
+          />
+          <img
+            src={snowman}
+            className="absolute bottom-0 right-[-15px] z-0 w-[290px] select-none"
+            alt="겨울 장식"
+          />
+        </>
+      );
+    }
+  };
+
   return (
     <>
       <style>{waveAnimationStyle}</style>
@@ -281,7 +353,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
         <div className="letter">
           <div className="shadow"></div>
           <div className="background"></div>
-          <div className="body" style={bodyStyle}>
+          <div className="body absolute overflow-hidden" style={bodyStyle}>
             {/* Wave Animation only for cassette type */}
             {letter.type === 'AUDIO' && <WaveAnimation />}
 
@@ -292,80 +364,17 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                 </svg>
               </div>
             </div>
+
+            {/* 계절 테마 장식 - 고정적으로 표시됨 */}
+            {letter.type === 'TEXT' && (
+              <div className="absolute inset-0 z-0 pointer-events-none">
+                {renderSeasonalDecorations()}
+              </div>
+            )}
+
             <div className="letter-content p-6 overflow-auto h-full w-full">
               {letter.type === 'TEXT' ? (
                 <div className="relative h-full flex flex-col">
-                  {/* 계절 테마 장식 */}
-                  <div className="absolute inset-0 z-0">
-                    {(() => {
-                      // spring
-                      if (letter.backgroundColor === 'spring') {
-                        return (
-                          <>
-                            <img
-                              src={cherry}
-                              className="absolute top-0 right-0 z-0 w-[190px] select-none"
-                              alt="봄 장식"
-                            />
-                            <img
-                              src={sweet}
-                              className="absolute bottom-0 left-0 z-0 w-[200px] select-none"
-                              alt="봄 장식"
-                            />
-                          </>
-                        );
-                        // summer
-                      } else if (letter.backgroundColor === 'summer') {
-                        return (
-                          <>
-                            <img
-                              src={seashell}
-                              className="absolute top-[0px] left-[0px] z-0 w-[150px] select-none"
-                              alt="여름 장식"
-                            />
-                            <img
-                              src={turtle}
-                              className="absolute bottom-[0px] right-[0px] z-0 w-[280px] select-none"
-                              alt="여름 장식"
-                            />
-                          </>
-                        );
-                        // autumn
-                      } else if (letter.backgroundColor === 'autumn') {
-                        return (
-                          <>
-                            <img
-                              src={plant}
-                              className="absolute bottom-0 left-0 z-0 w-[210px] select-none"
-                              alt="가을 장식"
-                            />
-                            <img
-                              src={tree}
-                              className="absolute bottom-[0px] right-[-10px] z-0 w-[350px] select-none"
-                              alt="가을 장식"
-                            />
-                          </>
-                        );
-                        // winter
-                      } else {
-                        return (
-                          <>
-                            <img
-                              src={snow}
-                              className="absolute bottom-0 left-[-90px] z-0 w-[380px] select-none"
-                              alt="겨울 장식"
-                            />
-                            <img
-                              src={snowman}
-                              className="absolute bottom-0 right-[-15px] z-0 w-[290px] select-none"
-                              alt="겨울 장식"
-                            />
-                          </>
-                        );
-                      }
-                    })()}
-                  </div>
-
                   {/* 편지 내용 */}
                   <div className="relative z-10 h-full flex flex-col">
                     <div>
@@ -381,7 +390,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                     <div className="flex-1 relative z-20 mb-12">
                       {letter.content ? (
                         <div
-                          className={`break-words overflow-wrap-normal text-lg leading-loose text-gray-700 overflow-y-auto h-full ${fontClass}`}
+                          className={`break-words overflow-wrap-normal text-h1-md leading-loose text-gray-700 overflow-y-auto h-full ${fontClass} letter-background-lines`}
                           dangerouslySetInnerHTML={{ __html: letter.content }}
                         />
                       ) : (
@@ -389,7 +398,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                           {/* 내용이 없을 경우 편지지 줄만 표시 */}
                           {[...Array(9)].map((_, index) => (
                             <div key={index}>
-                              <hr className="border-t border-gray-400 my-[35px]" />
+                              <hr className="border-t my-[35px]" />
                             </div>
                           ))}
                         </div>
@@ -405,11 +414,6 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                       </div>
                     </div>
                   </div>
-
-                  {/* 날짜 표시 */}
-                  {/* <div className="absolute bottom-4 right-4 text-base text-gray-500">
-                    <p>{letter.date}</p>
-                  </div> */}
                 </div>
               ) : (
                 // 카세트 타입인 경우
