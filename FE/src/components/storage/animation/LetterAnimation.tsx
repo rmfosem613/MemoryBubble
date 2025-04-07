@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LetterData } from '@/types/Letter';
-import { Headset, CirclePause, CirclePlay } from 'lucide-react';
+import { CirclePlay, CirclePause } from 'lucide-react';
 import useUserStore from '@/stores/useUserStore';
 import useFontStore from '@/stores/useFontStore';
 
@@ -73,6 +73,9 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
   const { user } = useUserStore();
+  
+  // 오디오 재생을 위한 ref 추가
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // 컴포넌트 마운트 시 폰트 정보 로드
   useEffect(() => {
@@ -99,6 +102,21 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
         unsubscribeRef.current.classList.add('show-game');
         unsubscribeRef.current.classList.remove('hide-game');
       }
+      
+      // 오디오 엘리먼트 생성 (AUDIO 타입인 경우)
+      if (letter.type === 'AUDIO' && letter.content) {
+        audioRef.current = new Audio(letter.content);
+        
+        // 오디오 이벤트 리스너 추가
+        audioRef.current.addEventListener('ended', () => {
+          setIsPlaying(false);
+        });
+        
+        audioRef.current.addEventListener('error', (e) => {
+          console.error('오디오 재생 오류:', e);
+          setIsPlaying(false);
+        });
+      }
     } else {
       if (unsubscribeRef.current) {
         unsubscribeRef.current.classList.add('hide-game');
@@ -110,10 +128,44 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
           }
         }, 800);
 
+        // 오디오 정리
+        if (audioRef.current) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+          audioRef.current = null;
+        }
+
         return () => clearTimeout(timer);
       }
     }
+    
+    // 컴포넌트 언마운트 시 오디오 정리
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeEventListener('ended', () => {});
+        audioRef.current.removeEventListener('error', () => {});
+        audioRef.current = null;
+      }
+    };
   }, [isOpen, letter]);
+  
+  // 오디오 재생/일시정지 처리
+  const handlePlayPause = () => {
+    if (!audioRef.current || !letter || letter.type !== 'AUDIO') return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      // 재생 시도
+      audioRef.current.play().catch(error => {
+        console.error('오디오 재생 실패:', error);
+        setIsPlaying(false);
+      });
+    }
+    
+    setIsPlaying(!isPlaying);
+  };
 
   if (!letter) return null;
 
@@ -252,12 +304,12 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                           <>
                             <img
                               src={cherry}
-                              className="absolute top-0 right-0 z-0 w-[190px]"
+                              className="absolute top-0 right-0 z-0 w-[190px] select-none"
                               alt="봄 장식"
                             />
                             <img
                               src={sweet}
-                              className="absolute bottom-0 left-0 z-0 w-[200px]"
+                              className="absolute bottom-0 left-0 z-0 w-[200px] select-none"
                               alt="봄 장식"
                             />
                           </>
@@ -268,12 +320,12 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                           <>
                             <img
                               src={seashell}
-                              className="absolute top-[0px] left-[0px] z-0 w-[150px]"
+                              className="absolute top-[0px] left-[0px] z-0 w-[150px] select-none"
                               alt="여름 장식"
                             />
                             <img
                               src={turtle}
-                              className="absolute bottom-[0px] right-[0px] z-0 w-[280px]"
+                              className="absolute bottom-[0px] right-[0px] z-0 w-[280px] select-none"
                               alt="여름 장식"
                             />
                           </>
@@ -284,12 +336,12 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                           <>
                             <img
                               src={plant}
-                              className="absolute bottom-0 left-0 z-0 w-[210px]"
+                              className="absolute bottom-0 left-0 z-0 w-[210px] select-none"
                               alt="가을 장식"
                             />
                             <img
                               src={tree}
-                              className="absolute bottom-[0px] right-[-10px] z-0 w-[350px]"
+                              className="absolute bottom-[0px] right-[-10px] z-0 w-[350px] select-none"
                               alt="가을 장식"
                             />
                           </>
@@ -300,12 +352,12 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                           <>
                             <img
                               src={snow}
-                              className="absolute bottom-0 left-[-90px] z-0 w-[380px]"
+                              className="absolute bottom-0 left-[-90px] z-0 w-[380px] select-none"
                               alt="겨울 장식"
                             />
                             <img
                               src={snowman}
-                              className="absolute bottom-0 right-[-15px] z-0 w-[290px]"
+                              className="absolute bottom-0 right-[-15px] z-0 w-[290px] select-none"
                               alt="겨울 장식"
                             />
                           </>
@@ -329,7 +381,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                     <div className="flex-1 relative z-20 mb-12">
                       {letter.content ? (
                         <div
-                          className={`text-lg leading-loose text-gray-700 overflow-y-auto h-full ${fontClass}`}
+                          className={`break-words overflow-wrap-normal text-lg leading-loose text-gray-700 overflow-y-auto h-full ${fontClass}`}
                           dangerouslySetInnerHTML={{ __html: letter.content }}
                         />
                       ) : (
@@ -403,43 +455,29 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
 
                   {/* 카세트 재생 컨트롤 */}
                   <div className="absolute bottom-10 z-20 w-full flex justify-center">
-                    <div className="bg-white border border-gray-300 rounded-[8px] px-[50px] py-[20px] flex items-center gap-[60px]">
-                      <button
-                        className="hover:bg-gray-100 p-2 rounded-full transition-colors flex items-center justify-center"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isPlaying) {
-                            setIsPlaying(true);
-                            // 재생 시작 로직 (실제 구현 필요)
-                          }
-                        }}
-                        disabled={isPlaying}>
-                        <Headset
-                          color={isPlaying ? '#9D9D9D' : '#3E404C'}
-                          width="28"
-                          height="28"
-                          className={isPlaying ? 'opacity-50' : ''}
-                        />
-                      </button>
+                    <div className="bg-white border border-gray-300 rounded-[8px] px-[25px] py-[20px] flex items-center gap-[60px]">
                       {isPlaying ? (
                         <button
-                          className="hover:bg-gray-100 p-2 rounded-full transition-colors flex items-center justify-center"
+                          className="flex items-center justify-center"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setIsPlaying(false);
-                            // 재생 중지 로직 (실제 구현 필요)
+                            handlePlayPause();
                           }}>
-                          <CirclePause color="#3E404C" width="28" height="28" />
+                          <CirclePause color="#3E404C" width="35" height="35" />
                         </button>
                       ) : (
                         <button
-                          className="hover:bg-gray-100 p-2 rounded-full transition-colors flex items-center justify-center"
+                          className="flex items-center justify-center"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setIsPlaying(true);
-                            // 재생 시작 로직 (실제 구현 필요)
+                            handlePlayPause();
                           }}>
-                          <CirclePlay color="#3E404C" width="28" height="28" />
+                          <CirclePlay
+                            color={isPlaying ? '#9D9D9D' : '#3E404C'}
+                            width="35"
+                            height="35"
+                            className={isPlaying ? 'opacity-50' : ''}
+                          />
                         </button>
                       )}
                     </div>

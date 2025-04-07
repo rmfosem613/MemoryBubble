@@ -110,12 +110,10 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center h-full p-4">
-      <h2 className="text-2xl font-bold text-gray-700 mb-4">새 편지함</h2>
-
+    <div className="flex flex-col items-center h-full">
       <div
         ref={containerRef}
-        className="w-full h-[calc(100%-3rem)] relative bg-white/50 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+        className="w-full h-full relative overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">편지를 불러오는 중입니다...</p>

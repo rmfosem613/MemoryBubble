@@ -18,7 +18,7 @@ function TextLetterContent({
   const [senderName, setSenderName] = useState<string>('');
   const { fetchUserProfile } = useUserApi();
   const { user } = useUserStore();
-  const maxLength = 400
+  const maxLength = 300
 
   // 현재 사용자 정보 조회
   useEffect(() => {
