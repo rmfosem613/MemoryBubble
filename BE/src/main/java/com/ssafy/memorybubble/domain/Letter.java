@@ -28,7 +28,8 @@ public class Letter {
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    @Column(name = "letter_content", nullable = false, length = 1610)
+    @Column(name = "letter_content", nullable = false, columnDefinition = "TEXT")
+    @Lob
     private String content;
 
     @Enumerated(EnumType.STRING)
