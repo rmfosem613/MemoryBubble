@@ -71,10 +71,34 @@ export const useProfileEditModal = (isOpen: boolean) => {
         ...prev,
         birth: value,
       }));
-      setErrors((prev) => ({
-        ...prev,
-        birth: value ? '' : '생년월일을 입력해주세요',
-      }));
+      if (!value) {
+        setErrors((prev) => ({
+          ...prev,
+          birth: '생년월일을 입력해주세요',
+        }));
+      } else {
+        // 생년월일 범위 검사
+        const birthDate = new Date(value);
+        const minDate = new Date('1900-01-01');
+        const maxDate = new Date(); // 현재 날짜
+
+        if (isNaN(birthDate.getTime())) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '유효한 날짜 형식이 아닙니다',
+          }));
+        } else if (birthDate < minDate || birthDate > maxDate) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '생일이 올바르지 않습니다.',
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '',
+          }));
+        }
+      }
     } else {
       // 일반 필드는 newUser 객체에 직접 업데이트
       setNewUser((prev) => ({
@@ -129,6 +153,40 @@ export const useProfileEditModal = (isOpen: boolean) => {
         }));
       }
     }
+    else if (name === 'birth') {
+      setNewUser((prev) => ({
+        ...prev,
+        birth: value.trim(),
+      }));
+      if (!value.trim()) {
+        setErrors((prev) => ({
+          ...prev,
+          birth: '생년월일을 입력해주세요',
+        }));
+      } else {
+        // 생년월일 범위 검사
+        const birthDate = new Date(value);
+        const minDate = new Date('1900-01-01');
+        const maxDate = new Date(); // 현재 날짜
+
+        if (isNaN(birthDate.getTime())) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '유효한 날짜 형식이 아닙니다',
+          }));
+        } else if (birthDate < minDate || birthDate > maxDate) {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '생일이 올바르지 않습니다.',
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            birth: '',
+          }));
+        }
+      }
+    }
   };
 
   // 프로필 이미지 파일 선택 핸들러
@@ -174,6 +232,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
       birth?: string;
       phoneNumber?: string;
       gender?: 'M' | 'F';
+      isProfileUpdate?: boolean;
     } = {};
 
     // 변경된 필드만 추가
@@ -189,6 +248,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
     if (user.gender !== newUser.gender) {
       updateData.gender = newUser.gender as 'M' | 'F' | null;
     }
+    updateData.isProfileUpdate = profileFile ? true : false;
 
     // 변경사항이 없고 이미지도 변경되지 않았으면 API 호출 없이 모달 닫기
     if (Object.keys(updateData).length === 0 && !profileFile) {
@@ -203,6 +263,9 @@ export const useProfileEditModal = (isOpen: boolean) => {
         const response = await updateUserProfile(user.userId, updateData);
         if (response.status === 200) {
           setUser(updateData);
+          setUser({
+            profileUrl: profileImage,
+          });
 
           // 이미지 업로드 처리
           if (profileFile && response.data.presignedUrl) {
@@ -211,16 +274,13 @@ export const useProfileEditModal = (isOpen: boolean) => {
                 response.data.presignedUrl,
                 profileFile,
               );
-              setUser({
-                profileUrl: profileImage,
-              });
             } catch (uploadError) {
               alert('프로필은 수정되었으나, 이미지 수정에 실패했습니다.');
               return false;
             }
           }
-
           alert('프로필 정보가 수정되었습니다. ');
+
           return true; // 모달 닫기
         } else {
           alert('프로필 정보 수정 중 오류가 발생했습니다. ');

@@ -23,6 +23,7 @@ function InputBirth({ onBirthChange, birthError, initialBirth = "" }) {
         type="date"
         value={birthDate} // 생일 입력 값
         onChange={handleDateChange} // 생일 변경 처리
+        min="1900-01-01"
         max={today} // 오늘 날짜를 최대값으로 설정하여 미래 날짜 선택 방지
         className="w-full h-14 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />

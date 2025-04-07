@@ -69,6 +69,17 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
           }
         }
       });
+
+      // 컴포넌트 언마운트 시 미디어 리소스 정리
+      if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+        const tracks = mediaRecorderRef.current.stream.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
+        });
+      }
+
+      // MediaRecorder 참조 정리
+      mediaRecorderRef.current = null;
     };
   }, [currentlyPlayingId, messages.length]);
 
@@ -227,6 +238,14 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
             const updatedMessages = await refreshMessages();
             return updatedMessages;
           }
+
+          // 스트림 트랙 중지
+          if (mediaRecorder && mediaRecorder.stream) {
+            const tracks = mediaRecorder.stream.getTracks();
+            tracks.forEach((track) => {
+              track.stop();
+            });
+          }
         } catch (error) {
           console.error('오디오 메시지 처리 실패:', error);
 
@@ -248,7 +267,11 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
         }
 
         // 스트림 트랙 중지
-        stream.getTracks().forEach((track) => track.stop());
+        if (stream) {
+          stream.getTracks().forEach((track) => {
+            track.stop();
+          });
+        }
       };
 
       // 녹음 시작
@@ -266,6 +289,19 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
       mediaRecorderRef.current.state !== 'inactive'
     ) {
       mediaRecorderRef.current.stop();
+
+      // 백업 중지 메커니즘
+      setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+          const tracks = mediaRecorderRef.current.stream.getTracks();
+          tracks.forEach((track) => {
+            track.stop();
+          });
+        }
+      }, 300);
+
+      setIsRecording(false);
+    } else {
       setIsRecording(false);
     }
   };

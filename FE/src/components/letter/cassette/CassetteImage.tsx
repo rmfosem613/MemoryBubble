@@ -72,39 +72,41 @@ function CassetteImage({ isRecordingOrPlaying, selectedDate }: CassetteImageProp
       <div className="mt-[80px] h-[234px]">
         <img
           src={getCassetteImage()}
-          className="relative z-10 w-[400px] h-full"
+          className="relative z-10 w-[400px] h-full select-none"
         />
         <img
           src={CassetteReel}
           className={`relative w-[44px] z-10 ${isRecordingOrPlaying ? 'animate-spin-slow' : ''} 
-          top-[-149px] left-[24%] sm:left-[93px] md:left-[99px]`}
+          top-[-149px] left-[24%] sm:left-[93px] md:left-[99px] select-none`}
         />
         <img
           src={CassetteReel}
           className={`relative w-[44px] z-10 ${isRecordingOrPlaying ? 'animate-spin-slow' : ''} 
-          top-[-192px] ml-[-15px] sm:ml-0 left-[68%] sm:left-[249px] md:left-[257px]`}
+          top-[-192px] ml-[-15px] sm:ml-0 left-[68%] sm:left-[249px] md:left-[257px] select-none`}
         />
 
         {/* 카세트 보낸이 */}
 
         {/* 테이프 css */}
         <div className="relative z-10 flex justify-center top-[-315px] h-full p-[25px]">
-          <div className="absolute bg-white w-0 sm:w-[120px] h-[20px]" />
-          <div className="relative bg-white w-0 sm:w-[120px] h-[20px] ml-[10px] mt-[15px]" />
+
         </div>
 
         <div className="relative z-30 flex justify-center top-[-520px] w-full h-0 sm:h-[130px] overflow-hidden">
 
           {/* 보내는이 글자 마킹 css */}
-          <div className='absolute flex space-x-1'>
-            <p className="font-p-700 text-h4-lg">From.</p>
-            <p className="pb-[2px] text-h4-lg font-p-700">
+          <div className='absolute flex space-x-1  px-2'>
+            <div className='absolute w-full h-[60%] -left-0.5 bg-white'></div>
+            <div className='absolute w-full h-[60%] bottom-0 -left-0.5 bg-white'></div>
+
+            <p className="z-10 font-p-700 text-h4-lg select-none">From.</p>
+            <p className="z-10 pb-[2px] text-h4-lg font-p-700 select-none">
               {senderName ? `${senderName}` : '보내는 사람이 없습니다.'}
             </p>
           </div>
 
 
-          <p className="relative text-gray-600 mt-[110px] ml-[250px] text-p-lg">
+          <p className="relative text-gray-600 mt-[110px] ml-[250px] text-p-lg select-none">
             {formatDate(selectedDate)}
           </p>
         </div>
