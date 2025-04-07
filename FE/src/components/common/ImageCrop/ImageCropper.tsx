@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Crop, X, RefreshCcw, Check } from 'lucide-react';
 import ReactCrop, { type Crop as LibCrop } from 'react-image-crop';
 import useImageCropper, { type AspectRatioOption } from './useImageCropper';
 import 'react-image-crop/dist/ReactCrop.css';
+import Alert from '../Alert';
 
 // ImageCropper 컴포넌트 Props 인터페이스
 export interface ImageCropperProps {
@@ -28,7 +29,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   initialImage = null,
   initialPreviewUrl = null,
   allowedAspectRatios = ["1:1", "4:3", "3:4"],
-  defaultAspectRatio = "1:1",
+  defaultAspectRatio = "4:3", // 기본값 4:3으로 변경
   minSize = 100, // 기본 최소 100KB
   maxSize = 10, // 기본 최대 10MB
   imageQuality = 0.95, // 기본 품질 95%
@@ -64,11 +65,19 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     initialImage,
     initialPreviewUrl,
     allowedAspectRatios,
-    defaultAspectRatio,
+    defaultAspectRatio: "4:3", // 항상 4:3으로 시작하도록 설정
     minSize,
     maxSize,
     imageQuality
   });
+
+  // 이미지가 로드되면 항상 4:3 비율로 초기 설정
+  useEffect(() => {
+    if (showCropper && previewUrl && imgRef.current) {
+      // 이미지가 로드된 후 초기 비율 강제 설정
+      handleRatioChange("4:3");
+    }
+  }, [showCropper, previewUrl, imgRef.current]);
 
   // 이미지나 미리보기 URL이 변경되면 상태 업데이트
   useEffect(() => {
@@ -76,6 +85,23 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
       setShowCropper(false);
     }
   }, [initialImage, initialPreviewUrl]);
+
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
+
 
   // 이미지 적용 처리 함수
   const applyImage = async () => {
@@ -87,6 +113,12 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
       }
     } catch (error) {
       console.error("이미지 크롭 실패:", error);
+
+      // 이미지가 너무 작은 경우
+      if (error.message === 'IMAGE_TOO_SMALL') {
+        showAlertMessage("업로드하려는 이미지가 너무 작습니다.", "red");
+        return;
+      }
     }
   };
 
@@ -104,11 +136,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           {allowedAspectRatios.map((ratio) => (
             <button
               key={ratio}
-              className={`px-5 py-2 rounded-md ${
-                selectedRatio === ratio
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
+              className={`px-5 py-2 rounded-md ${selectedRatio === ratio
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
+                }`}
               onClick={() => handleRatioChange(ratio)}
             >
               {ratioLabels[ratio]}
@@ -165,100 +196,110 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   );
 
   return (
-    <div className="image-cropper flex flex-col items-center justify-center">
-      {/* 숨겨진 파일 입력 필드 */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
-        onChange={handleImageChange}
-      />
+    <>
+      <div className="image-cropper flex flex-col items-center justify-center">
+        {/* 숨겨진 파일 입력 필드 */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleImageChange}
+        />
 
-      {/* 이미지 미리보기 또는 업로드 */}
-      {!showCropper && (
-        <>
-          {previewUrl ? (
-            renderPreview ? 
-              renderPreview(previewUrl, handleButtonClick) : 
-              defaultRenderPreview(previewUrl, handleButtonClick)
-          ) : (
-            renderUploadBox ? 
-              renderUploadBox(handleButtonClick, handleDragOver, handleDrop) : 
-              defaultRenderUploadBox(handleButtonClick, handleDragOver, handleDrop)
-          )}
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        </>
-      )}
+        {/* 이미지 미리보기 또는 업로드 */}
+        {!showCropper && (
+          <>
+            {previewUrl ? (
+              renderPreview ?
+                renderPreview(previewUrl, handleButtonClick) :
+                defaultRenderPreview(previewUrl, handleButtonClick)
+            ) : (
+              renderUploadBox ?
+                renderUploadBox(handleButtonClick, handleDragOver, handleDrop) :
+                defaultRenderUploadBox(handleButtonClick, handleDragOver, handleDrop)
+            )}
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </>
+        )}
 
-      {/* 이미지 크롭 모달 */}
-      {showCropper && (
-        <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center ${cropperClassName}`}>
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center">
-                <Crop className="mr-2" />
-                <h3 className="text-xl font-bold">{modalTitle}</h3>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row md:space-x-6">
-              {/* 비율 선택 영역 */}
-              <div className="md:w-1/4 mb-4 md:mb-0">
-                {renderRatioButtons()}
+        {/* 이미지 크롭 모달 */}
+        {showCropper && (
+          <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center ${cropperClassName}`}>
+            <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center">
+                  <Crop className="mr-2" />
+                  <h3 className="text-xl font-bold">{modalTitle}</h3>
+                </div>
               </div>
 
-              {/* 크롭 영역 */}
-              <div className="md:w-3/4">
-                <div className="flex justify-center mb-6">
-                  <div className="max-w-full" style={{ maxHeight: 'calc(70vh - 200px)' }}>
-                    <ReactCrop
-                      crop={crop}
-                      onChange={(newCrop) => setCrop(newCrop as LibCrop)}
-                      onComplete={handleCropComplete}
-                      aspect={
-                        selectedRatio === "1:1" ? 1 : 
-                        selectedRatio === "4:3" ? 4/3 : 3/4
-                      }
-                      className="max-w-full"
-                    >
-                      <img
-                        ref={imgRef}
-                        src={previewUrl || ''}
-                        alt="Crop Preview"
-                        className="max-w-full max-h-full"
-                        style={{ maxHeight: 'calc(70vh - 200px)' }}
-                      />
-                    </ReactCrop>
-                  </div>
+              <div className="flex flex-col md:flex-row md:space-x-6">
+                {/* 비율 선택 영역 */}
+                <div className="md:w-1/4 mb-4 md:mb-0">
+                  {renderRatioButtons()}
                 </div>
 
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={applyImage}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
-                  >
-                    <Check size={16} className="mr-1" /> {applyButtonText}
-                  </button>
-                  <button
-                    onClick={handleResetCrop}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
-                  >
-                    <RefreshCcw size={16} className="mr-1" /> {resetButtonText}
-                  </button>
-                  <button
-                    onClick={handleCancelCrop}
-                    className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
-                  >
-                    <X size={16} className="mr-1" /> {cancelButtonText}
-                  </button>
+                {/* 크롭 영역 */}
+                <div className="md:w-3/4">
+                  <div className="flex justify-center mb-6">
+                    <div className="max-w-full" style={{ maxHeight: 'calc(70vh - 200px)' }}>
+                      <ReactCrop
+                        crop={crop}
+                        onChange={(newCrop) => setCrop(newCrop as LibCrop)}
+                        onComplete={handleCropComplete}
+                        aspect={
+                          selectedRatio === "1:1" ? 1 :
+                            selectedRatio === "4:3" ? 4 / 3 : 3 / 4
+                        }
+                        className="max-w-full"
+                      >
+                        <img
+                          ref={imgRef}
+                          src={previewUrl || ''}
+                          alt="Crop Preview"
+                          className="max-w-full max-h-full"
+                          style={{ maxHeight: 'calc(70vh - 200px)' }}
+                          onLoad={() => {
+                            // 이미지가 로드되면 항상 4:3 비율로 초기화
+                            if (imgRef.current) {
+                              handleRatioChange("4:3");
+                            }
+                          }}
+                        />
+                      </ReactCrop>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={applyImage}
+                      className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
+                    >
+                      <Check size={16} className="mr-1" /> {applyButtonText}
+                    </button>
+                    <button
+                      onClick={handleResetCrop}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
+                    >
+                      <RefreshCcw size={16} className="mr-1" /> {resetButtonText}
+                    </button>
+                    <button
+                      onClick={handleCancelCrop}
+                      className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
+                    >
+                      <X size={16} className="mr-1" /> {cancelButtonText}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+    </>
   );
 };
 
