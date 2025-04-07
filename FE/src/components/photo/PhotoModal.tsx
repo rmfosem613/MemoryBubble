@@ -17,7 +17,7 @@ function PhotoModal({ photoUrl, onClose }: PhotoModalProps) {
       <div className="relative w-[90%] h-[66%] lg:w-[60%] sm:h-[80%] p-4 flex items-center justify-center">
         <div className='absolute w-full h-full bg-white p-2'>
           <img
-            src={photoUrl}
+            src={photoUrl+"&w=800"}
             alt="Enlarged photo"
             className="w-full h-full object-contain"
             style={{ maxWidth: '100%', maxHeight: '100%' }}

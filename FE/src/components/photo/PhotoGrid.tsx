@@ -35,7 +35,7 @@ function PhotoGrid({
       onClick={() => onPhotoClick(photo, index)}
     >
       <img
-        src={photo.photoUrl}
+        src={photo.photoUrl+"&w=600&h=600"}
         alt={`Photo ${index + 1}`}
         className="w-full h-full object-cover"
       />
