@@ -46,6 +46,10 @@ function WriteLetterPage() {
     }, 3500);
   };
 
+  useEffect(() => {
+    setTextContent('')
+  }, []);
+
   // 오디오 파일을 Blob으로 변환하는 함수
   const fetchAudioBlobFromUrl = async (audioUrl: string): Promise<Blob> => {
     try {
@@ -95,10 +99,10 @@ function WriteLetterPage() {
         : new Date().toISOString().split('T')[0];
 
       // 텍스트 편지의 경우 줄바꿈을 <br/>로 변환
-      const processedContent = letterType === 'TEXT' 
-        ? textContent.replace(/\n/g, '<br/>') 
+      const processedContent = letterType === 'TEXT'
+        ? textContent.replace(/\n/g, '<br/>')
         : '';
-        
+
       // API 요청 데이터 구성
       const letterRequest: SendLetterRequest = {
         type: letterType,
