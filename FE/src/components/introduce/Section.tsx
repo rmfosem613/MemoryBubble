@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { BookHeart, Edit3, Calendar, Image, Mail } from 'lucide-react';
+import FontPageCarousel from './FontPageCarousel';
 
-const IntroPage = () => {
+const Section = () => {
   // 스크롤 애니메이션을 위한 요소 참조
   const sectionRefs = {
     intro: useRef<HTMLDivElement>(null),
@@ -34,7 +35,7 @@ const IntroPage = () => {
       {
         root: null,
         rootMargin: '0px',
-        threshold: 0.2, // 10% 정도 보이면 애니메이션 시작
+        threshold: 0.3, // 10% 정도 보이면 애니메이션 시작
       },
     );
 
@@ -52,60 +53,32 @@ const IntroPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white pt[65px]">
+    <div className="min-h-screen bg-white">
       {/* 두 번째 섹션: 나만의 손글씨 */}
       <section
         ref={sectionRefs.handwriting}
-        className="min-h-screen flex flex-col items-center justify-center pb-10 opacity-0 translate-y-10 transition-all duration-1000 bg-summer-100">
-        {/* <div className="max-w-4xl mx-auto px-4"> */}
-        <div className="container flex flex-col gap-12 items-center">
-          <div className="flex justify-between gap-7">
-            <div className="flex-1">
-              <h2 className="text-4xl font-extrabold mb-4 flex items-center pt-4">
-                <Edit3 size={35} className="mr-2 text-blue-500" />
-                <p>나만의 손글씨</p>
-              </h2>
-              <p className="">
-                당신의 고유한 손글씨로 다양한 폰트로 만들어보세요.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 w-[60%] select-none">
-              <img
-                src="/intro-fontTemplate.png"
-                alt="손글씨 템플릿"
-                className="rounded-lg shadow-md"
-              />
-              <img
-                src="/intro-fontTemplate2.png"
-                alt="손글씨 템플릿 작성"
-                className="rounded-lg shadow-md"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-between gap-7">
-            <img
-              src="/intro-fontRequest.png"
-              alt="폰트 체험 페이지"
-              className="w-[70%] shadow-md rounded-lg object-cover select-none"
-            />
-
-            <p>
-              손글씨 폰트를 활용하여 더 기록을 특별하게 만들 수 있습니다.
-              <br />
-              <br />
-              당신만의 일기처럼 모든 디자인 요소에 개인의 감성을 더해보세요.
+        className="min-h-screen flex items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-autumn-100/30">
+        <div className="container flex flex-col gap-6 items-center mb-4">
+          {/* 제목 */}
+          <div className="flex flex-col gap-2">
+            <h2 className="flex items-center">
+              <Edit3 size={33} className="mr-2 text-blue-600" />
+              <p className="text-3xl font-extrabold">나만의 손글씨</p>
+            </h2>
+            <p className="text-gray-700 font-p-500">
+              나만의 손글씨를 디지털 폰트로 만들어보세요!
             </p>
           </div>
+          {/* 내용 */}
+          <FontPageCarousel />
         </div>
-        {/* </div> */}
       </section>
 
       {/* 세 번째 섹션: 추억 갤러리 */}
       <section
         ref={sectionRefs.gallery}
-        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-white">
-        <div className="container flex flex-col md:flex-row-reverse gap-6 md:gap-8 items-center ">
+        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-winter-100/30">
+        <div className="container flex flex-col md:flex-row-reverse gap-6 md:gap-8 items-center">
           <div className="flex flex-col gap-5 ">
             <h2 className="flex items-center pt-5">
               <Image size={33} className="mr-2 text-blue-600" />
@@ -128,7 +101,7 @@ const IntroPage = () => {
               </p>
             </div>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             <img
               src="intro-postcard.gif"
               alt="갤러리"
@@ -141,10 +114,10 @@ const IntroPage = () => {
       {/* 네 번째 섹션: 방울 캘린더 */}
       <section
         ref={sectionRefs.calendar}
-        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000">
-        <div className="container flex flex-col md:flex-row items-center md:items-end md:justify-between">
-          <div className="flex flex-col gap-5 mb-6 md:mb-0">
-            <h2 className="flex items-center pt-5">
+        className="flex flex-col items-center justi-fy-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-summer-100/30">
+        <div className="container flex flex-col lg:flex-row items-center lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-5 mb-6 lg:mb-0">
+            <h2 className="flex items-centerd">
               <Calendar size={33} className="mr-2 text-blue-600" />
               <p className="text-3xl font-extrabold">방울 캘린더</p>
             </h2>
@@ -194,14 +167,13 @@ const IntroPage = () => {
                   />
                 </div>
               </div>
-              {/* </div> */}
             </div>
           </div>
           <div className="flex-1 flex justify-end">
             <img
               src="/introCalendar.png"
               alt="전체 캘린더"
-              className="rounded-lg shadow-md w-[340px] md:w-[90%]"
+              className="rounded-lg shadow-md w-[390px] lg:w-[90%]"
             />
           </div>
         </div>
@@ -210,10 +182,10 @@ const IntroPage = () => {
       {/* 다섯 번째 섹션: 편지 */}
       <section
         ref={sectionRefs.letter}
-        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000">
-        <div className="container flex flex-col md:flex-row-reverse md:justify-between items-center pt-10">
+        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-winter-100/30">
+        <div className="container flex flex-col md:flex-row-reverse md:justify-between items-center">
           <div className="flex flex-col gap-5">
-            <h2 className="flex items-center lg:pt-6">
+            <h2 className="flex items-center ">
               <Mail size={33} className="mr-2 text-blue-600" />
               <p className="text-3xl font-extrabold">편지</p>
             </h2>
@@ -254,4 +226,4 @@ const IntroPage = () => {
   );
 };
 
-export default IntroPage;
+export default Section;

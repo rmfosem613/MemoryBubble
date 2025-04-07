@@ -19,7 +19,6 @@ import {
 import LoadingPage from './pages/LoadingPage';
 import BasicPhotoAlbumPage from './pages/BasicPhotoAlbumPage';
 import FontPage from './pages/FontPage';
-import IntroPage from './pages/IntroPage';
 import PhotoAlbumPage from './pages/PhotoAlbumPage';
 import WriteLetterPage from './pages/WriteLetterPage';
 import CalendarPage from './pages/CalendarPage';
@@ -86,7 +85,6 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
-          <Route path="/intro" element={<IntroPage />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/introduce" element={<IntroducePage />} />
 
