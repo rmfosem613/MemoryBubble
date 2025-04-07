@@ -1,21 +1,69 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '@/components/introduce/scrollAnimation.css';
 
-import pic1 from '@/assets/intro/1.png'
-import pic2 from '@/assets/intro/2.png'
-import pic3 from '@/assets/intro/3.png'
-import pic4 from '@/assets/intro/4.png'
-import pic5 from '@/assets/intro/5.png'
-import pic6 from '@/assets/intro/6.png'
-import pic7 from '@/assets/intro/7.png'
-import pic9 from '@/assets/intro/9.png'
-import pic10 from '@/assets/intro/10.png'
+// 분리된 컴포넌트들 임포트 - 파일명 수정
+// 수정된 빠른 스크롤링 배경 컴포넌트 임포트
+import ScrollingBackground from '@/components/introduce/ScrollingBackground';
+import ClipingView from '@/components/introduce/ClipingView';
+import TextOverlay from '@/components/introduce/TextOverlay';
+import NewSection from '@/components/introduce/NewSection';
 
 function IntroducePage() {
-  const [curtainHeight, setCurtainHeight] = useState(100);
+  const [curtainHeight, setCurtainHeight] = useState(1000);
+  const [telescopeSize, setTelescopeSize] = useState(1000);
+  const [isFullyScrolled, setIsFullyScrolled] = useState(false);
+  const [newSectionPosition, setNewSectionPosition] = useState('100%'); // 새로운 섹션 위치 관리
+  
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1); // 배경 투명도 상태 추가
+  const [logoOpacity, setLogoOpacity] = useState(0); // 로고 투명도 상태 추가
+  const [logoScale, setLogoScale] = useState(0.5); // 로고 크기 상태 추가
+
   const textContainerRef = useRef(null);
   const imageAreaRef = useRef(null);
+  const scrollContentRef = useRef(null);
+  const nextSectionRef = useRef(null);
+  const logoRef = useRef(null);
 
+  // 스크롤 이벤트 처리
+  useEffect(() => {
+    const handleScroll = () => {
+      // 첫 번째 스크롤 단계: 망원경 크기 조절 (더 빠르게 확대되도록 조정)
+      const firstPhaseMaxScroll = document.body.scrollHeight * 0.3; // 0.7에서 0.5로 변경하여 더 빨리 망원경이 확대되도록 함
+      const scrollY = window.scrollY;
+      const scrollRatio = Math.min(scrollY / firstPhaseMaxScroll, 1);
+
+      // 최대 화면의 150%까지만 커지도록 제한 (200%에서 150%로 변경)
+      const maxSize = Math.max(window.innerWidth, window.innerHeight) * 1.2;
+      const newSize = 1000 + scrollRatio * (maxSize - 1000);
+
+      // 망원경 크기 업데이트 - 더 빠르게 확대되도록 수정
+      setTelescopeSize(Math.min(newSize, maxSize));
+
+      // 완전히 스크롤됐는지 확인 (망원경이 전체 화면을 덮는지)
+      if (newSize >= maxSize * 1) { // 0.9에서 0.8로 변경하여 더 일찍 전환되도록 함
+        setIsFullyScrolled(true);
+
+        // 새로운 섹션의 위치 계산 - 스크롤 비율에 따라 올라오도록
+        const secondPhaseRatio = (scrollY - firstPhaseMaxScroll) / (firstPhaseMaxScroll * 0.2); // 0.3에서 0.2로 변경
+        const limitedRatio = Math.max(0, Math.min(1, secondPhaseRatio));
+        const newPosition = 100 - (limitedRatio * 100); // 100%에서 0%로 변경 (아래서 위로 올라옴)
+        setNewSectionPosition(`${newPosition}%`);
+      } else {
+        setIsFullyScrolled(false);
+        setNewSectionPosition('100%'); // 충분히 스크롤되지 않았을 때는 항상 아래에 위치
+      }
+    };
+
+    // 스크롤 이벤트 리스너 등록
+    window.addEventListener('scroll', handleScroll);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // 커튼 애니메이션 효과 - 현재 코드에서 누락됨
   useEffect(() => {
     // 페이지가 로드되면 약간의 지연 후 커튼을 아래로 사라지게 함
     const timer = setTimeout(() => {
@@ -32,7 +80,7 @@ function IntroducePage() {
       // 애니메이션이 완료되면 interval 정리
       const cleanup = setTimeout(() => {
         clearInterval(animation);
-      }, 1200); // 대략 2초 정도 소요
+      }, 1000); // 대략 1.2초 정도 소요
 
       return () => {
         clearInterval(animation);
@@ -45,349 +93,56 @@ function IntroducePage() {
 
   return (
     <>
-      <div className='flex h-screen relative overflow-hidden'>
-        {/* 콘텐츠 영역 */}
-        <div className='pt-[60px]'>
-          {/* 전체 화면을 덮는 오버레이 - 하얀색 배경 */}
-          <div className='fixed top-0 left-0 w-full h-screen bg-white z-10'></div>
+      <div
+        ref={logoRef}
+        className='fixed top-0 left-0 w-full h-screen flex justify-center items-center z-50 pointer-events-none'
+        style={{
+          opacity: logoOpacity,
+          transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
+          transform: `scale(${logoScale})`,
+        }}
+      >
+        <img className='w-[500px]' src="/logo-1.svg" alt="Logo" />
+      </div>
 
-          {/* 망원경으로 볼 수 있는 단일 원형 영역 */}
+      <div style={{ height: '450vh' }}>
+        {/* 스크롤을 위한 충분한 높이 제공 - 짧게 수정된 스크롤 높이 */}
+        <div className='relative' style={{ height: '90vh' }}>
+          {/* 배경 이미지 - 고정 위치 */}
+          <div className='flex h-screen bg-gray-800 fixed top-0 -left-[130px] w-[110%]'>
+            {/* 전체 화면을 덮는 오버레이 - 하얀색 배경 */}
+            <div className='fixed top-0 left-0 w-full h-screen z-10'></div>
+
+            {/* 이미지 그리드 배경 - 무한 스크롤 애니메이션 */}
+            <ScrollingBackground />
+
+            {/* 망원경 뷰와 클리핑 마스크 */}
+            <ClipingView
+              telescopeSize={telescopeSize}
+              imageAreaRef={imageAreaRef}
+              textContainerRef={textContainerRef}
+            />
+
+            {/* 텍스트 오버레이 */}
+            <TextOverlay textContainerRef={textContainerRef} />
+          </div>
+
+          {/* 검은색 커튼 - 위에서 아래로 사라짐 (z-index를 높이고 fixed로 변경하여 헤더보다 앞에 배치) */}
           <div
-            ref={imageAreaRef}
-            className='fixed z-20 rounded-full overflow-hidden bg-gray-800'
+            className='fixed top-0 left-0 right-0 bg-black z-[999] transition-height ease-out'
             style={{
-              width: '1000px',
-              height: '1000px',
-              top: '80%',
-              left: '70%',
-              transform: 'translate(-50%, -50%)',
+              height: `${curtainHeight}%`,
+              transition: 'height 0.5s ease-out'
             }}
-          >
-            {/* 스크롤 이미지 영역 - 원형 안에만 표시됨 */}
-            <div className='absolute top-0 -left-[700px] w-[calc(100%+600px)]'>
-              <div className='flex space-x-3 justify-between'>
-                {/* 첫 번째 ul - 위로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-up w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
+          ></div>
 
-                {/* 두 번째 ul - 아래로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-down w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
 
-                {/* 세 번째 ul - 위로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-up w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 네 번째 ul - 아래로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-down w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic10} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 다섯 번째 ul - 위로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-up w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 여섯 번째 ul - 위로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-down w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic5} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic6} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic7} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic9} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 일곱 번째 ul - 아래로 스크롤 */}
-                <div className='scroll-container w-[25%] overflow-hidden rotate-6'>
-                  <ul className='scroll-up w-full'>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    {/* 복제된 요소들 (무한 스크롤용) */}
-                    <li className='h-[30%] py-2'>
-                      <img src={pic1} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic2} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic3} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                    <li className='h-[30%] py-2'>
-                      <img src={pic4} className='h-full w-full rounded-[10px] object-cover' />
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 글자 영역 - 수정된 부분 */}
-          <div className='fixed bottom-10 left-10 z-30' ref={textContainerRef}>
-            <div className="relative">
-              {/* 기본 텍스트 (검은색) - 항상 보이는 텍스트 */}
-              <p
-                className='font-p-800 text-[75px]'
-                style={{
-                  lineHeight: "90px",
-                  WebkitTextStroke: '1px black',
-                  color: 'black',
-                }}
-              >
-                소중한 추억을 간직하는 공간, <br />
-                추억방울과 함께하세요
-              </p>
-
-              {/* 클리핑 마스크로 작동할 이미지 영역 참조 요소 */}
-              <div
-                className='absolute top-0 left-0 w-full h-full pointer-events-none'
-                style={{
-                  clipPath: 'url(#textMask)',
-                  WebkitClipPath: 'url(#textMask)',
-                }}
-              >
-                {/* 이미지와 겹치는 영역에만 보일 흰색 텍스트 */}
-                <p
-                  className='font-p-800 text-[75px]'
-                  style={{
-                    lineHeight: "90px",
-                    WebkitTextStroke: '1px black',
-                    color: 'white',
-                  }}
-                >
-                  소중한 추억을 간직하는 공간, <br />
-                  추억방울과 함께하세요
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* SVG 클리핑 마스크 정의 */}
-          <svg className="absolute" style={{ width: 0, height: 0, position: 'absolute' }}>
-            <defs>
-              {/* 텍스트 마스크 - 텍스트가 망원경 영역과 겹칠 때 색상 변경 (원형으로 수정) */}
-              <clipPath id="textMask" clipPathUnits="objectBoundingBox">
-                <path ref={path => {
-                  if (path && imageAreaRef.current) {
-                    // 컴포넌트 마운트 후 이미지 영역의 위치를 기반으로 클리핑 패스 동적 업데이트
-                    const updateClipPath = () => {
-                      const imageRect = imageAreaRef.current.getBoundingClientRect();
-                      const textRect = textContainerRef.current.getBoundingClientRect();
-
-                      // 텍스트 기준으로 상대적인 위치 계산
-                      const centerX = (imageRect.left + imageRect.width / 2 - textRect.left) / textRect.width;
-                      const centerY = (imageRect.top + imageRect.height / 2 - textRect.top) / textRect.height;
-                      
-                      // 원의 반지름 계산 (텍스트 컨테이너의 너비와 높이에 비례)
-                      const radiusX = (imageRect.width / 2) / textRect.width;
-                      const radiusY = (imageRect.height / 2) / textRect.height;
-                      
-                      // SVG 타원 경로로 클리핑 패스 업데이트 (원형 마스크)
-                      // A rx ry x-axis-rotation large-arc-flag sweep-flag x y
-                      const d = `
-                        M ${centerX} ${centerY - radiusY}
-                        A ${radiusX} ${radiusY} 0 0 1 ${centerX + radiusX} ${centerY}
-                        A ${radiusX} ${radiusY} 0 0 1 ${centerX} ${centerY + radiusY}
-                        A ${radiusX} ${radiusY} 0 0 1 ${centerX - radiusX} ${centerY}
-                        A ${radiusX} ${radiusY} 0 0 1 ${centerX} ${centerY - radiusY}
-                        Z
-                      `;
-                      
-                      path.setAttribute('d', d);
-                    };
-
-                    updateClipPath();
-                    window.addEventListener('scroll', updateClipPath);
-                    window.addEventListener('resize', updateClipPath);
-
-                    // 애니메이션 동기화
-                    const interval = setInterval(updateClipPath, 16);
-
-                    // 클린업
-                    return () => {
-                      window.removeEventListener('scroll', updateClipPath);
-                      window.removeEventListener('resize', updateClipPath);
-                      clearInterval(interval);
-                    };
-                  }
-                }} />
-              </clipPath>
-            </defs>
-          </svg>
         </div>
-
-        {/* 검은색 커튼 - 위에서 아래로 사라짐 */}
-        <div
-          className='absolute top-0 left-0 right-0 bg-black z-50 transition-height ease-out'
-          style={{
-            height: `${curtainHeight}%`,
-            transition: 'height 0.5s ease-out'
-          }}
-        ></div>
+        {/* 새로운 섹션 - 아래에서 올라오는 흰색 배경 섹션 (z-index 수정하여 보이도록) */}
+        <NewSection
+          newSectionPosition={newSectionPosition}
+          nextSectionRef={nextSectionRef}
+        />
       </div>
     </>
   );
