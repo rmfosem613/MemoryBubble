@@ -30,9 +30,9 @@ const LandingPage: React.FC<LoadingPageProps> = ({
           // 커튼 애니메이션 후 리다이렉션
           setTimeout(() => {
             navigate(redirectTo);
-          }, 1000); // 커튼 애니메이션에 충분한 시간 부여
+          }, 1500); // 커튼 애니메이션에 충분한 시간 부여
           
-          return 100;
+          return 300;
         }
 
         return newProgress;
@@ -50,7 +50,7 @@ const LandingPage: React.FC<LoadingPageProps> = ({
       <div className='justify-end pt-[60px] relative h-screen overflow-hidden'>
         {/* 검은색 커튼 */}
         <div 
-          className='absolute inset-0 bg-black z-50 transition-transform duration-800 ease-in-out'
+          className='absolute inset-0 bg-black z-50 transition-transform duration-1000 ease-in-out'
           style={{ 
             transform: showCurtain ? 'translateY(0)' : 'translateY(100%)',
           }}

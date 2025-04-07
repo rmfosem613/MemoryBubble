@@ -6,7 +6,7 @@ interface TextOverlayProps {
 
 const TextOverlay: React.FC<TextOverlayProps> = ({ textContainerRef }) => {
   return (
-    <div className='fixed bottom-10 left-10 z-30' ref={textContainerRef}>
+    <div className='fixed bottom-10 left-10 z-30 select-none' ref={textContainerRef}>
       <div className="relative">
         {/* 기본 텍스트 (검은색) - 항상 보이는 텍스트 */}
         <p

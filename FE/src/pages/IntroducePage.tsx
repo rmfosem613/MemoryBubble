@@ -13,10 +13,10 @@ function IntroducePage() {
   const [telescopeSize, setTelescopeSize] = useState(1000);
   const [isFullyScrolled, setIsFullyScrolled] = useState(false);
   const [newSectionPosition, setNewSectionPosition] = useState('100%'); // 새로운 섹션 위치 관리
-  
-  const [backgroundOpacity, setBackgroundOpacity] = useState(1); // 배경 투명도 상태 추가
-  const [logoOpacity, setLogoOpacity] = useState(0); // 로고 투명도 상태 추가
-  const [logoScale, setLogoScale] = useState(0.5); // 로고 크기 상태 추가
+
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1); // 배경 투명도 상태
+  const [logoOpacity, setLogoOpacity] = useState(0); // 로고 투명도 상태
+  const [logoScale, setLogoScale] = useState(0.5); // 로고 크기 상태
 
   const textContainerRef = useRef(null);
   const imageAreaRef = useRef(null);
@@ -39,6 +39,21 @@ function IntroducePage() {
       // 망원경 크기 업데이트 - 더 빠르게 확대되도록 수정
       setTelescopeSize(Math.min(newSize, maxSize));
 
+      // 배경 흐려짐 효과 (망원경이 50% 이상 확대되면 시작)
+      if (scrollRatio > 0.5) {
+        // 50%~100% 스크롤 구간에서 배경 흐려짐 (1에서 0.2로)
+        const fadeRatio = (scrollRatio - 0.5) * 2; // 0.5일 때 0, 1일 때 1
+        setBackgroundOpacity(Math.max(1 - fadeRatio * 0.8, 0.2)); // 최소 0.2 투명도 유지
+
+        // 로고 페이드인 및 확대 효과
+        setLogoOpacity(fadeRatio);
+        setLogoScale(0.5 + fadeRatio * 0.5); // 0.5에서 1로 확대
+      } else {
+        setBackgroundOpacity(1);
+        setLogoOpacity(0);
+        setLogoScale(0.5);
+      }
+
       // 완전히 스크롤됐는지 확인 (망원경이 전체 화면을 덮는지)
       if (newSize >= maxSize * 1) { // 0.9에서 0.8로 변경하여 더 일찍 전환되도록 함
         setIsFullyScrolled(true);
@@ -48,6 +63,12 @@ function IntroducePage() {
         const limitedRatio = Math.max(0, Math.min(1, secondPhaseRatio));
         const newPosition = 100 - (limitedRatio * 100); // 100%에서 0%로 변경 (아래서 위로 올라옴)
         setNewSectionPosition(`${newPosition}%`);
+
+        // 로고가 NewSection이 올라올 때 페이드아웃
+        if (limitedRatio > 0.3) {
+          const logoFadeOut = (limitedRatio - 0.3) / 0.7;
+          setLogoOpacity(Math.max(1 - logoFadeOut, 0));
+        }
       } else {
         setIsFullyScrolled(false);
         setNewSectionPosition('100%'); // 충분히 스크롤되지 않았을 때는 항상 아래에 위치
@@ -71,22 +92,22 @@ function IntroducePage() {
       const animateCurtain = () => {
         setCurtainHeight(prev => {
           if (prev <= 0) return 0;
-          return prev - 30; // 줄여나감
+          return prev - 10; // 줄여나감
         });
       };
 
-      const animation = setInterval(animateCurtain, 10); // 10ms마다 실행
+      const animation = setInterval(animateCurtain, 15); // 10ms마다 실행
 
       // 애니메이션이 완료되면 interval 정리
       const cleanup = setTimeout(() => {
         clearInterval(animation);
-      }, 1000); // 대략 1.2초 정도 소요
+      }, 3000); // 대략 1.2초 정도 소요
 
-      return () => {
+      return () => { 
         clearInterval(animation);
         clearTimeout(cleanup);
       };
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -95,7 +116,7 @@ function IntroducePage() {
     <>
       <div
         ref={logoRef}
-        className='fixed top-0 left-0 w-full h-screen flex justify-center items-center z-50 pointer-events-none'
+        className='fixed top-0 left-0 w-full h-screen flex justify-center items-center z-10 pointer-events-none'
         style={{
           opacity: logoOpacity,
           transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
@@ -105,11 +126,17 @@ function IntroducePage() {
         <img className='w-[500px]' src="/logo-1.svg" alt="Logo" />
       </div>
 
-      <div style={{ height: '450vh' }}>
+      <div style={{ height: '650vh' }}>
         {/* 스크롤을 위한 충분한 높이 제공 - 짧게 수정된 스크롤 높이 */}
         <div className='relative' style={{ height: '90vh' }}>
           {/* 배경 이미지 - 고정 위치 */}
-          <div className='flex h-screen bg-gray-800 fixed top-0 -left-[130px] w-[110%]'>
+          <div
+            className='flex h-screen bg-gray-800 fixed top-0 -left-[130px] w-[110%]'
+            style={{
+              opacity: backgroundOpacity,
+              transition: 'opacity 0.3s ease-out'
+            }}
+          >
             {/* 전체 화면을 덮는 오버레이 - 하얀색 배경 */}
             <div className='fixed top-0 left-0 w-full h-screen z-10'></div>
 
