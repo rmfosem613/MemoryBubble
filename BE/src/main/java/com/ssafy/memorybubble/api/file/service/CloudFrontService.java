@@ -9,6 +9,8 @@ import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
 import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
 import software.amazon.awssdk.services.cloudfront.url.SignedUrl;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -31,8 +33,12 @@ public class CloudFrontService {
         CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();
         Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);
 
+        // 파일명 인코딩
+        String encodedKey = URLEncoder.encode(key, StandardCharsets.UTF_8)
+                .replace("+", "%20");
+
         // 와일드카드를 포함한 리소스 URL
-        String resourceUrl = domain + "/" + key + "*";  // 쿼리 파라미터 허용
+        String resourceUrl = domain + "/" + encodedKey + "*";
 
         // PEM 키 경로 결정
         Path keyPath = Paths.get(getClass().getClassLoader().getResource(privateKeyPath).toURI());
@@ -48,7 +54,7 @@ public class CloudFrontService {
         SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCustomPolicy(customRequest);
 
         // URL에서 와일드카드(*) 제거 후 반환
-        String finalUrl = signedUrl.url().replace("/" + key + "*", "/" + key);
+        String finalUrl = signedUrl.url().replace("/" + encodedKey + "*", "/" + encodedKey);
         log.info("finalUrl: {}", finalUrl);
 
         return finalUrl;
