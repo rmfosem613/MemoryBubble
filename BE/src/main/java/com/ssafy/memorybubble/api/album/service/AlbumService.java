@@ -171,7 +171,7 @@ public class AlbumService {
         // 사진을 dto로 변환
         return PhotoDto.builder()
                 .photoId(photo.getId())
-                .photoUrl(fileService.getDownloadSignedURL(photo.getPath())+"&w=1000&h=1000")
+                .photoUrl(fileService.getDownloadSignedURL(photo.getPath()))
                 .build();
     }
 
