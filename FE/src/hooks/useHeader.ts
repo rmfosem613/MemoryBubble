@@ -69,7 +69,7 @@ const useHeader = () => {
 
   // 메인 경로인지 확인
   const isMainPath = useCallback(() => {
-    return location.pathname === '/';
+    return location.pathname === '/main';
   }, [location.pathname]);
 
   // 경로 일치하는지 확인
@@ -90,14 +90,14 @@ const useHeader = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         resetUser();
-        window.location.href = '/kakao';
+        window.location.href = '/introduce';
       }
     } catch (error) {
       // 오류가 발생해도 토큰 삭제 및 페이지 이동 처리
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       resetUser();
-      window.location.href = '/kakao';
+      window.location.href = '/introduce';
     }
   }, [logout, resetUser]);
 

@@ -94,14 +94,14 @@ const useUserInfo = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         useUserStore.getState().resetUser();
-        //window.location.href = '/kakao';
+        //window.location.href = '/introduce';
       }
     } catch (error) {
       // 오류가 발생해도 토큰 삭제 및 페이지 이동 처리
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       useUserStore.getState().resetUser();
-      //window.location.href = '/kakao';
+      //window.location.href = '/introduce';
     }
   }, [logout]);
 

@@ -21,7 +21,7 @@ const Header = () => {
 
   const menuItems = [
     { path: '/font', label: '나의 손글씨', icon: FileType },
-    { path: '/', label: '추억 갤러리', icon: Image },
+    { path: '/main', label: '추억 갤러리', icon: Image },
     { path: '/calendar', label: '방울 캘린더', icon: Calendar },
   ];
 

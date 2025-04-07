@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
         alert('로그인 정보가 만료되었습니다.');
 
         // 로그인 페이지로 리다이렉트
-        window.location.href = '/kakao';
+        window.location.href = '/introduce';
         return Promise.reject(refreshError);
       }
     }

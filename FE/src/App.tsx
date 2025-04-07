@@ -31,7 +31,6 @@ import Header from './components/header/Header';
 
 // 관리자 페이지
 import AdminPage from './pages/AdminPage';
-import TestKakaoLogin from './pages/TestKakaoLogin';
 import OAuthCallback from './components/oauth/OAuthCallback';
 import LandingPage from './pages/LandingPage';
 import IntroducePage from './pages/IntroducePage';
@@ -85,13 +84,12 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
-          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/introduce" element={<IntroducePage />} />
 
           {/* 인증이 필요 없는 경로 (로그인하지 않은 사용자만 접근 가능) */}
           <Route element={<NonAuthRoute />}>
             <Route path="/oauth/callback" element={<OAuthCallback />} />
-            <Route path="/kakao" element={<TestKakaoLogin />} />
           </Route>
 
           {/* 가족 생성/가입 페이지 - 인증 필요, 가족 없어야 함 */}
@@ -107,7 +105,7 @@ function App() {
 
           {/* 완전 보호된 경로 - 모든 조건 충족 필요 */}
           <Route element={<ProtectedRoute />}>
-            <Route index path="/" element={<MainWithLoading />} />
+            <Route index path="/main" element={<MainWithLoading />} />
             <Route path="/font" element={<FontPage />} />
             <Route path="/letter" element={<WriteLetterPage />} />
             <Route path="/album/basic" element={<BasicPhotoAlbumPage />} />
