@@ -1,22 +1,23 @@
 package com.ssafy.memorybubble.api.user.service;
 
+import com.ssafy.memorybubble.api.family.dto.FamilyJoinRequest;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.letter.repository.LetterRepository;
 import com.ssafy.memorybubble.api.user.dto.*;
-import com.ssafy.memorybubble.domain.Family;
-import com.ssafy.memorybubble.domain.User;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
-
-import com.ssafy.memorybubble.api.family.dto.JoinRequest;
 import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
+import com.ssafy.memorybubble.domain.Family;
+import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
+
+import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(User user, JoinRequest request, String profile) {
+    public void updateUser(User user, FamilyJoinRequest request, String profile) {
         // 이름, 프로필, 휴대폰번호, 성별, 생일 업데이트
         log.info("Updating user {}", user);
         user.updateUser(request.getName(), profile, request.getPhoneNumber(),
@@ -48,17 +49,29 @@ public class UserService {
 
     @Transactional
     public FileResponse updateUser(Long userId, UserRequest request) {
-        User user = getUser(userId);
         // 프로필 이미지를 바꿀 수 있는 url 반환
-        user.updateUser(request.getName(), user.getProfile(), request.getPhoneNumber(), request.getGender(), request.getBirth());
-        return fileService.createUploadFileResponse(user.getProfile());
+        User user = getUser(userId);
+        String key = user.getProfile();
+
+        // 프로필 이미지를 업데이트하는 경우
+        if (request.getIsProfileUpdate()) {
+            // 기존 프로필 이미지 삭제
+            fileService.deleteFile(user.getProfile());
+
+            // 새로운 프로필 이미지 url 반환
+            key = "user/" + UUID.randomUUID();
+        }
+
+        user.updateUser(request.getName(), key, request.getPhoneNumber(), request.getGender(), request.getBirth());
+
+        return fileService.createUploadFileResponse(key);
     }
 
     public UnreadLetterResponse getUnreadLetter(Long userId) {
         User user = getUser(userId);
         return UnreadLetterResponse.builder()
-                        .isUnread(letterRepository.existsByReceiverIdAndIsReadFalse(user.getId()))
-                        .build();
+                .isUnread(letterRepository.existsByReceiverIdAndIsReadFalse(user.getId()))
+                .build();
     }
 
     public JoinResponse getJoinAvailable(Long userId) {
@@ -96,15 +109,23 @@ public class UserService {
         return UserDto.builder()
                 .familyId(user.getFamily() != null ? user.getFamily().getId() : null)
                 .userId(userId)
+                .role(user.getRole())
                 .build();
     }
 
-    public UserInfoDto convertToDto(User user) {
+    public UserInfoDto getUserInfoDto (User user) {
+        return convertToDto(user);
+    }
+
+    private UserInfoDto convertToDto(User user) {
         // 유저 프로필이 있으면 유저 프로필 presigned url로 반환
+        String profile = null;
+        if(user.getProfile() != null) profile = fileService.getDownloadSignedURL(user.getProfile());
+        log.info(profile);
         return UserInfoDto.builder()
                 .userId(user.getId())
                 .name(user.getName())
-                .profileUrl(user.getProfile() !=null ? fileService.getDownloadPresignedURL(user.getProfile()) : null)
+                .profileUrl(profile)
                 .birth(user.getBirth())
                 .phoneNumber(user.getPhoneNumber())
                 .build();

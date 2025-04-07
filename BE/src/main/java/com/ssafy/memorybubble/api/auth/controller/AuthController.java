@@ -3,9 +3,11 @@ package com.ssafy.memorybubble.api.auth.controller;
 import com.ssafy.memorybubble.api.auth.dto.TokenRequest;
 import com.ssafy.memorybubble.api.auth.dto.TokenResponse;
 import com.ssafy.memorybubble.api.auth.service.TokenService;
+import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import java.util.Map;
 public class AuthController {
 
     private final TokenService tokenService;
+    private final FcmService fcmService;
 
     @GetMapping("/test")
     @Operation(
@@ -64,6 +67,7 @@ public class AuthController {
         log.info("userDetails.getUsername() logged out : {}", userDetails.getUsername());
         // user가 가진 refresh token 객체 삭제
         tokenService.deleteRefreshToken(userDetails.getUsername());
+        fcmService.deleteToken(Long.valueOf(userDetails.getUsername()));
         return ResponseEntity.ok().build();
     }
 
@@ -75,7 +79,7 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "새로운 accessToken 반환")
             }
     )
-    public ResponseEntity<TokenResponse> reissue(@RequestBody TokenRequest tokenRequest) {
+    public ResponseEntity<TokenResponse> reissue(@Valid @RequestBody TokenRequest tokenRequest) {
         // refresh Token 만료 조회 후 재발급
         String newAccessToken = tokenService.reissueAccessToken(tokenRequest.getRefreshToken());
         if (StringUtils.hasText(newAccessToken)) {

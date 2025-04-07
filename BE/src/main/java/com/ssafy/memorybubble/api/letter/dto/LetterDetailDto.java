@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class LetterDetailDto {
     String senderName;
+    Long senderId;
     Type type;
     LocalDateTime createdAt;
     LocalDate openAt;

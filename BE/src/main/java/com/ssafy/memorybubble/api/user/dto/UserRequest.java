@@ -10,10 +10,10 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @Getter
-public class UserRequest
-{
+public class UserRequest {
     LocalDate birth;
     Gender gender;
     String name;
     String phoneNumber;
+    Boolean isProfileUpdate;
 }

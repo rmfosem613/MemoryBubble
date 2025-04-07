@@ -11,7 +11,6 @@ import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.Photo;
 import com.ssafy.memorybubble.domain.User;
 import com.ssafy.memorybubble.api.album.exception.AlbumException;
-import com.ssafy.memorybubble.api.family.exception.FamilyException;
 import com.ssafy.memorybubble.api.album.repository.AlbumRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -54,18 +53,8 @@ public class AlbumService {
     public void addAlbum(Long userId, AlbumRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
-        Family family = user.getFamily();
+        Family family = Validator.validateAndGetFamily(user, request.getFamilyId());
         log.info("family: {}", family);
-
-        // 요청을 한 user가 가입된 family가 없으면 예외 반환
-        if(family == null) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
-
-        // 요청 한 user가 가입된 family와 albumRequest의 familyId가 일치하지 않으면 예외 반환
-        if(!request.getFamilyId().equals(family.getId())) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
 
         Album album = Album.builder()
                 .family(family)
@@ -79,12 +68,7 @@ public class AlbumService {
 
     public List<AlbumDto> getAlbums(Long userId, String name) {
         User user = userService.getUser(userId);
-        Family family = user.getFamily();
-
-        // 요청을 한 user가 가입된 family가 없으면 예외 반환
-        if(family == null) {
-            throw new FamilyException(FAMILY_NOT_FOUND);
-        }
+        Family family = Validator.validateAndGetFamily(user);
 
         // name이 없거나 빈 문자열이면 family로 album을 찾고 name이 있으면 포함된 album 찾음
         List<Album> albums = StringUtils.hasText(name)
@@ -131,7 +115,7 @@ public class AlbumService {
     }
 
     @Transactional
-    public void updateAlbumName(Long userId, Long albumId, UpdateRequest request) {
+    public AlbumUpdateResponse updateAlbum(Long userId, Long albumId, AlbumUpdateRequest request) {
         User user = userService.getUser(userId);
         Album album = getAlbum(albumId);
 
@@ -145,28 +129,32 @@ public class AlbumService {
         }
 
         // 내용이 있으면 내용 업데이트
-        if (StringUtils.hasText(request.getAlbumContent())) {
-            album.updateContent(request.getAlbumContent());
-            log.info("update album content: {}", album.getContent());
-        }
+        album.updateContent(request.getAlbumContent());
+        log.info("update album content: {}", album.getContent());
+
+        return AlbumUpdateResponse.builder()
+                .albumName(album.getName())
+                .albumContent(album.getContent())
+                .build();
     }
+
 
     public Album getAlbum(Long id) {
         return albumRepository.findById(id).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
     }
 
-    public AlbumDto convertToDto(Album album) {
+    private AlbumDto convertToDto(Album album) {
         return AlbumDto.builder()
                 .albumId(album.getId())
                 .albumName(album.getName())
                 .albumContent(album.getContent())
                 .backgroundColor(album.getBackgroundColor())
-                .thumbnailUrl(album.getThumbnail() == null ? null : fileService.getDownloadPresignedURL(album.getThumbnail()))
+                .thumbnailUrl(album.getThumbnail() == null ? null : fileService.getDownloadSignedURL(album.getThumbnail()))
                 .photoLength(photoRepository.countByAlbumId(album.getId()))
                 .build();
     }
 
-    public AlbumDetailDto convertToDto(Album album, List<Photo> photos) {
+    private AlbumDetailDto convertToDto(Album album, List<Photo> photos) {
         // 앨범에 포함된 사진을 dto로 변환 후 앨범 dto로 변환
         List<PhotoDto> photoDtos = photos.stream()
                 .map(this::convertToDto)
@@ -174,15 +162,21 @@ public class AlbumService {
 
         return AlbumDetailDto.builder()
                 .albumName(album.getName())
+                .albumContent(album.getContent())
                 .photoList(photoDtos)
                 .build();
     }
 
-    public PhotoDto convertToDto(Photo photo) {
+    private PhotoDto convertToDto(Photo photo) {
         // 사진을 dto로 변환
         return PhotoDto.builder()
                 .photoId(photo.getId())
-                .photoUrl(fileService.getDownloadPresignedURL(photo.getPath()))
+                .photoUrl(fileService.getDownloadSignedURL(photo.getPath()))
                 .build();
+    }
+
+    public boolean isBasicAlbum(Long albumId, Long familyId) {
+        Album album = albumRepository.findFirstByFamilyIdOrderByCreatedAtAsc(familyId).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
+        return album.getId().equals(albumId);
     }
 }

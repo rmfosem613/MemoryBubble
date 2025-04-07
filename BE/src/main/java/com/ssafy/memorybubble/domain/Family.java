@@ -32,6 +32,11 @@ public class Family {
         this.name = name;
     }
 
+    public void updateFamilyNameAndThumbnail(String name, String thumbnail) {
+        updateFamilyName(name);
+        this.thumbnail = thumbnail;
+    }
+
     @Builder
     public Family(String name, String thumbnail, LocalDateTime createdAt) {
         this.name = name;

@@ -30,7 +30,7 @@ public class Review {
     @Column(nullable = false)
     private Type type;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 170)
     private String content;
 
     @Column(nullable = false)

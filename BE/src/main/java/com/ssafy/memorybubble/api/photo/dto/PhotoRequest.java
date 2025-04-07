@@ -1,5 +1,6 @@
 package com.ssafy.memorybubble.api.photo.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class PhotoRequest {
-    Long albumId;
+    @NotNull Long albumId;
     Integer photoLength;
 }

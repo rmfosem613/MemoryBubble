@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +40,8 @@ public class PhotoController {
             }
     )
     public ResponseEntity<List<FileResponse>> addPhotos(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @RequestBody PhotoRequest photoRequest) {
-        List<FileResponse> fileResponses = photoService.addPhoto(Long.valueOf(userDetails.getUsername()), photoRequest);
+                                                        @Valid @RequestBody PhotoRequest request) {
+        List<FileResponse> fileResponses = photoService.addPhoto(Long.valueOf(userDetails.getUsername()), request);
         return ResponseEntity.ok(fileResponses);
     }
 
@@ -57,8 +58,8 @@ public class PhotoController {
     )
     public ResponseEntity<?> addReview(@AuthenticationPrincipal UserDetails userDetails,
                                        @PathVariable Long photoId,
-                                       @RequestBody ReviewRequest reviewRequest) {
-        Object result = photoService.addReview(Long.valueOf(userDetails.getUsername()), photoId, reviewRequest);
+                                       @Valid @RequestBody ReviewRequest request) {
+        Object result = photoService.addReview(Long.valueOf(userDetails.getUsername()), photoId, request);
         if (result == null) {
             // TEXT: null
             return ResponseEntity.ok().build();

@@ -1,20 +1,17 @@
-package com.ssafy.memorybubble.api.font.dto;
+package com.ssafy.memorybubble.api.family.dto;
 
 import com.ssafy.memorybubble.domain.FontStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Builder
 @AllArgsConstructor
-public class FontResponse {
-    private Long fontId;
+public class FamilyFontDto {
+    private Long userId;
+    private String userName;
     private String fontName;
-    private LocalDateTime createdAt;
-    private String presignedUrl;
     private String fileName;
     private FontStatus status;
 }

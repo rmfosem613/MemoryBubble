@@ -1,6 +1,8 @@
 package com.ssafy.memorybubble.api.photo.dto;
 
+import com.google.firebase.database.annotations.NotNull;
 import com.ssafy.memorybubble.domain.Type;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +11,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class ReviewRequest {
-    Type type;
-    String content;
+    @NotNull Type type;
+    @Size(max = 40) String content; // AUDIO는 null
 }

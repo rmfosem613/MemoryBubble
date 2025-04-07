@@ -1,6 +1,9 @@
 package com.ssafy.memorybubble.api.letter.dto;
 
 import com.ssafy.memorybubble.domain.Type;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,9 +14,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class LetterRequest {
-    Type type;
-    String content;
+    @NotNull Type type;
+    @Size(max = 400) String content;
     LocalDate openAt;
-    String backgroundColor;
-    Long receiverId;
+    @NotBlank String backgroundColor;
+    @NotNull Long receiverId;
 }

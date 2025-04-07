@@ -1,24 +1,20 @@
 package com.ssafy.memorybubble.api.font.service;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
+import com.ssafy.memorybubble.api.family.dto.FamilyFontDto;
 import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
 import com.ssafy.memorybubble.api.file.service.FileService;
-import com.ssafy.memorybubble.api.font.dto.FontAdminRequest;
 import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
 import com.ssafy.memorybubble.api.font.dto.FontResponse;
 import com.ssafy.memorybubble.api.font.exception.FontException;
 import com.ssafy.memorybubble.api.font.repository.FontRepository;
-import com.ssafy.memorybubble.api.user.exception.UserException;
 import com.ssafy.memorybubble.api.user.repository.UserRepository;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
-import com.ssafy.memorybubble.domain.Font;
-import com.ssafy.memorybubble.domain.FontStatus;
-import com.ssafy.memorybubble.domain.Role;
-import com.ssafy.memorybubble.domain.User;
+import com.ssafy.memorybubble.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,9 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_BAD_REQUEST;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.FONT_NOT_FOUND;
-import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
+import static com.ssafy.memorybubble.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -38,14 +32,15 @@ import static com.ssafy.memorybubble.common.exception.ErrorCode.USER_NOT_FOUND;
 @Transactional
 public class FontService {
     private final FontRepository fontRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final FileService fileService;
     private final FcmService fcmService;
+
     private final static String TEMPLATE_FILE = "template/추억방울_템플릿.zip";
     private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png"; // template/{userId}/{templateNumber}.png
     private final static int TEMPLATE_FILE_COUNT = 8; // 템플릿 파일의 개수
     private final static String FONT_PATH = "font/%d/%s.ttf"; // font/{userId}/{fontName}.ttf
-    private final UserRepository userRepository;
 
     // 사용자 - 폰트 조회
     @Transactional(readOnly = true)
@@ -56,7 +51,9 @@ public class FontService {
         Font font = fontRepository.findByUser(user).orElse(null);
         // 만들어진 폰트가 없는 경우
         if (font == null) {
-            return FontResponse.builder().build();
+            return FontResponse.builder()
+                    .status(FontStatus.NOT_CREATED)
+                    .build();
         }
         log.info("font={}", font);
 
@@ -69,9 +66,9 @@ public class FontService {
                 .fontId(font.getId())
                 .fontName(font.getName())
                 .fileName(font.getPath())
-                .fontNameEng(font.getNameEng())
                 .createdAt(font.getCreatedAt())
-                .presignedUrl(fileService.getDownloadPresignedURL(font.getPath()))
+                .presignedUrl(font.getFontStatus() == FontStatus.DONE? fileService.getDownloadSignedURL(font.getPath()) : null)
+                .status(font.getFontStatus())
                 .build();
     }
 
@@ -84,6 +81,7 @@ public class FontService {
         // 삭제하려는 폰트가 삭제를 요청한 사용자의 폰트인지 검사
         Validator.validateFontOwnership(user, font);
 
+        fileService.deleteFile(font.getPath());
         fontRepository.deleteById(fontId);
     }
 
@@ -103,12 +101,12 @@ public class FontService {
             throw new FontException(FONT_BAD_REQUEST);
         }
 
+        String fontName = fontRequest.getFontName() + "체";
         // 폰트 정보 저장
         Font font = Font.builder()
                 .user(user)
-                .name(fontRequest.getFontName())
-                .nameEng(fontRequest.getFontNameEng())
-                .path(String.format(FONT_PATH, userId, fontRequest.getFontName()))
+                .name(fontName)
+                .path(String.format(FONT_PATH, userId, fontName))
                 .build();
         fontRepository.save(font);
         log.info("font={}", font);
@@ -123,8 +121,8 @@ public class FontService {
         log.info("fileResponseList={}", fileResponseList);
 
         // 관리자에게 폰트 생성 요청 알림(FCM) 보내기
-        User admin = userRepository.findByRole(Role.ADMIN).orElseThrow(()->new UserException(USER_NOT_FOUND));
-        sendFontMessage(admin, "추억 방울", "새로운 폰트 생성 요청이 있습니다.");
+        userRepository.findAllByRole(Role.ADMIN)
+                .forEach(admin -> sendFontMessage(admin, "추억 방울", "새로운 폰트 생성 요청이 있습니다."));
         return fileResponseList;
     }
 
@@ -133,13 +131,13 @@ public class FontService {
         return fontRepository.findAllByFontStatus(FontStatus.REQUESTED)
                 .stream()
                 .map(font -> {
-                    User user = userService.getUser(font.getUser().getId());
-                    return convertToFontAdminDto(user, font.getName());
+                    User user = font.getUser();
+                    return convertToFontAdminDto(user, font);
                 })
                 .toList();
     }
 
-    private FontAdminResponse convertToFontAdminDto(User user, String fontName) {
+    private FontAdminResponse convertToFontAdminDto(User user, Font font) {
         List<FileResponse> files = IntStream.rangeClosed(1, TEMPLATE_FILE_COUNT)
                 .mapToObj(i -> {
                     String templateFile = String.format(TEMPLATE_FILE_NAME, user.getId(), i);
@@ -148,18 +146,20 @@ public class FontService {
                 .toList();
 
         return FontAdminResponse.builder()
-                .userId(user.getId())
+                .fontId(font.getId())
                 .userName(user.getName())
-                .fontName(fontName)
+                .fontName(font.getName())
+                .createdAt(font.getCreatedAt())
                 .files(files)
                 .build();
     }
 
     // 관리자 - 폰트 생성 완료
-    public FileResponse makeFont(FontAdminRequest fontAdminRequest) {
-        User user = userService.getUser(fontAdminRequest.getUserId());
-        Font font = fontRepository.findByUser(user)
+    public FileResponse makeFont(Long fontId) {
+        Font font = fontRepository.findById(fontId)
                 .orElseThrow(() -> new FontException(FONT_NOT_FOUND));
+
+        User user = font.getUser();
 
         // 폰트 생성 상태 업데이트
         font.updateStatus();
@@ -170,6 +170,17 @@ public class FontService {
         // ttf 파일 업로드할 Presigned URL 리턴
         String fontPath = String.format(FONT_PATH, user.getId(), font.getName());
         return fileService.createUploadFileResponse(fontPath);
+    }
+
+    // 관리자 - 폰트 생성 취소
+    public void cancelFont(Long fontId) {
+        Font font = fontRepository.findById(fontId)
+                .orElseThrow(() -> new FontException(FONT_NOT_FOUND));
+
+        fontRepository.delete(font);
+
+        // 사용자에게 폰트 생성 취소 알림 보내기
+        sendFontMessage(font.getUser(), "추억 방울", "파일의 내용이 올바르지 않아 폰트를 생성할 수 없습니다. 새로운 파일로 다시 요청해주세요.");
     }
 
     private void sendFontMessage(User receiver, String title, String body) {
@@ -192,5 +203,31 @@ public class FontService {
         } catch (FirebaseMessagingException e) {
             log.warn("Failed to send FCM message to user {}: {}", receiver.getId(), e.getMessage());
         }
+    }
+
+    public List<FamilyFontDto> getFamilyFont(Long userId, Long familyId) {
+        User user = userService.getUser(userId);
+        log.info("user={}", user);
+
+        Family family = Validator.validateAndGetFamily(user, familyId);
+        log.info("family={}", family);
+
+        // 가족 구성원 전체 조회 & 폰트 조회
+        return userService.getUsersByFamilyId(familyId)
+                .stream()
+                .map(this::convertToFamilyFontDto)
+                .toList();
+    }
+
+    private FamilyFontDto convertToFamilyFontDto(User user) {
+        FontResponse font = getFont(user.getId());
+
+        return FamilyFontDto.builder()
+                .userId(user.getId())
+                .userName(user.getName())
+                .fontName(font.getFontName())
+                .fileName(font.getStatus() == FontStatus.DONE? fileService.getDownloadSignedURL(font.getFileName()) : null)
+                .status(font.getStatus())
+                .build();
     }
 }
