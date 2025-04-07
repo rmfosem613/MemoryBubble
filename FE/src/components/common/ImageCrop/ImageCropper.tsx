@@ -165,7 +165,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   );
 
   return (
-    <div className="image-cropper">
+    <div className="image-cropper flex flex-col items-center justify-center">
       {/* 숨겨진 파일 입력 필드 */}
       <input
         type="file"
