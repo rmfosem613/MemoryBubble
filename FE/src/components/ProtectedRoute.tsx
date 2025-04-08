@@ -16,7 +16,7 @@ const useRouteAuth = () => {
   // 사용자 상태에 따른 적절한 리다이렉트 경로 반환
   const getRedirectPath = () => {
     if (!isAuthenticated) {
-      return '/kakao';
+      return '/introduce';
     }
 
     if (!hasFamilyId) {
@@ -27,7 +27,7 @@ const useRouteAuth = () => {
       return '/join';
     }
 
-    return '/'; // 모든 조건 충족 시 메인으로
+    return '/main'; // 모든 조건 충족 시 메인으로
   };
 
   return {
@@ -95,12 +95,12 @@ export const AdminRoute = ({ children }: RouteProps) => {
 
   // 인증이 안 된 경우 로그인 페이지로
   if (!isAuthenticated) {
-    return <Navigate to="/kakao" replace />;
+    return <Navigate to="/introduce" replace />;
   }
 
   // 관리자가 아닌 경우 메인으로
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/main" replace />;
   }
 
   return children || <Outlet />;

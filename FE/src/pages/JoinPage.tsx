@@ -167,7 +167,7 @@ function JoinPage() {
         await fetchProfileAndFamilyInfo(user.userId, user.familyId);
 
         // 가입 성공 후 메인 페이지로 이동
-        navigate('/');
+        navigate('/main');
       } catch (err) {
         console.error("가입 실패:", err);
         setError("가입에 실패했습니다. 다시 시도해주세요.");
