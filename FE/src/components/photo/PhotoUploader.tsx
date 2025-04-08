@@ -114,6 +114,7 @@ const PhotoUploader = ({
     return allowedTypes.includes(file.type);
   };
 
+  // 이미지 콘텐츠 검증 함수
   const validateImageContent = (file: File): Promise<boolean> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -128,6 +129,44 @@ const PhotoUploader = ({
 
         img.onerror = () => {
           // 이미지 로드 실패 = 유효하지 않은 이미지 파일
+          resolve(false);
+        };
+
+        img.src = e.target?.result as string;
+      };
+
+      reader.onerror = () => {
+        // 파일 읽기 실패
+        resolve(false);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // 이미지의 가로세로 비율이 극단적인지 검사하는 함수
+  // 가로세로 비율이 1:20 또는 20:1을 초과하는 경우 유효하지 않음
+  const validateImageAspectRatio = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const img = new Image();
+
+        img.onload = () => {
+          const { width, height } = img;
+
+          // 가로세로 비율 계산
+          const aspectRatio = width / height;
+
+          // 가로세로 비율이 1:20(0.05) 미만이거나 20:1(20) 초과인 경우 유효하지 않음
+          const isValidRatio = aspectRatio >= 0.05 && aspectRatio <= 20;
+
+          resolve(isValidRatio);
+        };
+
+        img.onerror = () => {
+          // 이미지 로드 실패
           resolve(false);
         };
 
@@ -177,6 +216,13 @@ const PhotoUploader = ({
         return null;
       }
 
+      // 이미지 가로세로 비율 검사
+      const aspectRatioValid = await validateImageAspectRatio(file);
+      if (!aspectRatioValid) {
+        showAlertMessage(`"${file.name}" 파일의 가로세로 비율이 너무 극단적입니다. 가로세로 비율이 1:20 또는 20:1을 초과할 수 없습니다.`, "red");
+        return null;
+      }
+
       return file;
     });
 
@@ -187,24 +233,22 @@ const PhotoUploader = ({
     const validatedFiles = validatedResults.filter(file => file !== null) as File[];
 
     // 유효한 파일이 없으면 종료
-    // if (validatedFiles.length === 0) {
-    //   if (files.length > 0) {
-    //     showAlertMessage("선택한 모든 이미지 파일이 유효하지 않습니다.", "red");
-    //   }
-    //   return;
-    // }
+    if (validatedFiles.length === 0 && files.length > 0) {
+      showAlertMessage("선택한 모든 이미지 파일이 유효하지 않습니다.", "red");
+      return;
+    }
 
     // 일부 파일만 유효한 경우 알림
-    // if (validatedFiles.length < files.length) {
-    //   showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 유효하지 않아 제외되었습니다.`, "red");
-    // }
+    if (validatedFiles.length < files.length) {
+      showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 유효하지 않아 제외되었습니다.`, "red");
+    }
 
     // 나머지 기존 코드와 동일...
     const newFiles = [...selectedFiles, ...validatedFiles];
     setSelectedFiles(newFiles);
 
     const startIndex = selectedFiles.length;
-    if (!isCropperModalOpen) {
+    if (!isCropperModalOpen && validatedFiles.length > 0) {
       setCurrentImageIndex(startIndex);
       setIsCropperModalOpen(true);
     }
@@ -260,11 +304,6 @@ const PhotoUploader = ({
       setCurrentImageIndex(-1);
     }, 500); // 약간의 지연을 주어 마지막 이미지 처리가 시각적으로 완료되는 것을 보여줌
   };
-
-  // 가로세로 비율 변경
-  // const handleRatioChange = (ratio: "4:3" | "3:4") => {
-  // setSelectedRatio(ratio);
-  // };
 
   // 이미지 크롭 모달 닫기 처리
   const handleCropperModalClose = () => {
@@ -392,8 +431,8 @@ const PhotoUploader = ({
 
           {/* 크기 제한 안내 메시지 */}
           <div className="text-sm-lg text-gray-400 -mt-1">
-            이미지 용량 제한: 100KB ~ 10MB <br/>
-            이미지 형식 제한: png, jpg, jpeg
+            이미지 용량 제한: 100KB ~ 10MB <br />
+            이미지 형식 제한: png, jpg, jpeg <br />
           </div>
         </div>
 
@@ -445,7 +484,7 @@ const PhotoUploader = ({
           aspectRatio={selectedRatio}
           onCropComplete={handleCropComplete}
           onAllCropsComplete={handleAllCropsComplete}
-          allowedAspectRatios={["4:3", "3:4"]}
+          allowedAspectRatios={["4:3", "3:4", "1:1"]}
           modalTitle="이미지 자르기"
         />
       )}
