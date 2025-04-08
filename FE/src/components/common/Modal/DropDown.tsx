@@ -96,7 +96,7 @@ function DropDown({ albums, currentAlbumId, onSelectAlbum, placeholder = '앨범
           }}
         >
           {albums && albums.length > 0 ? (
-            albums.map((album, index) => (
+            albums .filter((album) => album.id !== currentAlbumId).map((album, index) => (
               <div
                 key={index}
                 className="px-3 py-2 cursor-pointer hover:bg-gray-100"

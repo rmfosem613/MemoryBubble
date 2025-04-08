@@ -10,10 +10,15 @@ import useUserStore from '@/stores/useUserStore';
 interface CalendarEventAddModalProps {
   isOpen: boolean;
   close: () => void;
+  showAlert: (message: string, color: string) => void;
 }
 
-function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
-  const { selectDate, addEvent } = useCalendarEventStore();
+function CalendarEventAddModal({
+  isOpen,
+  close,
+  showAlert,
+}: CalendarEventAddModalProps) {
+  const { selectDate, addEvent, startYear, endYear } = useCalendarEventStore();
   const { user } = useUserStore();
 
   const [eventTitle, setEventTitle] = useState('');
@@ -41,20 +46,18 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
 
   // 제출
   const handleSubmit = async () => {
-    const newErrors = { title: '', date: '' };
-    // 일정 유효성 검사
-    if (eventTitle.trim() === '') {
-      newErrors.title = '일정을 입력해주세요.';
-    }
-    // 날짜 유효성 검사
-    if (!startDate || !endDate) {
-      newErrors.date = '날짜를 입력(선택)해주세요.';
-    }
-    setErrors(newErrors);
-    // 에러 메시지가 하나라도 있으면 false 반환
-    if (newErrors.title || newErrors.date) {
+    // 양쪽 공백 제거
+    const trimmedTitle = eventTitle.trim();
+    setEventTitle(trimmedTitle);
+
+    // 빈값 유효성 검사
+    if (!trimmedTitle) {
+      setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
       return false;
     }
+
+    // 유효한 경우
+    setErrors((prev) => ({ ...prev, title: '' }));
 
     // api 요청
     setIsLoading(true);
@@ -72,11 +75,12 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
       if (response.status === 200) {
         // 스토어에 새 일정 추가
         addEvent(response.data);
+        showAlert('일정이 등록되었습니다.', 'green');
         return true;
       }
     } catch (error) {
       console.error('일정 추가 실패:', error);
-      alert('일정 추가에 실패했습니다. 다시 시도해주세요.');
+      showAlert('일정 등록에 실패했습니다. 다시 시도해주세요.', 'red');
       return false;
     } finally {
       setIsLoading(false);
@@ -126,7 +130,7 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
       isOpen={isOpen}
       onClose={close}
       onConfirm={handleSubmit}
-      title="일정 등록"
+      title="새 일정 등록"
       cancelButtonText="취소하기"
       confirmButtonText={isLoading ? '등록 중...' : '등록하기'}>
       <div className="flex flex-col gap-4 px-2">
@@ -152,6 +156,11 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
               setErrors((prev) => ({ ...prev, title: '' }));
               setEventTitle(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault(); // 엔터 키 기본 동작 방지
+              }
+            }}
           />
           {errors.title && (
             <p className="text-red-500 text-sm">{errors.title}</p>
@@ -159,7 +168,12 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
         </div>
         {/* 기간 */}
         <div className="flex flex-col gap-1 mb-6">
-          <label htmlFor="event-date">기간</label>
+          <label htmlFor="event-date">
+            기간{' '}
+            <span className="text-sm text-gray-500">
+              (날짜를 선택해주세요.)
+            </span>
+          </label>
           <div className="flex items-center gap-2">
             <input
               id="start-date"
@@ -167,6 +181,9 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
               className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full hover:cursor-pointer"
               value={startDate}
               onChange={handleStartDateChange}
+              min={`${startYear}-01-01`}
+              max={`${endYear}-12-31`}
+              onKeyDown={(e) => e.preventDefault()}
             />
             <span className="px-2">~</span>
             <input
@@ -175,6 +192,9 @@ function CalendarEventAddModal({ isOpen, close }: CalendarEventAddModalProps) {
               className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full hover:cursor-pointer"
               value={endDate}
               onChange={handleEndDateChange}
+              min={`${startYear}-01-01`}
+              max={`${endYear}-12-31`}
+              onKeyDown={(e) => e.preventDefault()}
             />
           </div>
           {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}

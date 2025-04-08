@@ -62,7 +62,7 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
   };
 
   return (
-    <div className="fixed top-0 w-full flex justify-center items-center z-[9999] pointer-events-auto">
+    <div className="fixed top-0 left-0 w-full flex justify-center items-center z-[9999] pointer-events-auto">
       <div className={`px-4 py-4 mt-20 flex flex-col min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
         <div className="flex justify-between items-center space-x-6">
           <div className="flex space-x-2 items-center">
