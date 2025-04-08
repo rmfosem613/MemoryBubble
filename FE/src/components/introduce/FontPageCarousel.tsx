@@ -19,34 +19,34 @@ const FontPageCarousel = () => {
 
   // 페이지 콘텐츠
   const pages = [
-    <div key="page1" className="flex flex-col gap-3 w-full items-center">
-      <p className="text-gray-700 flex flex-col gap-3 font-p-500 w-[380px] md:w-[65%]">
-        Step 1. 템플릿 다운로드
-        <br />: 제공된 양식에 맞춰 나의 손글씨를 작성해주세요
+    <div key="page1" className="flex flex-col gap-3 w-full pl-[110px] mt-[10px]">
+      <p className="text-gray-700 flex flex-col gap-2 font-p-500 w-[380px] md:w-[65%]">
+        <span><span className='font-bold'>Step 1.</span> 템플릿 다운로드</span>
+        : 제공된 양식에 맞춰 나의 손글씨를 작성해주세요
       </p>
-      <div className="grid grid-cols-2 gap-5 select-none h-[410px] md:w-[65%]">
+      <div className="grid grid-cols-2 gap-5 select-none h-[410px] w-full md:w-[65%] ml-[80px]">
         <div className="w-full h-full">
           <img
             src="/intro-fontTemplate.png"
             alt="손글씨 템플릿"
-            className="w-full h-[92%] bg-white object-contain rounded-lg shadow-md"
+            className="w-full h-full bg-white object-contain rounded-lg shadow-md"
           />
         </div>
         <div className="w-full h-full">
           <img
             src="/intro-fontTemplate2.png"
             alt="손글씨 템플릿 작성"
-            className="w-[92%] h-[92%] bg-white overflow-hidden object-contain rounded-lg shadow-md"
+            className="w-[92%] h-full bg-white overflow-hidden object-contain rounded-lg shadow-md"
           />
         </div>
       </div>
     </div>,
-    <div key="page2" className="flex flex-col gap-3 w-full items-center">
+    <div key="page2" className="flex flex-col gap-2 w-full pl-[110px] mt-[10px]">
       <p className="text-gray-700 flex flex-col gap-3 font-p-500 w-[400px] md:w-[80%]">
-        Step 2. 작성한 파일 업로드
-        <br />: 완성된 템플릿을 업로드하여 폰트 제작을 의뢰하세요
+        <span><span className='font-bold'>Step 2.</span> 작성한 파일 업로드</span>
+        : 완성된 템플릿을 업로드하여 폰트 제작을 의뢰하세요
       </p>
-      <div className="select-none w-[400px] md:w-[80%]">
+      <div className="select-none h-[410px] md:w-[80%]">
         <img
           src="/intro-fontRequest.png"
           alt="폰트 페이지"
@@ -54,12 +54,12 @@ const FontPageCarousel = () => {
         />
       </div>
     </div>,
-    <div key="page3" className="flex flex-col gap-3 w-full items-center">
+    <div key="page3" className="flex flex-col gap-2 w-full pl-[110px] mt-[10px]">
       <p className="text-gray-700 flex flex-col gap-3 font-p-500  md:w-[80%]">
-        Step 3. 나의 폰트 확인
-        <br />: 생성된 폰트를 확인하고 사용해보세요!
+        <span><span className='font-bold'>Step 3.</span> 나의 폰트 확인</span>
+        : 생성된 폰트를 확인하고 사용해보세요!
       </p>
-      <div className="select-none w-[400px] md:w-[80%]">
+      <div className="select-none h-[410px] md:w-[80%]">
         <img
           src="/intro-fontPage.png"
           alt="폰트 페이지"
