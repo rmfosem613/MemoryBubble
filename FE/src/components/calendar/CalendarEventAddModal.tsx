@@ -154,6 +154,7 @@ function CalendarEventAddModal({
             rows={2}
             onChange={(e) => {
               setErrors((prev) => ({ ...prev, title: '' }));
+              if(e.target.value.length > 50) return;
               setEventTitle(e.target.value);
             }}
             onKeyDown={(e) => {
