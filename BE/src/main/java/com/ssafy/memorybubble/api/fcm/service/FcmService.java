@@ -27,7 +27,7 @@ public class FcmService {
     }
 
     public void saveToken(Long userId, FcmDto fcmDto) {
-        log.info("fcmDto.getToken(): {}", fcmDto.getToken());
+        log.info("userId :{}, fcmDto.getToken(): {}", userId, fcmDto.getToken());
         User user = userService.getUser(userId);
         // fcm token을 redis에 저장
         String key = getKey(user);
