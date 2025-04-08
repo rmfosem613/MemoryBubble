@@ -42,6 +42,9 @@ interface LetterState {
   // 카세트 편지 관련 상태관리
   setLetterType: (type: LetterType) => void;
   updateCassetteData: (data: Partial<CassetteData>) => void;
+
+  // 상태 리셋
+  resetLetterState: () => void;
 }
 
 // Zustand 스토어 생성
@@ -71,7 +74,21 @@ export const useLetterStore = create<LetterState>((set) => ({
   setLetterType: (type) => set({ letterType: type }),
   updateCassetteData: (data) => set((state) => ({
     cassetteData: { ...state.cassetteData, ...data }
-  }))
+  })),
+
+  resetLetterState: () =>
+    set({
+      letterType: 'TEXT',
+      textContent: '',
+      cassetteData: {
+        isRecorded: false,
+        isRecording: false,
+        recordingUrl: null,
+        recordingDuration: 0,
+      },
+      selectedColor: 'winter',
+      selectedMember: null,
+    }),
 }));
 
 
