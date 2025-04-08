@@ -303,16 +303,18 @@ function PhotoAlbum() {
           </div>
           <div
             className={`relative flex items-center gap-1 ${
-              photos[currentIndex].isThumbnail
+              photos && photos.length > 0 && photos[currentIndex].isThumbnail
                 ? 'text-gray-400 cursor-not-allowed'
                 : 'cursor-pointer hover:text-blue-500 transition-colors'
             }`}
             onClick={
-              photos[currentIndex].isThumbnail
+              photos && photos.length > 0 && photos[currentIndex].isThumbnail
                 ? undefined
                 : changeThumbnailModal.open
             }
-            aria-disabled={photos[currentIndex].isThumbnail}>
+            aria-disabled={
+              photos && photos.length > 0 && photos[currentIndex].isThumbnail
+            }>
             <div className="absolute bg-blue-400 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <ImageUp size={18} strokeWidth={1} />
             <p className="text-subtitle-1-lg">썸네일 변경</p>
