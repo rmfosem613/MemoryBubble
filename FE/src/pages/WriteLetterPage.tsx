@@ -27,7 +27,8 @@ function WriteLetterPage() {
     selectedMember,
     cassetteData,
     textContent,
-    setTextContent
+    setTextContent,
+    resetLetterState
   } = useLetterStore();
 
   // 알림 관련 상태
@@ -136,7 +137,7 @@ function WriteLetterPage() {
       }
 
       showAlertMessage('편지가 성공적으로 전송되었습니다.', "green");
-      navigate('/letter-box'); // 편지함 페이지로 이동
+      resetLetterState();
     } catch (error) {
       console.error('편지 전송 오류:', error);
       showAlertMessage('편지 전송에 실패했습니다. 다시 시도해주세요.', "red");
