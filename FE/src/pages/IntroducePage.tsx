@@ -103,7 +103,7 @@ function IntroducePage() {
         clearInterval(animation);
       }, 500); // 대략 1.2초 정도 소요
 
-      return () => { 
+      return () => {
         clearInterval(animation);
         clearTimeout(cleanup);
       };
@@ -126,7 +126,7 @@ function IntroducePage() {
         <img className='w-[500px]' src="/logo-1.svg" alt="Logo" />
       </div>
 
-      <div style={{ height: '650vh' }}>
+      <div style={{ height: '750vh' }}>
         {/* 스크롤을 위한 충분한 높이 제공 - 짧게 수정된 스크롤 높이 */}
         <div className='relative' style={{ height: '90vh' }}>
           {/* 배경 이미지 - 고정 위치 */}

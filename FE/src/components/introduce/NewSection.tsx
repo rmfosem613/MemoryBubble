@@ -11,11 +11,9 @@ const NewSection: React.FC<NewSectionProps> = ({ newSectionPosition, nextSection
     <>
       <div
         ref={nextSectionRef}
-        className="sticky top-0 min-h-screen w-full bg-white transition-all duration-500 ease-in-out"
+        className="sticky top-0 min-h-[500px] -mt-[40px] w-full bg-autumn-000 transition-all duration-500 ease-in-out"
         style={{
-          transform: `translateY(${newSectionPosition})`,
-          borderTopLeftRadius: '30px',
-          borderTopRightRadius: '30px',
+          transform: `translateY(${newSectionPosition})`
         }}>
         {/* 새 섹션 내용 */}
         <div className="mx-auto pt-[75px]">

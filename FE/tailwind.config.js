@@ -3,8 +3,8 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      minWidth:{
-        'app':'510px'
+      minWidth: {
+        'app': '510px'
       },
       colors: {
         transparent: 'tranparent',
@@ -35,15 +35,19 @@ module.exports = {
         'green-300': '#08785E',
 
         // Calender
+        'spring-000': '#FFFBFB',
         'spring-100': '#FFEFEF',
         'spring-200': '#FFBFCD',
         'spring-300': '#FF83AF',
+        'summer-000': "#F5FBFD",
         'summer-100': '#DBF0F7',
         'summer-200': '#76C1DE',
         'summer-300': '#507EC3',
+        'autumn-000': '#FFFCF5',
         'autumn-100': '#FFF3DC',
         'autumn-200': '#F8C37F',
         'autumn-300': '#F2914A',
+        'winter-000': '#F9F9FC',
         'winter-100': '#EAE8F5',
         'winter-200': '#96A0D1',
         'winter-300': '#50659C',

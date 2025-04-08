@@ -53,11 +53,11 @@ const Section = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-winter-000">
       {/* 두 번째 섹션: 나만의 손글씨 */}
       <section
         ref={sectionRefs.handwriting}
-        className="min-h-screen flex items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-autumn-100/30">
+        className="min-h-screen flex items-start justify-center py-10 opacity-0 translate-y-10 transition-all duration-1000 bg-autumn-000">
         <div className="container flex flex-col gap- items-center mb-4">
           {/* 제목 */}
           <div className="flex flex-col gap-2">
@@ -77,7 +77,7 @@ const Section = () => {
       {/* 세 번째 섹션: 추억 갤러리 */}
       <section
         ref={sectionRefs.gallery}
-        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-winter-100/30">
+        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-winter-000">
         <div className="container flex flex-col md:flex-row-reverse gap-6 md:gap-8 items-center">
           <div className="flex flex-col gap-5 ">
             <h2 className="flex items-center pt-5">
@@ -105,7 +105,7 @@ const Section = () => {
             <img
               src="intro-postcard.gif"
               alt="갤러리"
-              className="rounded-lg shadow-md"
+              className="rounded-lg shadow-md select-none"
             />
           </div>
         </div>
@@ -114,7 +114,7 @@ const Section = () => {
       {/* 네 번째 섹션: 방울 캘린더 */}
       <section
         ref={sectionRefs.calendar}
-        className="flex flex-col items-center justi-fy-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-summer-100/30">
+        className="flex min-h-screen flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-summer-000">
         <div className="container flex flex-col lg:flex-row items-center lg:items-end lg:justify-between">
           <div className="flex flex-col gap-5 mb-6 lg:mb-0">
             <h2 className="flex items-centerd">
@@ -136,7 +136,7 @@ const Section = () => {
                   <img
                     src="/calendar-winter.svg"
                     alt="겨울 캘린더"
-                    className="h-40"
+                    className="h-40 select-none"
                   />
                 </div>
               </div>
@@ -145,7 +145,7 @@ const Section = () => {
                   <img
                     src="/calendar-spring.svg"
                     alt="봄 캘린더"
-                    className="h-40"
+                    className="h-40 select-none"
                   />
                 </div>
               </div>
@@ -154,7 +154,7 @@ const Section = () => {
                   <img
                     src="/calendar-summer.svg"
                     alt="여름 캘린더"
-                    className="h-40"
+                    className="h-40 select-none"
                   />
                 </div>
               </div>
@@ -163,7 +163,7 @@ const Section = () => {
                   <img
                     src="/calendar-autumn.svg"
                     alt="가을 캘린더"
-                    className="h-40"
+                    className="h-40 select-none"
                   />
                 </div>
               </div>
@@ -173,7 +173,7 @@ const Section = () => {
             <img
               src="/introCalendar.png"
               alt="전체 캘린더"
-              className="rounded-lg shadow-md w-[390px] lg:w-[90%]"
+              className="rounded-lg shadow-md w-[390px] lg:w-[90%] select-none"
             />
           </div>
         </div>
@@ -182,7 +182,7 @@ const Section = () => {
       {/* 다섯 번째 섹션: 편지 */}
       <section
         ref={sectionRefs.letter}
-        className="flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-winter-100/30">
+        className="min-h-screen flex flex-col items-center justify-center py-20 opacity-0 translate-y-10 transition-all duration-1000 bg-winter-000">
         <div className="container flex flex-col md:flex-row-reverse md:justify-between items-center">
           <div className="flex flex-col gap-5">
             <h2 className="flex items-center ">
@@ -212,12 +212,12 @@ const Section = () => {
             <img
               src="intro-cassetteWinter.svg"
               alt="카세트 테이프"
-              className="ml-28 mt-4 w-[40%] md:m-0 md:w-[80%] lg:w-[60%] shadow-lg -rotate-6"
+              className="ml-28 rounded-[16px] mt-4 w-[40%] md:m-0 md:w-[80%] lg:w-[60%] shadow-lg -rotate-6 select-none"
             />
             <img
               src="/intro-unLetterWinter.svg"
               alt="편지 봉투"
-              className="z-10 absolute top-20 left-44 w-[45%] md:top-24 md:left-14 md:w-[80%] lg:left-36 lg:top-24 lg:w-[60%] shadow-lg"
+              className="z-10 absolute top-20 left-44 w-[45%] md:top-24 md:left-14 md:w-[80%] lg:left-36 lg:top-24 lg:w-[60%] shadow-lg select-none"
             />
           </div>
         </div>
