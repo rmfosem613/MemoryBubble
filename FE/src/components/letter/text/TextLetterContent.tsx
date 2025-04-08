@@ -82,7 +82,7 @@ function TextLetterContent({
         {/* 편지지 줄 7개 추가 */}
         {[...Array(7)].map((_, index) => (
           <div key={index}>
-            <hr className="border-t border-gray-400 my-[26.7px]" />
+            <hr className="border-t border-gray-300 my-[26.7px]" />
           </div>
         ))}
 
@@ -97,10 +97,13 @@ function TextLetterContent({
       </div>
 
       {/* 편지지 내용 입력: z-30 */}
-      <div className="absolute top-[-10px] mt-[60px] z-30 flex flex-col w-full pr-[40px]">
+      <div className="absolute top-[-10px] mt-[58px] z-30 flex flex-col w-full pr-[40px]">
         <textarea
-          className="resize-none h-[370px]"
-          style={getTextareaStyle()}
+          className="resize-none h-[370px] text-[27px]"
+          style={{
+            ...getTextareaStyle(),
+            lineHeight: "2",
+          }}
           rows={9}
           value={content}
           onChange={handleTextChange}
