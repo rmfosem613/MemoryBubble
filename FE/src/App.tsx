@@ -34,6 +34,7 @@ import AdminPage from './pages/AdminPage';
 import OAuthCallback from './components/oauth/OAuthCallback';
 import LandingPage from './pages/LandingPage';
 import IntroducePage from './pages/IntroducePage';
+import LandingWithIntro from './pages/LandingWithIntro';
 // import PWAInstaller from './components/PWAInstaller';
 
 type NotificationPayload = {
@@ -84,8 +85,9 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/introduce" element={<IntroducePage />} />
+          <Route index path="/" element={<LandingWithIntro />} />
+          {/* <Route path="/" element={<LandingPage />} /> */}
+          {/* <Route path="/introduce" element={<IntroducePage />} /> */}
 
           {/* 인증이 필요 없는 경로 (로그인하지 않은 사용자만 접근 가능) */}
           <Route element={<NonAuthRoute />}>
