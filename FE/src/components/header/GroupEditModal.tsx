@@ -31,7 +31,7 @@ const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
       onConfirm={onConfirm}>
       <>
         {/* 썸네일 이미지 */}
-        <div className="mb-5">
+        {/* <div className="mb-5">
           <p className="mb-2">그룹 대표 이미지</p>
           <div className="flex flex-col items-center">
             <input
@@ -59,7 +59,7 @@ const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
               이미지 변경
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* 그룹명 */}
         <div className="mb-4">

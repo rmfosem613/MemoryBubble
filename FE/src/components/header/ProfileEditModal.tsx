@@ -40,7 +40,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
       onConfirm={onConfirm}>
       <div className="w-full px-5 flex flex-col justify-center space-y-4">
         {/* 프로필 이미지 */}
-        <div className="mx-auto" onClick={triggerFileInput}>
+        {/* <div className="mx-auto" onClick={triggerFileInput}>
           <input
             type="file"
             ref={fileInputRef}
@@ -58,7 +58,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
               <Camera size={18} />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* 이름 입력 */}
         <div className="flex flex-col space-y-1">
