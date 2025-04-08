@@ -50,7 +50,7 @@ public class Letter {
     @Column(length = 30)
     private String backgroundColor;
 
-    private Integer duration;
+    private Long duration;
 
     public void updateIsRead(Boolean isRead) {
         this.isRead = isRead;

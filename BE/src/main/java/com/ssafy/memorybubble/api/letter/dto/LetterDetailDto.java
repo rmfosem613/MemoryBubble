@@ -19,4 +19,5 @@ public class LetterDetailDto {
     LocalDate openAt;
     String backgroundColor;
     String content;
+    Long duration;
 }

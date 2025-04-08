@@ -154,6 +154,7 @@ public class LetterService {
                 .openAt(letter.getOpenAt())
                 .backgroundColor(letter.getBackgroundColor())
                 .content(content)
+                .duration(letter.getDuration())
                 .build();
     }
 }
