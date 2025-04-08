@@ -53,6 +53,7 @@ function InputInfo({
   // 이름 변경 처리 함수
   const handleNameChange = (e) => {
     const value = e.target.value;
+    if(value.length > 10) return;
     setName(value); // 이름 상태 변경
     onNameChange(value); // 부모 컴포넌트에 이름 변경 알리기
   };

@@ -165,15 +165,19 @@ function PhotoAlbum() {
               {message.content}
             </p>
             <p className="text-xs text-gray-500">
-              {new Date(message.createdAt).toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: false,
-                //timeZone: 'Asia/Seoul',
-              })}
+              {(() => {
+                const date = new Date(message.createdAt);
+                // 한국 시간대로 변환 (UTC+9)
+                const koreaDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
+                const year = koreaDate.getFullYear();
+                const month = koreaDate.getMonth() + 1;
+                const day = koreaDate.getDate();
+                const hours = koreaDate.getHours();
+                const minutes = koreaDate.getMinutes();
+
+                return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+              })()}
             </p>
           </div>
         </div>
@@ -209,15 +213,19 @@ function PhotoAlbum() {
             </div>
           </div>
           <p className="text-xs text-gray-500">
-            {new Date(message.createdAt).toLocaleString('ko-KR', {
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: false,
-              // timeZone: 'Asia/Seoul',
-            })}
+            {(() => {
+              const date = new Date(message.createdAt);
+              // 한국 시간대로 변환 (UTC+9)
+              const koreaDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
+              const year = koreaDate.getFullYear();
+              const month = koreaDate.getMonth() + 1;
+              const day = koreaDate.getDate();
+              const hours = koreaDate.getHours();
+              const minutes = koreaDate.getMinutes();
+
+              return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+            })()}
           </p>
         </div>
       );
@@ -295,36 +303,38 @@ function PhotoAlbum() {
         </div>
         <div className="flex justify-end gap-4">
           <div
-            className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
+            className="flex items-center gap-1 cursor-pointer"
             onClick={editAlbumModal.open}>
-            <div className="absolute bg-gray-600 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
-            <PencilLine size={18} strokeWidth={1} />
-            <p className="text-subtitle-1-lg">앨범 정보 수정</p>
+            <PencilLine strokeWidth={1} className="absolute z-10 ml-[-7px] mt-[2px]" size={'21px'} />
+            <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400 opacity-45"></div>
+            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">앨범 수정</p>
           </div>
           <div
-            className={`relative flex items-center gap-1 ${
-              photos && photos.length > 0 && photos[currentIndex].isThumbnail
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'cursor-pointer hover:text-blue-500 transition-colors'
-            }`}
+            className={`flex items-center gap-1 ${!photos || photos.length === 0 || photos[currentIndex].isThumbnail
+              ? 'text-gray-400 opacity-70 cursor-default'
+              : 'cursor-pointer hover:text-blue-500' // 활성화된 경우 호버 효과 추가
+              }`}
             onClick={
-              photos && photos.length > 0 && photos[currentIndex].isThumbnail
+              !photos || photos.length === 0 || photos[currentIndex].isThumbnail
                 ? undefined
                 : changeThumbnailModal.open
             }
             aria-disabled={
-              photos && photos.length > 0 && photos[currentIndex].isThumbnail
-            }>
-            <div className="absolute bg-blue-400 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
-            <ImageUp size={18} strokeWidth={1} />
-            <p className="text-subtitle-1-lg">썸네일 변경</p>
+              !photos || photos.length === 0 || photos[currentIndex].isThumbnail
+            }
+            role="button" // 접근성을 위한 역할 추가
+            tabIndex={(!photos || photos.length === 0 || photos[currentIndex].isThumbnail) ? -1 : 0} // 키보드 접근성
+          >
+            <ImageUp strokeWidth={1} className="absolute z-10 ml-[-7px] mt-[2px]" size={'21px'} />
+            <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
+            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">썸네일 변경</p>
           </div>
           <div
-            className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors relative"
+            className="flex items-center gap-1 cursor-pointer"
             onClick={addPhotoModal.open}>
-            <div className="absolute bg-album-200 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
-            <CirclePlus size={18} strokeWidth={1} />
-            <p className="text-subtitle-1-lg">사진 추가하기</p>
+            <CirclePlus strokeWidth={1} className="absolute z-10 ml-[-7pX] mt-[2px]" size={'21px'} />
+            <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200 opacity-65"></div>
+            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">사진 추가</p>
           </div>
         </div>
       </div>
@@ -360,7 +370,7 @@ function PhotoAlbum() {
                 <img
                   src={photos[currentIndex].src + '&w=800'}
                   alt={photos[currentIndex].alt}
-                  className="max-w-full max-h-full object-contain absolute"
+                  className="w-full h-full object-contain absolute inset-0 p-2"
                   style={{
                     backfaceVisibility: 'hidden',
                   }}
@@ -446,11 +456,10 @@ function PhotoAlbum() {
                     글 남기기
                   </button>
                   <button
-                    className={`${
-                      isRecording
-                        ? 'bg-red-500 hover:bg-red-600 text-white'
-                        : 'bg-white text-black hover:bg-gray-100 border'
-                    } h-full px-4 py-2 rounded-lg transition-colors z-10`}
+                    className={`${isRecording
+                      ? 'bg-red-500 hover:bg-red-600 text-white'
+                      : 'bg-white text-black hover:bg-gray-100 border'
+                      } h-full px-4 py-2 rounded-lg transition-colors z-10`}
                     onClick={handleRecordButtonWrapper}>
                     <Mic size={20} strokeWidth={1} />
                   </button>
@@ -481,19 +490,21 @@ function PhotoAlbum() {
       </div>
 
       {/* 페이지 인디케이터 */}
-      {photos.length > 1 && (
-        <div className="flex items-center justify-center gap-6">
-          <button onClick={handleGoToPrevious}>
-            <ChevronLeft size={20} />
-          </button>
-          <p className="text-sm text-gray-600">
-            {currentIndex + 1} / {photos.length}
-          </p>
-          <button onClick={handleGoToNext}>
-            <ChevronRight size={20} />
-          </button>
-        </div>
-      )}
+      {
+        photos.length > 1 && (
+          <div className="flex items-center justify-center gap-6">
+            <button onClick={handleGoToPrevious}>
+              <ChevronLeft size={20} />
+            </button>
+            <p className="text-sm text-gray-600">
+              {currentIndex + 1} / {photos.length}
+            </p>
+            <button onClick={handleGoToNext}>
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        )
+      }
 
       {/* 앨범명 수정 모달 */}
       <Modal
@@ -615,10 +626,12 @@ function PhotoAlbum() {
         onUploadComplete={refreshPhotos}
       />
 
-      {alertState && (
-        <Alert message={alertState.message} color={alertState.color} />
-      )}
-    </div>
+      {
+        alertState && (
+          <Alert message={alertState.message} color={alertState.color} />
+        )
+      }
+    </div >
   );
 }
 

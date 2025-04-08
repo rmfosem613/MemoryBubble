@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import Title from '@/components/common/Title';
 import LetterTypeSelector from '@/components/letter/common/LetterTypeSelector';
 import TextLetterContent from '@/components/letter/text/TextLetterContent';
@@ -9,15 +8,13 @@ import Button from '@/components/common/Button/Button';
 import { useLetterStore } from '@/stores/useLetterStore';
 import { sendLetter } from '@/apis/letterApi';
 import { SendLetterRequest } from '@/apis/letterApi';
-import { useNavigate } from 'react-router-dom';
 import { useUserApi } from '@/apis/useUserApi';
 
 import Alert from '@/components/common/Alert';
 
 function WriteLetterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { uploadImageWithPresignedUrl } = useUserApi();
 
   // 편지 타입 및 상태 정보 가져오기
@@ -28,16 +25,16 @@ function WriteLetterPage() {
     cassetteData,
     textContent,
     setTextContent,
-    resetLetterState
+    resetLetterState,
   } = useLetterStore();
 
   // 알림 관련 상태
   const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertColor, setAlertColor] = useState("red");
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertColor, setAlertColor] = useState('red');
 
   // 알림 메시지 표시
-  const showAlertMessage = (message: string, color: string = "red") => {
+  const showAlertMessage = (message: string, color: string = 'red') => {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
@@ -48,7 +45,7 @@ function WriteLetterPage() {
   };
 
   useEffect(() => {
-    setTextContent('')
+    setTextContent('');
   }, []);
 
   // 오디오 파일을 Blob으로 변환하는 함수
@@ -70,9 +67,10 @@ function WriteLetterPage() {
 
   // 편지 보내기 처리 함수
   const handleSendLetter = async () => {
+    console.log('녹음 시간:', cassetteData.recordingDuration);
     // 유효성 검사
     if (!selectedMember) {
-      showAlertMessage('받는 사람을 선택해주세요.', "red");
+      showAlertMessage('받는 사람을 선택해주세요.', 'red');
       return;
     }
 
@@ -81,13 +79,13 @@ function WriteLetterPage() {
 
     // 텍스트 편지인 경우 내용 확인 (공백만 있는 경우도 체크)
     if (letterType === 'TEXT' && !textContent.trim()) {
-      showAlertMessage('편지 내용을 입력해주세요.', "red");
+      showAlertMessage('편지 내용을 입력해주세요.', 'red');
       return;
     }
 
     // 카세트 편지인 경우 녹음 확인
     if (letterType === 'AUDIO' && !cassetteData.isRecorded) {
-      showAlertMessage('녹음을 완료해주세요.', "red");
+      showAlertMessage('녹음을 완료해주세요.', 'red');
       return;
     }
 
@@ -100,30 +98,38 @@ function WriteLetterPage() {
         : new Date().toISOString().split('T')[0];
 
       // 텍스트 편지의 경우 줄바꿈을 <br/>로 변환
-      const processedContent = letterType === 'TEXT'
-        ? textContent.replace(/\n/g, '<br/>')
-        : '';
+      const processedContent =
+        letterType === 'TEXT' ? textContent.replace(/\n/g, '<br/>') : '';
 
       // API 요청 데이터 구성
       const letterRequest: SendLetterRequest = {
         type: letterType,
-        content: processedContent,  // 변환된 내용 또는 AUDIO 타입인 경우 빈 문자열
+        content: processedContent, // 변환된 내용 또는 AUDIO 타입인 경우 빈 문자열
         openAt: formattedDate,
         backgroundColor: themeColor,
-        receiverId: parseInt(selectedMember.id, 10)
+        receiverId: parseInt(selectedMember.id, 10),
+        duration: cassetteData.recordingDuration || 0, // AUDIO 타입인 경우 녹음 시간
       };
+
+      console.log(letterRequest, '편지 전송 요청 데이터');
 
       // 편지 전송 API 호출
       const response = await sendLetter(letterRequest);
 
       // AUDIO 타입인 경우, 녹음된 오디오 파일을 presignedUrl에 업로드
-      if (letterType === 'AUDIO' && cassetteData.recordingUrl && response.presignedUrl) {
+      if (
+        letterType === 'AUDIO' &&
+        cassetteData.recordingUrl &&
+        response.presignedUrl
+      ) {
         // 오디오 URL에서 Blob 객체 가져오기
-        const audioBlob = await fetchAudioBlobFromUrl(cassetteData.recordingUrl);
+        const audioBlob = await fetchAudioBlobFromUrl(
+          cassetteData.recordingUrl,
+        );
 
         // 파일 타입 설정 (오디오 녹음은 일반적으로 audio/wav 또는 audio/webm)
         const audioFile = new File([audioBlob], 'recording.mp3', {
-          type: 'audio/mpeg'
+          type: 'audio/mpeg',
         });
 
         try {
@@ -131,16 +137,19 @@ function WriteLetterPage() {
           await uploadImageWithPresignedUrl(response.presignedUrl, audioFile);
         } catch (uploadError) {
           console.error('오디오 파일 업로드 실패:', uploadError);
-          showAlertMessage('오디오 파일 업로드에 실패했습니다. 다시 시도해주세요.', "red");
+          showAlertMessage(
+            '오디오 파일 업로드에 실패했습니다. 다시 시도해주세요.',
+            'red',
+          );
           throw uploadError;
         }
       }
 
-      showAlertMessage('편지가 성공적으로 전송되었습니다.', "green");
+      showAlertMessage('편지가 성공적으로 전송되었습니다.', 'green');
       resetLetterState();
     } catch (error) {
       console.error('편지 전송 오류:', error);
-      showAlertMessage('편지 전송에 실패했습니다. 다시 시도해주세요.', "red");
+      showAlertMessage('편지 전송에 실패했습니다. 다시 시도해주세요.', 'red');
     } finally {
       setIsLoading(false);
     }
@@ -153,10 +162,11 @@ function WriteLetterPage() {
       <div className="container mt-[8px]">
         <div className="relative mb-[20px]">
           <Title text="편지쓰기" />
-          <p className="flex absolute top-[108px] left-[160px]">나만의 손글씨를 사용하여 편지로 마음을 전해보세요</p>
+          <p className="flex absolute top-[108px] left-[160px]">
+            나만의 손글씨를 사용하여 편지로 마음을 전해보세요
+          </p>
         </div>
         <div className="grid grid-cols-12 gap-1">
-
           {/* grid 9 */}
           <div className="col-span-9">
             <div className="grid grid-rows-11 gap-1">
@@ -166,10 +176,14 @@ function WriteLetterPage() {
               </div>
               {/* 편지 레이아웃 */}
               <div className="row-span-10">
-                {letterType === 'TEXT' ?
-                  <TextLetterContent onContentChange={handleContentChange} content={textContent} /> :
+                {letterType === 'TEXT' ? (
+                  <TextLetterContent
+                    onContentChange={handleContentChange}
+                    content={textContent}
+                  />
+                ) : (
                   <CassetteContent selectedDate={selectedDate} />
-                }
+                )}
               </div>
             </div>
           </div>
@@ -180,7 +194,7 @@ function WriteLetterPage() {
               <LetterControls onDateChange={setSelectedDate} />
               <Button
                 icon="send"
-                name={isLoading ? "전송 중..." : "편지보내기"}
+                name={isLoading ? '전송 중...' : '편지보내기'}
                 color="blue"
                 onClick={handleSendLetter}
               />
