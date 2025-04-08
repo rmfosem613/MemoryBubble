@@ -92,22 +92,22 @@ function IntroducePage() {
       const animateCurtain = () => {
         setCurtainHeight(prev => {
           if (prev <= 0) return 0;
-          return prev - 10; // 줄여나감
+          return prev - 50; // 줄여나감
         });
       };
 
-      const animation = setInterval(animateCurtain, 15); // 10ms마다 실행
+      const animation = setInterval(animateCurtain, 5); // 5ms마다 실행
 
       // 애니메이션이 완료되면 interval 정리
       const cleanup = setTimeout(() => {
         clearInterval(animation);
-      }, 3000); // 대략 1.2초 정도 소요
+      }, 500); // 대략 1.2초 정도 소요
 
-      return () => { 
+      return () => {
         clearInterval(animation);
         clearTimeout(cleanup);
       };
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, []);
@@ -126,7 +126,7 @@ function IntroducePage() {
         <img className='w-[500px]' src="/logo-1.svg" alt="Logo" />
       </div>
 
-      <div style={{ height: '650vh' }}>
+      <div style={{ height: '750vh' }}>
         {/* 스크롤을 위한 충분한 높이 제공 - 짧게 수정된 스크롤 높이 */}
         <div className='relative' style={{ height: '90vh' }}>
           {/* 배경 이미지 - 고정 위치 */}

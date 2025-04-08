@@ -24,17 +24,21 @@ const FontPageCarousel = () => {
         Step 1. 템플릿 다운로드
         <br />: 제공된 양식에 맞춰 나의 손글씨를 작성해주세요
       </p>
-      <div className="grid grid-cols-2 gap-5 select-none w-[380px] md:w-[65%]">
-        <img
-          src="/intro-fontTemplate.png"
-          alt="손글씨 템플릿"
-          className="w-full rounded-lg shadow-md"
-        />
-        <img
-          src="/intro-fontTemplate2.png"
-          alt="손글씨 템플릿 작성"
-          className="w-full rounded-lg shadow-md"
-        />
+      <div className="grid grid-cols-2 gap-5 select-none h-[410px] md:w-[65%]">
+        <div className="w-full h-full">
+          <img
+            src="/intro-fontTemplate.png"
+            alt="손글씨 템플릿"
+            className="w-full h-[92%] bg-white object-contain rounded-lg shadow-md"
+          />
+        </div>
+        <div className="w-full h-full">
+          <img
+            src="/intro-fontTemplate2.png"
+            alt="손글씨 템플릿 작성"
+            className="w-[92%] h-[92%] bg-white overflow-hidden object-contain rounded-lg shadow-md"
+          />
+        </div>
       </div>
     </div>,
     <div key="page2" className="flex flex-col gap-3 w-full items-center">
@@ -77,11 +81,10 @@ const FontPageCarousel = () => {
         <button
           onClick={goToPrevPage}
           disabled={currentPage === 0}
-          className={`p-2 rounded-full ${
-            currentPage === 0
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-autumn-100'
-          }`}
+          className={`p-2 rounded-full ${currentPage === 0
+            ? 'text-gray-300 cursor-not-allowed'
+            : 'text-gray-600 hover:bg-autumn-100'
+            }`}
           aria-label="이전 페이지">
           <ChevronLeft size={24} />
         </button>
@@ -92,11 +95,10 @@ const FontPageCarousel = () => {
             <button
               key={index}
               onClick={() => goToPage(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentPage
-                  ? 'bg-autumn-200'
-                  : 'bg-autumn-100 hover:bg-autumn-200/50'
-              }`}
+              className={`w-3 h-3 rounded-full transition-all ${index === currentPage
+                ? 'bg-autumn-200'
+                : 'bg-autumn-100 hover:bg-autumn-200/50'
+                }`}
               aria-label={`${index + 1}번 페이지로 이동`}
             />
           ))}
@@ -105,11 +107,10 @@ const FontPageCarousel = () => {
         <button
           onClick={goToNextPage}
           disabled={currentPage === totalPages - 1}
-          className={`p-2 rounded-full ${
-            currentPage === totalPages - 1
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-autumn-100'
-          }`}
+          className={`p-2 rounded-full ${currentPage === totalPages - 1
+            ? 'text-gray-300 cursor-not-allowed'
+            : 'text-gray-600 hover:bg-autumn-100'
+            }`}
           aria-label="다음 페이지">
           <ChevronRight size={24} />
         </button>
