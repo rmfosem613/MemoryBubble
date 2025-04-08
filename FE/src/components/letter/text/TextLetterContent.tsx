@@ -19,7 +19,7 @@ function TextLetterContent({
   const [senderName, setSenderName] = useState<string>('');
   const { fetchUserProfile } = useUserApi();
   const { user } = useUserStore();
-  const maxLength = 300;
+  const maxLength = 200;
 
   // 커스텀 폰트 훅 사용
   const { fontLoaded, fontFamily } = useCustomFont();
