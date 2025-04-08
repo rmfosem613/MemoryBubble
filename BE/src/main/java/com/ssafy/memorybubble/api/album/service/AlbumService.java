@@ -156,8 +156,9 @@ public class AlbumService {
 
     private AlbumDetailDto convertToDto(Album album, List<Photo> photos) {
         // 앨범에 포함된 사진을 dto로 변환 후 앨범 dto로 변환
+        String thumbnail = album.getThumbnail();
         List<PhotoDto> photoDtos = photos.stream()
-                .map(this::convertToDto)
+                .map(photo -> convertToDto(photo, thumbnail))
                 .collect(Collectors.toList());
 
         return AlbumDetailDto.builder()
@@ -167,11 +168,12 @@ public class AlbumService {
                 .build();
     }
 
-    private PhotoDto convertToDto(Photo photo) {
+    private PhotoDto convertToDto(Photo photo, String thumbnail) {
         // 사진을 dto로 변환
         return PhotoDto.builder()
                 .photoId(photo.getId())
                 .photoUrl(fileService.getDownloadSignedURL(photo.getPath()))
+                .isThumbnail(photo.getPath().equals(thumbnail))
                 .build();
     }
 
