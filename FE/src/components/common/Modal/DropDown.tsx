@@ -89,7 +89,7 @@ function DropDown({
       >
         <span className={`${disabled || noAlbumsAvailable ? 'text-gray-500' : 'text-gray-700'}`}>
           {disabled || noAlbumsAvailable
-            ? "이동 가능한 앨범이 없습니다"
+            ? "추억보관함"
             : selectedAlbum 
               ? selectedAlbum.title 
               : placeholder}
@@ -130,7 +130,7 @@ function DropDown({
               </div>
             ))
           ) : (
-            <div className="px-3 py-2 text-gray-500">이동 가능한 앨범이 없습니다</div>
+            <div className="px-3 py-2 text-gray-500">추억 보관함</div>
           )}
         </div>
       )}

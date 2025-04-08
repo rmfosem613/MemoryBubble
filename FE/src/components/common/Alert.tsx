@@ -62,8 +62,8 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full flex justify-center items-center z-[9999] pointer-events-auto">
-      <div className={`px-4 py-4 mt-20 flex flex-col min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
+    <div className="fixed left-1/2 transform -translate-x-1/2 z-[9999] pointer-events-auto mt-[64px]">
+      <div className={`px-4 py-4 flex flex-col min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
         <div className="flex justify-between items-center space-x-6">
           <div className="flex space-x-2 items-center">
             <AlertCircle className={`w-4 h-4 ${colorClasses.text}`} />
@@ -87,7 +87,7 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
 
 
       </div>
-    </div>
+    </div >
   );
 };
 
