@@ -84,6 +84,14 @@ function JoinPage() {
       if (!name) {
         setNameError("이름을 입력해주세요.");
         hasError = true;
+      } else if (name.length < 1) {
+        setNameError("이름은 최소 1글자 이상이어야 합니다.");
+        hasError = true;
+      } else if (name.length > 10) {
+        setNameError("이름은 최대 10글자까지 가능합니다.");
+        hasError = true;
+      } else {
+        setNameError("");
       }
 
       if (!gender) {
@@ -223,7 +231,8 @@ function JoinPage() {
 
   // 자식 컴포넌트에서 받은 폼 데이터 처리 함수
   const handleNameChange = (value) => {
-    setName(value);
+    const trimName = value.trim();
+    setName(trimName);
     setNameError("");
   };
 
