@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Crop, X, RefreshCcw, Check } from 'lucide-react';
 import ReactCrop, { type Crop as LibCrop } from 'react-image-crop';
 import useImageCropper, { type AspectRatioOption } from './useImageCropper';
@@ -15,6 +15,7 @@ export interface ImageCropperProps {
   minSize?: number; // 최소 크기 (KB)
   maxSize?: number; // 최대 크기 (MB)
   imageQuality?: number; // 이미지 품질 (0.0 ~ 1.0)
+  maxAspectRatioDifference?: number; // 최대 가로세로 비율 차이 (기본값: 20)
   renderPreview?: (previewUrl: string | null, handleButtonClick: () => void) => React.ReactNode;
   renderUploadBox?: (handleButtonClick: () => void, handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void, handleDrop: (e: React.DragEvent<HTMLDivElement>) => void) => React.ReactNode;
   modalTitle?: string;
@@ -33,6 +34,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   minSize = 100, // 기본 최소 100KB
   maxSize = 10, // 기본 최대 10MB
   imageQuality = 0.95, // 기본 품질 95%
+  maxAspectRatioDifference = 20, // 기본 최대 비율 차이 20배
   renderPreview,
   renderUploadBox,
   modalTitle = "이미지 자르기",
@@ -68,14 +70,27 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     defaultAspectRatio: "4:3", // 항상 4:3으로 시작하도록 설정
     minSize,
     maxSize,
-    imageQuality
+    imageQuality,
+    maxAspectRatioDifference
   });
 
-  // 이미지가 로드되면 항상 4:3 비율로 초기 설정
+  // 비율 버튼에 대한 참조 객체 추가
+  const squareRatioButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 이미지가 로드되면 초기에 4:3 비율로 설정하고, 그 다음 1:1 비율 버튼 자동 클릭
   useEffect(() => {
     if (showCropper && previewUrl && imgRef.current) {
       // 이미지가 로드된 후 초기 비율 강제 설정
       handleRatioChange("4:3");
+      
+      // 약간의 딜레이 후 1:1 비율 버튼 자동 클릭 실행
+      const timer = setTimeout(() => {
+        if (squareRatioButtonRef.current) {
+          squareRatioButtonRef.current.click();
+        }
+      }, 300); // 300ms 딜레이 후 실행
+      
+      return () => clearTimeout(timer);
     }
   }, [showCropper, previewUrl, imgRef.current]);
 
@@ -106,6 +121,22 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   // 이미지 적용 처리 함수
   const applyImage = async () => {
     try {
+      // crop 영역 크기 확인
+      if (imgRef.current && crop) {
+        // 이미지 전체 면적 계산
+        const totalArea = imgRef.current.width * imgRef.current.height;
+        // 현재 crop 영역 면적 계산
+        const cropArea = crop.width * crop.height;
+        // 면적 비율 계산 (%)
+        const areaRatio = (cropArea / totalArea) * 100;
+        
+        // 최소 면적(30%) 확인
+        if (areaRatio < 30) {
+          showAlertMessage("자르기 영역이 원본 이미지의 30% 이상이어야 합니다.", "red");
+          return;
+        }
+      }
+      
       const result = await handleApplyCrop();
       // 부모 컴포넌트로 크롭된 이미지 전달
       if (result.file) {
@@ -136,6 +167,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
           {allowedAspectRatios.map((ratio) => (
             <button
               key={ratio}
+              ref={ratio === "1:1" ? squareRatioButtonRef : null} // 1:1 버튼에 참조 연결
               className={`px-5 py-2 rounded-md ${selectedRatio === ratio
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700"
@@ -246,12 +278,30 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
                     <div className="max-w-full" style={{ maxHeight: 'calc(70vh - 200px)' }}>
                       <ReactCrop
                         crop={crop}
-                        onChange={(newCrop) => setCrop(newCrop as LibCrop)}
+                        onChange={(newCrop) => {
+                          if (imgRef.current) {
+                            // 이미지 전체 면적 계산
+                            const totalArea = imgRef.current.width * imgRef.current.height;
+                            // 새 crop 영역 면적 계산
+                            const newCropArea = newCrop.width * newCrop.height;
+                            // 면적 비율 계산 (%)
+                            const areaRatio = (newCropArea / totalArea) * 100;
+                            
+                            // 최소 면적(30%) 미만이면 crop 영역 제한
+                            if (areaRatio >= 30) {
+                              setCrop(newCrop as LibCrop);
+                            }
+                          } else {
+                            setCrop(newCrop as LibCrop);
+                          }
+                        }}
                         onComplete={handleCropComplete}
                         aspect={
                           selectedRatio === "1:1" ? 1 :
                             selectedRatio === "4:3" ? 4 / 3 : 3 / 4
                         }
+                        minWidth={30} // 최소 너비 지정
+                        minHeight={30} // 최소 높이 지정
                         className="max-w-full"
                       >
                         <img
@@ -261,9 +311,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
                           className="max-w-full max-h-full"
                           style={{ maxHeight: 'calc(70vh - 200px)' }}
                           onLoad={() => {
-                            // 이미지가 로드되면 항상 4:3 비율로 초기화
+                            // 이미지가 로드되었을 때 초기 시작은 4:3 비율
                             if (imgRef.current) {
                               handleRatioChange("4:3");
+                              // 1:1 비율 버튼은 이미지 로드 후 useEffect에서 처리
                             }
                           }}
                         />
