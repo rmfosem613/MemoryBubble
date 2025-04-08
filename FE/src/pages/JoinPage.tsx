@@ -81,9 +81,22 @@ function JoinPage() {
       // 개인정보 유효성 검사
       let hasError = false;
 
-      if (!name) {
+      const trimName = name.trim();
+      if (!trimName) {
         setNameError("이름을 입력해주세요.");
         hasError = true;
+      } else if (trimName.length < 1) {
+        setNameError("이름은 최소 1글자 이상이어야 합니다.");
+        hasError = true;
+      } else if (trimName.length > 10) {
+        setNameError("이름은 최대 10글자까지 가능합니다.");
+        hasError = true;
+      } else {
+        setNameError("");
+      }
+
+      if(trimName !== name) {
+        setName(trimName);
       }
 
       if (!gender) {

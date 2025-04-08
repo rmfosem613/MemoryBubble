@@ -151,7 +151,7 @@ function MainPage() {
   }
 
   // 앨범 이미지 URL 확인
-  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl)+"&w=1000";
+  const albumImageUrl = getAlbumImageUrl(currentAlbum.imageUrl);
 
   // 앨범 선택 컴포넌트 - 사진 업로더에 전달할 컴포넌트
   const AlbumSelector = (
@@ -219,7 +219,7 @@ function MainPage() {
                       style={{
                         color: "transparent",
                         WebkitBackgroundClip: "text",
-                        backgroundImage: `url('${albumImageUrl}')`,
+                        backgroundImage: `url('${albumImageUrl}&w=1000') `,
                         backgroundSize: "100%"
                       }}>
                       {currentAlbum.title || "추억보관함"}
@@ -230,7 +230,7 @@ function MainPage() {
 
               {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
-                src={albumImageUrl}
+                src={albumImageUrl === defaultAlbumImage ? albumImageUrl : albumImageUrl+"&w=1000"}
                 className='w-[94%] object-cover cursor-pointer'
                 onClick={handleAlbumClick}
                 alt={currentAlbum.title}

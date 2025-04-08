@@ -1,10 +1,10 @@
-import { useState } from "react";
-import Modal from "@/components/common/Modal/Modal";
-import InputText from "@/components/common/Modal/InputText";
-import AlbumColorPicker from "./AlbumColorPicker";
-import { createAlbum } from "@/apis/albumApi";
+import { useState } from 'react';
+import Modal from '@/components/common/Modal/Modal';
+import InputText from '@/components/common/Modal/InputText';
+import AlbumColorPicker from './AlbumColorPicker';
+import { createAlbum } from '@/apis/albumApi';
 
-import Alert from "../common/Alert";
+import Alert from '../common/Alert';
 
 interface AlbumCreatorProps {
   isOpen: boolean;
@@ -17,21 +17,21 @@ const AlbumCreator = ({
   isOpen,
   onClose,
   familyId,
-  onCreateComplete
+  onCreateComplete,
 }: AlbumCreatorProps) => {
   // 앨범 생성 폼 상태 관리
-  const [albumName, setAlbumName] = useState("");
-  const [albumDescription, setAlbumDescription] = useState("");
-  const [selectedColor, setSelectedColor] = useState("#f4e2dc"); // 기본 색상
+  const [albumName, setAlbumName] = useState('');
+  const [albumDescription, setAlbumDescription] = useState('');
+  const [selectedColor, setSelectedColor] = useState('#f4e2dc'); // 기본 색상
   const [isCreatingAlbum, setIsCreatingAlbum] = useState(false);
 
   // 알림 관련 상태
   const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertColor, setAlertColor] = useState("red");
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertColor, setAlertColor] = useState('red');
 
   // 알림 메시지 표시
-  const showAlertMessage = (message: string, color: string = "red") => {
+  const showAlertMessage = (message: string, color: string = 'red') => {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
@@ -44,7 +44,7 @@ const AlbumCreator = ({
   // 폼 입력 검증
   const validateAlbumForm = () => {
     if (!albumName.trim()) {
-      showAlertMessage("앨범 이름을 입력해주세요.","red");
+      showAlertMessage('앨범 이름을 입력해주세요.', 'red');
       return false;
     }
     return true;
@@ -72,21 +72,21 @@ const AlbumCreator = ({
         familyId: familyId || 0,
         albumName: albumName.trim(),
         albumContent: albumDescription.trim(),
-        backgroundColor: selectedColor
+        backgroundColor: selectedColor,
       });
 
       // 앨범 목록 다시 불러오기
       await onCreateComplete();
 
       // 입력 필드 초기화
-      setAlbumName("");
-      setAlbumDescription("");
-      setSelectedColor("#f4e2dc");
+      setAlbumName('');
+      setAlbumDescription('');
+      setSelectedColor('#f4e2dc');
 
       // 모달 닫기
       onClose();
     } catch (error) {
-      showAlertMessage("앨범 생성에 실패했습니다. 다시 시도해주세요.","red");
+      showAlertMessage('앨범 생성에 실패했습니다. 다시 시도해주세요.', 'red');
     } finally {
       setIsCreatingAlbum(false);
     }
@@ -104,27 +104,40 @@ const AlbumCreator = ({
         isOpen={isOpen}
         onClose={onClose}
         title="앨범 생성"
-        confirmButtonText={isCreatingAlbum ? "생성 중..." : "생성하기"}
+        confirmButtonText={isCreatingAlbum ? '생성 중...' : '생성하기'}
         cancelButtonText="취소하기"
-        onConfirm={handleCreateAlbumStart}
-      >
+        onConfirm={handleCreateAlbumStart}>
         <div className="py-2">
           <p className="mb-4">새로운 추억보관함을 생성해보세요!</p>
-          <p className="text-subtitle-1-lg font-p-500 text-black">앨범 이름 (최대 7자)</p>
+          <p className="text-subtitle-1-lg font-p-500 text-black">
+            앨범 이름 (최대 7자)
+          </p>
           <InputText
             value={albumName}
-            onChange={setAlbumName}
+            onChange={(e) => {
+              if (e.length <= 7) {
+                setAlbumName(e);
+              }
+            }}
             maxLength={7}
             placeholder="앨범 이름을 입력해주세요 (필수)"
           />
-          <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">앨범 한 줄 설명 (최대 60자)</p>
+          <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">
+            앨범 한 줄 설명 (최대 60자)
+          </p>
           <InputText
             value={albumDescription}
-            onChange={setAlbumDescription}
+            onChange={(e) => {
+              if (e.length <= 60) {
+                setAlbumDescription(e);
+              }
+            }}
             maxLength={60}
             placeholder="앨범 설명을 입력해주세요 (선택)"
           />
-          <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">표지색 정하기</p>
+          <p className="mt-[3px] text-subtitle-1-lg font-p-500 text-black">
+            표지색 정하기
+          </p>
 
           <AlbumColorPicker
             selectedColor={selectedColor}

@@ -20,6 +20,7 @@ import apiClient from '@/apis/apiClient';
 import { useAlert } from '@/hooks/useAlert';
 import PhotoUploader from '../photo/PhotoUploader';
 import Alert from '../common/Alert';
+import { useEffect, useRef } from 'react';
 
 // 폰트 스타일을 생성하는 컴포넌트
 const FontStyles = ({ fontInfoList }) => {
@@ -59,7 +60,7 @@ function PhotoAlbum() {
     photos,
     isLoading,
     currentIndex,
-    photoMessages, // API에서 가져온 메시지 데이터0
+    photoMessages, // API에서 가져온 메시지 데이터
     setPhotoMessages, // 메시지 데이터 업데이트 함수
     handleChangeAlbum,
     handleChangeThumnail,
@@ -87,6 +88,8 @@ function PhotoAlbum() {
   } = usePhotoMessages(photos, currentIndex);
 
   const { alertState, showAlert } = useAlert();
+
+  const messageContainerRef = useRef(null);
 
   // 각 모달별로 useModal() 훅 사용하여 상태 관리
   const editAlbumModal = useModal();
@@ -150,10 +153,23 @@ function PhotoAlbum() {
               {message.writer || '사용자'}
             </h4>
           </div>
-          <p
-            className={`text-gray-700 mt-1 text-h4-lg font-p-500 ${fontClass}`}>
-            {message.content}
-          </p>
+          <div className="flex items-baseline justify-between gap-2">
+            <p
+              className={`text-gray-700 mt-1 text-h4-lg font-p-500 ${fontClass}`}>
+              {message.content}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date(message.createdAt).toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: false,
+                timeZone: 'Asia/Seoul',
+              })}
+            </p>
+          </div>
         </div>
       );
     } else if (message.type === 'AUDIO') {
@@ -199,7 +215,7 @@ function PhotoAlbum() {
     // 기존 handleSaveMessage 함수 호출
     await handleSaveMessage(e);
 
-    // API에서 최신 메시지 목록 다시 가져오기 - toggleFlipWithPostCard 함수의 로직 활용
+    // API에서 최신 메시지 목록 다시 가져오기
     if (photos && photos.length > 0) {
       try {
         const currentPhotoId = photos[currentIndex].id;
@@ -214,6 +230,13 @@ function PhotoAlbum() {
       }
     }
   };
+
+  useEffect(() => {
+    if (messageContainerRef.current && photoMessages.length > 0) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  }, [photoMessages]); // photoMessages가 변경될 때마다 실행
 
   // 앨범 선택 핸들러
   const handleSelectAlbum = (albumId) => {
@@ -262,8 +285,17 @@ function PhotoAlbum() {
             <p className="text-subtitle-1-lg">앨범 정보 수정</p>
           </div>
           <div
-            className="relative flex items-center gap-1 cursor-pointer hover:text-blue-500 transition-colors"
-            onClick={changeThumbnailModal.open}>
+            className={`relative flex items-center gap-1 ${
+              photos[currentIndex].isThumbnail
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'cursor-pointer hover:text-blue-500 transition-colors'
+            }`}
+            onClick={
+              photos[currentIndex].isThumbnail
+                ? undefined
+                : changeThumbnailModal.open
+            }
+            aria-disabled={photos[currentIndex].isThumbnail}>
             <div className="absolute bg-blue-400 w-4 h-4 rounded-full left-1 top-2 opacity-50"></div>
             <ImageUp size={18} strokeWidth={1} />
             <p className="text-subtitle-1-lg">썸네일 변경</p>
@@ -307,7 +339,7 @@ function PhotoAlbum() {
               {/* 앞면 - 사진 */}
               {photos && photos.length > 0 ? (
                 <img
-                  src={photos[currentIndex].src+"&w=800"}
+                  src={photos[currentIndex].src + '&w=800'}
                   alt={photos[currentIndex].alt}
                   className="max-w-full max-h-full object-contain absolute"
                   style={{
@@ -347,7 +379,9 @@ function PhotoAlbum() {
                 </div>
 
                 {/* 메시지 표시 영역 - API에서 가져온 메시지 표시 */}
-                <div className="flex-1 overflow-y-auto px-2 mt-2 z-10">
+                <div
+                  className="flex-1 overflow-y-auto px-2 mt-2 z-10"
+                  ref={messageContainerRef}>
                   {photoMessages && photoMessages.length > 0 ? (
                     photoMessages.map((message) => renderApiMessage(message))
                   ) : (
