@@ -310,18 +310,21 @@ function PhotoAlbum() {
             <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">앨범 수정</p>
           </div>
           <div
-            className={`flex items-center gap-1 ${photos && photos.length > 0 && photos[currentIndex].isThumbnail
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'cursor-pointer'
+            className={`flex items-center gap-1 ${!photos || photos.length === 0 || photos[currentIndex].isThumbnail
+              ? 'text-gray-400 opacity-70 cursor-default'
+              : 'cursor-pointer hover:text-blue-500' // 활성화된 경우 호버 효과 추가
               }`}
             onClick={
-              photos && photos.length > 0 && photos[currentIndex].isThumbnail
+              !photos || photos.length === 0 || photos[currentIndex].isThumbnail
                 ? undefined
                 : changeThumbnailModal.open
             }
             aria-disabled={
-              photos && photos.length > 0 && photos[currentIndex].isThumbnail
-            }>
+              !photos || photos.length === 0 || photos[currentIndex].isThumbnail
+            }
+            role="button" // 접근성을 위한 역할 추가
+            tabIndex={(!photos || photos.length === 0 || photos[currentIndex].isThumbnail) ? -1 : 0} // 키보드 접근성
+          >
             <ImageUp strokeWidth={1} className="absolute z-10 ml-[-7px] mt-[2px]" size={'21px'} />
             <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
             <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">썸네일 변경</p>
@@ -367,7 +370,7 @@ function PhotoAlbum() {
                 <img
                   src={photos[currentIndex].src + '&w=800'}
                   alt={photos[currentIndex].alt}
-               className="w-full h-full object-contain absolute inset-0 p-2"
+                  className="w-full h-full object-contain absolute inset-0 p-2"
                   style={{
                     backfaceVisibility: 'hidden',
                   }}
@@ -487,19 +490,21 @@ function PhotoAlbum() {
       </div>
 
       {/* 페이지 인디케이터 */}
-      {photos.length > 1 && (
-        <div className="flex items-center justify-center gap-6">
-          <button onClick={handleGoToPrevious}>
-            <ChevronLeft size={20} />
-          </button>
-          <p className="text-sm text-gray-600">
-            {currentIndex + 1} / {photos.length}
-          </p>
-          <button onClick={handleGoToNext}>
-            <ChevronRight size={20} />
-          </button>
-        </div>
-      )}
+      {
+        photos.length > 1 && (
+          <div className="flex items-center justify-center gap-6">
+            <button onClick={handleGoToPrevious}>
+              <ChevronLeft size={20} />
+            </button>
+            <p className="text-sm text-gray-600">
+              {currentIndex + 1} / {photos.length}
+            </p>
+            <button onClick={handleGoToNext}>
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        )
+      }
 
       {/* 앨범명 수정 모달 */}
       <Modal
@@ -621,10 +626,12 @@ function PhotoAlbum() {
         onUploadComplete={refreshPhotos}
       />
 
-      {alertState && (
-        <Alert message={alertState.message} color={alertState.color} />
-      )}
-    </div>
+      {
+        alertState && (
+          <Alert message={alertState.message} color={alertState.color} />
+        )
+      }
+    </div >
   );
 }
 
