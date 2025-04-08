@@ -96,7 +96,6 @@ function ThumbnailSelector({
       await onUpdateComplete();
 
       // 모달 닫기 및 모드 취소
-      // onClose();
       handleClose();
     } catch (error) {
       console.error("썸네일 변경 실패:", error);
@@ -114,7 +113,7 @@ function ThumbnailSelector({
       {showAlert && <Alert message={alertMessage} color={alertColor} />}
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         title="대표 이미지 변경하기"
         confirmButtonText="변경하기"
         cancelButtonText="취소하기"
