@@ -1,5 +1,5 @@
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useUser from './hooks/useUser';
 import {
   requestNotificationPermission,
@@ -45,6 +45,7 @@ type NotificationPayload = {
 
 function App() {
   const { isLoading, checkAuthAndFetchUserData } = useUser();
+  const hasRequestedPermission = useRef(false); // 추가
 
   // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청
   useEffect(() => {
@@ -53,25 +54,25 @@ function App() {
 
   // fcm token 요청
   useEffect(() => {
-    const initFCM = async (): Promise<void> => {
+    const initFCM = async () => {
+      // 이미 요청했다면 다시 요청하지 않음
+      if (hasRequestedPermission.current) return;
+
+      hasRequestedPermission.current = true;
       await requestNotificationPermission();
     };
 
-    // 포그라운드 메시지 리스너 설정
+    initFCM();
+
     onMessageListener()
       .then((payload: NotificationPayload) => {
         if (payload.notification) {
-          console.log('Foreground message received:', payload.notification);
-          console.log(payload.notification.title);
-          console.log(payload.notification.body);
           alert(
-            `알림 도착: ${payload.notification.title} ${payload.notification.body}`,
+            `알림 도착: ${payload.notification.title} ${payload.notification.body}`
           );
         }
       })
       .catch((err) => console.log('FCM 메시지 리스너 오류:', err));
-
-    initFCM();
   }, []);
 
   if (isLoading) {

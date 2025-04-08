@@ -19,6 +19,14 @@ const messaging: Messaging = getMessaging(app);
 // FCM 토큰 요청 함수
 export const requestNotificationPermission = async (): Promise<string | null> => {
   try {
+    const currentPermission = Notification.permission;
+
+    // 이미 거부된 상태인 경우
+    if (currentPermission === 'denied') {
+      // 사용자에게 브라우저 설정에서 권한을 변경하도록 안내 메시지 표시
+      alert('알림 권한이 거부되었습니다. 브라우저 설정에서 변경해주세요.');
+      return null;
+    }
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       const token = await getToken(messaging, {
