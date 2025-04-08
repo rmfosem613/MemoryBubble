@@ -87,7 +87,6 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
     try {
       const response = await apiClient.get(`/api/letters/${id}`);
       console.log(response.data, '편지 상세 정보');
-      console.log(response.data.content, '편지 상세 정보 내용');
 
       // 상세 정보를 상태에 저장
       setSelectedLetter(response.data);

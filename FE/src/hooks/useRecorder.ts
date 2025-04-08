@@ -23,9 +23,9 @@ const cleanupMediaStream = (stream: MediaStream | null) => {
   if (!stream) return;
 
   try {
-    stream.getTracks().forEach(track => {
+    stream.getTracks().forEach((track) => {
       track.enabled = false; // 빠른 비활성화
-      track.stop();          // 완전한 정리
+      track.stop(); // 완전한 정리
     });
     console.log('오디오 트랙 중지 및 리소스 해제 완료');
   } catch (error) {
@@ -36,15 +36,17 @@ const cleanupMediaStream = (stream: MediaStream | null) => {
 // 오디오 녹음 및 재생 기능을 제공하는 커스텀 훅
 export function useRecorder(
   onPlayingChange: (isPlaying: boolean) => void,
-  onRecordingChange: (isRecording: boolean) => void
+  onRecordingChange: (isRecording: boolean) => void,
 ): [RecorderState, RecorderActions] {
   const { cassetteData, updateCassetteData, letterType } = useLetterStore();
 
   // 녹음 상태 관리
-  const [recordState, setRecordState] = useState<'inactive' | 'recording' | 'recorded'>('inactive');
+  const [recordState, setRecordState] = useState<
+    'inactive' | 'recording' | 'recorded'
+  >('inactive');
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordedTime, setRecordedTime] = useState(0); // 초 단위
-  const [currentTime, setCurrentTime] = useState(0); // 초 단위 
+  const [currentTime, setCurrentTime] = useState(0); // 초 단위
   const [progressWidth, setProgressWidth] = useState(0); // 프로그레스 바 너비 (0-100%)
 
   // 녹음 관련 참조
@@ -90,16 +92,15 @@ export function useRecorder(
 
       // 녹음 완료
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/wav',
+        });
         const audioUrl = URL.createObjectURL(audioBlob);
 
         if (audioRef.current) {
           audioRef.current.src = audioUrl;
           updateCassetteData({
-            isRecorded: true,
-            isRecording: false,
             recordingUrl: audioUrl,
-            recordingDuration: recordedTime
           });
         }
       };
@@ -112,7 +113,7 @@ export function useRecorder(
 
       updateCassetteData({
         ...cassetteData,
-        isRecording: true
+        isRecording: true,
       });
 
       // 타이머 시작
@@ -121,7 +122,7 @@ export function useRecorder(
       }
 
       timerRef.current = window.setInterval(() => {
-        setCurrentTime(prev => {
+        setCurrentTime((prev) => {
           const newTime = prev + 1;
           setProgressWidth((newTime / MAX_RECORDING_TIME) * 100);
 
@@ -133,7 +134,6 @@ export function useRecorder(
           return newTime;
         });
       }, 1000);
-
     } catch (error) {
       console.error('녹음을 시작할 수 없습니다:', error);
     }
@@ -141,11 +141,24 @@ export function useRecorder(
 
   // 녹음 중지 함수
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      const finalRecordingTime = currentTime; // 현재 시간 값을 캡처
+      console.log('녹음 중지:', finalRecordingTime, '초');
+
       mediaRecorderRef.current.stop();
       setRecordState('recorded');
       setRecordedTime(currentTime);
       onRecordingChange(false);
+
+      // 중요: 녹음 시간 정보 즉시 업데이트
+      updateCassetteData({
+        isRecorded: true,
+        isRecording: false,
+        recordingDuration: finalRecordingTime,
+      });
 
       // 타이머 중지
       if (timerRef.current) {
@@ -155,7 +168,7 @@ export function useRecorder(
 
       // 트랙 비활성화(마이크 엑세스 표시가 더 빨리 사라짐)
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => {
+        streamRef.current.getTracks().forEach((track) => {
           track.enabled = false;
         });
       }
@@ -192,7 +205,12 @@ export function useRecorder(
     setCurrentTime(0); // 시간 초기화
     setRecordedTime(0);
     setProgressWidth(0);
-    updateCassetteData({ isRecorded: false, isRecording: false, recordingUrl: null, recordingDuration: 0 });
+    updateCassetteData({
+      isRecorded: false,
+      isRecording: false,
+      recordingUrl: null,
+      recordingDuration: 0,
+    });
   };
 
   // 녹음 재생 함수
@@ -275,7 +293,10 @@ export function useRecorder(
       streamRef.current = null;
 
       // MediaRecorder 정리
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== 'inactive'
+      ) {
         try {
           mediaRecorderRef.current.stop();
         } catch (error) {
@@ -288,6 +309,12 @@ export function useRecorder(
 
   return [
     { recordState, isPlaying, recordedTime, currentTime, progressWidth },
-    { startRecording, stopRecording, resetRecording, playRecording, formatTime }
+    {
+      startRecording,
+      stopRecording,
+      resetRecording,
+      playRecording,
+      formatTime,
+    },
   ];
 }
