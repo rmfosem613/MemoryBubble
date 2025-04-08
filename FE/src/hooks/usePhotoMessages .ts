@@ -89,44 +89,55 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
       | React.KeyboardEvent<HTMLInputElement>,
   ) => {
     e.stopPropagation();
-    if (postcardMessage.trim() !== '') {
-      try {
-        // photos와 currentIndex가 유효한 경우에만 API 요청
-        if (photos && currentIndex !== undefined && photos.length > 0) {
-          const currentPhotoId = photos[currentIndex].id;
 
-          // API 요청 데이터 형식
-          const messageData = {
-            type: 'TEXT',
-            content: postcardMessage,
-          };
+    // 메시지가 비어있는지 확인
+    if (postcardMessage.trim() === '') {
+      // 빈 메시지인 경우 알림 표시
+      alert('메시지를 입력해주세요.');
 
-          // API 요청 보내기
-          const response = await apiClient.post(
-            `/api/photos/${currentPhotoId}/review`,
-            messageData,
-          );
-          console.log('메시지 전송 성공:', response.data);
-        }
+      // 입력 필드에 포커스
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
+      return; // 함수 실행 중단
+    }
 
-        // 로컬 메시지 상태 업데이트 (기존 로직)
-        const newTextMessage: Message = {
-          id: generateId(),
-          type: 'text',
+    try {
+      // photos와 currentIndex가 유효한 경우에만 API 요청
+      if (photos && currentIndex !== undefined && photos.length > 0) {
+        const currentPhotoId = photos[currentIndex].id;
+
+        // API 요청 데이터 형식
+        const messageData = {
+          type: 'TEXT',
           content: postcardMessage,
-          timestamp: new Date().toLocaleString(),
         };
 
-        setMessages((prev) => [...prev, newTextMessage]);
-        setPostcardMessage('');
-
-        if (messageInputRef.current) {
-          messageInputRef.current.focus();
-        }
-      } catch (error) {
-        console.error('메시지 전송 실패:', error);
-        // 에러 처리 로직 추가 가능
+        // API 요청 보내기
+        const response = await apiClient.post(
+          `/api/photos/${currentPhotoId}/review`,
+          messageData,
+        );
+        console.log('메시지 전송 성공:', response.data);
       }
+
+      // 로컬 메시지 상태 업데이트 (기존 로직)
+      const newTextMessage: Message = {
+        id: generateId(),
+        type: 'text',
+        content: postcardMessage,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      setMessages((prev) => [...prev, newTextMessage]);
+      setPostcardMessage('');
+
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
+    } catch (error) {
+      console.error('메시지 전송 실패:', error);
+      // 에러 처리 로직 추가 가능
     }
   };
 

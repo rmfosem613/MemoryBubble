@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useFontStore from '@/stores/useFontStore';
 
 function Step3() {
@@ -11,8 +11,37 @@ function Step3() {
     uploadedFiles,
   } = useFontStore();
 
+  // 폰트명 유효성 검사 오류 상태 추가
+  const [nameError, setNameError] = useState<string | null>(null);
+
+  // 영어와 한글만 허용하는 정규식
+  const validNameRegex = /^[가-힣a-zA-Z]+$/;
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+
+    // 글자수 제한 (7글자까지만)
+    if (newValue.length > 7) return;
+
+    // 입력값이 있고 유효하지 않은 문자가 포함된 경우
+    if (newValue && !validNameRegex.test(newValue)) {
+      setNameError('한글과 영어만 입력 가능합니다.');
+    } else {
+      setNameError(null);
+    }
+
+    setFontNameKo(newValue);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 폼 제출 전 최종 유효성 검사
+    if (fontNameKo && !validNameRegex.test(fontNameKo)) {
+      setNameError('한글과 영어만 입력 가능합니다.');
+      return;
+    }
+
     submitFont();
   };
 
@@ -40,12 +69,10 @@ function Step3() {
                 type="text"
                 id="fontNameKo"
                 value={fontNameKo}
-                onChange={(e) => {
-                  if (e.target.value.length <= 7) {
-                    setFontNameKo(e.target.value);
-                  }
-                }}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                onChange={handleNameChange}
+                className={`w-full p-2 border ${
+                  nameError ? 'border-red-500' : 'border-gray-300'
+                } rounded-md`}
               />
               <p className="">체</p>
               <span
@@ -53,6 +80,10 @@ function Step3() {
                 {fontNameKo.length}/7
               </span>
             </div>
+            {/* 폰트명 유효성 검사 오류 메시지 */}
+            {nameError && (
+              <p className="text-red-500 mt-1 text-sm">{nameError}</p>
+            )}
           </div>
 
           {/* 업로드된 파일 수량 표시 */}
@@ -68,7 +99,7 @@ function Step3() {
             )}
           </div>
 
-          {/* 에러 메시지 표시 */}
+          {/* 제출 오류 메시지 표시 */}
           {submitError && (
             <p className="text-red-500 mt-1 text-sm">{submitError}</p>
           )}
@@ -76,9 +107,11 @@ function Step3() {
           <div className="mt-6">
             <button
               type="submit"
-              disabled={isSubmitting || uploadedFiles.length !== 8}
+              disabled={
+                isSubmitting || uploadedFiles.length !== 8 || !!nameError
+              }
               className={`w-full py-3 rounded-md ${
-                isSubmitting || uploadedFiles.length !== 8
+                isSubmitting || uploadedFiles.length !== 8 || !!nameError
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-500 hover:bg-blue-600'
               } text-white transition-colors`}>
