@@ -47,6 +47,12 @@ const FontStyles = ({ fontInfoList }) => {
 };
 
 function PhotoAlbum() {
+  const showAlertMessage = (
+    message: string,
+    color: 'red' | 'green' | 'gray',
+  ) => {
+    showAlert(message, color);
+  };
   const {
     albumTitle,
     newAlbumName,
@@ -85,7 +91,7 @@ function PhotoAlbum() {
     handleSaveMessage,
     handleRecordButtonClick,
     toggleAudioPlayback,
-  } = usePhotoMessages(photos, currentIndex);
+  } = usePhotoMessages(photos, currentIndex, showAlertMessage);
 
   const { alertState, showAlert } = useAlert();
 
@@ -178,30 +184,41 @@ function PhotoAlbum() {
       return (
         <div
           key={message.id || message.createdAt}
-          className="flex flex-row mb-2 ">
-          <div className="flex items-center justify-center gap-2">
+          className="flex flex-row mb-2 items-baseline justify-between">
+          <div className="flex items-center justify-center">
             <h4 className={`font-p-700 text-h3-lg ${fontClass}`}>
               {message.writer || '사용자'}
             </h4>
-          </div>
-          <div className="mt-2">
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // URL을 직접 전달하고 isDirectUrl을 true로 설정
-                  toggleAudioPlayback(message.content, true);
-                }}
-                className="p-2 bg-blue-100 rounded-full">
-                {isPlaying ? (
-                  <CirclePause size={24} />
-                ) : (
-                  <CirclePlay size={24} />
-                )}
-                <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
-              </button>
+            <div className="mt-2">
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // URL을 직접 전달하고 isDirectUrl을 true로 설정
+                    toggleAudioPlayback(message.content, true);
+                  }}
+                  className="p-2 bg-blue-100 rounded-full">
+                  {isPlaying ? (
+                    <CirclePause size={24} />
+                  ) : (
+                    <CirclePlay size={24} />
+                  )}
+                  <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
+                </button>
+              </div>
             </div>
           </div>
+          <p className="text-xs text-gray-500">
+            {new Date(message.createdAt).toLocaleString('ko-KR', {
+              year: 'numeric',
+              month: 'numeric',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: false,
+              timeZone: 'Asia/Seoul',
+            })}
+          </p>
         </div>
       );
     }
