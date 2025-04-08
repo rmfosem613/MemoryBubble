@@ -1,67 +1,73 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import useUserStore from '@/stores/useUserStore';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode } from 'react';
 
 interface RouteProps {
   children?: ReactNode;
 }
 
-const useRouteAuth = () => {
+// 사용자 권한 검증을 위한 커스텀 훅 (export 추가)
+export const useAuth = () => {
   const { user } = useUserStore();
   const isAuthenticated = localStorage.getItem('accessToken') !== null;
   const hasFamilyId = !!user.familyId;
   const hasCompletedProfile = !!user.birth;
   const isAdmin = user.role === 'ADMIN';
 
-  // 사용자 상태에 따른 적절한 리다이렉트 경로 반환
-  const getRedirectPath = () => {
-    if (!isAuthenticated) {
-      return '/introduce';
-    }
-
-    if (!hasFamilyId) {
-      return '/enter';
-    }
-
-    if (!hasCompletedProfile) {
-      return '/join';
-    }
-
-    return '/main'; // 모든 조건 충족 시 메인으로
-  };
-
   return {
     isAuthenticated,
     hasFamilyId,
     hasCompletedProfile,
     isAdmin,
-    getRedirectPath,
-    // 특정 라우트 접근 가능 여부 확인 함수들
-    canAccessProtectedRoute: isAuthenticated && hasFamilyId && hasCompletedProfile,
-    canAccessFamilyCreation: isAuthenticated && !hasFamilyId,
-    canAccessProfileCreation: isAuthenticated && hasFamilyId && !hasCompletedProfile,
-    canAccessNonAuth: !isAuthenticated,
-    canAccessAdminRoute: isAuthenticated && isAdmin,
   };
 };
 
-// 완전히 보호된 라우트 - 인증, 가족, 프로필 정보 모두 필요
-export const ProtectedRoute = ({ children }: RouteProps) => {
-  const { canAccessProtectedRoute, getRedirectPath } = useRouteAuth();
+// 로그인하지 않은 사용자만 접근 가능한 라우트 (OAuthCallback용)
+export const OAuthRoute = ({ children }: RouteProps) => {
+  const { isAuthenticated, hasFamilyId, hasCompletedProfile } = useAuth();
 
-  if (!canAccessProtectedRoute) {
-    return <Navigate to={getRedirectPath()} replace />;
+  if (isAuthenticated) {
+    // 로그인 되어 있으면, 상태에 따라 적절한 페이지로 리다이렉션
+    if (!hasFamilyId) {
+      return <Navigate to="/enter" replace />;
+    } else if (!hasCompletedProfile) {
+      return <Navigate to="/join" replace />;
+    } else {
+      return <Navigate to="/main" replace />;
+    }
   }
+  return children || <Outlet />;
+};
 
+// 로그인 상태에 상관없이 누구나 접근 가능한 라우트 (LandingWithIntro)
+export const PublicRoute = ({ children }: RouteProps) => {
+  const { isAuthenticated, hasFamilyId, hasCompletedProfile } = useAuth();
+
+  if (isAuthenticated) {
+    if (!hasFamilyId) {
+      // 가족 정보가 없는 경우
+      return <Navigate to="/enter" replace />;
+    } else if (!hasCompletedProfile) {
+      // 가족 정보는 있지만 프로필 정보가 없는 경우
+      return <Navigate to="/join" replace />;
+    }
+    // 그 외에는 접근 허용 (로그인 + 가족정보 + 프로필정보 모두 있음)
+  }
   return children || <Outlet />;
 };
 
 // 가족 생성/가입 라우트 - 인증 필요 + 가족이 없어야 함
 export const FamilyCreationRoute = ({ children }: RouteProps) => {
-  const { canAccessFamilyCreation, getRedirectPath } = useRouteAuth();
+  const { isAuthenticated, hasFamilyId, hasCompletedProfile } = useAuth();
 
-  if (!canAccessFamilyCreation) {
-    return <Navigate to={getRedirectPath()} replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  // 가족정보가 이미 있는 경우
+  if (hasFamilyId) {
+    // 프로필 정보도 있으면 메인으로, 없으면 프로필 생성 페이지로
+    return <Navigate to={hasCompletedProfile ? '/main' : '/join'} replace />;
   }
 
   return children || <Outlet />;
@@ -69,35 +75,49 @@ export const FamilyCreationRoute = ({ children }: RouteProps) => {
 
 // 프로필 생성 라우트 - 인증 + 가족 필요 + 프로필이 없어야 함
 export const ProfileCreationRoute = ({ children }: RouteProps) => {
-  const { canAccessProfileCreation, getRedirectPath } = useRouteAuth();
+  const { isAuthenticated, hasFamilyId, hasCompletedProfile } = useAuth();
 
-  if (!canAccessProfileCreation) {
-    return <Navigate to={getRedirectPath()} replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
   }
-
+  // 가족정보가 없는 경우
+  if (!hasFamilyId) {
+    return <Navigate to="/enter" replace />;
+  }
+  // 프로필 정보가 이미 있는 경우
+  if (hasCompletedProfile) {
+    return <Navigate to="/main" replace />;
+  }
   return children || <Outlet />;
 };
 
-// 인증되지 않은 사용자만 접근 가능한 라우트 컴포넌트
-export const NonAuthRoute = ({ children }: RouteProps) => {
-  const { canAccessNonAuth, getRedirectPath } = useRouteAuth();
+// 완전히 보호된 라우트 - 인증, 가족, 프로필 정보 모두 필요
+export const ProtectedRoute = ({ children }: RouteProps) => {
+  const { isAuthenticated, hasFamilyId, hasCompletedProfile } = useAuth();
 
-  if (!canAccessNonAuth) {
-    return <Navigate to={getRedirectPath()} replace />;
+  // 인증 확인
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
   }
-
+  // 가족 정보 확인
+  if (!hasFamilyId) {
+    return <Navigate to="/enter" replace />;
+  }
+  // 프로필 정보 확인
+  if (!hasCompletedProfile) {
+    return <Navigate to="/join" replace />;
+  }
   return children || <Outlet />;
 };
 
-// 관리자 라우트 - 인증 + 관리자 역할만 필요 (가족/프로필 정보 불필요)
+// 관리자 라우트 - 인증 + 관리자 역할만 필요
 export const AdminRoute = ({ children }: RouteProps) => {
-  const { isAuthenticated, isAdmin } = useRouteAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
 
   // 인증이 안 된 경우 로그인 페이지로
   if (!isAuthenticated) {
-    return <Navigate to="/introduce" replace />;
+    return <Navigate to="/" replace />;
   }
-
   // 관리자가 아닌 경우 메인으로
   if (!isAdmin) {
     return <Navigate to="/main" replace />;
