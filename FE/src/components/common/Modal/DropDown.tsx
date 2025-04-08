@@ -5,11 +5,17 @@ interface DropDownProps {
   currentAlbumId?: number | null;
   onSelectAlbum: (albumId: number) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
-function DropDown({ albums, currentAlbumId, onSelectAlbum, placeholder = '앨범을 선택해주세요' }: DropDownProps) {
+function DropDown({ 
+  albums, 
+  currentAlbumId, 
+  onSelectAlbum, 
+  placeholder = '앨범을 선택해주세요',
+  disabled = false
+}: DropDownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  // const { albums, currentAlbum } = useAlbumStore();
   const [selectedAlbum, setSelectedAlbum] = useState<{ id: number; title: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -62,30 +68,48 @@ function DropDown({ albums, currentAlbumId, onSelectAlbum, placeholder = '앨범
     setIsOpen(false);
   };
 
+  // 드롭다운 토글 핸들러
+  const toggleDropdown = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
+  };
+
+  const availableAlbums = albums.filter((album) => album.id !== currentAlbumId);
+  const noAlbumsAvailable = availableAlbums.length === 0;
+
   return (
     <div className="relative w-full mb-4" ref={dropdownRef}>
       {/* 선택된 항목 표시 영역 */}
       <div
-        className="flex items-center justify-between w-full p-3 border border-gray-300 rounded-md cursor-pointer"
-        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center justify-between w-full p-3 border border-gray-300 rounded-md ${
+          disabled || noAlbumsAvailable ? 'bg-gray-100 cursor-not-allowed' : 'cursor-pointer'
+        }`}
+        onClick={toggleDropdown}
       >
-        <span className="text-gray-700">
-          {selectedAlbum ? selectedAlbum.title : placeholder}
+        <span className={`${disabled || noAlbumsAvailable ? 'text-gray-500' : 'text-gray-700'}`}>
+          {disabled || noAlbumsAvailable
+            ? "이동 가능한 앨범이 없습니다"
+            : selectedAlbum 
+              ? selectedAlbum.title 
+              : placeholder}
         </span>
-        <svg
-          className={`w-5 h-5 text-gray-600 transform ${isOpen ? 'rotate-180' : ''}`}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+        {!disabled && !noAlbumsAvailable && (
+          <svg
+            className={`w-5 h-5 text-gray-600 transform ${isOpen ? 'rotate-180' : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        )}
       </div>
 
       {/* 드롭다운 목록 - 화면 중앙에 고정 위치 */}
-      {isOpen && (
+      {isOpen && !disabled && !noAlbumsAvailable && (
         <div
           className="mt-[-25px] fixed z-50 bg-white border border-gray-300 rounded-md overflow-auto"
           style={{
@@ -95,8 +119,8 @@ function DropDown({ albums, currentAlbumId, onSelectAlbum, placeholder = '앨범
             height: '260px',
           }}
         >
-          {albums && albums.length > 0 ? (
-            albums .filter((album) => album.id !== currentAlbumId).map((album, index) => (
+          {availableAlbums.length > 0 ? (
+            availableAlbums.map((album, index) => (
               <div
                 key={index}
                 className="px-3 py-2 cursor-pointer hover:bg-gray-100"
@@ -106,7 +130,7 @@ function DropDown({ albums, currentAlbumId, onSelectAlbum, placeholder = '앨범
               </div>
             ))
           ) : (
-            <div className="px-3 py-2 text-gray-500">추억보관함</div>
+            <div className="px-3 py-2 text-gray-500">이동 가능한 앨범이 없습니다</div>
           )}
         </div>
       )}
