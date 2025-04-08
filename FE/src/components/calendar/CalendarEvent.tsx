@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CirclePlus, Link, Trash2, PenLine, LoaderCircle } from 'lucide-react';
 
@@ -6,6 +6,7 @@ import useCalendarEventStore from '@/stores/useCalendarEventStore';
 import { getMonthColors } from '@/utils/calendarUtils';
 import { linkAlbumToSchedule } from '@/apis/useCalendarApi';
 import { usePhotoAlbum } from '@/hooks/usePhotoAlbum';
+import Alert from '../common/Alert';
 
 import useModal from '@/hooks/useModal';
 import CalendarEventAddModal from './CalendarEventAddModal';
@@ -47,6 +48,40 @@ function CalendarEvent() {
   const calendarEventRemoveModal = useModal(false);
   const calendarEventEditModal = useModal(false);
   const calendarAlbumModal = useModal(false);
+
+  // Alert 관련 상태 추가
+  const [customAlert, setcustomAlert] = useState<{
+    show: boolean;
+    message: string;
+    color: string;
+  }>({
+    show: false,
+    message: '',
+    color: '',
+  });
+
+  // 알림 표시 후 3초 후에 상태 리셋
+  useEffect(() => {
+    if (customAlert.show) {
+      const timer = setTimeout(() => {
+        setcustomAlert({
+          show: false,
+          message: '',
+          color: '',
+        });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [customAlert.show]);
+
+  const showAlert = (message: string, color: string) => {
+    setcustomAlert({
+      show: true,
+      message,
+      color,
+    });
+  };
 
   // 앨범 ID로 앨범 이름 찾기
   const getAlbumNameById = (albumId: number | null) => {
@@ -105,10 +140,14 @@ function CalendarEvent() {
 
       if (response.status === 200) {
         updateEvent(scheduleId, response.data);
+        showAlert('일정과 앨범의 연결이 해제되었습니다.', 'green');
       }
     } catch (error) {
       console.error('앨범 연결 해제 실패:', error);
-      alert('앨범 연결 해제에 실패했습니다.');
+      showAlert(
+        '일정과 앨범 연결 해제에 실패했습니다. 다시 시도해주세요.',
+        'red',
+      );
     } finally {
       setUnlinkingId(null);
     }
@@ -124,6 +163,12 @@ function CalendarEvent() {
 
   // 앨범 연결 모달 열기
   const openAlbumModal = (event) => {
+    // 연결 가능한 앨범이 있는지 확인 (기본 앨범 외 최소 1개 이상)
+    if (allAlbums.length <= 1) {
+      showAlert('연결할 수 있는 앨범이 없습니다.', 'red');
+      return;
+    }
+    
     setSelectEvent(event);
     calendarAlbumModal.open();
   };
@@ -142,6 +187,10 @@ function CalendarEvent() {
 
   return (
     <>
+      {customAlert.show && (
+        <Alert message={customAlert.message} color={customAlert.color} />
+      )}
+
       <div
         className={`w-full h-full ${colors.bg[0]} lg:pt-[65px] px-6 pb-4 flex flex-col space-y-3`}>
         {/* -- 일정 헤더 -- */}
@@ -321,6 +370,7 @@ function CalendarEvent() {
       <CalendarEventAddModal
         isOpen={calendarEventAddModal.isOpen}
         close={calendarEventAddModal.close}
+        showAlert={showAlert}
       />
 
       {/* 삭제 모달 */}
@@ -328,6 +378,7 @@ function CalendarEvent() {
         isOpen={calendarEventRemoveModal.isOpen}
         close={calendarEventRemoveModal.close}
         event={selectEvent}
+        showAlert={showAlert}
       />
 
       {/* 수정 모달 */}
@@ -335,6 +386,7 @@ function CalendarEvent() {
         isOpen={calendarEventEditModal.isOpen}
         close={calendarEventEditModal.close}
         event={selectEvent}
+        showAlert={showAlert}
       />
 
       {/* 앨범 연결 모달 */}
@@ -345,6 +397,7 @@ function CalendarEvent() {
           scheduleId={selectEvent.scheduleId}
           currentAlbumId={selectEvent.albumId || null}
           allAlbums={allAlbums}
+          showAlert={showAlert}
         />
       )}
     </>
