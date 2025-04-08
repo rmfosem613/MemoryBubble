@@ -16,35 +16,41 @@ function CassetteContent({ selectedDate }: CassetteContentProps) {
   const [isRecording, setIsRecording] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // 알림 관련 상태
   const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertColor, setAlertColor] = useState("red");
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertColor, setAlertColor] = useState('red');
 
   // 알림 메시지 표시
-  const showAlertMessage = (message: string, color: string = "red", onConfirm?: () => void, onCancel?: () => void) => {
+  const showAlertMessage = (
+    message: string,
+    color: string = 'red',
+    onConfirm?: () => void,
+    onCancel?: () => void,
+  ) => {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
-    
+
     if (onConfirm || onCancel) {
       return { confirmButton: onConfirm, cancelButton: onCancel };
     }
-    
+
     // 버튼이 없는 일반 알림인 경우 자동 숨김
     setTimeout(() => {
       setShowAlert(false);
     }, 3500);
   };
-  
+
   // 페이지 이동 감지를 위한 리스너 추가
   useEffect(() => {
     // 브라우저 기본 beforeunload 이벤트 핸들러 (브라우저 닫기 등에 대응)
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isRecording) {
         e.preventDefault();
-        e.returnValue = '녹음 중입니다. 페이지를 벗어나면 녹음이 중단됩니다. 계속하시겠습니까?';
+        e.returnValue =
+          '녹음 중입니다. 페이지를 벗어나면 녹음이 중단됩니다. 계속하시겠습니까?';
         return e.returnValue;
       }
     };
@@ -53,7 +59,10 @@ function CassetteContent({ selectedDate }: CassetteContentProps) {
     const handleRouteChange = () => {
       if (isRecording) {
         // Alert 표시 로직으로 대체
-        showAlertMessage('녹음 중입니다. 페이지를 벗어나면 녹음이 중단됩니다. 계속하시겠습니까?', 'red');
+        showAlertMessage(
+          '녹음 중입니다. 페이지를 벗어나면 녹음이 중단됩니다. 계속하시겠습니까?',
+          'red',
+        );
         // 실제 라우팅 처리는 Alert의 확인/취소 버튼 핸들러에서 처리
         return false;
       }
@@ -66,7 +75,7 @@ function CassetteContent({ selectedDate }: CassetteContentProps) {
     // 클린업 함수
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      
+
       // 녹음 중 상태였다면 마이크 해제 알림
       if (isRecording) {
         console.log('컴포넌트 언마운트: 녹음 중지 및 마이크 해제');
@@ -81,9 +90,9 @@ function CassetteContent({ selectedDate }: CassetteContentProps) {
   return (
     <>
       {showAlert && (
-        <Alert 
-          message={alertMessage} 
-          color={alertColor} 
+        <Alert
+          message={alertMessage}
+          color={alertColor}
           showButtons={true}
           confirmButton={() => {
             // 확인 버튼 처리 - 녹음 중지 후 페이지 이동
@@ -96,7 +105,7 @@ function CassetteContent({ selectedDate }: CassetteContentProps) {
           }}
         />
       )}
-      
+
       <LetterContainer className="h-[95.5%] w-[100%] flex">
         {/* 카세트 이미지 컴포넌트 */}
         <CassetteImage

@@ -10,6 +10,7 @@ declare module '@/types/Letter' {
   interface LetterData {
     content?: string;
     senderId: number;
+    duration: number;
   }
 }
 
@@ -77,6 +78,17 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
   // 오디오 재생을 위한 ref 추가
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // 오디오 진행 상태 관리
+  const [currentTime, setCurrentTime] = useState(0);
+  const progressTimerRef = useRef<number | null>(null);
+
+  // 시간 포맷 함수
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   // 컴포넌트 마운트 시 폰트 정보 로드
   useEffect(() => {
     if (!isFamilyFontsLoaded && user && user.familyId) {
@@ -96,6 +108,14 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
       ? `font-user-${senderFont.userId}`
       : '';
 
+  // 진행 타이머 정리 함수
+  const clearProgressTimer = () => {
+    if (progressTimerRef.current) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+  };
+
   useEffect(() => {
     if (isOpen && letter) {
       if (unsubscribeRef.current) {
@@ -107,14 +127,16 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
       if (letter.type === 'AUDIO' && letter.content) {
         audioRef.current = new Audio(letter.content);
 
-        // 오디오 이벤트 리스너 추가
         audioRef.current.addEventListener('ended', () => {
           setIsPlaying(false);
+          setCurrentTime(0);
+          clearProgressTimer();
         });
 
         audioRef.current.addEventListener('error', (e) => {
           console.error('오디오 재생 오류:', e);
           setIsPlaying(false);
+          clearProgressTimer();
         });
       }
     } else {
@@ -132,6 +154,8 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
         if (audioRef.current) {
           audioRef.current.pause();
           setIsPlaying(false);
+          clearProgressTimer();
+          setCurrentTime(0);
           audioRef.current = null;
         }
 
@@ -143,10 +167,12 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.removeEventListener('ended', () => { });
-        audioRef.current.removeEventListener('error', () => { });
+        audioRef.current.removeEventListener('loadedmetadata', () => {});
+        audioRef.current.removeEventListener('ended', () => {});
+        audioRef.current.removeEventListener('error', () => {});
         audioRef.current = null;
       }
+      clearProgressTimer();
     };
   }, [isOpen, letter]);
 
@@ -156,16 +182,36 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
 
     if (isPlaying) {
       audioRef.current.pause();
+      clearProgressTimer();
     } else {
       // 재생 시도
-      audioRef.current.play().catch(error => {
-        console.error('오디오 재생 실패:', error);
-        setIsPlaying(false);
-      });
+      audioRef.current
+        .play()
+        .catch((error) => {
+          console.error('오디오 재생 실패:', error);
+          setIsPlaying(false);
+          clearProgressTimer();
+        })
+        .then(() => {
+          // 재생 성공 시 진행 타이머 시작
+          clearProgressTimer(); // 기존 타이머 정리
+          progressTimerRef.current = window.setInterval(() => {
+            if (audioRef.current) {
+              setCurrentTime(audioRef.current.currentTime);
+            }
+          }, 100);
+        });
     }
 
     setIsPlaying(!isPlaying);
   };
+
+  // 진행 바 프로그레스 계산 (0-100%)
+  const duration = letter?.duration || 0;
+  const rawProgressPercentage =
+    duration > 0 ? (currentTime / duration) * 100 : 0;
+  // 100%를 넘지 않도록 제한
+  const progressPercentage = Math.min(rawProgressPercentage, 100);
 
   if (!letter) return null;
 
@@ -316,7 +362,8 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
           />
         </>
       );
-    } else { // winter
+    } else {
+      // winter
       return (
         <>
           <img
@@ -333,6 +380,54 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
       );
     }
   };
+
+  // 카세트 재생 컨트롤 렌더링 함수
+  const renderAudioControls = () => (
+    <div className="absolute bottom-10 z-20 w-full flex justify-center">
+      <div className="bg-white border border-gray-300 rounded-[8px] px-[25px] py-[20px] flex flex-col items-center gap-[20px] w-[80%] max-w-[450px]">
+        {/* 진행 바 */}
+        <div className="w-full bg-gray-200 rounded-full h-[6px]">
+          <div
+            className="bg-blue-500 h-[6px] rounded-full transition-all duration-100"
+            style={{ width: `${progressPercentage}%` }}></div>
+        </div>
+
+        {/* 시간 표시와 재생 컨트롤 */}
+        <div className="flex justify-between items-center w-full">
+          <span className="text-sm text-gray-600">
+            {formatTime(currentTime)}
+          </span>
+
+          {isPlaying ? (
+            <button
+              className="flex items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayPause();
+              }}>
+              <CirclePause color="#3E404C" width="35" height="35" />
+            </button>
+          ) : (
+            <button
+              className="flex items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayPause();
+              }}>
+              <CirclePlay
+                color={isPlaying ? '#9D9D9D' : '#3E404C'}
+                width="35"
+                height="35"
+                className={isPlaying ? 'opacity-50' : ''}
+              />
+            </button>
+          )}
+
+          <span className="text-sm text-gray-600">{formatTime(duration)}</span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -458,34 +553,7 @@ const LetterAnimation: React.FC<LetterAnimationProps> = ({
                   </div>
 
                   {/* 카세트 재생 컨트롤 */}
-                  <div className="absolute bottom-10 z-20 w-full flex justify-center">
-                    <div className="bg-white border border-gray-300 rounded-[8px] px-[25px] py-[20px] flex items-center gap-[60px]">
-                      {isPlaying ? (
-                        <button
-                          className="flex items-center justify-center"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayPause();
-                          }}>
-                          <CirclePause color="#3E404C" width="35" height="35" />
-                        </button>
-                      ) : (
-                        <button
-                          className="flex items-center justify-center"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayPause();
-                          }}>
-                          <CirclePlay
-                            color={isPlaying ? '#9D9D9D' : '#3E404C'}
-                            width="35"
-                            height="35"
-                            className={isPlaying ? 'opacity-50' : ''}
-                          />
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  {renderAudioControls()}
                 </div>
               )}
             </div>
