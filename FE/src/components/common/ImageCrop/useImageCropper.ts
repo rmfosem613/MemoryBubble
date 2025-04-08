@@ -66,8 +66,8 @@ const useImageCropper = ({
 
     return {
       unit: '%',
-      width: 20,
-      height: 20 / aspectMap[ratio],
+      width: 30,
+      height: 30 / aspectMap[ratio],
       x: 0,
       y: 0,
       aspect: aspectMap[ratio]

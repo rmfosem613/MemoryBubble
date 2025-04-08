@@ -81,7 +81,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   useEffect(() => {
     if (showCropper && previewUrl && imgRef.current) {
       // 이미지가 로드된 후 초기 비율 강제 설정
-      handleRatioChange("4:3");
+      handleRatioChange("1:1");
       
       // 약간의 딜레이 후 1:1 비율 버튼 자동 클릭 실행
       const timer = setTimeout(() => {
@@ -278,30 +278,14 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
                     <div className="max-w-full" style={{ maxHeight: 'calc(70vh - 200px)' }}>
                       <ReactCrop
                         crop={crop}
-                        onChange={(newCrop) => {
-                          if (imgRef.current) {
-                            // 이미지 전체 면적 계산
-                            const totalArea = imgRef.current.width * imgRef.current.height;
-                            // 새 crop 영역 면적 계산
-                            const newCropArea = newCrop.width * newCrop.height;
-                            // 면적 비율 계산 (%)
-                            const areaRatio = (newCropArea / totalArea) * 100;
-                            
-                            // 최소 면적(30%) 미만이면 crop 영역 제한
-                            if (areaRatio >= 30) {
-                              setCrop(newCrop as LibCrop);
-                            }
-                          } else {
-                            setCrop(newCrop as LibCrop);
-                          }
-                        }}
+                        onChange={(newCrop) => setCrop(newCrop as LibCrop)}
                         onComplete={handleCropComplete}
                         aspect={
                           selectedRatio === "1:1" ? 1 :
                             selectedRatio === "4:3" ? 4 / 3 : 3 / 4
                         }
-                        minWidth={30} // 최소 너비 지정
-                        minHeight={30} // 최소 높이 지정
+                        minWidth={selectedRatio === "4:3" ? 100 : selectedRatio === "1:1" ? 100 : 0}
+                        minHeight={selectedRatio === "3:4" ? 135 : selectedRatio === "1:1" ? 100 : 0}
                         className="max-w-full"
                       >
                         <img
