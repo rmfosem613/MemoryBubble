@@ -249,13 +249,13 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   };
 
   // 크롭 영역이 유효한지 검사하는 함수
-  const isCropValid = () => {
-    // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
-    if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
-      return false;
-    }
-    return true;
-  };
+  // const isCropValid = () => {
+  //   // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
+  //   if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
+  //     return false;
+  //   }
+  //   return true;
+  // };
 
   // 현재 이미지에 대한 자르기 로직
   const handleApplyCrop = async () => {
@@ -265,10 +265,10 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
 
     // 크롭 영역이 유효한지 체크
-    if (!isCropValid()) {
-      showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
-      return false;
-    }
+    // if (!isCropValid()) {
+    //   showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
+    //   return false;
+    // }
 
     const canvas = document.createElement('canvas');
     const image = imgRef.current;
