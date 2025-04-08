@@ -11,7 +11,11 @@ export interface Message {
   isPlaying?: boolean; // 오디오 메시지 재생 상태 (오디오인 경우만 사용)
 }
 
-export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
+export const usePhotoMessages = (
+  photos?: Photo[],
+  currentIndex?: number,
+  showAlertMessage?: (message: string, color: string) => void,
+) => {
   const [postcardMessage, setPostcardMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -93,7 +97,7 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
     // 메시지가 비어있는지 확인
     if (postcardMessage.trim() === '') {
       // 빈 메시지인 경우 알림 표시
-      alert('메시지를 입력해주세요.');
+      showAlertMessage('메세지를 입력해주세요.', 'red');
 
       // 입력 필드에 포커스
       if (messageInputRef.current) {
@@ -289,6 +293,7 @@ export const usePhotoMessages = (photos?: Photo[], currentIndex?: number) => {
       mediaRecorder.start();
       setIsRecording(true);
     } catch (error) {
+      showAlertMessage('녹음을 시작할 수 없습니다. 권한을 확인해주세요', 'red');
       console.error('녹음을 시작할 수 없습니다:', error);
     }
   };
