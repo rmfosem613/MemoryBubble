@@ -392,7 +392,7 @@ const PhotoUploader = ({
 
           {/* 크기 제한 안내 메시지 */}
           <div className="text-sm-lg text-gray-400 -mt-1">
-            이미지 용량 제한: 100KB ~ 10MB <br/>
+            이미지 용량 제한: 100KB ~ 10MB <br />
             이미지 형식 제한: png, jpg, jpeg
           </div>
         </div>
@@ -445,7 +445,7 @@ const PhotoUploader = ({
           aspectRatio={selectedRatio}
           onCropComplete={handleCropComplete}
           onAllCropsComplete={handleAllCropsComplete}
-          allowedAspectRatios={["4:3", "3:4"]}
+          allowedAspectRatios={[ "4:3", "3:4", "1:1"]}
           modalTitle="이미지 자르기"
         />
       )}
