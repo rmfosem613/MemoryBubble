@@ -58,7 +58,7 @@ const AlertAdmin: React.FC<AlertAdminProps> = ({
             hour: 'numeric',
             minute: 'numeric',
             hour12: false,
-            timeZone: 'Asia/Seoul',
+            // timeZone: 'Asia/Seoul',
           })}
         </p>
       </div>
