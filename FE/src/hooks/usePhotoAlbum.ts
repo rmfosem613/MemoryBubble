@@ -9,6 +9,7 @@ export interface Photo {
   id: number;
   src: string;
   alt: string;
+  isThumbnail: boolean; // 썸네일 여부
 }
 
 export const usePhotoAlbum = () => {
@@ -88,10 +89,11 @@ export const usePhotoAlbum = () => {
         }
 
         // Photo 인터페이스에 맞게 데이터 변환
-        const formattedPhotos: Photo[] = photoList.map((photo: any) => ({
+        const formattedPhotos: Photo[] = photoList.map((photo) => ({
           id: photo.photoId,
           src: photo.photoUrl,
           alt: `앨범 사진 ${photo.photoId}`,
+          isThumbnail: photo.isThumbnail,
         }));
 
         setPhotos(formattedPhotos);
@@ -142,6 +144,7 @@ export const usePhotoAlbum = () => {
           id: photo.photoId,
           src: photo.photoUrl,
           alt: `앨범 사진 ${photo.photoId}`,
+          isThumbnail: photo.isThumbnail,
         }));
 
         // 사진 목록 업데이트
@@ -203,6 +206,24 @@ export const usePhotoAlbum = () => {
         `/api/albums/${id}/thumbnail`,
         data,
       );
+      // 현재 앨범의 사진 목록 다시 가져오기
+      if (id) {
+        const response = await apiClient.get(`/api/albums/${id}`);
+
+        // API 응답에서 photoList 배열 추출
+        const photoList = response.data.photoList || [];
+
+        // Photo 인터페이스에 맞게 데이터 변환
+        const formattedPhotos: Photo[] = photoList.map((photo: any) => ({
+          id: photo.photoId,
+          src: photo.photoUrl,
+          alt: `앨범 사진 ${photo.photoId}`,
+          isThumbnail: photo.isThumbnail,
+        }));
+
+        // 사진 목록 업데이트
+        setPhotos(formattedPhotos);
+      }
 
       console.log('썸네일 변경 성공:', response.data);
     } catch (error) {
