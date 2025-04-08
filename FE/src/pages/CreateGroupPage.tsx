@@ -54,13 +54,13 @@ function CreateGroupPage() {
         return
       }
 
-      if (groupName.length < 2) {
-        setNameError("그룹명은 최소 2글자 이상이어야 합니다.")
+      if (groupName.length < 1) {
+        setNameError("그룹명은 최소 1글자 이상이어야 합니다.")
         return
       }
 
-      if (groupName.length > 7) {
-        setNameError("그룹명은 최대 7글자까지 가능합니다.")
+      if (groupName.length > 10) {
+        setNameError("그룹명은 최대 10글자까지 가능합니다.")
         return
       }
 
