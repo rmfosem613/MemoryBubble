@@ -19,4 +19,5 @@ public class LetterRequest {
     LocalDate openAt;
     @NotBlank String backgroundColor;
     @NotNull Long receiverId;
+    Long duration;
 }

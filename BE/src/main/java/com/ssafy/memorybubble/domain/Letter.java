@@ -57,7 +57,7 @@ public class Letter {
     }
 
     @Builder
-    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDate openAt, Boolean isRead, String backgroundColor) {
+    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDate openAt, Boolean isRead, String backgroundColor, Long duration) {
         this.receiver = receiver;
         this.sender = sender;
         this.content = content;
@@ -66,6 +66,7 @@ public class Letter {
         this.openAt = openAt;
         this.isRead = isRead;
         this.backgroundColor = backgroundColor;
+        this.duration = duration;
     }
 
     @PrePersist

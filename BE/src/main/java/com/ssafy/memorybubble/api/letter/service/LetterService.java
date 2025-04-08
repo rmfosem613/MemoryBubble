@@ -69,6 +69,7 @@ public class LetterService {
                 .openAt(request.getOpenAt())
                 .sender(sender)
                 .receiver(receiver)
+                .duration(request.getDuration())
                 .build();
 
         letterRepository.save(letter);
