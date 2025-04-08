@@ -250,7 +250,7 @@ function CreateGroupPage() {
                 <Button name="이전" color="white" onClick={handlePrev} />
               )}
               <Button
-                name={currentStep === 2 ? (isLoading ? "처리 중..." : "완료") : "다음"}
+                name={currentStep === 2 ? "완료" : "다음"}
                 color="blue"
                 onClick={handleNext}
               />
