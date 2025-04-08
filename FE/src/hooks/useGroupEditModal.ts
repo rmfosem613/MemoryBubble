@@ -3,30 +3,69 @@ import useUserStore from '@/stores/useUserStore';
 import useUserApi from '@/apis/useUserApi';
 
 export const useGroupEditModal = (isOpen: boolean) => {
-  const { updateFamilyInfo, uploadImageWithPresignedUrl } = useUserApi();
+  const { updateFamilyInfo, uploadImageWithPresignedUrl, fetchFamilyInfo } =
+    useUserApi();
   const { user, family, setFamily } = useUserStore();
 
   const [groupName, setGroupName] = useState('');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Alert 관련 상태 추가
+  const [customAlert, setCustomAlert] = useState<{
+    show: boolean;
+    message: string;
+    color: string;
+  }>({
+    show: false,
+    message: '',
+    color: '',
+  });
+
+  // 알림 표시 함수
+  const showAlert = (message: string, color: string) => {
+    setCustomAlert({
+      show: true,
+      message,
+      color,
+    });
+  };
+
+  // 알림 표시 후 3초 후에 상태 리셋
+  useEffect(() => {
+    if (customAlert.show) {
+      const timer = setTimeout(() => {
+        setCustomAlert({
+          show: false,
+          message: '',
+          color: '',
+        });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [customAlert.show]);
 
   // 초기화
   useEffect(() => {
     if (isOpen) {
       setGroupName(family.familyName);
-      setThumbnailPreview(family.thumbnailUrl+"&w=250");
+      setThumbnailPreview(family.thumbnailUrl + '&w=250');
       setThumbnail(null);
       setErrorMessage('');
     }
   }, [isOpen, family.familyName, family.thumbnailUrl]);
 
-  // 입력 변경 시 에러 메시지 초기화
+  // 입력 변경 시 에러 메시지 초기화 및 10자 제한
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setGroupName(e.target.value);
-    setErrorMessage('');
+    const newValue = e.target.value;
+    // 10자 이하일 때만 상태 업데이트
+    if (newValue.length <= 10) {
+      setGroupName(newValue);
+      setErrorMessage('');
+    }
   };
 
   // 그룹명 blur 처리
@@ -39,28 +78,15 @@ export const useGroupEditModal = (isOpen: boolean) => {
     }
   };
 
-  // 이미지 선택 버튼 클릭
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // 파일 선택 핸들러
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (file, previewUrl = null) => {
     if (file) {
-      // 이미지 파일 검증
-      if (!file.type.match('image.*')) {
-        alert('이미지 파일만 업로드 가능합니다.');
-        return;
-      }
       setThumbnail(file);
 
-      // 이미지 미리보기 생성
-      const reader = new FileReader();
-      reader.onload = () => {
-        setThumbnailPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // 미리보기 URL도 함께 저장 (전달 받았을 경우)
+      if (previewUrl) {
+        setThumbnailPreview(previewUrl);
+      }
     }
   };
 
@@ -72,6 +98,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
 
     // 기존 이름과 동일하고 새 이미지가 없으면 API 호출 없이 닫기
     if (groupName === family.familyName && !thumbnail) {
+      showAlert('수정된 내용이 없습니다.', 'green');
       return true; // 모달 닫기
     }
 
@@ -81,7 +108,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
 
       const response = await updateFamilyInfo(user.familyId, {
         familyName: groupName,
-        isThumbnailUpdate: thumbnail ? true : false
+        isThumbnailUpdate: thumbnail ? true : false,
       });
 
       if (response.status === 200) {
@@ -89,7 +116,6 @@ export const useGroupEditModal = (isOpen: boolean) => {
         setFamily({
           familyName: groupName,
         });
-
         // 이미지 업로드 처리
         if (thumbnail && response.data.presignedUrl) {
           try {
@@ -97,26 +123,26 @@ export const useGroupEditModal = (isOpen: boolean) => {
               response.data.presignedUrl,
               thumbnail,
             );
-            // 이미지 업로드 성공 시 이미지 URL 상태 업데이트
-            setFamily({
-              thumbnailUrl: thumbnailPreview,
-            });
+            const familyResponse = await fetchFamilyInfo(user.familyId);
+            if (familyResponse.status === 200) {
+              setFamily(familyResponse.data);
+            }
           } catch (uploadError) {
-            alert('그룹명은 수정되었으나, 이미지 수정에 실패했습니다.');
+            showAlert(
+              '그룹명은 수정되었으나, 이미지 수정 중 오류가 발생했습니다.',
+              'red',
+            );
             return false;
           }
         }
-        alert('그룹 정보가 수정되었습니다.');
-        if (window.location.pathname === '/main' && thumbnail) {
-          window.location.reload();
-        }
+        showAlert('그룹 정보가 수정되었습니다.', 'green');
         return true; // 성공 시 모달 닫기
       } else {
-        alert('그룹 정보 수정 중 오류가 발생했습니다.');
+        showAlert('그룹 정보 수정 중 오류가 발생했습니다.', 'red');
         return false; // 모달 유지
       }
     } catch (error) {
-      alert('그룹 정보 수정 중 오류가 발생했습니다.');
+      showAlert('그룹 정보 수정 중 오류가 발생했습니다.', 'red');
       return false; // 모달 유지
     } finally {
       setIsLoading(false);
@@ -126,16 +152,17 @@ export const useGroupEditModal = (isOpen: boolean) => {
   return {
     // 상태
     groupName,
+    thumbnail,
     thumbnailPreview,
     errorMessage,
     isLoading,
-    fileInputRef,
+    customAlert,
 
     // 액션
     handleInputChange,
     handleGroupNameBlur,
-    handleImageClick,
     handleFileChange,
     onConfirm,
+    showAlert,
   };
 };

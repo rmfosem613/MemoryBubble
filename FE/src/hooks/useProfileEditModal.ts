@@ -11,12 +11,12 @@ interface ProfileFormErrors {
 }
 
 export const useProfileEditModal = (isOpen: boolean) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, setUser } = useUserStore();
-  const { updateUserProfile, uploadImageWithPresignedUrl } = useUserApi();
+  const { updateUserProfile, uploadImageWithPresignedUrl, fetchUserProfile } =
+    useUserApi();
 
   const [newUser, setNewUser] = useState<User>(user);
-  const [profileImage, setProfileImage] = useState<string>('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [phonePrefix, setPhonePrefix] = useState<string>('010');
   const [phoneMiddle, setPhoneMiddle] = useState<string>('');
@@ -28,12 +28,52 @@ export const useProfileEditModal = (isOpen: boolean) => {
     phoneNumber: '',
   });
 
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const minDate = new Date('1900-01-01');
+  const maxDate = new Date(todayStr); // 현재 날짜
+
+  // Alert 관련 상태 추가
+  const [customAlert, setCustomAlert] = useState<{
+    show: boolean;
+    message: string;
+    color: string;
+  }>({
+    show: false,
+    message: '',
+    color: '',
+  });
+
+  // 알림 표시 함수
+  const showAlert = (message: string, color: string) => {
+    setCustomAlert({
+      show: true,
+      message,
+      color,
+    });
+  };
+
+  // 알림 표시 후 3초 후에 상태 리셋
+  useEffect(() => {
+    if (customAlert.show) {
+      const timer = setTimeout(() => {
+        setCustomAlert({
+          show: false,
+          message: '',
+          color: '',
+        });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [customAlert.show]);
+
   // 모달이 열릴 때 상태 초기화
   useEffect(() => {
     if (isOpen) {
       const parts = user.phoneNumber?.split('-') || ['010', '', ''];
       setNewUser(user);
-      setProfileImage(user.profileUrl+"&w=200" || '');
+      setProfileImage(user.profileUrl + '&w=200' || '');
       // 전화번호 분리
       setPhonePrefix(parts[0] || '010');
       setPhoneMiddle(parts[1] || '');
@@ -66,39 +106,29 @@ export const useProfileEditModal = (isOpen: boolean) => {
       if (/^\d*$/.test(value)) {
         setPhoneSuffix(value);
       }
+    } else if (name === 'name') {
+      // 이름은 10자 이하로 제한
+      if (value.length <= 10) {
+        setNewUser((prev) => ({
+          ...prev,
+          name: value,
+        }));
+        // 입력 중에도 에러 메시지 초기화
+        setErrors((prev) => ({
+          ...prev,
+          name: '',
+        }));
+      }
+      // 입력 길이가 제한을 초과하면 기존 값 유지
     } else if (name === 'birth') {
       setNewUser((prev) => ({
         ...prev,
-        birth: value,
+        birth: value.trim(),
       }));
-      if (!value) {
-        setErrors((prev) => ({
-          ...prev,
-          birth: '생년월일을 입력해주세요',
-        }));
-      } else {
-        // 생년월일 범위 검사
-        const birthDate = new Date(value);
-        const minDate = new Date('1900-01-01');
-        const maxDate = new Date(); // 현재 날짜
-
-        if (isNaN(birthDate.getTime())) {
-          setErrors((prev) => ({
-            ...prev,
-            birth: '유효한 날짜 형식이 아닙니다',
-          }));
-        } else if (birthDate < minDate || birthDate > maxDate) {
-          setErrors((prev) => ({
-            ...prev,
-            birth: '생일이 올바르지 않습니다.',
-          }));
-        } else {
-          setErrors((prev) => ({
-            ...prev,
-            birth: '',
-          }));
-        }
-      }
+      setErrors((prev) => ({
+        ...prev,
+        birth: '',
+      }));
     } else {
       // 일반 필드는 newUser 객체에 직접 업데이트
       setNewUser((prev) => ({
@@ -152,68 +182,49 @@ export const useProfileEditModal = (isOpen: boolean) => {
           name: '',
         }));
       }
-    }
-    else if (name === 'birth') {
+    } else if (name === 'birth') {
+      // 날짜 입력 검증
+      const birthDate = new Date(value);
       setNewUser((prev) => ({
         ...prev,
-        birth: value.trim(),
+        birth: value,
       }));
-      if (!value.trim()) {
-        setErrors((prev) => ({
-          ...prev,
-          birth: '생년월일을 입력해주세요',
-        }));
-      } else {
-        // 생년월일 범위 검사
-        const birthDate = new Date(value);
-        const minDate = new Date('1900-01-01');
-        const maxDate = new Date(); // 현재 날짜
-
-        if (isNaN(birthDate.getTime())) {
+      if (
+        !value.trim() ||
+        isNaN(birthDate.getTime()) ||
+        birthDate < minDate ||
+        birthDate > maxDate
+      ) {
+        // 적절한 에러 메시지 설정
+        if (!value.trim()) {
           setErrors((prev) => ({
             ...prev,
-            birth: '유효한 날짜 형식이 아닙니다',
-          }));
-        } else if (birthDate < minDate || birthDate > maxDate) {
-          setErrors((prev) => ({
-            ...prev,
-            birth: '생일이 올바르지 않습니다.',
+            birth: '생년월일을 입력해주세요',
           }));
         } else {
           setErrors((prev) => ({
             ...prev,
-            birth: '',
+            birth: '유효한 날짜 범위가 아닙니다.',
           }));
         }
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          birth: '',
+        }));
       }
     }
   };
 
   // 프로필 이미지 파일 선택 핸들러
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageChange = (file, previewUrl = null) => {
     if (file) {
-      if (!file.type.match('image.*')) {
-        alert('이미지 파일만 업로드 가능합니다.');
-        return;
-      }
       setProfileFile(file);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      setErrors((prev) => ({
-        ...prev,
-        image: '',
-      }));
+      // 미리보기 URL도 함께 저장 (전달 받았을 경우)
+      if (previewUrl) {
+        setProfileImage(previewUrl);
+      }
     }
-  };
-
-  // 이미지 업로드 트리거
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
   };
 
   // 확인 버튼 클릭 시 실행할 함수
@@ -248,24 +259,22 @@ export const useProfileEditModal = (isOpen: boolean) => {
     if (user.gender !== newUser.gender) {
       updateData.gender = newUser.gender as 'M' | 'F' | null;
     }
-    updateData.isProfileUpdate = profileFile ? true : false;
-
     // 변경사항이 없고 이미지도 변경되지 않았으면 API 호출 없이 모달 닫기
     if (Object.keys(updateData).length === 0 && !profileFile) {
+      showAlert('수정된 내용이 없습니다.', 'green');
       return true;
     }
-
+    // api 요청
     try {
       setIsLoading(true);
 
       // 프로필 정보가 변경되었거나 이미지가 변경된 경우 API 요청
       if (Object.keys(updateData).length > 0 || profileFile) {
+        updateData.isProfileUpdate = profileFile ? true : false;
+
         const response = await updateUserProfile(user.userId, updateData);
         if (response.status === 200) {
           setUser(updateData);
-          setUser({
-            profileUrl: profileImage,
-          });
 
           // 이미지 업로드 처리
           if (profileFile && response.data.presignedUrl) {
@@ -274,22 +283,27 @@ export const useProfileEditModal = (isOpen: boolean) => {
                 response.data.presignedUrl,
                 profileFile,
               );
+              const profileResponse = await fetchUserProfile(user.userId);
+              if (profileResponse.status === 200) {
+                setUser(profileResponse.data);
+              }
             } catch (uploadError) {
-              alert('프로필은 수정되었으나, 이미지 수정에 실패했습니다.');
+              showAlert(
+                '프로필은 수정되었으나, 이미지 수정 중 오류가 발생했습니다.',
+                'red',
+              );
               return false;
             }
           }
-          alert('프로필 정보가 수정되었습니다. ');
-
+          showAlert('프로필 정보가 수정되었습니다.', 'green');
           return true; // 모달 닫기
         } else {
-          alert('프로필 정보 수정 중 오류가 발생했습니다. ');
+          showAlert('프로필 정보 수정 중 오류가 발생했습니다.', 'red');
           return false;
         }
       }
-      return true; // 변경사항이 없으면 모달 닫기
     } catch (error) {
-      alert('프로필 정보 수정 중 오류가 발생했습니다. ');
+      showAlert('프로필 정보 수정 중 오류가 발생했습니다.', 'red');
       return false;
     } finally {
       setIsLoading(false);
@@ -299,17 +313,21 @@ export const useProfileEditModal = (isOpen: boolean) => {
   return {
     newUser,
     profileImage,
+    profileFile,
     phonePrefix,
     phoneMiddle,
     phoneSuffix,
     isLoading,
     errors,
-    fileInputRef,
+    customAlert,
+    todayStr,
+    minDate,
+    maxDate,
     handleInputChange,
     handleBlur,
     handleImageChange,
-    triggerFileInput,
     onConfirm,
+    showAlert,
   };
 };
 

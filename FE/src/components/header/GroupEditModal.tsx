@@ -1,7 +1,8 @@
 import React from 'react';
 import Modal from '@/components/common/Modal/Modal';
 import { useGroupEditModal } from '@/hooks/useGroupEditModal';
-
+import InputGroupPic from '../join/InputGroupPic';
+import Alert from '@/components/common/Alert';
 interface GroupEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,28 +11,32 @@ interface GroupEditModalProps {
 const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
   const {
     groupName,
+    thumbnail,
     thumbnailPreview,
     errorMessage,
     isLoading,
-    fileInputRef,
+    customAlert,
     handleInputChange,
     handleGroupNameBlur,
-    handleImageClick,
     handleFileChange,
     onConfirm,
   } = useGroupEditModal(isOpen);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="그룹 수정"
-      confirmButtonText={isLoading ? '저장 중...' : '저장하기'}
-      cancelButtonText="취소하기"
-      onConfirm={onConfirm}>
-      <>
-        {/* 썸네일 이미지 */}
-        {/* <div className="mb-5">
+    <>
+      {customAlert.show && (
+        <Alert message={customAlert.message} color={customAlert.color} />
+      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="그룹 수정"
+        confirmButtonText={isLoading ? '저장 중...' : '저장하기'}
+        cancelButtonText="취소하기"
+        onConfirm={onConfirm}>
+        <>
+          {/* 썸네일 이미지 */}
+          {/* <div className="mb-5">
           <p className="mb-2">그룹 대표 이미지</p>
           <div className="flex flex-col items-center">
             <input
@@ -60,34 +65,47 @@ const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
             </button>
           </div>
         </div> */}
-
-        {/* 그룹명 */}
-        <div className="mb-4">
-          <div className="flex justify-between">
-            <p className="mb-1">
-              그룹명
-              <span className="p-1 text-sm text-gray-600">
-                (최소 1자 ~ 최대 10자)
-              </span>
+          <div className="mb-5 flex flex-col gap-2">
+            <p className="mb-2">그룹 대표 이미지</p>
+            <p className="text-xs text-gray-500 text-center">
+              이미지 크기는 100KB ~ 10MB 이내로 등록가능합니다.
             </p>
-            <p className="text-gray-600 mb-1 text-sm">{groupName.length}/10</p>
+            <InputGroupPic
+              onImageChange={handleFileChange}
+              initialImage={thumbnail}
+              initialPreviewUrl={thumbnailPreview}
+            />
           </div>
-          <input
-            type="text"
-            value={groupName}
-            onChange={handleInputChange}
-            onBlur={handleGroupNameBlur}
-            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-            placeholder="그룹명을 입력해주세요."
-            maxLength={10}
-            disabled={isLoading}
-          />
-          {errorMessage && (
-            <p className="text-red-500 mt-1 text-sm">{errorMessage}</p>
-          )}
-        </div>
-      </>
-    </Modal>
+          {/* 그룹명 */}
+          <div className="mb-4">
+            <div className="flex justify-between">
+              <p className="mb-1">
+                그룹명
+                <span className="p-1 text-sm text-gray-600">
+                  (최소 1자 ~ 최대 10자)
+                </span>
+              </p>
+              <p className="text-gray-600 mb-1 text-sm">
+                {groupName.length}/10
+              </p>
+            </div>
+            <input
+              type="text"
+              value={groupName}
+              onChange={handleInputChange}
+              onBlur={handleGroupNameBlur}
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+              placeholder="그룹명을 입력해주세요."
+              maxLength={10}
+              disabled={isLoading}
+            />
+            {errorMessage && (
+              <p className="text-red-500 mt-1 text-sm">{errorMessage}</p>
+            )}
+          </div>
+        </>
+      </Modal>
+    </>
   );
 };
 

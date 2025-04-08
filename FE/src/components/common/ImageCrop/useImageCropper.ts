@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { type Crop as LibCrop } from 'react-image-crop';
 
 import Alert from '../Alert';
@@ -74,6 +74,13 @@ const useImageCropper = ({
     } as Crop;
   }
 
+  useEffect(() => {
+    if (initialPreviewUrl) {
+      setPreviewUrl(initialPreviewUrl);
+      setShowCropper(false);
+    }
+  }, [initialPreviewUrl]);
+  
   // 이미지 크기 유효성 검사 함수
   const validateImageSize = (file: File): boolean => {
     const minSizeBytes = minSize * 1024; // KB를 바이트로 변환

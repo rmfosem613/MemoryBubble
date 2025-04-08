@@ -61,7 +61,7 @@ const Header = () => {
           {isLoggedIn && (
             <>
               {/* 가족 및 프로필이 있는 경우 */}
-              {hasCompleteProfile ? (
+              {hasCompleteProfile||isAdmin ? (
                 <>
                   <div className="flex items-center space-x-2 order-2 sm:order-none">
                     <div className="hidden sm:flex items-center md:space-x-2">
