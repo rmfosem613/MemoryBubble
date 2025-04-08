@@ -118,13 +118,25 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     setSelectedRatio("4:3");
     const aspect = getAspectValue();
 
-    // 이미지 크기에 맞게 초기 크롭 영역 조정 (더 넓은 영역으로)
+    // 고정 너비 100px 설정
+    const fixedWidth = 100;
+    // 비율에 맞는 높이 계산
+    const fixedHeight = fixedWidth / aspect;
+
+    // 픽셀값을 퍼센트로 변환
+    const percentWidth = (fixedWidth / width) * 100;
+    const percentHeight = (fixedHeight / height) * 100;
+
+    // 이미지 중앙에 위치하도록 좌표 계산
+    const x = 0;
+    const y = 0;
+
     const newCrop: Crop = {
       unit: '%',
-      width: 80, // 80%로 크롭 영역 확대
-      height: 80 * (1 / aspect),
-      x: 0, // 가운데 정렬을 위해 10%에서 시작
-      y: 0,
+      width: percentWidth,
+      height: percentHeight,
+      x: x,
+      y: y,
     };
 
     setCrop(newCrop);
@@ -132,10 +144,10 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 초기 completedCrop도 바로 설정
     setCompletedCrop({
       unit: '%',
-      width: 80,
-      height: 80 * (1 / aspect),
-      x: 0,
-      y: 0
+      width: percentWidth,
+      height: percentHeight,
+      x: x,
+      y: y
     });
   };
 
@@ -151,23 +163,28 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    // 크롭 영역 너비와 높이 설정 (백분율)
-    const cropWidth = 80;
-    const cropHeight = cropWidth * (1 / aspect);
+    // 고정 너비 100px 설정
+    const fixedWidth = 100;
+    // 비율에 맞는 높이 계산
+    const fixedHeight = fixedWidth / aspect;
+
+    // 픽셀값을 퍼센트로 변환
+    const percentWidth = (fixedWidth / img.width) * 100;
+    const percentHeight = (fixedHeight / img.height) * 100;
 
     // 마우스 위치를 중심으로 크롭 영역 배치 (이미지 경계 고려)
-    let posX = Math.max(0, x - cropWidth / 2);
-    let posY = Math.max(0, y - cropHeight / 2);
+    let posX = Math.max(0, x - percentWidth / 2);
+    let posY = Math.max(0, y - percentHeight / 2);
 
     // 이미지 오른쪽/아래 경계를 넘어가지 않도록 조정
-    if (posX + cropWidth > 100) posX = 100 - cropWidth;
-    if (posY + cropHeight > 100) posY = 100 - cropHeight;
+    if (posX + percentWidth > 100) posX = 100 - percentWidth;
+    if (posY + percentHeight > 100) posY = 100 - percentHeight;
 
     // 새 크롭 영역 설정
     const newCrop: Crop = {
       unit: '%',
-      width: cropWidth,
-      height: cropHeight,
+      width: percentWidth,
+      height: percentHeight,
       x: posX,
       y: posY,
     };
@@ -175,8 +192,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     setCrop(newCrop);
     setCompletedCrop({
       unit: '%',
-      width: cropWidth,
-      height: cropHeight,
+      width: percentWidth,
+      height: percentHeight,
       x: posX,
       y: posY
     });
@@ -190,37 +207,55 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   // 비율 변경 처리
   const handleRatioChange = (ratio: AspectRatioOption) => {
     setSelectedRatio(ratio);
-    if (imgWidth && imgHeight) {
+    if (imgRef.current && imgWidth && imgHeight) {
       const aspect = ratio === "1:1" ? 1 : ratio === "4:3" ? 4 / 3 : 3 / 4;
-      // 비율 변경 시에도 왼쪽 상단으로 설정
+
+      // 고정 너비 100px 설정
+      const fixedWidth = 100;
+      // 비율에 맞는 높이 계산
+      const fixedHeight = fixedWidth / aspect;
+
+      // 픽셀값을 퍼센트로 변환
+      const percentWidth = (fixedWidth / imgWidth) * 100;
+      const percentHeight = (fixedHeight / imgHeight) * 100;
+
+      // 현재 위치를 유지하거나 중앙으로 재배치
+      let x = 0;
+      let y = 0;
+
+      // 이미지 경계를 벗어나지 않도록 조정
+      if (x + percentWidth > 100) x = 100 - percentWidth;
+      if (y + percentHeight > 100) y = 100 - percentHeight;
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+
       const newCrop = {
         unit: '%' as const,
-        width: 80,
-        height: 80 * (1 / aspect),
-        x: 0,
-        y: 0,
+        width: percentWidth,
+        height: percentHeight,
+        x: x,
+        y: y,
       };
-      setCrop(newCrop);
 
-      // 비율 변경 시에도 completedCrop 업데이트
+      setCrop(newCrop);
       setCompletedCrop({
         unit: '%',
-        width: 80,
-        height: 80 * (1 / aspect),
-        x: 0,
-        y: 0
+        width: percentWidth,
+        height: percentHeight,
+        x: x,
+        y: y
       });
     }
   };
 
   // 크롭 영역이 유효한지 검사하는 함수
-  const isCropValid = () => {
-    // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
-    if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
-      return false;
-    }
-    return true;
-  };
+  // const isCropValid = () => {
+  //   // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
+  //   if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
+  //     return false;
+  //   }
+  //   return true;
+  // };
 
   // 현재 이미지에 대한 자르기 로직
   const handleApplyCrop = async () => {
@@ -230,10 +265,10 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
 
     // 크롭 영역이 유효한지 체크
-    if (!isCropValid()) {
-      showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
-      return false;
-    }
+    // if (!isCropValid()) {
+    //   showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
+    //   return false;
+    // }
 
     const canvas = document.createElement('canvas');
     const image = imgRef.current;
@@ -329,6 +364,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
               onChange={(c) => setCrop(c)}
               onComplete={handleCropComplete}
               aspect={getAspectValue()}
+               minWidth={selectedRatio === "4:3" ? 100 : selectedRatio === "1:1" ? 100 : 0}
+                        minHeight={selectedRatio === "3:4" ? 135 : selectedRatio === "1:1" ? 100 : 0}
               className="max-w-full"
             >
               <img

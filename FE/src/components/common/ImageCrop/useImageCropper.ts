@@ -26,6 +26,7 @@ interface UseImageCropperParams {
   minSize?: number; // 최소 크기 (KB)
   maxSize?: number; // 최대 크기 (MB)
   imageQuality?: number; // 이미지 품질 (0.0 ~ 1.0)
+  maxAspectRatioDifference?: number; // 최대 가로세로 비율 차이
 }
 
 const useImageCropper = ({
@@ -35,7 +36,8 @@ const useImageCropper = ({
   defaultAspectRatio = "1:1",
   minSize = 100, // 기본 최소 100KB
   maxSize = 10, // 기본 최대 10MB
-  imageQuality = 0.95 // 기본 품질 95%
+  imageQuality = 0.95, // 기본 품질 95%
+  maxAspectRatioDifference = 20 // 기본 최대 비율 차이 20배
 }: UseImageCropperParams = {}) => {
   // 상태 관리
   const [image, setImage] = useState<File | null>(initialImage);
@@ -64,8 +66,8 @@ const useImageCropper = ({
 
     return {
       unit: '%',
-      width: 20,
-      height: 20 / aspectMap[ratio],
+      width: 30,
+      height: 30 / aspectMap[ratio],
       x: 0,
       y: 0,
       aspect: aspectMap[ratio]
@@ -91,6 +93,19 @@ const useImageCropper = ({
     return true;
   };
 
+  // 이미지 가로세로 비율 검사 함수
+  const validateAspectRatio = (width: number, height: number): boolean => {
+    const ratio = width / height;
+    
+    if (ratio >= maxAspectRatioDifference || ratio <= 1/maxAspectRatioDifference) {
+      setError(`이미지가 너무 길어서 업로드할 수 없습니다.`);
+      return false;
+    }
+    
+    setError("");
+    return true;
+  };
+
   // 이미지 선택 시 실행되는 함수
   const handleImageSelect = (file: File): void => {
     if (file.type.startsWith('image/')) {
@@ -99,23 +114,40 @@ const useImageCropper = ({
         return;
       }
 
-      // 미리보기 생성
-      const fileReader = new FileReader();
-      fileReader.onload = (event) => {
-        const previewResult = event.target?.result as string;
-        setPreviewUrl(previewResult);
-        // 기본 비율 설정
-        setSelectedRatio(defaultAspectRatio);
-        setCrop(getInitialCrop(defaultAspectRatio));
-        // 이미지 로드 상태 초기화
-        imageLoaded.current = false;
-        // 크롭 화면 보여주기
-        setShowCropper(true);
-      };
-      fileReader.readAsDataURL(file);
+      // 이미지 비율 검증을 위해 이미지 로드
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src); // 메모리 누수 방지
+        
+        // 이미지 가로세로 비율 검증
+        if (!validateAspectRatio(img.width, img.height)) {
+          return;
+        }
+        
+        // 미리보기 생성
+        const fileReader = new FileReader();
+        fileReader.onload = (event) => {
+          const previewResult = event.target?.result as string;
+          setPreviewUrl(previewResult);
+          // 기본 비율 설정
+          setSelectedRatio(defaultAspectRatio);
+          setCrop(getInitialCrop(defaultAspectRatio));
+          // 이미지 로드 상태 초기화
+          imageLoaded.current = false;
+          // 크롭 화면 보여주기
+          setShowCropper(true);
+        };
+        fileReader.readAsDataURL(file);
 
-      // 이미지 파일 저장
-      setImage(file);
+        // 이미지 파일 저장
+        setImage(file);
+      };
+      
+      img.onerror = () => {
+        setError("이미지를 로드하는 데 실패했습니다.");
+      };
+      
+      img.src = URL.createObjectURL(file);
     } else {
       setError("이미지 파일만 선택 가능합니다.");
     }
@@ -406,7 +438,8 @@ const useImageCropper = ({
     allowedAspectRatios,
     minSize,
     maxSize,
-    imageQuality
+    imageQuality,
+    maxAspectRatioDifference
   };
 };
 
