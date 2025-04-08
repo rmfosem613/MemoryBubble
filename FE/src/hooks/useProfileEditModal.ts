@@ -101,6 +101,9 @@ export const useProfileEditModal = (isOpen: boolean) => {
       }
     } else {
       // 일반 필드는 newUser 객체에 직접 업데이트
+      if(name === 'name') {
+        if(name.length > 10) return;
+      }
       setNewUser((prev) => ({
         ...prev,
         [name]: value,

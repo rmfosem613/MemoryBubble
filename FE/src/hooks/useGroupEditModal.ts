@@ -25,6 +25,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
 
   // 입력 변경 시 에러 메시지 초기화
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if(e.target.value.length > 10) return;
     setGroupName(e.target.value);
     setErrorMessage('');
   };
