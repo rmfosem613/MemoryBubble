@@ -162,7 +162,7 @@ const UserInfo = () => {
                   key={member.userId}
                   className="flex items-center space-x-3 p-3 border-b border-gray-200">
                   <img
-                    src={member.profileUrl}
+                    src={member.profileUrl+"&w=80&h=80"}
                     alt="프로필 이미지"
                     className="h-11 w-11 rounded-full object-cover"
                   />
