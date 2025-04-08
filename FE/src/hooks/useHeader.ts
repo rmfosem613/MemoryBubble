@@ -67,11 +67,6 @@ const useHeader = () => {
     }
   }, [checkUnreadLetter, hasCompleteProfile, location.pathname]);
 
-  // 메인 경로인지 확인
-  const isMainPath = useCallback(() => {
-    return location.pathname === '/main';
-  }, [location.pathname]);
-
   // 경로 일치하는지 확인
   const isActivePath = useCallback(
     (path: string) => {
@@ -106,7 +101,6 @@ const useHeader = () => {
     menuRef,
     buttonRef,
     isUnread,
-    isMainPath,
     isActivePath,
     toggleMenu,
     closeMenu,
