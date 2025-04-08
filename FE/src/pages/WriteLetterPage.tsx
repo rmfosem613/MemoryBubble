@@ -11,11 +11,10 @@ import { SendLetterRequest } from '@/apis/letterApi';
 import { useUserApi } from '@/apis/useUserApi';
 
 import Alert from '@/components/common/Alert';
-import { useRecorder } from '@/hooks/useRecorder';
 
 function WriteLetterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { uploadImageWithPresignedUrl } = useUserApi();
 
   // 편지 타입 및 상태 정보 가져오기
