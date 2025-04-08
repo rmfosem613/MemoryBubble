@@ -165,15 +165,19 @@ function PhotoAlbum() {
               {message.content}
             </p>
             <p className="text-xs text-gray-500">
-              {new Date(message.createdAt).toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: false,
-                //timeZone: 'Asia/Seoul',
-              })}
+              {(() => {
+                const date = new Date(message.createdAt);
+                // 한국 시간대로 변환 (UTC+9)
+                const koreaDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
+                const year = koreaDate.getFullYear();
+                const month = koreaDate.getMonth() + 1;
+                const day = koreaDate.getDate();
+                const hours = koreaDate.getHours();
+                const minutes = koreaDate.getMinutes();
+
+                return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+              })()}
             </p>
           </div>
         </div>
@@ -209,15 +213,19 @@ function PhotoAlbum() {
             </div>
           </div>
           <p className="text-xs text-gray-500">
-            {new Date(message.createdAt).toLocaleString('ko-KR', {
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: false,
-              // timeZone: 'Asia/Seoul',
-            })}
+            {(() => {
+              const date = new Date(message.createdAt);
+              // 한국 시간대로 변환 (UTC+9)
+              const koreaDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
+              const year = koreaDate.getFullYear();
+              const month = koreaDate.getMonth() + 1;
+              const day = koreaDate.getDate();
+              const hours = koreaDate.getHours();
+              const minutes = koreaDate.getMinutes();
+
+              return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+            })()}
           </p>
         </div>
       );
