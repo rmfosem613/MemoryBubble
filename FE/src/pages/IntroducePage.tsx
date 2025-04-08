@@ -92,22 +92,22 @@ function IntroducePage() {
       const animateCurtain = () => {
         setCurtainHeight(prev => {
           if (prev <= 0) return 0;
-          return prev - 10; // 줄여나감
+          return prev - 50; // 줄여나감
         });
       };
 
-      const animation = setInterval(animateCurtain, 15); // 10ms마다 실행
+      const animation = setInterval(animateCurtain, 5); // 5ms마다 실행
 
       // 애니메이션이 완료되면 interval 정리
       const cleanup = setTimeout(() => {
         clearInterval(animation);
-      }, 3000); // 대략 1.2초 정도 소요
+      }, 500); // 대략 1.2초 정도 소요
 
       return () => { 
         clearInterval(animation);
         clearTimeout(cleanup);
       };
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, []);
