@@ -10,4 +10,5 @@ import lombok.Getter;
 public class PhotoDto {
     Long photoId;
     String photoUrl;
+    Boolean isThumbnail;
 }
