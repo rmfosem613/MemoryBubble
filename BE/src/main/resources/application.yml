@@ -34,7 +34,6 @@ spring:
             client-id: ${oauth2.client-id}
             client-secret: ${oauth2.client-secret}
             client-authentication-method: client_secret_post
-#            redirect-uri: http://localhost:8080/login/oauth2/code/kakao # spring security에서 만든 redirect-uri
             authorization-grant-type: authorization_code
             client-name: kakao
             scope:
@@ -52,6 +51,7 @@ spring:
         bucket: ${aws.bucket}
       cloudfront:
         domain: https://dc7a8e6v5khzi.cloudfront.net
+        distribution-id: ${cloudfront.distribution-id}
         key-pair-id: ${cloudfront.key-pair-id}
         private-key-path: ${cloudfront.private-key-path}
 jwt:

@@ -5,6 +5,7 @@ import com.ssafy.memorybubble.api.family.dto.FamilyFontDto;
 import com.ssafy.memorybubble.api.fcm.dto.FcmMessage;
 import com.ssafy.memorybubble.api.fcm.service.FcmService;
 import com.ssafy.memorybubble.api.file.dto.FileResponse;
+import com.ssafy.memorybubble.api.file.service.CloudFrontService;
 import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.font.dto.FontAdminResponse;
 import com.ssafy.memorybubble.api.font.dto.FontRequest;
@@ -36,6 +37,7 @@ public class FontService {
     private final UserService userService;
     private final FileService fileService;
     private final FcmService fcmService;
+    private final CloudFrontService cloudFrontService;
 
     private final static String TEMPLATE_FILE = "template/추억방울_템플릿.zip";
     private final static String TEMPLATE_FILE_NAME = "template/%d/%d.png"; // template/{userId}/{templateNumber}.png
@@ -81,6 +83,8 @@ public class FontService {
         // 삭제하려는 폰트가 삭제를 요청한 사용자의 폰트인지 검사
         Validator.validateFontOwnership(user, font);
 
+        // CloudFront에서 캐싱 무효화 후 파일 삭제
+        cloudFrontService.invalidateFile(font.getPath());
         fileService.deleteFile(font.getPath());
         fontRepository.deleteById(fontId);
     }
