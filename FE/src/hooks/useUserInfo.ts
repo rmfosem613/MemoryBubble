@@ -15,7 +15,7 @@ const kakaoConfig = {
 };
 
 const useUserInfo = () => {
-  const { user } = useUserStore();
+  const { user, resetUser } = useUserStore();
   const { getFamilyInviteCode, logout } = useUserApi();
 
   // 드롭다운 관련 상태
@@ -93,17 +93,15 @@ const useUserInfo = () => {
         // 토큰 삭제 및 페이지 이동 처리
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        useUserStore.getState().resetUser();
-        //window.location.href = '/introduce';
+        resetUser();
       }
     } catch (error) {
       // 오류가 발생해도 토큰 삭제 및 페이지 이동 처리
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      useUserStore.getState().resetUser();
-      //window.location.href = '/introduce';
+      resetUser();
     }
-  }, [logout]);
+  }, [logout, resetUser]);
 
   return {
     // 상태
