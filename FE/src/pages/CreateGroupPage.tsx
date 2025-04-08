@@ -54,16 +54,16 @@ function CreateGroupPage() {
         return
       }
 
-      if (groupName.length < 1) {
+      if (groupName.trim().length < 1) {
         setNameError("그룹명은 최소 1글자 이상이어야 합니다.")
         return
       }
 
-      if (groupName.length > 10) {
+      if (groupName.trim().length > 10) {
         setNameError("그룹명은 최대 10글자까지 가능합니다.")
         return
       }
-
+      setGroupName(groupName.trim());
       setCurrentStep(currentStep + 1)
     } else {
       if (!groupImage) {
