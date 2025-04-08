@@ -49,7 +49,7 @@ const PhotoUploader = ({
   // 모달이 닫힐 때 상태 초기화
   const resetState = () => {
     setSelectedFiles([]);
-    setCroppedImages([]);
+    // setCroppedImages([]);
     setCurrentImageIndex(-1);
     setSelectedRatio("4:3");
     setIsUploadingPhotos(false);
@@ -254,6 +254,35 @@ const PhotoUploader = ({
     }
   };
 
+  const handleCancelAllImages = () => {
+    // 자르는데 성공한 이미지와 자르지 못한 이미지 필터링
+    const processedIndices = new Set();
+
+    // 성공적으로 자른 이미지 인덱스 찾기
+    croppedImages.forEach((img, index) => {
+      if (img && img.preview) {
+        processedIndices.add(index);
+      }
+    });
+
+    // 자르기 완료되었던 이미지는 저장
+    const updatedFiles = selectedFiles.filter((_, index) => processedIndices.has(index));
+    const updatedCroppedImages = croppedImages.filter((img, index) => processedIndices.has(index));
+
+    // 이미지 상태 업데이트
+    setSelectedFiles(updatedFiles);
+    setCroppedImages(updatedCroppedImages);
+    setCurrentImageIndex(-1);
+    setIsCropperModalOpen(false);
+
+    // 이미지 자르기가 취소 되었을 때 alert
+    if (updatedFiles.length === 0) {
+      showAlertMessage("모든 이미지가 취소되었습니다.", "red");
+    } else if (updatedFiles.length < selectedFiles.length) {
+      showAlertMessage(`처리되지 않은 이미지가 취소되었습니다. (${updatedFiles.length}개 남음)`, "red");
+    }
+  }
+
   // 이미지 제거
   const handleRemoveImage = (index: number) => {
     // 선택된 파일 배열에서 제거
@@ -400,7 +429,7 @@ const PhotoUploader = ({
       setIsUploadingPhotos(false);
       setUploadProgress(0);
       setSelectedFiles([]);
-      setCroppedImages([]);
+      // setCroppedImages([]);
     }
   };
 
@@ -483,9 +512,11 @@ const PhotoUploader = ({
           currentIndex={currentImageIndex}
           aspectRatio={selectedRatio}
           onCropComplete={handleCropComplete}
+          onCancelAll={handleCancelAllImages}
           onAllCropsComplete={handleAllCropsComplete}
           allowedAspectRatios={["4:3", "3:4", "1:1"]}
           modalTitle="이미지 자르기"
+          cancelButtonText="취소하기"
         />
       )}
     </>
