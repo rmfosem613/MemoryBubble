@@ -15,10 +15,12 @@ interface ImageCropperModalProps {
   aspectRatio: AspectRatioOption;
   onCropComplete: (file: File, previewUrl: string, index: number) => void;
   onAllCropsComplete?: () => void;
+  onCancelAll?: () => void; // 취소
   allowedAspectRatios?: AspectRatioOption[];
   imageQuality?: number;
   modalTitle?: string;
   applyButtonText?: string;
+  cancelButtonText?: string;
 }
 
 const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
@@ -29,10 +31,12 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   aspectRatio,
   onCropComplete,
   onAllCropsComplete,
+  onCancelAll,
   allowedAspectRatios = ["1:1", "4:3", "3:4"],
   imageQuality = 0.95,
   modalTitle = "이미지 자르기",
   // applyButtonText = "자르기",
+  cancelButtonText = "취소하기",
 }) => {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatioOption>("4:3");
   const [crop, setCrop] = useState<Crop>({
@@ -197,6 +201,16 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       x: posX,
       y: posY
     });
+  };
+
+  // 모든 이미지 취소 처리
+  const handleCancelAll = () => {
+    // onCancelAll 콜백이 있으면 호출
+    if (onCancelAll) {
+      onCancelAll();
+    }
+    // 모달 닫기
+    onClose();
   };
 
   // 사용자가 크롭을 완료했을 때 호출
@@ -364,8 +378,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
               onChange={(c) => setCrop(c)}
               onComplete={handleCropComplete}
               aspect={getAspectValue()}
-               minWidth={selectedRatio === "4:3" ? 100 : selectedRatio === "1:1" ? 100 : 0}
-                        minHeight={selectedRatio === "3:4" ? 135 : selectedRatio === "1:1" ? 100 : 0}
+              minWidth={selectedRatio === "4:3" ? 100 : selectedRatio === "1:1" ? 100 : 0}
+              minHeight={selectedRatio === "3:4" ? 135 : selectedRatio === "1:1" ? 100 : 0}
               className="max-w-full"
             >
               <img
@@ -401,8 +415,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         onClose={onClose}
         title={computedModalTitle}
         confirmButtonText={finalApplyButtonText}
+        cancelButtonText={cancelButtonText}
         onConfirm={handleApplyCrop}
-        onCancel={onClose}
+        onCancel={handleCancelAll}
       >
         {renderModalContent()}
       </Modal>
