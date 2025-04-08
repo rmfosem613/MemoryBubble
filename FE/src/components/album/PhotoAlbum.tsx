@@ -172,7 +172,7 @@ function PhotoAlbum() {
                 hour: 'numeric',
                 minute: 'numeric',
                 hour12: false,
-                timeZone: 'Asia/Seoul',
+                //timeZone: 'Asia/Seoul',
               })}
             </p>
           </div>
@@ -216,7 +216,7 @@ function PhotoAlbum() {
               hour: 'numeric',
               minute: 'numeric',
               hour12: false,
-              timeZone: 'Asia/Seoul',
+              // timeZone: 'Asia/Seoul',
             })}
           </p>
         </div>
