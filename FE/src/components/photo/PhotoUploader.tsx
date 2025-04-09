@@ -642,7 +642,7 @@ const PhotoUploader = ({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="추억 보관하기"
+        title={`추억 보관하기 (${croppedImages.length}/5)`}
         confirmButtonText="보관하기"
         cancelButtonText="취소하기"
         onConfirm={handlePhotoUploadStart}
@@ -685,7 +685,7 @@ const PhotoUploader = ({
           onCancelAll={handleCancelAllImages}
           onAllCropsComplete={handleAllCropsComplete}
           allowedAspectRatios={["4:3", "3:4", "1:1"]}
-          modalTitle="이미지 자르기"
+          modalTitle={`이미지 자르기`}
           cancelButtonText="취소하기"
         />
       )}
