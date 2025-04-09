@@ -21,24 +21,44 @@ export const SEASON_COLORS = {
     border: ['border-winter-100', 'border-winter-200', 'border-winter-300'],
     bg: ['bg-winter-100', 'bg-winter-200', 'bg-winter-300'],
     text: ['text-winter-100', 'text-winter-200', 'text-winter-300'],
+    hover: [
+      'hover:bg-winter-100',
+      'hover:bg-winter-200/20',
+      'hover:bg-winter-200/50',
+    ],
   },
   // 봄 (3월, 4월, 5월)
   spring: {
     border: ['border-spring-100', 'border-spring-200', 'border-spring-300'],
     bg: ['bg-spring-100', 'bg-spring-200', 'bg-spring-300'],
     text: ['text-spring-100', 'text-spring-200', 'text-spring-300'],
+    hover: [
+      'hover:bg-spring-100',
+      'hover:bg-spring-200/20',
+      'hover:bg-spring-200/50',
+    ],
   },
   // 여름 (6월, 7월, 8월)
   summer: {
     border: ['border-summer-100', 'border-summer-200', 'border-summer-300'],
     bg: ['bg-summer-100', 'bg-summer-200', 'bg-summer-300'],
     text: ['text-summer-100', 'text-summer-200', 'text-summer-300'],
+    hover: [
+      'hover:bg-summer-100',
+      'hover:bg-summer-200/20',
+      'hover:bg-summer-200/50',
+    ],
   },
   // 가을 (9월, 10월, 11월)
   autumn: {
     border: ['border-autumn-100', 'border-autumn-200', 'border-autumn-300'],
     bg: ['bg-autumn-100', 'bg-autumn-200', 'bg-autumn-300'],
     text: ['text-autumn-100', 'text-autumn-200', 'text-autumn-300'],
+    hover: [
+      'hover:bg-autumn-100',
+      'hover:bg-autumn-200/20',
+      'hover:bg-autumn-200/50',
+    ],
   },
 };
 
