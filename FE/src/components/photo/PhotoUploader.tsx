@@ -5,7 +5,7 @@ import ImageSelector from "@/components/common/Modal/ImageSelector";
 import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
 import { uploadImageToS3 } from "@/components/common/ImageCrop/imageUtils";
 
-import Alert from "../common/Alert";
+import Alert from "../common/Alert_upload";
 
 interface PhotoUploaderProps {
   isOpen: boolean;
