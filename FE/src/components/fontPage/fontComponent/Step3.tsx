@@ -76,7 +76,7 @@ function Step3() {
               />
               <p className="">체</p>
               <span
-                className={`text-xs ${fontNameKo.length >= 7 ? 'text-red-500' : 'text-gray-500'}`}>
+                className={`text-xs text-gray-500`}>
                 {fontNameKo.length}/7
               </span>
             </div>

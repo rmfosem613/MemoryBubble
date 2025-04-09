@@ -44,7 +44,7 @@ function JoinPage() {
   const { user } = useUserStore();
   const { joinFamily, uploadImageWithPresignedUrl } = useUserApi();
   const { fetchProfileAndFamilyInfo } = useUser();
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
@@ -95,7 +95,7 @@ function JoinPage() {
         setNameError("");
       }
 
-      if(trimName !== name) {
+      if (trimName !== name) {
         setName(trimName);
       }
 
@@ -109,7 +109,7 @@ function JoinPage() {
         hasError = true;
       }*/
 
-      if(!phonePrefix || !phoneMiddle || !phoneSuffix) {
+      if (!phonePrefix || !phoneMiddle || !phoneSuffix) {
         setPhoneError("전화번호를 입력해주세요.");
         hasError = true;
       } else if (phoneMiddle.length !== 4 || phoneSuffix.length !== 4) {
@@ -126,7 +126,7 @@ function JoinPage() {
         setBirthError("생일을 입력해주세요.");
         return;
       }
-      else if(birth < "1900-01-01" || birth > new Date().toISOString().split('T')[0]) {
+      else if (birth < "1900-01-01" || birth > new Date().toISOString().split('T')[0]) {
         setBirthError("생일이 올바르지 않습니다.");
         return;
       }
@@ -176,7 +176,7 @@ function JoinPage() {
           }
         }
 
-         // 사용자 정보 조회 및 상태 업데이트
+        // 사용자 정보 조회 및 상태 업데이트
         await fetchProfileAndFamilyInfo(user.userId, user.familyId);
 
         // 가입 성공 후 메인 페이지로 이동
@@ -374,7 +374,7 @@ function JoinPage() {
                 <Button name="이전" color="white" onClick={handlePrev} />
               )}
               <Button
-                name={currentStep === 3 ? (isLoading ? "처리 중..." : "완료") : "다음"}
+                name={currentStep === 3 ? "완료" : "다음"}
                 color="blue"
                 onClick={handleNext}
               />

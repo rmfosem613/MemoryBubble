@@ -25,6 +25,7 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
     setSelectedDate(formattedDate);
+    onDateChange(today); // 초기 로드 시 오늘 날짜를 부모 컴포넌트에 전달
   }, []);
 
   // 가족 구성원 정보 조회
@@ -66,9 +67,9 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
     setSelectedColor(colorId as any);
   };
 
-  const handleDateChange = (date: Date) => {
-    onDateChange(date);
-  };
+  // const handleDateChange = (date: Date) => {
+  //   onDateChange(date);
+  // };
 
   return (
     <div className="border-2 border-gray-300 rounded-[8px] h-full w-full mb-1">
@@ -98,7 +99,11 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
             className="w-full border rounded-[8px] border-gray-300 p-2 text-sm"
             min={new Date().toISOString().split('T')[0]}
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            onChange={(e) => {
+              setSelectedDate(e.target.value);
+              const dateObject = new Date(e.target.value);
+              onDateChange(dateObject);
+            }}
           />
         </div>
 

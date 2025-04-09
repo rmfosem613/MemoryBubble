@@ -22,7 +22,6 @@ interface LetterMember {
 
 // 편지 상태 인터페이스
 interface LetterState {
-
   // 편지 타입
   letterType: LetterType;
   cassetteData: CassetteData;
@@ -55,7 +54,7 @@ export const useLetterStore = create<LetterState>((set) => ({
     isRecorded: false,
     isRecording: false,
     recordingUrl: null,
-    recordingDuration: 0
+    recordingDuration: 0,
   },
 
   // 텍스트 편지 내용
@@ -72,9 +71,10 @@ export const useLetterStore = create<LetterState>((set) => ({
 
   // 카세트 관련 함수
   setLetterType: (type) => set({ letterType: type }),
-  updateCassetteData: (data) => set((state) => ({
-    cassetteData: { ...state.cassetteData, ...data }
-  })),
+  updateCassetteData: (data) =>
+    set((state) => ({
+      cassetteData: { ...state.cassetteData, ...data },
+    })),
 
   resetLetterState: () =>
     set({
@@ -91,13 +91,11 @@ export const useLetterStore = create<LetterState>((set) => ({
     }),
 }));
 
-
 // 편지 보관함 타입
 type StorageType = 'new' | 'received';
 
 // 편지 보관함 인터페이스
 interface StorageState {
-
   // 편지 타입
   storageType: StorageType;
 }

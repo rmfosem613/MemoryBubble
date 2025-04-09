@@ -5,7 +5,7 @@ import useUserApi from '@/apis/useUserApi';
 // 커스텀 알림 타입 정의
 interface CustomAlert {
   message: string;
-  color: 'red' | 'green';
+  color: 'red' | 'green' | 'gray' | 'blue';
   isVisible: boolean;
 }
 
@@ -32,7 +32,7 @@ const useUserInfo = () => {
 
   // 커스텀 알림 표시 함수
   const showCustomAlert = useCallback(
-    (message: string, color: 'red' | 'green') => {
+    (message: string, color: 'red' | 'green' | 'gray' | 'blue') => {
       setCustomAlert({
         message,
         color,

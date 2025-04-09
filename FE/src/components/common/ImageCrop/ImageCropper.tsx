@@ -34,7 +34,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   minSize = 100, // 기본 최소 100KB
   maxSize = 10, // 기본 최대 10MB
   imageQuality = 0.95, // 기본 품질 95%
-  maxAspectRatioDifference = 20, // 기본 최대 비율 차이 20배
+  maxAspectRatioDifference = 5, // 기본 최대 비율 차이 20배
   renderPreview,
   renderUploadBox,
   modalTitle = "이미지 자르기",
@@ -131,8 +131,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
         const areaRatio = (cropArea / totalArea) * 100;
         
         // 최소 면적(30%) 확인
-        if (areaRatio < 30) {
-          showAlertMessage("자르기 영역이 원본 이미지의 30% 이상이어야 합니다.", "red");
+        if (areaRatio < 20) {
+          showAlertMessage("자르기 영역이 원본 이미지의 20% 이상이어야 합니다.", "red");
           return;
         }
       }

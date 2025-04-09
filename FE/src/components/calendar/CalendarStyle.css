@@ -185,7 +185,7 @@
 }
 
 .fc-daygrid-day-frame {
-  @apply lg:!min-h-[105px] lg:!max-h-[105px];
+  @apply !cursor-pointer lg:!min-h-[105px] lg:!max-h-[105px];
 }
 
 /* 이전달 및 다음달 날짜 */
@@ -193,7 +193,7 @@
   @apply !bg-inherit;
 }
 .fc-day-disabled .fc-daygrid-day-frame {
-  @apply !border-none;
+  @apply !border-none !cursor-default;
 }
 
 /* 오늘 날짜 */

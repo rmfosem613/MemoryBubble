@@ -5,7 +5,7 @@ import ImageSelector from "@/components/common/Modal/ImageSelector";
 import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
 import { uploadImageToS3 } from "@/components/common/ImageCrop/imageUtils";
 
-import Alert from "../common/Alert";
+import Alert from "../common/Alert_upload";
 
 interface PhotoUploaderProps {
   isOpen: boolean;
@@ -160,7 +160,7 @@ const PhotoUploader = ({
           const aspectRatio = width / height;
 
           // 가로세로 비율이 1:20(0.05) 미만이거나 20:1(20) 초과인 경우 유효하지 않음
-          const isValidRatio = aspectRatio >= 0.05 && aspectRatio <= 20;
+          const isValidRatio = aspectRatio >= 0.2 && aspectRatio <= 5;
 
           resolve(isValidRatio);
         };
@@ -185,8 +185,8 @@ const PhotoUploader = ({
   // 이미지 선택 시 처리
   const handleImagesSelected = async (files: File[]) => {
     // 최대 5개까지만 선택 가능 검사
-    if (files.length + selectedFiles.length > 5) {
-      showAlertMessage("이미지는 한 번에 최대 5개까지만 업로드할 수 있습니다.", "red");
+    if (files.length + selectedFiles.length > 10) {
+      showAlertMessage("이미지는 한 번에 최대 10개까지만 업로드할 수 있습니다.", "red");
       return;
     }
 
@@ -219,7 +219,7 @@ const PhotoUploader = ({
       // 이미지 가로세로 비율 검사
       const aspectRatioValid = await validateImageAspectRatio(file);
       if (!aspectRatioValid) {
-        showAlertMessage(`"${file.name}" 파일의 가로세로 비율이 너무 극단적입니다. 가로세로 비율이 1:20 또는 20:1을 초과할 수 없습니다.`, "red");
+        showAlertMessage(`이미지가 너무 길어서 업로드할 수 없습니다.`, "red");
         return null;
       }
 
@@ -233,15 +233,15 @@ const PhotoUploader = ({
     const validatedFiles = validatedResults.filter(file => file !== null) as File[];
 
     // 유효한 파일이 없으면 종료
-    if (validatedFiles.length === 0 && files.length > 0) {
-      showAlertMessage("선택한 모든 이미지 파일이 유효하지 않습니다.", "red");
-      return;
-    }
+    // if (validatedFiles.length === 0 && files.length > 0) {
+    //   showAlertMessage("선택한 모든 이미지 파일이 유효하지 않습니다.", "red");
+    //   return;
+    // }
 
     // 일부 파일만 유효한 경우 알림
-    if (validatedFiles.length < files.length) {
-      showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 유효하지 않아 제외되었습니다.`, "red");
-    }
+    // if (validatedFiles.length < files.length) {
+    //   showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 유효하지 않아 제외되었습니다.`, "red");
+    // }
 
     // 나머지 기존 코드와 동일...
     const newFiles = [...selectedFiles, ...validatedFiles];
@@ -453,7 +453,7 @@ const PhotoUploader = ({
             onImagesSelected={handleImagesSelected}
             selectedImages={selectedFiles}
             onRemoveImage={handleRemoveImage}
-            maxImages={5}
+            maxImages={10}
             previewSize="md"
             croppedPreviews={croppedImages.map(img => img?.preview || null)}
           />
@@ -462,6 +462,7 @@ const PhotoUploader = ({
           <div className="text-sm-lg text-gray-400 -mt-1">
             이미지 용량 제한: 100KB ~ 10MB <br />
             이미지 형식 제한: png, jpg, jpeg <br />
+            <span className="text-blue-500">이미지 한 번에 10개까지 등록 가능</span>
           </div>
         </div>
 

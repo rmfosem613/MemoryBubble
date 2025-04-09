@@ -174,8 +174,8 @@ export const usePhotoAlbum = () => {
 
       // 요청 body 객체 생성
       const data = {
-        albumName: newAlbumName || albumTitle, // 새 이름이 없으면 기존 이름 사용
-        albumContent: newAlbumContent,
+        albumName: newAlbumName.trim() || albumTitle, // 새 이름이 없으면 기존 이름 사용
+        albumContent: newAlbumContent.trim(),
       };
 
       // API 요청 보내기

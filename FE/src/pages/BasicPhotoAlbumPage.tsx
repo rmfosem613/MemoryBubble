@@ -232,7 +232,7 @@ function BasicPhotoAlbumPage() {
   // 앨범 이동 모달 열기
   const openMoveAlbumModal = () => {
     if (selectedPhotos.length === 0) {
-      showAlertMessage("이동할 사진을 먼저 선택해주세요.");
+      showAlertMessage("이동할 사진을 먼저 선택해주세요.", "red");
       return;
     }
     moveAlbumModal.open();

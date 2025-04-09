@@ -38,7 +38,7 @@ function PhotoMover({
   const [alertColor, setAlertColor] = useState("red");
 
   // Alert 표시 함수
-  const showAlertMessage = (message: string, color: string = "red") => {
+  const showAlertMessage = (message: string, color: string) => {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
