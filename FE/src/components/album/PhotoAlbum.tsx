@@ -164,21 +164,21 @@ function PhotoAlbum() {
               className={`text-gray-700 mt-1 text-h4-lg font-p-500 ${fontClass}`}>
               {message.content}
             </p>
-            <p className="text-xs text-gray-500">
-              {(() => {
-                const date = new Date(message.createdAt);
-                // 한국 시간대로 변환 (UTC+9)
-                const koreaDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+          </div>
+          <div className="text-xs text-gray-500 float-end mt-1">
+            {(() => {
+              const date = new Date(message.createdAt);
+              // 한국 시간대로 변환 (UTC+9)
+              const koreaDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
 
-                const year = koreaDate.getFullYear();
-                const month = koreaDate.getMonth() + 1;
-                const day = koreaDate.getDate();
-                const hours = koreaDate.getHours();
-                const minutes = koreaDate.getMinutes();
+              const year = koreaDate.getFullYear();
+              const month = koreaDate.getMonth() + 1;
+              const day = koreaDate.getDate();
+              const hours = koreaDate.getHours();
+              const minutes = koreaDate.getMinutes();
 
-                return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
-              })()}
-            </p>
+              return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+            })()}
           </div>
         </div>
       );
@@ -313,7 +313,7 @@ function PhotoAlbum() {
             className={`flex items-center gap-1 ${!photos || photos.length === 0 || photos[currentIndex].isThumbnail
               ? 'text-gray-400 opacity-70 cursor-default'
               : 'cursor-pointer hover:text-blue-500' // 활성화된 경우 호버 효과 추가
-              }`}
+            }`}
             onClick={
               !photos || photos.length === 0 || photos[currentIndex].isThumbnail
                 ? undefined
@@ -459,7 +459,7 @@ function PhotoAlbum() {
                     className={`${isRecording
                       ? 'bg-red-500 hover:bg-red-600 text-white'
                       : 'bg-white text-black hover:bg-gray-100 border'
-                      } h-full px-4 py-2 rounded-lg transition-colors z-10`}
+                    } h-full px-4 py-2 rounded-lg transition-colors z-10`}
                     onClick={handleRecordButtonWrapper}>
                     <Mic size={20} strokeWidth={1} />
                   </button>
