@@ -212,25 +212,34 @@ function MainPage() {
                       {currentAlbum.title}
                     </p>
                   ) : (
-                    // 커스텀 이미지일 때는 기존 스타일 유지
-                    <p
-                      className='absolute text-album-1-sm md:text-album-1-md lg:text-album-1-lg font-p-800 bg-clip-text w-[94%]
+                    // 이모지 확인 - 유니코드 이모지 범위로 검사
+                    /[\p{Emoji}]/u.test(currentAlbum.title) ? (
+                      // 이모지가 있으면 검은색 텍스트로 표시
+                      <p className='absolute text-album-1-sm md:text-album-1-md lg:text-album-1-lg font-p-800 w-[94%] text-gray-700
+                        drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]'>
+                        {currentAlbum.title || "추억보관함"}
+                      </p>
+                    ) : (
+                      // 커스텀 이미지일 때는 기존 스타일 유지
+                      <p
+                        className='absolute text-album-1-sm md:text-album-1-md lg:text-album-1-lg font-p-800 bg-clip-text w-[94%]
                       drop-shadow-[1px_1px_2px_rgba(0,0,0,0.2)]'
-                      style={{
-                        color: "transparent",
-                        WebkitBackgroundClip: "text",
-                        backgroundImage: `url('${albumImageUrl}&w=1000') `,
-                        backgroundSize: "100%"
-                      }}>
-                      {currentAlbum.title || "추억보관함"}
-                    </p>
+                        style={{
+                          color: "transparent",
+                          WebkitBackgroundClip: "text",
+                          backgroundImage: `url('${albumImageUrl}&w=1000') `,
+                          backgroundSize: "100%"
+                        }}>
+                        {currentAlbum.title || "추억보관함"}
+                      </p>
+                    )
                   )}
                 </div>
               </div>
 
               {/* 앨범 이미지 - 클릭 이벤트 추가 */}
               <img
-                src={albumImageUrl === defaultAlbumImage ? albumImageUrl : albumImageUrl+"&w=1000"}
+                src={albumImageUrl === defaultAlbumImage ? albumImageUrl : albumImageUrl + "&w=1000"}
                 className='w-[94%] object-cover cursor-pointer'
                 onClick={handleAlbumClick}
                 alt={currentAlbum.title}
