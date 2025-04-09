@@ -280,3 +280,242 @@ export const uploadImageToS3 = async (
     return false;
   }
 };
+
+/**
+ * 이미지 파일을 다운샘플링하여 미리보기용 이미지와 메타데이터를 생성합니다.
+ * @param file 원본 이미지 파일
+ * @param maxWidth 최대 너비 (픽셀)
+ * @param maxHeight 최대 높이 (픽셀)
+ * @param quality JPEG 품질 (0-1)
+ * @returns 다운샘플링된 이미지 Blob과 메타데이터
+ */
+// imageUtils.ts의 createDownsampledImage 함수 수정
+export const createDownsampledImage = (
+  file: File,
+  maxWidth: number = 800,
+  maxHeight: number = 600,
+  quality: number = 0.8
+): Promise<{
+  file: File;
+  blob: Blob;
+  width: number;
+  height: number;
+  preview: string;
+  originalFile: File;
+}> => {
+  return new Promise((resolve, reject) => {
+    // 직접 URL 생성으로 처리 속도 향상
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      // 원본 크기 저장
+      const originalWidth = img.naturalWidth;
+      const originalHeight = img.naturalHeight;
+
+      // 새 크기 계산 - 미리보기용 최대 크기 제한
+      let width = originalWidth;
+      let height = originalHeight;
+
+      // 다운샘플링 비율 계산 - 더 큰 스케일로 줄이기(더 작게 만들기)
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.floor(width * ratio);
+        height = Math.floor(height * ratio);
+      }
+
+      // 캔버스 생성
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('캔버스 컨텍스트를 생성할 수 없습니다'));
+        return;
+      }
+
+      // 이미지 그리기
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // 메모리 해제
+      URL.revokeObjectURL(objectUrl);
+
+      // 이미지 생성 및 반환 - 더 낮은 품질로 설정하여 성능 향상
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Blob을 생성할 수 없습니다'));
+          return;
+        }
+
+        // 미리보기 URL 생성
+        const previewUrl = URL.createObjectURL(blob);
+
+        // 다운샘플링된 파일 생성
+        const downsampledFile = new File(
+          [blob],
+          file.name,
+          { type: 'image/jpeg' }
+        );
+
+        resolve({
+          file: downsampledFile,
+          blob,
+          width,
+          height,
+          preview: previewUrl,
+          originalFile: file
+        });
+      }, 'image/jpeg', quality * 0.8); // 품질을 더 낮게 설정하여 속도 향상
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('이미지 로드 실패'));
+    };
+
+    // 이미지 로드
+    img.src = objectUrl;
+  });
+};
+
+/**
+ * 원본 이미지에 크롭을 적용하고 업로드용으로 최적화합니다.
+ * @param originalFile 원본 파일
+ * @param previewWidth 미리보기 이미지 너비
+ * @param previewHeight 미리보기 이미지 높이
+ * @param cropData 크롭 데이터 (x, y, width, height)
+ * @param maxWidth 최대 출력 너비
+ * @param maxHeight 최대 출력 높이
+ * @param quality 출력 품질 (0-1)
+ * @returns 최적화된 크롭 이미지 File
+ */
+// imageUtils.ts의 applyOriginalCrop 함수 수정
+export const applyOriginalCrop = (
+  originalFile: File,
+  previewWidth: number,
+  previewHeight: number,
+  cropData: { x: number; y: number; width: number; height: number },
+  maxWidth: number = 1920,
+  maxHeight: number = 1080,
+  quality: number = 0.85
+): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    // 직접 URL 생성으로 처리 속도 향상
+    const objectUrl = URL.createObjectURL(originalFile);
+    const img = new Image();
+
+    img.onload = () => {
+      // 원본 이미지의 실제 크기와 미리보기 이미지의 크기 비율 계산
+      // 여기서 문제가 발생할 수 있습니다 - 보다 정확한 스케일 계산 필요
+      const scaleX = img.naturalWidth / previewWidth;
+      const scaleY = img.naturalHeight / previewHeight;
+
+      // 정확한 스케일 값 사용 (일관된 단일 스케일 사용)
+      const scale = Math.min(scaleX, scaleY);
+
+      // 원본 이미지 좌표계에서의 크롭 영역 계산
+      const scaledCrop = {
+        x: cropData.x * scale,
+        y: cropData.y * scale,
+        width: cropData.width * scale,
+        height: cropData.height * scale
+      };
+
+      // 이미지 경계를 벗어나지 않도록 조정
+      if (scaledCrop.x < 0) scaledCrop.x = 0;
+      if (scaledCrop.y < 0) scaledCrop.y = 0;
+      if (scaledCrop.x + scaledCrop.width > img.naturalWidth)
+        scaledCrop.width = img.naturalWidth - scaledCrop.x;
+      if (scaledCrop.y + scaledCrop.height > img.naturalHeight)
+        scaledCrop.height = img.naturalHeight - scaledCrop.y;
+
+      // 최종 출력 크기 계산
+      let finalWidth = scaledCrop.width;
+      let finalHeight = scaledCrop.height;
+
+      // 최대 크기 초과 시 비율 유지하며 리사이징
+      if (finalWidth > maxWidth || finalHeight > maxHeight) {
+        const ratio = Math.min(maxWidth / finalWidth, maxHeight / finalHeight);
+        finalWidth = Math.floor(finalWidth * ratio);
+        finalHeight = Math.floor(finalHeight * ratio);
+      }
+
+      // 캔버스 생성
+      const canvas = document.createElement('canvas');
+      canvas.width = finalWidth;
+      canvas.height = finalHeight;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('캔버스 컨텍스트를 생성할 수 없습니다'));
+        return;
+      }
+
+      // 로깅 추가로 문제 진단
+      console.log('원본 이미지 크기:', img.naturalWidth, 'x', img.naturalHeight);
+      console.log('미리보기 크기:', previewWidth, 'x', previewHeight);
+      console.log('스케일 계수:', scale, '(x:', scaleX, ', y:', scaleY, ')');
+      console.log('원본 크롭 데이터:', cropData);
+      console.log('스케일 적용된 크롭:', scaledCrop);
+      console.log('최종 이미지 크기:', finalWidth, 'x', finalHeight);
+
+      // 크롭 및 리사이징 적용
+      ctx.drawImage(
+        img,
+        scaledCrop.x,
+        scaledCrop.y,
+        scaledCrop.width,
+        scaledCrop.height,
+        0, 0,
+        finalWidth,
+        finalHeight
+      );
+
+      // 메모리 해제
+      URL.revokeObjectURL(objectUrl);
+
+      // 최종 이미지 생성 - WebP로 변환하여 최적화
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Blob을 생성할 수 없습니다'));
+          return;
+        }
+
+        // 동일한 파일명 유지하고 타입만 변경
+        resolve(new File([blob], originalFile.name, {
+          type: 'image/webp', // 항상 WebP로 통일
+          lastModified: Date.now()
+        }));
+      }, 'image/webp', quality);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('이미지 로드 실패'));
+    };
+
+    img.src = objectUrl;
+  });
+};
+
+/**
+ * 이미지 크롭 작업을 위한 메타데이터를 저장합니다.
+ * 미리보기 최적화 및 원본 크롭 작업에 필요한 정보를 관리합니다.
+ */
+export interface ImageProcessingMetadata {
+  originalFile: File;
+  previewFile: File;
+  previewUrl: string;
+  previewWidth: number;
+  previewHeight: number;
+  cropData?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  processedFile?: File;
+}

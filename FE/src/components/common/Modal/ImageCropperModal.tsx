@@ -13,7 +13,8 @@ interface ImageCropperModalProps {
   imageFiles: File[]; // 이미지 배열 형태로 변경
   currentIndex: number;
   aspectRatio: AspectRatioOption;
-  onCropComplete: (file: File, previewUrl: string, index: number) => void;
+  onCropComplete: (file: File, previewUrl: string, index: number, cropData: any) => void;
+  // onCropComplete: (file: File, previewUrl: string, index: number) => void;
   onAllCropsComplete?: () => void;
   onCancelAll?: () => void; // 취소
   allowedAspectRatios?: AspectRatioOption[];
@@ -55,6 +56,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   const imgRef = useRef<HTMLImageElement | null>(null);
   const currentImageFile = imageFiles[currentIndex];
   const isLastImage = currentIndex === imageFiles.length - 1;
+
+  // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(false);
 
   // 제목 상태 수정
   const computedModalTitle = `${modalTitle} (${currentIndex + 1}/${imageFiles.length})`;
@@ -262,78 +266,99 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
   };
 
-  // 크롭 영역이 유효한지 검사하는 함수
-  // const isCropValid = () => {
-  //   // 크롭 영역이 없거나 너무 작은 경우 (최소 30% 이상 크기)
-  //   if (!completedCrop || completedCrop.width < 30 || completedCrop.height < 30) {
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
   // 현재 이미지에 대한 자르기 로직
-  const handleApplyCrop = async () => {
+  const handleApplyCrop = async (): Promise<boolean> => {
     if (!completedCrop || !imgRef.current || !currentImageFile) {
       showAlertMessage("이미지 영역이 지정되지 않았습니다. 영역을 선택해주세요.", "red");
       return false;
     }
 
-    // 크롭 영역이 유효한지 체크
-    // if (!isCropValid()) {
-    //   showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
-    //   return false;
-    // }
+    // 로딩 상태 시작
+    setIsLoading(true);
 
-    const canvas = document.createElement('canvas');
-    const image = imgRef.current;
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
+    try {
+      const canvas = document.createElement('canvas');
+      const image = imgRef.current;
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
 
-    const cropX = completedCrop.x * image.width * scaleX / 100;
-    const cropY = completedCrop.y * image.height * scaleY / 100;
-    const cropWidth = completedCrop.width * image.width * scaleX / 100;
-    const cropHeight = completedCrop.height * image.height * scaleY / 100;
+      const cropX = completedCrop.x * image.width * scaleX / 100;
+      const cropY = completedCrop.y * image.height * scaleY / 100;
+      const cropWidth = completedCrop.width * image.width * scaleX / 100;
+      const cropHeight = completedCrop.height * image.height * scaleY / 100;
 
-    canvas.width = cropWidth;
-    canvas.height = cropHeight;
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return false;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setIsLoading(false);
+        return false;
+      }
 
-    ctx.drawImage(
-      image,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
-      0,
-      0,
-      cropWidth,
-      cropHeight
-    );
+      ctx.drawImage(
+        image,
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight
+      );
 
-    // 잘라낸 이미지를 Blob으로 변환
-    canvas.toBlob(
-      (blob) => {
-        if (!blob || !currentImageFile) return;
+      // 실제 cropData 생성 - 원본 이미지 기준으로 계산된 값
+      const cropData = {
+        x: cropX,
+        y: cropY,
+        width: cropWidth,
+        height: cropHeight
+      };
 
-        const croppedFile = new File([blob], currentImageFile.name, {
-          type: 'image/webp',
-          lastModified: Date.now()
-        });
+      // 잘라낸 이미지를 Blob으로 변환
+      return new Promise<boolean>((resolve) => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || !currentImageFile) {
+              setIsLoading(false);
+              resolve(false);
+              return;
+            }
 
-        const croppedUrl = URL.createObjectURL(blob);
-        setIsCropComplete(true);
+            const croppedFile = new File([blob], currentImageFile.name, {
+              type: 'image/webp',
+              lastModified: Date.now()
+            });
 
-        onCropComplete(croppedFile, croppedUrl, currentIndex);
+            const croppedUrl = URL.createObjectURL(blob);
+            setIsCropComplete(true);
 
-        if (isLastImage && onAllCropsComplete) {
-          onAllCropsComplete();
-        }
-      },
-      'image/webp',
-      imageQuality
-    );
+            // 크롭 데이터와 함께 전달
+            onCropComplete(croppedFile, croppedUrl, currentIndex, {
+              x: cropX,
+              y: cropY,
+              width: cropWidth,
+              height: cropHeight
+            });
+
+            if (isLastImage && onAllCropsComplete) {
+              onAllCropsComplete();
+            }
+            
+            // 로딩 상태 종료
+            setIsLoading(false);
+            resolve(true);
+          },
+          'image/webp',
+          imageQuality
+        );
+      });
+    } catch (error) {
+      console.error("이미지 자르기 실패:", error);
+      setIsLoading(false);
+      return false;
+    }
   };
 
   const renderRatioButtons = () => {
@@ -356,6 +381,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
               : "bg-gray-200"
               }`}
             onClick={() => handleRatioChange(ratio)}
+            disabled={isLoading}
           >
             {ratioLabels[ratio]}
           </button>
@@ -381,6 +407,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
               minWidth={selectedRatio === "4:3" ? 100 : selectedRatio === "1:1" ? 100 : 0}
               minHeight={selectedRatio === "3:4" ? 135 : selectedRatio === "1:1" ? 100 : 0}
               className="max-w-full"
+              disabled={isLoading}
             >
               <img
                 ref={imgRef}
@@ -393,15 +420,22 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
                   WebkitUserSelect: 'none',
                   MozUserSelect: 'none',
                   msUserSelect: 'none',
-                  pointerEvents: 'auto'
+                  pointerEvents: isLoading ? 'none' : 'auto'
                 }}
                 onLoad={onImageLoad}
-                onClick={createCropAtPosition} // 클릭한 위치에 crop 영역 생성
+                onClick={isLoading ? undefined : createCropAtPosition} // 로딩 중이면 클릭 비활성화
                 draggable="false"
               />
             </ReactCrop>
           </div>
         </div>
+        
+        {/* 로딩 중일 때 표시할 메시지 */}
+        {isLoading && (
+          <div className="text-center mt-2 text-blue-500">
+            처리 중입니다. 잠시만 기다려주세요...
+          </div>
+        )}
       </div>
     );
   };
@@ -418,6 +452,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         cancelButtonText={cancelButtonText}
         onConfirm={handleApplyCrop}
         onCancel={handleCancelAll}
+        isConfirmDisabled={isLoading}
+        isCancelDisabled={isLoading}
       >
         {renderModalContent()}
       </Modal>
