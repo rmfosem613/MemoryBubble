@@ -176,9 +176,9 @@ const LimitedPhotoUploader = ({
   // 이미지 선택 시 처리 - 남은 슬롯 수를 고려
   const handleImagesSelected = async (files: File[]) => {
     // 최대 10개까지만 선택 가능 검사
-    if (files.length + selectedFiles.length > 10) {
+    if (files.length + selectedFiles.length > 5) {
       showAlertMessage(
-        '이미지는 한 번에 최대 10개까지만 업로드할 수 있습니다.',
+        '이미지는 한 번에 최대 5개까지만 업로드할 수 있습니다.',
         'red',
       );
       return;
@@ -544,7 +544,7 @@ const LimitedPhotoUploader = ({
             이미지 용량 제한: 100KB ~ 10MB <br />
             이미지 형식 제한: png, jpg, jpeg <br />
             <span className="text-blue-500">
-              이미지 한 번에 10개까지 등록 가능
+              이미지 한 번에 5개까지 등록 가능
             </span>
           </div>
         </div>
