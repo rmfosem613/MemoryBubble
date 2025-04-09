@@ -275,20 +275,6 @@ export const usePhotoAlbum = () => {
     setIsFlipped(false);
   };
 
-  // 키보드 이벤트 처리 (왼쪽/오른쪽 화살표)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        goToPrevious();
-      } else if (e.key === 'ArrowRight') {
-        goToNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [photos.length]);
-
   // 현재 이미지, 이전 이미지, 다음 이미지 인덱스 계산
   const getPrevIndex = () => {
     if (photos.length === 0) return 0;
