@@ -400,8 +400,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         {renderRatioButtons()}
 
         {/* 이미지 크롭 영역 */}
-        <div className="flex justify-center mb-2 bg-gray-300">
-          <div className="max-w-full" style={{ maxHeight: 'calc(70vh - 200px)' }}>
+        <div className="flex justify-center items-center mb-2 bg-gray-300">
+          <div className="max-w-full flex items-center" style={{ minHeight: 'calc(70vh - 200px)' }}>
             <ReactCrop
               crop={crop}
               onChange={(c) => setCrop(c)}
