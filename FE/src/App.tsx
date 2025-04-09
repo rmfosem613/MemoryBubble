@@ -1,5 +1,5 @@
 import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import useUser from './hooks/useUser';
 import {
   requestNotificationPermission,
@@ -45,7 +45,6 @@ type NotificationPayload = {
 
 function App() {
   const { isLoading, checkAuthAndFetchUserData } = useUser();
-  const hasRequestedPermission = useRef(false); // 추가
 
   // 컴포넌트 마운트 시 인증 확인 및 사용자 정보 요청
   useEffect(() => {
@@ -54,11 +53,8 @@ function App() {
 
   // fcm token 요청
   useEffect(() => {
-    const initFCM = async () => {
-      // 이미 요청했다면 다시 요청하지 않음
-      if (hasRequestedPermission.current) return;
-
-      hasRequestedPermission.current = true;
+    const initFCM = async (): Promise<void> => {
+      // 매 새로고침마다 권한 요청
       await requestNotificationPermission();
     };
 
