@@ -40,9 +40,9 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
       };
     } else if (color === "blue") {
       return {
-        border: "border-blue-800",
-        bg: "bg-blue-700",
-        text: "text-blue-900"
+        border: "border-alert-blue-200",
+        bg: "bg-alert-blue-100",
+        text: "text-alert-blue-300"
       };
     }
     else {

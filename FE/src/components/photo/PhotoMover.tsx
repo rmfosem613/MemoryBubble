@@ -35,7 +35,7 @@ function PhotoMover({
   // Alert 관련
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertColor, setAlertColor] = useState("blue");
+  const [alertColor, setAlertColor] = useState("red");
 
   // Alert 표시 함수
   const showAlertMessage = (message: string, color: string) => {
@@ -64,9 +64,9 @@ function PhotoMover({
     if (!sourceAlbumId) {
       const errorMessage = "앨범 정보를 가져오는 중 오류가 발생했습니다.";
       if (onError) {
-        onError(errorMessage, "blue");
+        onError(errorMessage, "red");
       } else {
-        showAlertMessage(errorMessage, "blue");
+        showAlertMessage(errorMessage, "red");
       }
       return false;
     }
@@ -74,9 +74,9 @@ function PhotoMover({
     if (!targetAlbumId || targetAlbumId === sourceAlbumId) {
       const errorMessage = "이동할 대상 앨범을 선택해주세요.";
       if (onError) {
-        onError(errorMessage, "blue");
+        onError(errorMessage, "red");
       } else {
-        showAlertMessage(errorMessage, "blue");
+        showAlertMessage(errorMessage, "red");
       }
       return false;
     }
@@ -120,9 +120,9 @@ function PhotoMover({
       console.error("사진 이동 실패:", error);
       const errorMessage = "사진 이동 중 오류가 발생했습니다.";
       if (onError) {
-        onError(errorMessage, "blue");
+        onError(errorMessage, "red");
       } else {
-        showAlertMessage(errorMessage, "blue");
+        showAlertMessage(errorMessage, "red");
       }
     }
   };

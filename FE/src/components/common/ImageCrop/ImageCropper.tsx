@@ -34,7 +34,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   minSize = 100, // 기본 최소 100KB
   maxSize = 10, // 기본 최대 10MB
   imageQuality = 0.95, // 기본 품질 95%
-  maxAspectRatioDifference = 20, // 기본 최대 비율 차이 20배
+  maxAspectRatioDifference = 5, // 기본 최대 비율 차이 20배
   renderPreview,
   renderUploadBox,
   modalTitle = "이미지 자르기",
