@@ -18,9 +18,10 @@ import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
 import apiClient from '@/apis/apiClient';
 import { useAlert } from '@/hooks/useAlert';
-import PhotoUploader from '../photo/PhotoUploader';
+// import PhotoUploader from '../photo/PhotoUploader';
 import Alert from '../common/Alert';
 import { useEffect, useRef } from 'react';
+import LimitedPhotoUploader from './common/LimitedPhotoUploader';
 
 // 폰트 스타일을 생성하는 컴포넌트
 const FontStyles = ({ fontInfoList }) => {
@@ -47,12 +48,7 @@ const FontStyles = ({ fontInfoList }) => {
 };
 
 function PhotoAlbum() {
-  const showAlertMessage = (
-    message: string,
-    color: 'red' | 'green' | 'gray' | 'blue',
-  ) => {
-    showAlert(message, color);
-  };
+  const { alertState, showAlert } = useAlert();
   const {
     albumTitle,
     newAlbumName,
@@ -89,9 +85,7 @@ function PhotoAlbum() {
     handleSaveMessage,
     handleRecordButtonClick,
     toggleAudioPlayback,
-  } = usePhotoMessages(photos, currentIndex, showAlertMessage);
-
-  const { alertState, showAlert } = useAlert();
+  } = usePhotoMessages(photos, currentIndex, showAlert);
 
   const messageContainerRef = useRef(null);
 
@@ -100,6 +94,19 @@ function PhotoAlbum() {
   const changeThumbnailModal = useModal();
   const movePhotoModal = useModal();
   const addPhotoModal = useModal();
+
+  const MAX_PHOTOS = 30;
+  const isPhotoLimitReached = photos && photos.length >= MAX_PHOTOS;
+
+  // 사진 추가 버튼 클릭 핸들러
+  const handleAddPhotoClick = () => {
+    if (isPhotoLimitReached) {
+      showAlert(`사진은 최대 ${MAX_PHOTOS}장까지만 추가할 수 있습니다.`, 'red');
+      return;
+    }
+
+    addPhotoModal.open();
+  };
 
   const handleGoToPrevious = () => {
     goToPrevious();
@@ -268,8 +275,8 @@ function PhotoAlbum() {
 
   // 비동기 함수를 Modal의 onConfirm 속성에 맞는 래퍼 함수로 변환
   const handleChangeAlbumWrapper = () => {
-    handleChangeAlbum();
     showAlert('앨범 정보가 수정되었습니다.', 'green');
+    handleChangeAlbum();
     return true; // 모달 닫기
   };
 
@@ -301,7 +308,7 @@ function PhotoAlbum() {
         </div>
         <div className="flex justify-end gap-4">
           <div
-            className="flex items-center gap-1 cursor-pointer"
+            className="flex items-center gap-1 cursor-pointer hover:text-blue-500"
             onClick={editAlbumModal.open}>
             <PencilLine
               strokeWidth={1}
@@ -341,16 +348,19 @@ function PhotoAlbum() {
             />
             <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
             <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">
-              {!photos ||
-              photos.length === 0 ||
-              photos[currentIndex].isThumbnail
-                ? '썸네일 입니다'
-                : '썸네일 변경'}
+              썸네일 변경
             </p>
           </div>
           <div
-            className="flex items-center gap-1 cursor-pointer"
-            onClick={addPhotoModal.open}>
+            className={`flex items-center gap-1 ${
+              isPhotoLimitReached
+                ? 'text-gray-400 opacity-70 cursor-not-allowed'
+                : 'cursor-pointer hover:text-blue-500'
+            }`}
+            onClick={isPhotoLimitReached ? undefined : handleAddPhotoClick}
+            aria-disabled={isPhotoLimitReached}
+            role="button"
+            tabIndex={isPhotoLimitReached ? -1 : 0}>
             <CirclePlus
               strokeWidth={1}
               className="absolute z-10 ml-[-7pX] mt-[2px]"
@@ -616,12 +626,14 @@ function PhotoAlbum() {
         </div>
       </Modal>
 
-      {/* 사진 추가 모달 */}
-      <PhotoUploader
+      {/* 기존 PhotoUploader 대신 CustomPhotoUploader 사용 */}
+      <LimitedPhotoUploader
         isOpen={addPhotoModal.isOpen}
         onClose={addPhotoModal.close}
         albumId={parseInt(albumId)}
         onUploadComplete={refreshPhotos}
+        currentPhotoCount={photos?.length || 0}
+        maxPhotoCount={MAX_PHOTOS}
       />
 
       {alertState && (
