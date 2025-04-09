@@ -186,33 +186,33 @@ function PhotoAlbum() {
       const isPlaying = currentlyPlayingId === (message.id || message.content);
 
       return (
-        <div
-          key={message.id || message.createdAt}
-          className="flex flex-row mb-2 items-baseline justify-between">
-          <div className="flex items-center justify-center">
-            <h4 className={`font-p-700 text-h3-lg ${fontClass}`}>
-              {message.writer || '사용자'}
-            </h4>
-            <div className="mt-2">
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // URL을 직접 전달하고 isDirectUrl을 true로 설정
-                    toggleAudioPlayback(message.content, true);
-                  }}
-                  className="p-2 bg-blue-100 rounded-full">
-                  {isPlaying ? (
-                    <CirclePause size={24} />
-                  ) : (
-                    <CirclePlay size={24} />
-                  )}
-                  <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
-                </button>
+        <div key={message.id || message.createdAt} className="mb-2">
+          <div className="flex flex-row mb-2 items-baseline justify-between">
+            <div className="flex items-center justify-center">
+              <h4 className={`font-p-700 text-h3-lg ${fontClass}`}>
+                {message.writer || '사용자'}
+              </h4>
+              <div className="mt-2">
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // URL을 직접 전달하고 isDirectUrl을 true로 설정
+                      toggleAudioPlayback(message.content, true);
+                    }}
+                    className="p-2 bg-blue-100 rounded-full">
+                    {isPlaying ? (
+                      <CirclePause size={24} />
+                    ) : (
+                      <CirclePlay size={24} />
+                    )}
+                    <div className="absolute bg-blue-600 w-5 h-5 rounded-full right-[6px] bottom-[6px] opacity-50"></div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <p className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 float-end mt-1">
             {(() => {
               const date = new Date(message.createdAt);
               // 한국 시간대로 변환 (UTC+9)
@@ -226,7 +226,7 @@ function PhotoAlbum() {
 
               return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
             })()}
-          </p>
+          </div>
         </div>
       );
     }
@@ -445,7 +445,7 @@ function PhotoAlbum() {
                       disabled={isRecording}
                     />
                     <div
-                      className={`absolute bottom-2 right-3 text-xs ${postcardMessage.length >= 40 ? 'text-red-500' : 'text-gray-500'}`}>
+                      className={`absolute bottom-2 right-3 text-xs text-gray-500`}>
                       {postcardMessage.length}/40
                     </div>
                   </div>
@@ -538,7 +538,7 @@ function PhotoAlbum() {
             />
             <div className="flex justify-end mt-1">
               <span
-                className={`text-xs ${newAlbumName.length >= 7 ? 'text-red-500' : 'text-gray-500'}`}>
+                className={`text-xs text-gray-500`}>
                 {newAlbumName.length}/7
               </span>
             </div>
@@ -562,7 +562,7 @@ function PhotoAlbum() {
             />
             <div className="flex justify-end mt-1">
               <span
-                className={`text-xs ${newAlbumContent.length >= 60 ? 'text-red-500' : 'text-gray-500'}`}>
+                className={`text-xs text-gray-500`}>
                 {newAlbumContent.length}/60
               </span>
             </div>
