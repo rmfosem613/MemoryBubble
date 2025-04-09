@@ -25,6 +25,9 @@ module.exports = {
         'blue-400': '#97BFFC',
         'blue-500': '#7DABF8',
         'blue-600': '#3D4EAC',
+        'blue-700': '#F1F7FF',
+        'blue-800': '#5094FA',
+        'blue-900': '#1D6CE0',
 
         // Alert
         'red-100': '#FFF2F2',

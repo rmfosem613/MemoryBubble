@@ -9,7 +9,7 @@ interface AlertProps {
   showButtons?: boolean;
 }
 
-// color 예시 : green, red, gray
+// color 예시 : green, red, gray, blue
 const Alert = ({ message, color, confirmButton, cancelButton, showButtons = false }: AlertProps) => {
   const [visible, setVisible] = useState(true);
 
@@ -30,15 +30,22 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
       return {
         border: "border-red-200",
         bg: "bg-red-100",
-        text: "text-red-700"
+        text: "text-red-300"
       };
     } else if (color === "green") {
       return {
         border: "border-green-200",
         bg: "bg-green-100",
-        text: "text-green-700"
+        text: "text-green-300"
       };
-    } else {
+    } else if (color === "blue") {
+      return {
+        border: "border-blue-800",
+        bg: "bg-blue-700",
+        text: "text-blue-900"
+      };
+    }
+    else {
       return {
         border: "border-gray-200",
         bg: "bg-gray-100",

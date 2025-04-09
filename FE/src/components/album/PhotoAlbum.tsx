@@ -49,7 +49,7 @@ const FontStyles = ({ fontInfoList }) => {
 function PhotoAlbum() {
   const showAlertMessage = (
     message: string,
-    color: 'red' | 'green' | 'gray',
+    color: 'red' | 'green' | 'gray' | 'blue',
   ) => {
     showAlert(message, color);
   };
