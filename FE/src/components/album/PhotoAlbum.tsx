@@ -18,9 +18,10 @@ import Modal from '../common/Modal/Modal';
 import useModal from '@/hooks/useModal';
 import apiClient from '@/apis/apiClient';
 import { useAlert } from '@/hooks/useAlert';
-import PhotoUploader from '../photo/PhotoUploader';
+// import PhotoUploader from '../photo/PhotoUploader';
 import Alert from '../common/Alert';
 import { useEffect, useRef } from 'react';
+import LimitedPhotoUploader from './common/LimitedPhotoUploader';
 
 // 폰트 스타일을 생성하는 컴포넌트
 const FontStyles = ({ fontInfoList }) => {
@@ -47,12 +48,7 @@ const FontStyles = ({ fontInfoList }) => {
 };
 
 function PhotoAlbum() {
-  const showAlertMessage = (
-    message: string,
-    color: 'red' | 'green' | 'gray' | 'blue',
-  ) => {
-    showAlert(message, color);
-  };
+  const { alertState, showAlert } = useAlert();
   const {
     albumTitle,
     newAlbumName,
@@ -70,8 +66,6 @@ function PhotoAlbum() {
     setPhotoMessages, // 메시지 데이터 업데이트 함수
     handleChangeAlbum,
     handleChangeThumnail,
-    getPrevIndex,
-    getNextIndex,
     goToPrevious,
     goToNext,
     allAlbums,
@@ -80,6 +74,7 @@ function PhotoAlbum() {
     albumId,
     refreshPhotos,
     fontInfoList,
+    isImageLoading,
   } = usePhotoAlbum();
 
   const {
@@ -91,9 +86,7 @@ function PhotoAlbum() {
     handleSaveMessage,
     handleRecordButtonClick,
     toggleAudioPlayback,
-  } = usePhotoMessages(photos, currentIndex, showAlertMessage);
-
-  const { alertState, showAlert } = useAlert();
+  } = usePhotoMessages(photos, currentIndex, showAlert);
 
   const messageContainerRef = useRef(null);
 
@@ -102,6 +95,19 @@ function PhotoAlbum() {
   const changeThumbnailModal = useModal();
   const movePhotoModal = useModal();
   const addPhotoModal = useModal();
+
+  const MAX_PHOTOS = 30;
+  const isPhotoLimitReached = photos && photos.length >= MAX_PHOTOS;
+
+  // 사진 추가 버튼 클릭 핸들러
+  const handleAddPhotoClick = () => {
+    if (isPhotoLimitReached) {
+      showAlert(`사진은 최대 ${MAX_PHOTOS}장까지만 추가할 수 있습니다.`, 'red');
+      return;
+    }
+
+    addPhotoModal.open();
+  };
 
   const handleGoToPrevious = () => {
     goToPrevious();
@@ -161,7 +167,7 @@ function PhotoAlbum() {
           </div>
           <div className="flex items-baseline justify-between gap-2">
             <p
-              className={`text-gray-700 mt-1 text-h4-lg font-p-500 ${fontClass}`}>
+              className={`text-gray-700 mt-1 text-h4-lg font-p-500 ${fontClass} break-all`}>
               {message.content}
             </p>
           </div>
@@ -270,8 +276,8 @@ function PhotoAlbum() {
 
   // 비동기 함수를 Modal의 onConfirm 속성에 맞는 래퍼 함수로 변환
   const handleChangeAlbumWrapper = () => {
-    handleChangeAlbum();
     showAlert('앨범 정보가 수정되었습니다.', 'green');
+    handleChangeAlbum();
     return true; // 모달 닫기
   };
 
@@ -303,16 +309,23 @@ function PhotoAlbum() {
         </div>
         <div className="flex justify-end gap-4">
           <div
-            className="flex items-center gap-1 cursor-pointer"
+            className="flex items-center gap-1 cursor-pointer hover:text-blue-500"
             onClick={editAlbumModal.open}>
-            <PencilLine strokeWidth={1} className="absolute z-10 ml-[-7px] mt-[2px]" size={'21px'} />
+            <PencilLine
+              strokeWidth={1}
+              className="absolute z-10 ml-[-7px] mt-[2px]"
+              size={'21px'}
+            />
             <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-gray-400 opacity-45"></div>
-            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">앨범 수정</p>
+            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">
+              앨범 수정
+            </p>
           </div>
           <div
-            className={`flex items-center gap-1 ${!photos || photos.length === 0 || photos[currentIndex].isThumbnail
-              ? 'text-gray-400 opacity-70 cursor-default'
-              : 'cursor-pointer hover:text-blue-500' // 활성화된 경우 호버 효과 추가
+            className={`flex items-center gap-1 ${
+              !photos || photos.length === 0 || photos[currentIndex].isThumbnail
+                ? 'text-gray-400 opacity-70 cursor-default'
+                : 'cursor-pointer hover:text-blue-500' // 활성화된 경우 호버 효과 추가
             }`}
             onClick={
               !photos || photos.length === 0 || photos[currentIndex].isThumbnail
@@ -323,18 +336,41 @@ function PhotoAlbum() {
               !photos || photos.length === 0 || photos[currentIndex].isThumbnail
             }
             role="button" // 접근성을 위한 역할 추가
-            tabIndex={(!photos || photos.length === 0 || photos[currentIndex].isThumbnail) ? -1 : 0} // 키보드 접근성
+            tabIndex={
+              !photos || photos.length === 0 || photos[currentIndex].isThumbnail
+                ? -1
+                : 0
+            } // 키보드 접근성
           >
-            <ImageUp strokeWidth={1} className="absolute z-10 ml-[-7px] mt-[2px]" size={'21px'} />
+            <ImageUp
+              strokeWidth={1}
+              className="absolute z-10 ml-[-7px] mt-[2px]"
+              size={'21px'}
+            />
             <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-blue-500 opacity-45"></div>
-            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">썸네일 변경</p>
+            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">
+              썸네일 변경
+            </p>
           </div>
           <div
-            className="flex items-center gap-1 cursor-pointer"
-            onClick={addPhotoModal.open}>
-            <CirclePlus strokeWidth={1} className="absolute z-10 ml-[-7pX] mt-[2px]" size={'21px'} />
+            className={`flex items-center gap-1 ${
+              isPhotoLimitReached
+                ? 'text-gray-400 opacity-70 cursor-not-allowed'
+                : 'cursor-pointer hover:text-blue-500'
+            }`}
+            onClick={isPhotoLimitReached ? undefined : handleAddPhotoClick}
+            aria-disabled={isPhotoLimitReached}
+            role="button"
+            tabIndex={isPhotoLimitReached ? -1 : 0}>
+            <CirclePlus
+              strokeWidth={1}
+              className="absolute z-10 ml-[-7pX] mt-[2px]"
+              size={'21px'}
+            />
             <div className="flex mt-auto w-3.5 h-3.5 rounded-full bg-album-200 opacity-65"></div>
-            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">사진 추가</p>
+            <p className="font-p-500 text-subtitle-1-sm md:text-subtitle-1-md lg:text-subtitle-1-lg">
+              사진 추가
+            </p>
           </div>
         </div>
       </div>
@@ -342,18 +378,6 @@ function PhotoAlbum() {
       {/* 이미지 슬라이더 - 더 큰 컨테이너로 변경 */}
       <div className="relative h-screen max-h-[500px] overflow-hidden my-8">
         <div className="flex justify-center items-center h-full">
-          {/* 이전 이미지 (왼쪽에 약간 보이는 이미지) */}
-          {photos.length > 1 && (
-            <div className="bg-white absolute left-24 h-full flex items-center opacity-70 transform -translate-x-1/4 scale-90 z-10">
-              <img
-                src={photos[getPrevIndex()].src}
-                alt={photos[getPrevIndex()].alt}
-                className="h-4/5 max-h-[450px] w-auto object-contain cursor-pointer hover:scale-105 transition-transform"
-                onClick={handleGoToPrevious}
-              />
-            </div>
-          )}
-
           {/* 현재 이미지 (가운데 큰 이미지) - 3D 뒤집기 효과 추가 */}
           <div
             className="relative z-20 perspective-1000 cursor-pointer"
@@ -365,17 +389,27 @@ function PhotoAlbum() {
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 transition: 'transform 0.6s',
               }}>
-              {/* 앞면 - 사진 */}
               {photos && photos.length > 0 ? (
-                <img
-                  src={photos[currentIndex].src + '&w=800'}
-                  alt={photos[currentIndex].alt}
-                  className="w-full h-full object-contain absolute inset-0 p-2"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                  }}
-                  onClick={toggleFlipWithPostCard}
-                />
+                <div className="relative w-full h-full">
+                  {/* 항상 이미지를 렌더링하고, 투명도만 조절 */}
+                  <img
+                    src={photos[currentIndex].src + '&w=800'}
+                    alt={photos[currentIndex].alt}
+                    className="w-full h-full object-contain absolute inset-0 p-2 transition-opacity duration-300"
+                    style={{
+                      backfaceVisibility: 'hidden',
+                      opacity: isImageLoading(currentIndex) ? 0.3 : 1, // 완전히 숨기지 않고 흐리게 표시
+                    }}
+                    onClick={toggleFlipWithPostCard}
+                  />
+
+                  {/* 로딩 인디케이터는 이미지 위에 표시 */}
+                  {isImageLoading(currentIndex) && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">
                   사진이 없습니다.
@@ -456,9 +490,10 @@ function PhotoAlbum() {
                     글 남기기
                   </button>
                   <button
-                    className={`${isRecording
-                      ? 'bg-red-500 hover:bg-red-600 text-white'
-                      : 'bg-white text-black hover:bg-gray-100 border'
+                    className={`${
+                      isRecording
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-white text-black hover:bg-gray-100 border'
                     } h-full px-4 py-2 rounded-lg transition-colors z-10`}
                     onClick={handleRecordButtonWrapper}>
                     <Mic size={20} strokeWidth={1} />
@@ -474,37 +509,23 @@ function PhotoAlbum() {
               </div>
             </div>
           </div>
-
-          {/* 다음 이미지 (오른쪽에 약간 보이는 이미지) */}
-          {photos.length > 1 && (
-            <div className="bg-white absolute right-24 h-full flex items-center opacity-70 transform translate-x-1/4 scale-90 z-10">
-              <img
-                src={photos[getNextIndex()].src}
-                alt={photos[getNextIndex()].alt}
-                className="h-4/5 max-h-[450px] w-auto object-contain cursor-pointer hover:scale-105 transition-transform"
-                onClick={handleGoToNext}
-              />
-            </div>
-          )}
         </div>
       </div>
 
       {/* 페이지 인디케이터 */}
-      {
-        photos.length > 1 && (
-          <div className="flex items-center justify-center gap-6">
-            <button onClick={handleGoToPrevious}>
-              <ChevronLeft size={20} />
-            </button>
-            <p className="text-sm text-gray-600">
-              {currentIndex + 1} / {photos.length}
-            </p>
-            <button onClick={handleGoToNext}>
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )
-      }
+      {photos.length > 1 && (
+        <div className="flex items-center justify-center gap-6">
+          <button onClick={handleGoToPrevious}>
+            <ChevronLeft size={20} />
+          </button>
+          <p className="text-sm text-gray-600">
+            {currentIndex + 1} / {photos.length}
+          </p>
+          <button onClick={handleGoToNext}>
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      )}
 
       {/* 앨범명 수정 모달 */}
       <Modal
@@ -537,8 +558,7 @@ function PhotoAlbum() {
               className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             />
             <div className="flex justify-end mt-1">
-              <span
-                className={`text-xs text-gray-500`}>
+              <span className={`text-xs text-gray-500`}>
                 {newAlbumName.length}/7
               </span>
             </div>
@@ -561,8 +581,7 @@ function PhotoAlbum() {
               className="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             />
             <div className="flex justify-end mt-1">
-              <span
-                className={`text-xs text-gray-500`}>
+              <span className={`text-xs text-gray-500`}>
                 {newAlbumContent.length}/60
               </span>
             </div>
@@ -618,20 +637,20 @@ function PhotoAlbum() {
         </div>
       </Modal>
 
-      {/* 사진 추가 모달 */}
-      <PhotoUploader
+      {/* 기존 PhotoUploader 대신 CustomPhotoUploader 사용 */}
+      <LimitedPhotoUploader
         isOpen={addPhotoModal.isOpen}
         onClose={addPhotoModal.close}
         albumId={parseInt(albumId)}
         onUploadComplete={refreshPhotos}
+        currentPhotoCount={photos?.length || 0}
+        maxPhotoCount={MAX_PHOTOS}
       />
 
-      {
-        alertState && (
-          <Alert message={alertState.message} color={alertState.color} />
-        )
-      }
-    </div >
+      {alertState && (
+        <Alert message={alertState.message} color={alertState.color} />
+      )}
+    </div>
   );
 }
 
