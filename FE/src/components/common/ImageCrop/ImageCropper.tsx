@@ -131,8 +131,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
         const areaRatio = (cropArea / totalArea) * 100;
         
         // 최소 면적(30%) 확인
-        if (areaRatio < 30) {
-          showAlertMessage("자르기 영역이 원본 이미지의 30% 이상이어야 합니다.", "red");
+        if (areaRatio < 20) {
+          showAlertMessage("자르기 영역이 원본 이미지의 20% 이상이어야 합니다.", "red");
           return;
         }
       }

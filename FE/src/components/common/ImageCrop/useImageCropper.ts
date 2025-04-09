@@ -299,7 +299,7 @@ const useImageCropper = ({
       const cropRatio = (cropArea / originalArea) * 100;
 
       // 크롭 영역이 원본 이미지의 30% 미만인 경우 경고
-      if (cropRatio < 30) {
+      if (cropRatio < 20) {
         reject(new Error('IMAGE_TOO_SMALL'));
         return;
       }
