@@ -453,7 +453,7 @@ const PhotoUploader = ({
             onImagesSelected={handleImagesSelected}
             selectedImages={selectedFiles}
             onRemoveImage={handleRemoveImage}
-            maxImages={10}
+            maxImages={5}
             previewSize="md"
             croppedPreviews={croppedImages.map(img => img?.preview || null)}
           />
