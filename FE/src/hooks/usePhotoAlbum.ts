@@ -31,9 +31,68 @@ export const usePhotoAlbum = () => {
   );
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
 
+  const [loadingImages, setLoadingImages] = useState<Record<number, boolean>>(
+    {},
+  );
+
   const { id } = useParams();
   const { user } = useUserstore();
   const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
+
+  const preloadImage = (src: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
+
+  const preloadAdjacentImages = async () => {
+    if (!photos || photos.length <= 1) return;
+
+    // 다음 이미지와 이전 이미지의 인덱스 계산
+    const prevIndex = currentIndex === 0 ? photos.length - 1 : currentIndex - 1;
+    const nextIndex = currentIndex === photos.length - 1 ? 0 : currentIndex + 1;
+
+    // 현재 이미지의 로딩 상태 설정
+    setLoadingImages((prev) => ({ ...prev, [currentIndex]: true }));
+
+    try {
+      // 다음 이미지와 이전 이미지 프리로딩 시작
+      const preloadPromises = [prevIndex, nextIndex].map((index) => {
+        if (photos[index]?.src) {
+          // src에 너비 파라미터 추가 (현재 렌더링 방식과 일치)
+          const imgSrc = photos[index].src + '&w=800';
+          return preloadImage(imgSrc).then(() => {
+            // 해당 이미지 로딩 완료 표시
+            setLoadingImages((prev) => ({ ...prev, [index]: false }));
+          });
+        }
+        return Promise.resolve();
+      });
+
+      // 병렬로 프리로딩 수행
+      await Promise.all(preloadPromises);
+    } catch (error) {
+      console.error('이미지 프리로딩 중 오류 발생:', error);
+    } finally {
+      // 현재 이미지 로딩 완료 표시
+      setLoadingImages((prev) => ({ ...prev, [currentIndex]: false }));
+    }
+  };
+
+  // currentIndex가 변경될 때마다 주변 이미지 프리로딩
+  useEffect(() => {
+    if (photos && photos.length > 0) {
+      preloadAdjacentImages();
+    }
+  }, [currentIndex, photos]);
+
+  // isImageLoading 함수 - 특정 인덱스의 이미지 로딩 상태 확인
+  const isImageLoading = (index: number): boolean => {
+    return loadingImages[index] === true;
+  };
 
   // 컴포넌트 마운트 시 가족 폰트 정보 미리 로드
   useEffect(() => {
@@ -341,5 +400,6 @@ export const usePhotoAlbum = () => {
     albumId: id, // 현재 앨범 ID 반환
     refreshPhotos,
     fontInfoList: familyFonts,
+    isImageLoading,
   };
 };
