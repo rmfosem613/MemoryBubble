@@ -54,7 +54,7 @@ export const useLetterStore = create<LetterState>((set) => ({
     isRecorded: false,
     isRecording: false,
     recordingUrl: null,
-    recordingDuration: 0,
+    recordingDuration: 300,
   },
 
   // 텍스트 편지 내용

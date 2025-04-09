@@ -67,14 +67,16 @@ function CassettePlayer({
           <div
             className="absolute h-[10px] bg-gray-700 rounded-full transition-all duration-100 ease-linear"
             style={{ width: `${progressWidth}%` }}></div>
-          {/* 시간 표시 */} 
+          {/* 시간 표시 */}
           <p className="absolute left-0 top-[20px] text-sm">
             {recordState === 'recording' || isPlaying
               ? formatTime(currentTime)
               : '0:00'}
           </p>
           <p className="absolute right-0 top-[20px] text-sm">
-            {recordState === 'recorded' ? formatTime(recordedTime) : '5:00'}
+            {recordState === 'recorded' && recordedTime > 0
+              ? formatTime(recordedTime)
+              : '5:00'}
           </p>
         </div>
       </div>

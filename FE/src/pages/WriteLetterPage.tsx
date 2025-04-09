@@ -108,7 +108,7 @@ function WriteLetterPage() {
         openAt: formattedDate,
         backgroundColor: themeColor,
         receiverId: parseInt(selectedMember.id, 10),
-        duration: cassetteData.recordingDuration || 0, // AUDIO 타입인 경우 녹음 시간
+        duration: cassetteData.recordingDuration || 300, // AUDIO 타입인 경우 녹음 시간
       };
 
       console.log(letterRequest, '편지 전송 요청 데이터');
