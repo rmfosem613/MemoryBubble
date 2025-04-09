@@ -193,7 +193,7 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
         isOpen={isAnimationOpen}
         onClose={handleCloseAnimation}
       />
-      {showAlert && <Alert message={alertMessage} color="red" />}
+      {showAlert && <Alert message={alertMessage} color="blue" />}
     </div>
   );
 };

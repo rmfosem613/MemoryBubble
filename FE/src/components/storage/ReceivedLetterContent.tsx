@@ -115,7 +115,7 @@ function ReceivedLetterContent() {
   // 편지가 있는 경우 표시할 내용
   return (
     <>
-      {showAlert && <Alert message={alertMessage} color="red" />}
+      {showAlert && <Alert message={alertMessage} color="blue" />}
       <div className="p-6 h-full overflow-y-auto">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 select-none">
           {letters.map((letter, index) => (
