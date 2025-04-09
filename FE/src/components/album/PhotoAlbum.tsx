@@ -299,13 +299,10 @@ function PhotoAlbum() {
   }
 
   return (
-    <div className="container">
-      <div className="flex justify-between items-baseline mb-6">
+    <div className="container h-screen">
+      <div className="flex justify-between items-baseline mb-2">
         <div className="flex flex-row items-end">
           <Title text={albumTitle} />
-          <div className="text-subtitle-1-lg text-gray-600">
-            사진을 눌러 엽서를 작성해보세요
-          </div>
         </div>
         <div className="flex justify-end gap-4">
           <div
@@ -376,14 +373,17 @@ function PhotoAlbum() {
       </div>
 
       {/* 이미지 슬라이더 - 더 큰 컨테이너로 변경 */}
-      <div className="relative h-screen max-h-[500px] overflow-hidden my-8">
+      <div className="text-subtitle-1-lg text-gray-600 text-center">
+        사진을 눌러 엽서를 작성해보세요
+      </div>
+      <div className="relative max-h-[480px] overflow-hidden mt-1 mb-3">
         <div className="flex justify-center items-center h-full">
           {/* 현재 이미지 (가운데 큰 이미지) - 3D 뒤집기 효과 추가 */}
           <div
             className="relative z-20 perspective-1000 cursor-pointer"
             style={{ perspective: '1000px' }}>
             <div
-              className="bg-white border relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[500px] flex items-center justify-center"
+              className="bg-white border relative transition-transform duration-700 transform-style-preserve-3d w-[700px] h-[480px] flex items-center justify-center"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
