@@ -132,35 +132,38 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
             )}
 
             {/* 선택된 이미지 미리보기 */}
-            {selectedImages.map((file, index) => (
-              <div key={index} className={`relative ${imageSize} flex-shrink-0`}>
-                <img
-                  src={getImageSrc(index)}
-                  alt={`Selected ${index}`}
-                  className="border border-gray-300 w-full h-full object-cover rounded-md"
-                />
-                <button
-                  className="absolute top-1 right-1 bg-gray-800 bg-opacity-70 rounded-full w-5 h-5 flex items-center justify-center"
-                  onClick={() => handleRemoveImage(index)}
-                  type="button"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+            {selectedImages.map((file, index) => {
+              if (!croppedPreviews[index]) return null;
+              return (
+                <div key={index} className={`relative ${imageSize} flex-shrink-0`}>
+                  <img
+                    src={getImageSrc(index)}
+                    alt={`Selected ${index}`}
+                    className="border border-gray-300 w-full h-full object-cover rounded-md"
+                  />
+                  <button
+                    className="absolute top-1 right-1 bg-gray-800 bg-opacity-70 rounded-full w-5 h-5 flex items-center justify-center"
+                    onClick={() => handleRemoveImage(index)}
+                    type="button"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            ))}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
