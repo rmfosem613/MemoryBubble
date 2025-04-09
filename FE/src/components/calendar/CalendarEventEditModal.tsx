@@ -50,17 +50,17 @@ function CalendarEventEditModal({
   // 제출
   const handleSubmit = async () => {
     if (!event) return false;
-    const trimmedTitle = scheduleContent.trim();
-    setScheduleContent(trimmedTitle);
 
-    // 빈값 유효성 검사
-    if (!trimmedTitle) {
+    // 에러 메시지가 있는지 확인
+    if (errors.title || errors.date) {
+      return false; // 에러가 있으면 제출 중단
+    }
+
+    // 빈값 확인 (최종 확인)
+    if (!scheduleContent.trim()) {
       setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
       return false;
     }
-
-    // 유효한 경우
-    setErrors((prev) => ({ ...prev, title: '' }));
 
     // api 요청
     setIsLoading(true);
@@ -95,11 +95,38 @@ function CalendarEventEditModal({
     }
   };
 
-  // 시작 날짜 변경
+  // 일정 내용 변경 처리 함수 추가
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    // 50자 이하일 때만 상태 업데이트
+    if (newValue.length <= 50) {
+      setScheduleContent(newValue);
+      setErrors((prev) => ({ ...prev, title: '' }));
+    }
+  };
+
+  // 일정 내용 blur 처리 함수 추가
+  const handleContentBlur = () => {
+    // 양쪽 공백 제거하고 바로 상태 업데이트
+    const trimmedContent = scheduleContent.trim();
+    setScheduleContent(trimmedContent);
+
+    // 빈값 유효성 검사
+    if (!trimmedContent) {
+      setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
+    }
+  };
+
+  // 시작 날짜 변경 수정
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
     setStartDate(newStartDate);
-    setErrors((prev) => ({ ...prev, date: '' })); // 날짜 에러 메시지 초기화
+
+    // 시작일이 비어있는지 확인
+    if (!newStartDate || !endDate) {
+      setErrors((prev) => ({ ...prev, date: '날짜를 선택해주세요.' }));
+      return;
+    }
 
     // 시작일이 종료일보다 나중이면 종료일을 시작일과 같게 설정
     const start = new Date(newStartDate + 'T00:00:00');
@@ -107,13 +134,21 @@ function CalendarEventEditModal({
     if (start > end) {
       setEndDate(newStartDate);
     }
+
+    // 에러가 없으면 에러 메시지 초기화
+    setErrors((prev) => ({ ...prev, date: '' }));
   };
 
-  // 종료 날짜 변경
+  // 종료 날짜 변경 수정
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEndDate = e.target.value;
     setEndDate(newEndDate);
-    setErrors((prev) => ({ ...prev, date: '' })); // 날짜 에러 메시지 초기화
+
+    // 종료일이 비어있는지 확인
+    if (!startDate || !newEndDate) {
+      setErrors((prev) => ({ ...prev, date: '날짜를 선택해주세요.' }));
+      return;
+    }
 
     // 종료일이 시작일보다 이전이면 시작일을 종료일과 같게 설정
     const start = new Date(startDate + 'T00:00:00');
@@ -121,6 +156,9 @@ function CalendarEventEditModal({
     if (end < start) {
       setStartDate(newEndDate);
     }
+
+    // 에러가 없으면 에러 메시지 초기화
+    setErrors((prev) => ({ ...prev, date: '' }));
   };
 
   return (
@@ -150,10 +188,8 @@ function CalendarEventEditModal({
             value={scheduleContent}
             maxLength={50}
             rows={2}
-            onChange={(e) => {
-              setErrors((prev) => ({ ...prev, title: '' }));
-              setScheduleContent(e.target.value);
-            }}
+            onChange={handleContentChange}
+            onBlur={handleContentBlur}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault(); // 엔터 키 기본 동작 방지
