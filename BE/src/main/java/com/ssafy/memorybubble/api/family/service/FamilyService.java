@@ -155,7 +155,7 @@ public class FamilyService {
     }
 
     @Transactional
-    public FamilyResponse updateFamily(Long userId, Long familyId, FamilyRequest request) {
+    public FamilyResponse updateFamily(Long userId, Long familyId, FamilyUpdateRequest request) {
         User user = userService.getUser(userId);
         log.info("user: {}", user);
         Family family = Validator.validateAndGetFamily(user, familyId);
