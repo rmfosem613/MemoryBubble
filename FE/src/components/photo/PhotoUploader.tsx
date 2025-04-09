@@ -3,7 +3,12 @@ import Modal from "@/components/common/Modal/Modal";
 import { getPhotoUploadUrls } from "@/apis/photoApi";
 import ImageSelector from "@/components/common/Modal/ImageSelector";
 import ImageCropperModal from "@/components/common/Modal/ImageCropperModal";
-import { uploadImageToS3 } from "@/components/common/ImageCrop/imageUtils";
+import {
+  uploadImageToS3,
+  createDownsampledImage,
+  applyOriginalCrop,
+  ImageProcessingMetadata
+} from "@/components/common/ImageCrop/imageUtils";
 
 import Alert from "../common/Alert_upload";
 
@@ -28,6 +33,9 @@ const PhotoUploader = ({
   // 자르기 완료된 이미지 파일들 (최종 결과)
   const [croppedImages, setCroppedImages] = useState<{ file: File; preview: string }[]>([]);
 
+  // 이미지 메타데이터 (원본 및 다운샘플링 정보)
+  const [imageMetadata, setImageMetadata] = useState<ImageProcessingMetadata[]>([]);
+
   // 현재 자르고 있는 이미지 인덱스
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(-1);
 
@@ -36,6 +44,9 @@ const PhotoUploader = ({
 
   // 이미지 자르기 모달 표시 여부
   const [isCropperModalOpen, setIsCropperModalOpen] = useState(false);
+
+  // 이미지 처리 상태
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
 
   // 업로드 상태
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
@@ -46,22 +57,38 @@ const PhotoUploader = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
 
+  // 다운샘플링 설정
+  const previewMaxWidth = 800;   // 미리보기 최대 너비
+  const previewMaxHeight = 600;  // 미리보기 최대 높이
+  const previewQuality = 0.8;    // 미리보기 품질
+
   // 모달이 닫힐 때 상태 초기화
   const resetState = () => {
+    // setSelectedFiles([]);
+    // // setCroppedImages([]);
+    // setCurrentImageIndex(-1);
+    // setSelectedRatio("4:3");
+    // setIsUploadingPhotos(false);
+    // setUploadProgress(0);
+    // setShowAlert(false);
+    // setIsCropperModalOpen(false);
     setSelectedFiles([]);
-    // setCroppedImages([]);
+    setCroppedImages([]);
+    setImageMetadata([]);
     setCurrentImageIndex(-1);
     setSelectedRatio("4:3");
+    setIsProcessingImages(false);
     setIsUploadingPhotos(false);
     setUploadProgress(0);
     setShowAlert(false);
     setIsCropperModalOpen(false);
+
   };
 
   // 이미지 선택 시 자동으로 크롭 모달 열기 - 미처리된 이미지만 대상으로 함
   useEffect(() => {
     // 선택된 파일이 있고 모달이 닫혀있는 상태에서만 실행
-    if (selectedFiles.length > 0 && !isCropperModalOpen) {
+    if (selectedFiles.length > 0 && !isCropperModalOpen && !isProcessingImages) {
       // 크롭되지 않은 이미지가 있는지 확인
       const uncroppedIndex = selectedFiles.findIndex((_, index) => {
         // 해당 인덱스의 크롭된 이미지가 없거나 미리보기가 없으면 아직 처리되지 않은 것
@@ -234,6 +261,7 @@ const PhotoUploader = ({
 
     // 유효한 파일이 없으면 종료
     // if (validatedFiles.length === 0 && files.length > 0) {
+    //   setIsProcessingImages(false);
     //   showAlertMessage("선택한 모든 이미지 파일이 유효하지 않습니다.", "red");
     //   return;
     // }
@@ -244,10 +272,57 @@ const PhotoUploader = ({
     // }
 
     // 나머지 기존 코드와 동일...
+    // 원본 파일 배열에 추가
     const newFiles = [...selectedFiles, ...validatedFiles];
     setSelectedFiles(newFiles);
 
+    // 각 이미지를 다운샘플링하여 미리보기 생성
     const startIndex = selectedFiles.length;
+    const newMetadata = [...imageMetadata];
+
+    for (let i = 0; i < validatedFiles.length; i++) {
+      try {
+        // 다운샘플링된 미리보기 생성
+        const result = await createDownsampledImage(
+          validatedFiles[i],
+          previewMaxWidth,
+          previewMaxHeight,
+          previewQuality
+        );
+
+        // 메타데이터 저장
+        const meta: ImageProcessingMetadata = {
+          originalFile: validatedFiles[i],
+          previewFile: result.file,
+          previewUrl: result.preview,
+          previewWidth: result.width,
+          previewHeight: result.height
+        };
+
+        // 배열에 추가
+        while (newMetadata.length <= startIndex + i) {
+          newMetadata.push({} as ImageProcessingMetadata);
+        }
+        newMetadata[startIndex + i] = meta;
+
+        // // 미리보기 이미지 추가 (크롭되지 않은 상태)
+        // const newCroppedImages = [...croppedImages];
+        // while (newCroppedImages.length <= startIndex + i) {
+        //   newCroppedImages.push({ file: new File([], "placeholder"), preview: "" });
+        // }
+
+        // 여기서는 미리보기 이미지만 설정하고 실제 크롭은 나중에 처리
+        // setCroppedImages(newCroppedImages);
+      } catch (error) {
+        console.error(`이미지 ${validatedFiles[i].name} 다운샘플링 실패:`, error);
+      }
+    }
+
+    // 메타데이터 업데이트
+    setImageMetadata(newMetadata);
+    setIsProcessingImages(false);
+
+    // 크롭 모달 열기
     if (!isCropperModalOpen && validatedFiles.length > 0) {
       setCurrentImageIndex(startIndex);
       setIsCropperModalOpen(true);
@@ -268,12 +343,14 @@ const PhotoUploader = ({
     // 자르기 완료되었던 이미지는 저장
     const updatedFiles = selectedFiles.filter((_, index) => processedIndices.has(index));
     const updatedCroppedImages = croppedImages.filter((img, index) => processedIndices.has(index));
+    const updatedMetadata = imageMetadata.filter((meta, index) => processedIndices.has(index));
 
     // 이미지 상태 업데이트
     setSelectedFiles(updatedFiles);
     setCroppedImages(updatedCroppedImages);
     setCurrentImageIndex(-1);
     setIsCropperModalOpen(false);
+    setImageMetadata(updatedMetadata);
 
     // 이미지 자르기가 취소 되었을 때 alert
     if (updatedFiles.length === 0) {
@@ -290,6 +367,15 @@ const PhotoUploader = ({
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
 
+    // 메타데이터에서 제거
+    const newMetadata = [...imageMetadata];
+    if (newMetadata[index] && newMetadata[index].previewUrl) {
+      // URL 객체 메모리 해제
+      URL.revokeObjectURL(newMetadata[index].previewUrl);
+    }
+    newMetadata.splice(index, 1);
+    setImageMetadata(newMetadata);
+
     // 잘린 이미지도 함께 제거
     const newCroppedImages = [...croppedImages];
     newCroppedImages.splice(index, 1);
@@ -297,17 +383,28 @@ const PhotoUploader = ({
   };
 
   // 단일 이미지 자르기 완료 처리
-  const handleCropComplete = (file: File, previewUrl: string, index: number) => {
+  const handleCropComplete = (file: File, previewUrl: string, index: number, cropData: any) => {
     // 현재 이미지의 크롭 결과 저장
     const newCroppedImages = [...croppedImages];
+    const newMetadata = [...imageMetadata];
 
     // 배열 길이가 충분하지 않으면 확장
     while (newCroppedImages.length <= index) {
       newCroppedImages.push({ file: new File([], "placeholder"), preview: "" });
     }
 
+    // 크롭된 미리보기 이미지 저장
     newCroppedImages[index] = { file, preview: previewUrl };
     setCroppedImages(newCroppedImages);
+
+    // 메타데이터에 크롭 정보 추가
+    if (newMetadata[index]) {
+      newMetadata[index] = {
+        ...newMetadata[index],
+        cropData
+      };
+      setImageMetadata(newMetadata);
+    }
 
     // 다음 처리되지 않은 이미지를 찾음
     let nextIndex = index + 1;
@@ -338,6 +435,35 @@ const PhotoUploader = ({
   const handleCropperModalClose = () => {
     setCurrentImageIndex(-1);
     setIsCropperModalOpen(false);
+  };
+
+  // 사진 업로드 전 최종 이미지 처리
+  const prepareImagesForUpload = async (): Promise<File[]> => {
+    const uploadReadyFiles: File[] = [];
+
+    for (let i = 0; i < imageMetadata.length; i++) {
+      const meta = imageMetadata[i];
+
+      if (!meta || !meta.cropData) {
+        continue;
+      }
+
+      try {
+        // 원본 이미지에 크롭을 적용하고 업로드용으로 최적화
+        const optimizedFile = await applyOriginalCrop(
+          meta.originalFile,
+          meta.previewWidth,
+          meta.previewHeight,
+          meta.cropData
+        );
+
+        uploadReadyFiles.push(optimizedFile);
+      } catch (error) {
+        console.error(`이미지 ${i + 1} 최적화 실패:`, error);
+      }
+    }
+
+    return uploadReadyFiles;
   };
 
   // 사진 업로드 시작
@@ -372,28 +498,40 @@ const PhotoUploader = ({
   // 실제 업로드 처리 함수
   const uploadPhotosProcess = async () => {
     try {
-      const validCroppedImages = croppedImages.filter(img => img && img.preview);
+      // const validCroppedImages = croppedImages.filter(img => img && img.preview);
 
-      if (!albumId || validCroppedImages.length === 0) {
-        throw new Error("앨범 또는 이미지가 선택되지 않았습니다.");
+      // if (!albumId || validCroppedImages.length === 0) {
+      //   throw new Error("앨범 또는 이미지가 선택되지 않았습니다.");
+      // }
+
+      if (!albumId) {
+        throw new Error("앨범이 선택되지 않았습니다.");
+      }
+
+      // 크롭 적용된 원본 이미지 준비
+      const processedFiles = await prepareImagesForUpload();
+
+      if (!processedFiles.length) {
+        throw new Error("업로드할 이미지가 없습니다.");
       }
 
       // S3 업로드용 presigned URL 요청
       const urlsResponse = await getPhotoUploadUrls({
         albumId: albumId,
-        photoLength: validCroppedImages.length
+        photoLength: processedFiles.length
+        // photoLength: validCroppedImages.length
       });
 
-      if (!urlsResponse || urlsResponse.length !== validCroppedImages.length) {
+      if (!urlsResponse || urlsResponse.length !== processedFiles.length) {
         throw new Error("업로드 URL을 받는 데 문제가 발생했습니다.");
       }
 
-      const totalImages = validCroppedImages.length;
+      const totalImages = processedFiles.length;
       let successCount = 0;
 
       for (let i = 0; i < totalImages; i++) {
         try {
-          const imageFile = validCroppedImages[i].file;
+          const imageFile = processedFiles[i];
 
           // S3에 업로드
           const uploadSuccess = await uploadImageToS3(
@@ -430,6 +568,15 @@ const PhotoUploader = ({
       setUploadProgress(0);
       setSelectedFiles([]);
       // setCroppedImages([]);
+
+      // 미리보기 URL 메모리 해제
+      imageMetadata.forEach(meta => {
+        if (meta && meta.previewUrl) {
+          URL.revokeObjectURL(meta.previewUrl);
+        }
+      });
+
+      resetState();
     }
   };
 
@@ -443,6 +590,18 @@ const PhotoUploader = ({
     resetState();
   }, [isOpen]);
 
+  // 컴포넌트 언마운트 시 메모리 정리
+  useEffect(() => {
+    return () => {
+      // 미리보기 URL 메모리 해제
+      imageMetadata.forEach(meta => {
+        if (meta && meta.previewUrl) {
+          URL.revokeObjectURL(meta.previewUrl);
+        }
+      });
+    };
+  }, []);
+
   // 모달 안의 본문 렌더링
   const renderModalContent = () => {
     return (
@@ -455,7 +614,10 @@ const PhotoUploader = ({
             onRemoveImage={handleRemoveImage}
             maxImages={5}
             previewSize="md"
-            croppedPreviews={croppedImages.map(img => img?.preview || null)}
+            croppedPreviews={selectedFiles.map((_, index) =>
+              (croppedImages[index] && croppedImages[index].preview) ? croppedImages[index].preview : null
+            )}
+          // croppedPreviews={croppedImages.map(img => img?.preview || null)}
           />
 
           {/* 크기 제한 안내 메시지 */}
@@ -510,7 +672,13 @@ const PhotoUploader = ({
               handleCropperModalClose();
             }
           }}
-          imageFiles={selectedFiles}
+          imageFiles={selectedFiles.map((file, index) => {
+            // 다운샘플링된 미리보기 파일을 사용 (있는 경우)
+            if (imageMetadata[index] && imageMetadata[index].previewFile) {
+              return imageMetadata[index].previewFile;
+            }
+            return file;
+          })}
           currentIndex={currentImageIndex}
           aspectRatio={selectedRatio}
           onCropComplete={handleCropComplete}

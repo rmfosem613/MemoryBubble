@@ -13,7 +13,13 @@ interface ImageCropperModalProps {
   imageFiles: File[]; // 이미지 배열 형태로 변경
   currentIndex: number;
   aspectRatio: AspectRatioOption;
-  onCropComplete: (file: File, previewUrl: string, index: number) => void;
+  onCropComplete: (file: File, previewUrl: string, index: number, cropData?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
+  // onCropComplete: (file: File, previewUrl: string, index: number) => void;
   onAllCropsComplete?: () => void;
   onCancelAll?: () => void; // 취소
   allowedAspectRatios?: AspectRatioOption[];
@@ -321,6 +327,14 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       cropHeight
     );
 
+    // 크롭 데이터 생성
+    const cropData = {
+      x: cropX,
+      y: cropY,
+      width: cropWidth,
+      height: cropHeight
+    };
+
     // 잘라낸 이미지를 Blob으로 변환
     canvas.toBlob(
       (blob) => {
@@ -337,7 +351,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         const croppedUrl = URL.createObjectURL(blob);
         setIsCropComplete(true);
 
-        onCropComplete(croppedFile, croppedUrl, currentIndex);
+        onCropComplete(croppedFile, croppedUrl, currentIndex, cropData);
 
         if (isLastImage && onAllCropsComplete) {
           onAllCropsComplete();
