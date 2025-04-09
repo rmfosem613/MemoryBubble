@@ -48,7 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public FileResponse updateUser(Long userId, UserRequest request) {
+    public FileResponse updateUser(Long userId, UserUpdateRequest request) {
         // 프로필 이미지를 바꿀 수 있는 url 반환
         User user = getUser(userId);
         String key = user.getProfile();

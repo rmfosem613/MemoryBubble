@@ -73,11 +73,11 @@ public class UserController {
     )
     public ResponseEntity<FileResponse> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
                                                       @PathVariable Long userId,
-                                                      @RequestBody UserRequest userRequest) {
+                                                      @RequestBody UserUpdateRequest request) {
         if(!userDetails.getUsername().equals(userId.toString())) {
             throw new UserException(USER_ACCESS_DENIED);
         }
-        return ResponseEntity.ok(userService.updateUser(Long.valueOf(userDetails.getUsername()), userRequest));
+        return ResponseEntity.ok(userService.updateUser(Long.valueOf(userDetails.getUsername()), request));
     }
 
     @GetMapping("/letter")
