@@ -74,6 +74,7 @@ function PhotoAlbum() {
     albumId,
     refreshPhotos,
     fontInfoList,
+    isImageLoading,
   } = usePhotoAlbum();
 
   const {
@@ -388,17 +389,27 @@ function PhotoAlbum() {
                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 transition: 'transform 0.6s',
               }}>
-              {/* 앞면 - 사진 */}
               {photos && photos.length > 0 ? (
-                <img
-                  src={photos[currentIndex].src + '&w=800'}
-                  alt={photos[currentIndex].alt}
-                  className="w-full h-full object-contain absolute inset-0 p-2"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                  }}
-                  onClick={toggleFlipWithPostCard}
-                />
+                <div className="relative w-full h-full">
+                  {/* 항상 이미지를 렌더링하고, 투명도만 조절 */}
+                  <img
+                    src={photos[currentIndex].src + '&w=800'}
+                    alt={photos[currentIndex].alt}
+                    className="w-full h-full object-contain absolute inset-0 p-2 transition-opacity duration-300"
+                    style={{
+                      backfaceVisibility: 'hidden',
+                      opacity: isImageLoading(currentIndex) ? 0.3 : 1, // 완전히 숨기지 않고 흐리게 표시
+                    }}
+                    onClick={toggleFlipWithPostCard}
+                  />
+
+                  {/* 로딩 인디케이터는 이미지 위에 표시 */}
+                  {isImageLoading(currentIndex) && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <p className="text-subtitle-1-lg font-p-500 text-gray-500 mb-4">
                   사진이 없습니다.
