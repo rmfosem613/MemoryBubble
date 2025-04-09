@@ -12,6 +12,7 @@ interface ModalProps {
   onCancel?: () => void | boolean | Promise<boolean>; // 취소 버튼 클릭 시 추가 로직을 위한 함수
   onConfirm?: () => void | boolean | Promise<boolean>; // 확인 버튼 클릭 시 추가 로직을 위한 함수
   isConfirmDisabled?: boolean; // 확인 버튼 비활성화 여부
+  isCancelDisabled?: boolean;
 }
 
 function Modal({
@@ -24,6 +25,7 @@ function Modal({
   onCancel,
   onConfirm,
   isConfirmDisabled = false,
+  isCancelDisabled = false,
 }: ModalProps) {
   if (!isOpen) return null;
 
@@ -36,6 +38,8 @@ function Modal({
 
   // 취소 버튼 클릭 핸들러
   const handleCancelClick = async () => {
+    if (isCancelDisabled) return;
+
     if (onCancel) {
       const shouldClose = await onCancel();
       if (shouldClose !== false) {
@@ -49,7 +53,7 @@ function Modal({
   // 확인 버튼 클릭 핸들러
   const handleConfirmClick = async () => {
     if (isConfirmDisabled) return; // 버튼이 비활성화된 경우 실행하지 않음
-    
+
     if (onConfirm) {
       const shouldClose = await onConfirm();
       if (shouldClose !== false) {
@@ -80,15 +84,18 @@ function Modal({
         <div className="px-5 py-4 md:px-6 lg:px-8 bg-gray-100 rounded-b-lg flex justify-end space-x-3">
           {/* 취소 버튼 */}
           {cancelButtonText && (
-            <div onClick={handleCancelClick}>
-              <Button name={cancelButtonText} color="white" />
+            <div onClick={isCancelDisabled ? undefined : handleCancelClick}>
+              <Button
+                name={cancelButtonText}
+                color={isCancelDisabled ? "gray" : "white"}
+              />
             </div>
           )}
           {/* 확인 버튼 */}
           <div onClick={isConfirmDisabled ? undefined : handleConfirmClick}>
-            <Button 
-              name={confirmButtonText} 
-              color={isConfirmDisabled ? "gray" : "blue"} 
+            <Button
+              name={confirmButtonText}
+              color={isConfirmDisabled ? "gray" : "blue"}
             />
           </div>
         </div>

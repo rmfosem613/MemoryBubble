@@ -56,6 +56,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   const currentImageFile = imageFiles[currentIndex];
   const isLastImage = currentIndex === imageFiles.length - 1;
 
+  // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(false);
+
   // 제목 상태 수정
   const computedModalTitle = `${modalTitle} (${currentIndex + 1}/${imageFiles.length})`;
 
@@ -278,6 +281,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       return false;
     }
 
+    // 로딩 상태 시작
+    setIsLoading(true);
+
     // 크롭 영역이 유효한지 체크
     // if (!isCropValid()) {
     //   showAlertMessage("자르기 영역이 너무 작습니다. 더 넓은 영역을 선택해주세요.", "red");
@@ -298,7 +304,10 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     canvas.height = cropHeight;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return false;
+    if (!ctx) {
+      setIsLoading(false);
+      return false;
+    }
 
     ctx.drawImage(
       image,
@@ -315,7 +324,10 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     // 잘라낸 이미지를 Blob으로 변환
     canvas.toBlob(
       (blob) => {
-        if (!blob || !currentImageFile) return;
+        if (!blob || !currentImageFile) {
+          setIsLoading(false);
+          return;
+        }
 
         const croppedFile = new File([blob], currentImageFile.name, {
           type: 'image/webp',
@@ -330,6 +342,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         if (isLastImage && onAllCropsComplete) {
           onAllCropsComplete();
         }
+
+        // 로딩 상태 종료
+        setIsLoading(false);
       },
       'image/webp',
       imageQuality
@@ -418,6 +433,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         cancelButtonText={cancelButtonText}
         onConfirm={handleApplyCrop}
         onCancel={handleCancelAll}
+        isConfirmDisabled={isLoading}
+        isCancelDisabled={isLoading}
       >
         {renderModalContent()}
       </Modal>

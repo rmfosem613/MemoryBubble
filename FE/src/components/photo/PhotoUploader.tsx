@@ -490,6 +490,7 @@ const PhotoUploader = ({
           croppedImages.filter(img => img && img.preview).length !== selectedFiles.length ||
           isUploadingPhotos
         }
+        isCancelDisabled={isUploadingPhotos}
       >
         {renderModalContent()}
       </Modal>
