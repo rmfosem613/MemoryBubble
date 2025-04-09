@@ -25,7 +25,7 @@ function InputText({
       />
       {maxLength && (
         <div
-          className={`text-right text-sm mt-1 ${value.length >= maxLength ? 'text-red-500' : 'text-gray-500'} `}>
+          className={`text-right text-sm mt-1 text-gray-500`}>
           {value.length}/{maxLength}
         </div>
       )}
