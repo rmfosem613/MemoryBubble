@@ -127,7 +127,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                <span className="text-xs text-gray-500 mt-1">이미지 추가</span>
+                {/* <span className="text-xs text-gray-500 mt-1">이미지 추가</span> */}
               </label>
             )}
 
