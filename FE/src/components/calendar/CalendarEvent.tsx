@@ -164,11 +164,11 @@ function CalendarEvent() {
   // 앨범 연결 모달 열기
   const openAlbumModal = (event) => {
     // 연결 가능한 앨범이 있는지 확인 (기본 앨범 외 최소 1개 이상)
-    if (allAlbums.length <= 1) {
+    if (allAlbums.length <= 1 || (event.albumId && allAlbums.length <= 2)) {
       showAlert('연결할 수 있는 앨범이 없습니다.', 'red');
       return;
     }
-    
+
     setSelectEvent(event);
     calendarAlbumModal.open();
   };
@@ -201,7 +201,7 @@ function CalendarEvent() {
           </h2>
           {/* 일정추가 */}
           <div
-            className={`flex items-center gap-1 cursor-pointer hover:${colors.bg[1]}/20 rounded-full px-1`}
+            className={`flex items-center gap-1 cursor-pointer ${colors.hover[1]} rounded-full px-1`}
             onClick={(e) => {
               e.stopPropagation();
               calendarEventAddModal.open();
@@ -222,17 +222,17 @@ function CalendarEvent() {
               <div key={eventGroup.mainEvent.scheduleId} className="mb-3">
                 {/* 일정 */}
                 <div
-                  className={`flex flex-col pb-2 border-b-2 border-dashed ${colors.border[1]} cursor-pointer`}>
+                  className={`flex flex-col pb-2 border-b-2 border-dashed ${colors.border[1]}`}>
                   <>
                     <div
-                      className="px-2 flex justify-between items-start"
+                      className="px-2 flex justify-between items-start cursor-pointer"
                       onClick={() =>
                         toggleEvent(eventGroup.mainEvent.scheduleId)
                       }>
-                      <p className="p-1 text-h4-lg font-p-500 break-all">
+                      <p className="flex-1 p-1 text-h4-lg font-p-500 break-all">
                         {eventGroup.mainEvent.scheduleContent}
                       </p>
-                      <div className="flex space-x-1 items-center pt-2">
+                      <div className="flex flex-col space-y-1 items-center pt-2 w-6 h-full">
                         {eventGroup.mainEvent.albumId ? <Link size={20} /> : ''}
                         {eventGroup.count > 1 && (
                           <span
@@ -276,43 +276,42 @@ function CalendarEvent() {
 
                         {/* 앨범ID가 있을 때 다시연결하기와 연결끊기 버튼 추가 */}
                         {eventGroup.mainEvent.albumId && (
-                          <div className="ml-auto flex space-x-2">
-                            <button
-                              className={`px-2 py-1 text-xs rounded-md ${colors.bg[0]} hover:${colors.bg[1]}/50 text-gray-500 font-p-500`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openAlbumModal(eventGroup.mainEvent);
-                              }}>
-                              연결하기
-                            </button>
-                            <button
-                              className="px-2 py-1 text-xs rounded-md bg-red-100 hover:bg-red-200/30 text-gray-500 font-p-500 flex items-center justify-center  disabled:hover:bg-red-100"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUnlinkAlbum(
-                                  eventGroup.mainEvent.scheduleId,
-                                );
-                              }}
-                              disabled={
-                                unlinkingId === eventGroup.mainEvent.scheduleId
-                              }>
-                              {unlinkingId ===
-                              eventGroup.mainEvent.scheduleId ? (
-                                <LoaderCircle
-                                  size={16}
-                                  className={`${colors.text[1]} animate-spin`}
-                                />
-                              ) : (
-                                'X'
-                              )}
-                            </button>
-                          </div>
+                          // <div className="ml-auto flex space-x-2">
+                          //   <button
+                          //     className={`px-2 py-1 text-xs rounded-md ${colors.bg[0]} hover:${colors.bg[1]}/50 text-gray-500 font-p-500`}
+                          //     onClick={(e) => {
+                          //       e.stopPropagation();
+                          //       openAlbumModal(eventGroup.mainEvent);
+                          //     }}>
+                          //     앨범연결
+                          //   </button>
+                          <button
+                            className="px-2 py-1 text-xs rounded-md bg-red-100 hover:bg-red-200/30 text-gray-500 font-p-500 flex items-center justify-center  disabled:hover:bg-red-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUnlinkAlbum(
+                                eventGroup.mainEvent.scheduleId,
+                              );
+                            }}
+                            disabled={
+                              unlinkingId === eventGroup.mainEvent.scheduleId
+                            }>
+                            {unlinkingId === eventGroup.mainEvent.scheduleId ? (
+                              <LoaderCircle
+                                size={16}
+                                className={`${colors.text[1]} animate-spin`}
+                              />
+                            ) : (
+                              'X'
+                            )}
+                          </button>
+                          // </div>
                         )}
 
                         {/* 앨범ID가 없을 때 앨범 연결하기 버튼 추가 */}
                         {!eventGroup.mainEvent.albumId && (
                           <button
-                            className={`ml-auto px-2 py-1 text-xs rounded-md ${colors.bg[0]} hover:${colors.bg[1]}/50 text-gray-500 font-p-500`}
+                            className={`ml-auto px-2 py-1 text-xs rounded-md ${colors.bg[0]} ${colors.hover[2]} text-gray-500 font-p-500`}
                             onClick={(e) => {
                               e.stopPropagation();
                               openAlbumModal(eventGroup.mainEvent);
@@ -323,7 +322,7 @@ function CalendarEvent() {
                       </div>
                       <div className="flex justify-end space-x-2">
                         <button
-                          className={`p-1 rounded-full hover:${colors.bg[0]}`}
+                          className={`p-1 rounded-full ${colors.hover[0]}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             openEditModal(eventGroup.mainEvent);
@@ -331,7 +330,7 @@ function CalendarEvent() {
                           <PenLine size={20} />
                         </button>
                         <button
-                          className={`p-1 rounded-full hover:${colors.bg[0]}`}
+                          className={`p-1 rounded-full ${colors.hover[0]}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             openRemoveModal(

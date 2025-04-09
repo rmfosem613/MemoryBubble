@@ -46,18 +46,16 @@ function CalendarEventAddModal({
 
   // 제출
   const handleSubmit = async () => {
-    // 양쪽 공백 제거
-    const trimmedTitle = eventTitle.trim();
-    setEventTitle(trimmedTitle);
+    // 에러 메시지가 있는지 확인
+    if (errors.title || errors.date) {
+      return false; // 에러가 있으면 제출 중단
+    }
 
-    // 빈값 유효성 검사
-    if (!trimmedTitle) {
+    // 빈값 확인 (최종 확인)
+    if (!eventTitle.trim()) {
       setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
       return false;
     }
-
-    // 유효한 경우
-    setErrors((prev) => ({ ...prev, title: '' }));
 
     // api 요청
     setIsLoading(true);
@@ -87,11 +85,37 @@ function CalendarEventAddModal({
     }
   };
 
+  // 일정 제목 입력 처리 함수
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    // 50자 이하일 때만 상태 업데이트
+    if (newValue.length <= 50) {
+      setEventTitle(newValue);
+      setErrors((prev) => ({ ...prev, title: '' }));
+    }
+  };
+
+  // 일정 제목 blur 처리 함수
+  const handleTitleBlur = () => {
+    // 양쪽 공백 제거하고 바로 상태 업데이트
+    const trimmedTitle = eventTitle.trim();
+    setEventTitle(trimmedTitle);
+
+    // 빈값 유효성 검사
+    if (!trimmedTitle) {
+      setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
+    }
+  };
+
   // 시작 날짜 변경
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
     setStartDate(newStartDate);
-    setErrors((prev) => ({ ...prev, date: '' })); // 날짜 에러 메시지 초기화
+
+    if (!newStartDate || !endDate) {
+      setErrors((prev) => ({ ...prev, date: '날짜를 선택해주세요.' }));
+      return;
+    }
 
     // 시작일이 종료일보다 나중이면 종료일을 시작일과 같게 설정
     const start = new Date(newStartDate + 'T00:00:00');
@@ -99,13 +123,20 @@ function CalendarEventAddModal({
     if (start > end) {
       setEndDate(newStartDate);
     }
+
+    // 에러가 없으면 에러 메시지 초기화
+    setErrors((prev) => ({ ...prev, date: '' }));
   };
 
   // 종료 날짜 변경
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEndDate = e.target.value;
     setEndDate(newEndDate);
-    setErrors((prev) => ({ ...prev, date: '' })); // 날짜 에러 메시지 초기화
+
+    if (!startDate || !newEndDate) {
+      setErrors((prev) => ({ ...prev, date: '날짜를 선택해주세요.' }));
+      return;
+    }
 
     // 종료일이 시작일보다 이전이면 시작일을 종료일과 같게 설정
     const start = new Date(startDate + 'T00:00:00');
@@ -113,6 +144,9 @@ function CalendarEventAddModal({
     if (end < start) {
       setStartDate(newEndDate);
     }
+
+    // 에러가 없으면 에러 메시지 초기화
+    setErrors((prev) => ({ ...prev, date: '' }));
   };
 
   // 앨범 연결
@@ -152,11 +186,8 @@ function CalendarEventAddModal({
             value={eventTitle}
             maxLength={50}
             rows={2}
-            onChange={(e) => {
-              setErrors((prev) => ({ ...prev, title: '' }));
-              if(e.target.value.length > 50) return;
-              setEventTitle(e.target.value);
-            }}
+            onChange={handleTitleChange}
+            onBlur={handleTitleBlur}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault(); // 엔터 키 기본 동작 방지
