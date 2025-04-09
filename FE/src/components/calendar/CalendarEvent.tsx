@@ -229,10 +229,10 @@ function CalendarEvent() {
                       onClick={() =>
                         toggleEvent(eventGroup.mainEvent.scheduleId)
                       }>
-                      <p className="p-1 text-h4-lg font-p-500 break-all">
+                      <p className="flex-1 p-1 text-h4-lg font-p-500 break-all">
                         {eventGroup.mainEvent.scheduleContent}
                       </p>
-                      <div className="flex flex-col space-y-1 items-center pt-2 w-14 h-full">
+                      <div className="flex flex-col space-y-1 items-center pt-2 w-6 h-full">
                         {eventGroup.mainEvent.albumId ? <Link size={20} /> : ''}
                         {eventGroup.count > 1 && (
                           <span
