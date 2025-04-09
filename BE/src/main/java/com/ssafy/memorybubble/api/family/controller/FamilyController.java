@@ -118,7 +118,7 @@ public class FamilyController {
     @PatchMapping("/{familyId}")
     public ResponseEntity<FamilyResponse> updateFamily(@AuthenticationPrincipal UserDetails userDetails,
                                                        @PathVariable Long familyId,
-                                                       @Valid @RequestBody FamilyRequest request) {
+                                                       @Valid @RequestBody FamilyUpdateRequest request) {
         // 가족 수정
         return ResponseEntity.ok().body(
                 familyService.updateFamily(Long.valueOf(userDetails.getUsername()), familyId, request)
