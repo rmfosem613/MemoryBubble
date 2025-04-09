@@ -37,7 +37,7 @@ const useImageCropper = ({
   minSize = 100, // 기본 최소 100KB
   maxSize = 10, // 기본 최대 10MB
   imageQuality = 0.95, // 기본 품질 95%
-  maxAspectRatioDifference = 20 // 기본 최대 비율 차이 20배
+  maxAspectRatioDifference = 5 // 기본 최대 비율 차이 20배
 }: UseImageCropperParams = {}) => {
   // 상태 관리
   const [image, setImage] = useState<File | null>(initialImage);
