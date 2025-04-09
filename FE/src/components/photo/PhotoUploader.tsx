@@ -185,8 +185,8 @@ const PhotoUploader = ({
   // 이미지 선택 시 처리
   const handleImagesSelected = async (files: File[]) => {
     // 최대 5개까지만 선택 가능 검사
-    if (files.length + selectedFiles.length > 10) {
-      showAlertMessage("이미지는 한 번에 최대 10개까지만 업로드할 수 있습니다.", "red");
+    if (files.length + selectedFiles.length > 5) {
+      showAlertMessage("이미지는 한 번에 최대 5개까지만 업로드할 수 있습니다.", "red");
       return;
     }
 
@@ -462,7 +462,7 @@ const PhotoUploader = ({
           <div className="text-sm-lg text-gray-400 -mt-1">
             이미지 용량 제한: 100KB ~ 10MB <br />
             이미지 형식 제한: png, jpg, jpeg <br />
-            <span className="text-blue-500">이미지 한 번에 10개까지 등록 가능</span>
+            <span className="text-blue-500">이미지 한 번에 5개까지 등록 가능</span>
           </div>
         </div>
 
@@ -490,6 +490,7 @@ const PhotoUploader = ({
           croppedImages.filter(img => img && img.preview).length !== selectedFiles.length ||
           isUploadingPhotos
         }
+        isCancelDisabled={isUploadingPhotos}
       >
         {renderModalContent()}
       </Modal>
