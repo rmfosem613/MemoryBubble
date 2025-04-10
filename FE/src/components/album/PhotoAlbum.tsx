@@ -21,8 +21,8 @@ import { useAlert } from '@/hooks/useAlert';
 // import PhotoUploader from '../photo/PhotoUploader';
 import Alert from '../common/Alert';
 import { useEffect, useRef } from 'react';
-import LimitedPhotoUploader from './common/LimitedPhotoUploader';
-// import LimitedPhotoUploader from '@/components/photo/PhotoUploader';
+// import LimitedPhotoUploader from './common/LimitedPhotoUploader';
+import LimitedPhotoUploader from '@/components/photo/PhotoUploader';
 
 // 폰트 스타일을 생성하는 컴포넌트
 const FontStyles = ({ fontInfoList }) => {
