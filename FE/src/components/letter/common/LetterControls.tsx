@@ -9,9 +9,10 @@ import useUserStore from '@/stores/useUserStore';
 
 interface LetterControlsProps {
   onDateChange: (date: Date | null) => void;
+  selectedDate?: Date; // Add prop to receive the date from parent
 }
 
-function LetterControls({ onDateChange }: LetterControlsProps) {
+function LetterControls({ onDateChange, selectedDate: propSelectedDate }: LetterControlsProps) {
   const { selectedColor, setSelectedColor, selectedMember, setSelectedMember } =
     useLetterStore();
   const [familyMembers, setFamilyMembers] = useState<LetterMember[]>([]);
@@ -19,14 +20,21 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
   const { fetchFamilyInfo } = useUserApi();
   const { user } = useUserStore();
 
-  const [selectedDate, setSelectedDate] = useState('');
+  // Convert input date to string format for the date input
+  const [selectedDateString, setSelectedDateString] = useState('');
 
   useEffect(() => {
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
-    setSelectedDate(formattedDate);
-    onDateChange(today); // 초기 로드 시 오늘 날짜를 부모 컴포넌트에 전달
-  }, []);
+    // If a date is provided from the parent, use it
+    // Otherwise, use today's date
+    const dateToUse = propSelectedDate || new Date();
+    const formattedDate = dateToUse.toISOString().split('T')[0];
+    setSelectedDateString(formattedDate);
+    
+    // Initial load - notify parent component
+    if (!propSelectedDate) {
+      onDateChange(dateToUse);
+    }
+  }, [propSelectedDate, onDateChange]);
 
   // 가족 구성원 정보 조회
   useEffect(() => {
@@ -57,7 +65,7 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
     };
 
     loadFamilyMembers();
-  }, [fetchFamilyInfo]);
+  }, [fetchFamilyInfo, user.familyId]);
 
   const handleMemberSelect = (option: { id: string; label: string }) => {
     setSelectedMember(option);
@@ -66,10 +74,6 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
   const handleColorSelect = (colorId: string) => {
     setSelectedColor(colorId as any);
   };
-
-  // const handleDateChange = (date: Date) => {
-  //   onDateChange(date);
-  // };
 
   return (
     <div className="border-2 border-gray-300 rounded-[8px] h-full w-full mb-1">
@@ -98,11 +102,18 @@ function LetterControls({ onDateChange }: LetterControlsProps) {
             type="date"
             className="w-full border rounded-[8px] border-gray-300 p-2 text-sm"
             min={new Date().toISOString().split('T')[0]}
-            value={selectedDate}
+            value={selectedDateString}
             onChange={(e) => {
-              setSelectedDate(e.target.value);
-              const dateObject = new Date(e.target.value);
-              onDateChange(dateObject);
+              const value = e.target.value;
+              if (!value) {
+                // 삭제된 경우: 오늘 날짜로 설정
+                const today = new Date().toISOString().split("T")[0];
+                setSelectedDateString(today);
+                onDateChange(new Date(today));
+              } else {
+                setSelectedDateString(value);
+                onDateChange(new Date(value));
+              }
             }}
           />
         </div>

@@ -46,7 +46,7 @@ function WriteLetterPage() {
 
   useEffect(() => {
     setTextContent('');
-  }, []);
+  }, [setTextContent]);
 
   // 오디오 파일을 Blob으로 변환하는 함수
   const fetchAudioBlobFromUrl = async (audioUrl: string): Promise<Blob> => {
@@ -63,6 +63,13 @@ function WriteLetterPage() {
   // 편지 내용 변경 핸들러
   const handleContentChange = (content: string) => {
     setTextContent(content);
+  };
+
+  // 날짜 변경 핸들러
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      setSelectedDate(date);
+    }
   };
 
   // 편지 보내기 처리 함수
@@ -93,9 +100,9 @@ function WriteLetterPage() {
       setIsLoading(true);
 
       // 날짜 포맷팅 (YYYY-MM-DD)
-      const formattedDate = selectedDate
-        ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
-        : new Date().toISOString().split('T')[0];
+      const formattedDate = `${selectedDate.getFullYear()}-${String(
+        selectedDate.getMonth() + 1
+      ).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
       // 텍스트 편지의 경우 줄바꿈을 <br/>로 변환
       const processedContent =
@@ -124,7 +131,7 @@ function WriteLetterPage() {
       ) {
         // 오디오 URL에서 Blob 객체 가져오기
         const audioBlob = await fetchAudioBlobFromUrl(
-          cassetteData.recordingUrl,
+          cassetteData.recordingUrl
         );
 
         // 파일 타입 설정 (오디오 녹음은 일반적으로 audio/wav 또는 audio/webm)
@@ -139,14 +146,20 @@ function WriteLetterPage() {
           console.error('오디오 파일 업로드 실패:', uploadError);
           showAlertMessage(
             '오디오 파일 업로드에 실패했습니다. 다시 시도해주세요.',
-            'red',
+            'red'
           );
           throw uploadError;
         }
       }
 
       showAlertMessage('편지가 성공적으로 전송되었습니다.', 'green');
+      
+      // 성공 시 상태 초기화
       resetLetterState();
+      
+      // 날짜를 오늘 날짜로 초기화
+      const today = new Date();
+      setSelectedDate(today);
     } catch (error) {
       console.error('편지 전송 오류:', error);
       showAlertMessage('편지 전송에 실패했습니다. 다시 시도해주세요.', 'red');
@@ -191,7 +204,10 @@ function WriteLetterPage() {
           {/* grid 3 */}
           <div className="col-span-3">
             <div className="flex-row h-[85%]">
-              <LetterControls onDateChange={setSelectedDate} />
+              <LetterControls 
+                onDateChange={handleDateChange}
+                selectedDate={selectedDate} // Pass the selected date to the LetterControls component
+              />
               <Button
                 icon="send"
                 name={isLoading ? '전송 중...' : '편지보내기'}

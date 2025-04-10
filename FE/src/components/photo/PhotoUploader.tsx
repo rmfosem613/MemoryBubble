@@ -18,6 +18,8 @@ interface PhotoUploaderProps {
   albumId: number | null;
   onUploadComplete: () => Promise<void>;
   albumSelectComponent?: React.ReactNode;
+  currentPhotoCount?: number;
+  maxPhotoCount?: number;
 }
 
 const PhotoUploader = ({
@@ -25,7 +27,9 @@ const PhotoUploader = ({
   onClose,
   albumId,
   onUploadComplete,
-  albumSelectComponent
+  albumSelectComponent,
+  currentPhotoCount = 0,
+  maxPhotoCount = 0,
 }: PhotoUploaderProps) => {
   // 사용자가 선택한 원본 이미지 파일들
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -56,6 +60,9 @@ const PhotoUploader = ({
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("red");
+
+  // 남은 슬롯 계산
+  const remainingSlots = Math.max(0, maxPhotoCount - currentPhotoCount);
 
   // 다운샘플링 설정
   const previewMaxWidth = 800;   // 미리보기 최대 너비
@@ -271,7 +278,6 @@ const PhotoUploader = ({
     //   showAlertMessage(`일부 이미지(${files.length - validatedFiles.length}개)가 유효하지 않아 제외되었습니다.`, "red");
     // }
 
-    // 나머지 기존 코드와 동일...
     // 원본 파일 배열에 추가
     const newFiles = [...selectedFiles, ...validatedFiles];
     setSelectedFiles(newFiles);
@@ -498,12 +504,6 @@ const PhotoUploader = ({
   // 실제 업로드 처리 함수
   const uploadPhotosProcess = async () => {
     try {
-      // const validCroppedImages = croppedImages.filter(img => img && img.preview);
-
-      // if (!albumId || validCroppedImages.length === 0) {
-      //   throw new Error("앨범 또는 이미지가 선택되지 않았습니다.");
-      // }
-
       if (!albumId) {
         throw new Error("앨범이 선택되지 않았습니다.");
       }
@@ -515,23 +515,47 @@ const PhotoUploader = ({
         throw new Error("업로드할 이미지가 없습니다.");
       }
 
-      // S3 업로드용 presigned URL 요청
-      const urlsResponse = await getPhotoUploadUrls({
-        albumId: albumId,
-        photoLength: processedFiles.length
-        // photoLength: validCroppedImages.length
-      });
+      // 현재 앨범의 사진 개수와 선택한 이미지 개수의 합이 최대 개수를 초과하는지 확인
+      const totalFinalCount = currentPhotoCount + processedFiles.length;
 
-      if (!urlsResponse || urlsResponse.length !== processedFiles.length) {
-        throw new Error("업로드 URL을 받는 데 문제가 발생했습니다.");
+      let imagesToUpload = processedFiles;
+      if (totalFinalCount > maxPhotoCount) {
+        // 최대 개수에 맞게 이미지 수 제한
+        const allowedCount = Math.max(0, maxPhotoCount - currentPhotoCount);
+
+        if (allowedCount <= 0) {
+          showAlertMessage(
+            `앨범에 이미 최대 ${maxPhotoCount}장의 사진이 있습니다.`,
+            'red',
+          );
+          setIsUploadingPhotos(false);
+          return;
+        }
+
+        // 최대 허용 개수만큼만 이미지 업로드
+        imagesToUpload = processedFiles.slice(0, allowedCount);
+        showAlertMessage(
+          `앨범당 최대 ${maxPhotoCount}장까지만 업로드할 수 있습니다. 처음 ${allowedCount}장만 업로드됩니다.`,
+          'red',
+        );
       }
 
-      const totalImages = processedFiles.length;
+      // S3 업로드용 presigned URL 요청 (한 번만 호출)
+      const urlsResponse = await getPhotoUploadUrls({
+        albumId: albumId,
+        photoLength: imagesToUpload.length,
+      });
+
+      if (!urlsResponse || urlsResponse.length !== imagesToUpload.length) {
+        throw new Error('업로드 URL을 받는 데 문제가 발생했습니다.');
+      }
+
+      const totalImages = imagesToUpload.length;
       let successCount = 0;
 
       for (let i = 0; i < totalImages; i++) {
         try {
-          const imageFile = processedFiles[i];
+          const imageFile = imagesToUpload[i]; // processedFiles[i]가 아닌 imagesToUpload[i] 사용
 
           // S3에 업로드
           const uploadSuccess = await uploadImageToS3(
@@ -567,7 +591,6 @@ const PhotoUploader = ({
       setIsUploadingPhotos(false);
       setUploadProgress(0);
       setSelectedFiles([]);
-      // setCroppedImages([]);
 
       // 미리보기 URL 메모리 해제
       imageMetadata.forEach(meta => {
@@ -620,6 +643,12 @@ const PhotoUploader = ({
           // croppedPreviews={croppedImages.map(img => img?.preview || null)}
           />
 
+          {maxPhotoCount > 1 &&
+            < div className="text-sm font-medium text-blue-500 mb-4">
+              이 앨범에 추가 가능한 사진: {remainingSlots}장
+            </div>
+          }
+
           {/* 크기 제한 안내 메시지 */}
           <div className="text-sm-lg text-gray-400 -mt-1">
             이미지 용량 제한: 100KB ~ 10MB <br />
@@ -632,7 +661,7 @@ const PhotoUploader = ({
         {albumSelectComponent}
 
 
-      </div>
+      </div >
     );
   };
 
