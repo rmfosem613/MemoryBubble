@@ -642,7 +642,8 @@ function PhotoAlbum() {
           </p>
           <DropDown
             // 30장 미만인 앨범만 보여줌
-            albums={allAlbums.filter((album) => album.photoCount < 30)}
+            // albums={allAlbums.filter((album) => album.photoCount < 30)}
+            albums={allAlbums}
             currentAlbumId={parseInt(albumId)} // useParams()로 가져온 현재 앨범 ID
             onSelectAlbum={handleSelectAlbum}
             placeholder="앨범을 선택해주세요"
