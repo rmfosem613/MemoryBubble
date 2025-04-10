@@ -9,7 +9,7 @@ interface CalendarAlbumModalProps {
   close: () => void;
   scheduleId: number;
   currentAlbumId: number | null;
-  allAlbums: { id: number; title: string }[];
+  allAlbums: { id: number; title: string, photoCount: number }[];
   showAlert: (message: string, color: string) => void;
 }
 

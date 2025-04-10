@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface DropDownProps {
-  albums: { id: number; title: string }[];
+  albums: { id: number; title: string; photoCount: number }[];
   currentAlbumId?: number | null;
   onSelectAlbum: (albumId: number) => void;
   placeholder?: string;

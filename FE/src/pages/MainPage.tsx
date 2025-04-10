@@ -158,7 +158,7 @@ function MainPage() {
     <div className="relative w-full mb-4">
       <p className="mb-1 text-subtitle-1-lg font-p-500 text-black">앨범 선택하기</p>
       <DropDown
-        albums={albums.map(album => ({ id: album.id, title: album.title }))}
+        albums={albums.map(album => ({ id: album.id, title: album.title, photoCount: album.photoCount }))}
         currentAlbumId={selectedAlbumId}
         onSelectAlbum={handleAlbumSelect}
         placeholder="앨범을 선택해주세요"
