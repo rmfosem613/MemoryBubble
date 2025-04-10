@@ -309,6 +309,9 @@ function PhotoAlbum() {
 
   return (
     <div className="container h-screen">
+      {alertState && (
+        <Alert message={alertState.message} color={alertState.color} />
+      )}
       <div className="flex justify-between items-baseline mb-2">
         <div className="flex flex-row items-end">
           <Title text={albumTitle} />
@@ -639,7 +642,7 @@ function PhotoAlbum() {
           </p>
           <DropDown
             // 30장 미만인 앨범만 보여줌
-            albums={allAlbums.filter(album => album.photoCount < 30)}
+            albums={allAlbums.filter((album) => album.photoCount < 30)}
             currentAlbumId={parseInt(albumId)} // useParams()로 가져온 현재 앨범 ID
             onSelectAlbum={handleSelectAlbum}
             placeholder="앨범을 선택해주세요"
@@ -656,10 +659,6 @@ function PhotoAlbum() {
         currentPhotoCount={photos?.length || 0}
         maxPhotoCount={MAX_PHOTOS}
       />
-
-      {alertState && (
-        <Alert message={alertState.message} color={alertState.color} />
-      )}
     </div>
   );
 }
