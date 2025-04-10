@@ -1,8 +1,10 @@
 import React from 'react';
 import Modal from '@/components/common/Modal/Modal';
 import { useGroupEditModal } from '@/hooks/useGroupEditModal';
-import InputGroupPic from '../join/InputGroupPic';
 import Alert from '@/components/common/Alert';
+import ImageCropper from '../common/ImageCrop/ImageCropper';
+import { Upload } from 'lucide-react';
+
 interface GroupEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,6 +23,43 @@ const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
     handleFileChange,
     onConfirm,
   } = useGroupEditModal(isOpen);
+
+  // 그룹 이미지 미리보기 커스텀 렌더링 함수
+  const renderGroupPreview = (
+    previewUrl: string | null,
+    handleButtonClick: () => void,
+  ) => (
+    <div className="relative w-[400px] h-[300px] flex items-center justify-center bg-gray-100">
+      <img
+        src={previewUrl || ''}
+        alt="Group Preview"
+        className="max-w-full max-h-full object-contain"
+        style={{ maxHeight: '300px' }}
+      />
+      <button
+        onClick={handleButtonClick}
+        className="absolute z-50 bg-blue-500 text-white font-p-500 py-2 px-3 rounded-[8px] bottom-[10px] right-[10px]">
+        {/* 이미지 재업로드 */}
+        <Upload width={'20px'} />
+      </button>
+    </div>
+  );
+
+  // 업로드 영역 커스텀 렌더링 함수
+  const renderUploadBox = (
+    handleButtonClick: () => void,
+    handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void,
+    handleDrop: (e: React.DragEvent<HTMLDivElement>) => void,
+  ) => (
+    <div
+      className="w-[370px] h-[260px] mt-[10px] border border-gray-600 flex flex-col items-center justify-center cursor-pointer"
+      onClick={handleButtonClick}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}>
+      <Upload size={32} className="text-gray-600 mb-2" />
+      <p className="text-sm text-gray-600">클릭하거나 드래그</p>
+    </div>
+  );
 
   return (
     <>
@@ -65,17 +104,23 @@ const GroupEditModal = ({ isOpen, onClose }: GroupEditModalProps) => {
             </button>
           </div>
         </div> */}
+
           <div className="mb-5 flex flex-col gap-2">
             <p className="mb-2">그룹 대표 이미지</p>
             <p className="text-xs text-gray-500 text-center">
               이미지 크기는 100KB ~ 10MB 이내로 등록가능합니다.
             </p>
-            <InputGroupPic
+            <ImageCropper
               onImageChange={handleFileChange}
               initialImage={thumbnail}
               initialPreviewUrl={thumbnailPreview}
+              allowedAspectRatios={['1:1', '4:3', '3:4']} // 그룹 이미지는 4:3, 3:4 비율 허용
+              defaultAspectRatio="1:1" // 초기 crop 비율
+              renderPreview={renderGroupPreview}
+              renderUploadBox={renderUploadBox}
             />
           </div>
+
           {/* 그룹명 */}
           <div className="mb-4">
             <div className="flex justify-between">

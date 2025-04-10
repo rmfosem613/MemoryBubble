@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import useUserStore from '@/stores/useUserStore';
 import useUserApi from '@/apis/useUserApi';
+import { convertToWebP } from '@/components/common/ImageCrop/imageUtils';
 
 export const useGroupEditModal = (isOpen: boolean) => {
   const { updateFamilyInfo, uploadImageWithPresignedUrl, fetchFamilyInfo } =
@@ -56,7 +57,7 @@ export const useGroupEditModal = (isOpen: boolean) => {
       setThumbnail(null);
       setErrorMessage('');
     }
-  }, [isOpen, family.familyName, family.thumbnailUrl]);
+  }, [isOpen]);
 
   // 입력 변경 시 에러 메시지 초기화 및 10자 제한
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -119,9 +120,14 @@ export const useGroupEditModal = (isOpen: boolean) => {
         // 이미지 업로드 처리
         if (thumbnail && response.data.presignedUrl) {
           try {
+            // 이미지를 webp 형식으로 변환
+            const webpBlob = await convertToWebP(thumbnail);
+
             await uploadImageWithPresignedUrl(
               response.data.presignedUrl,
-              thumbnail,
+              new File([webpBlob], response.data.fileName, {
+                type: 'image/webp',
+              }),
             );
             const familyResponse = await fetchFamilyInfo(user.familyId);
             if (familyResponse.status === 200) {

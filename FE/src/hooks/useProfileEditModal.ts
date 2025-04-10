@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import useUserStore from '@/stores/useUserStore';
 import useUserApi from '@/apis/useUserApi';
 import { User } from '@/stores/useUserStore';
+import { convertToWebP } from '@/components/common/ImageCrop/imageUtils';
 
 interface ProfileFormErrors {
   name: string;
@@ -73,7 +74,9 @@ export const useProfileEditModal = (isOpen: boolean) => {
     if (isOpen) {
       const parts = user.phoneNumber?.split('-') || ['010', '', ''];
       setNewUser(user);
-      setProfileImage(user.profileUrl + '&w=200' || '');
+      setProfileImage(user.profileUrl + '&w=250' || '');
+      setProfileFile(null);
+
       // 전화번호 분리
       setPhonePrefix(parts[0] || '010');
       setPhoneMiddle(parts[1] || '');
@@ -85,7 +88,7 @@ export const useProfileEditModal = (isOpen: boolean) => {
         phoneNumber: '',
       });
     }
-  }, [isOpen, user]);
+  }, [isOpen]);
 
   // 입력 핸들러
   const handleInputChange = (
@@ -131,8 +134,8 @@ export const useProfileEditModal = (isOpen: boolean) => {
       }));
     } else {
       // 일반 필드는 newUser 객체에 직접 업데이트
-      if(name === 'name') {
-        if(name.length > 10) return;
+      if (name === 'name') {
+        if (name.length > 10) return;
       }
       setNewUser((prev) => ({
         ...prev,
@@ -274,17 +277,21 @@ export const useProfileEditModal = (isOpen: boolean) => {
       // 프로필 정보가 변경되었거나 이미지가 변경된 경우 API 요청
       if (Object.keys(updateData).length > 0 || profileFile) {
         updateData.isProfileUpdate = profileFile ? true : false;
-
         const response = await updateUserProfile(user.userId, updateData);
+
         if (response.status === 200) {
           setUser(updateData);
 
           // 이미지 업로드 처리
           if (profileFile && response.data.presignedUrl) {
+            // 이미지를 webp 형식으로 변환
+            const webpBlob = await convertToWebP(profileFile);
             try {
               await uploadImageWithPresignedUrl(
                 response.data.presignedUrl,
-                profileFile,
+                new File([webpBlob], response.data.fileName, {
+                  type: 'image/webp',
+                }),
               );
               const profileResponse = await fetchUserProfile(user.userId);
               if (profileResponse.status === 200) {

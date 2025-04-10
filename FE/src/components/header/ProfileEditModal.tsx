@@ -1,9 +1,9 @@
 import React from 'react';
-import { Camera, Check } from 'lucide-react';
+import { Camera, Check, Upload } from 'lucide-react';
 import Modal from '../common/Modal/Modal';
 import useProfileEditModal from '@/hooks/useProfileEditModal';
-import InputGroupPic from '../join/InputGroupPic';
 import Alert from '../common/Alert';
+import ImageCropper from '../common/ImageCrop/ImageCropper';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -27,6 +27,42 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
     handleImageChange,
     onConfirm,
   } = useProfileEditModal(isOpen);
+
+  // 프로필 이미지 미리보기 커스텀 렌더링 함수
+  const renderProfilePreview = (
+    previewUrl: string | null,
+    handleButtonClick: () => void,
+  ) => (
+    <div className="relative w-40 h-40">
+      <img
+        src={previewUrl || ''}
+        alt="Profile Preview"
+        className="w-40 h-40 rounded-full object-cover border-4"
+      />
+      {/* 업로드 버튼 */}
+      <div
+        className="absolute bottom-0 right-0 bg-blue-500 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
+        onClick={handleButtonClick}>
+        <Upload size={16} className="text-white" />
+      </div>
+    </div>
+  );
+
+  // 업로드 영역 커스텀 렌더링 함수
+  const renderUploadBox = (
+    handleButtonClick: () => void,
+    handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void,
+    handleDrop: (e: React.DragEvent<HTMLDivElement>) => void,
+  ) => (
+    <div
+      className="w-40 h-40 rounded-full border border-gray-600 flex flex-col items-center justify-center cursor-pointer"
+      onClick={handleButtonClick}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}>
+      <Upload size={32} className="text-gray-600 mb-2" />
+      <p className="text-sm text-gray-600">클릭하거나 드래그</p>
+    </div>
+  );
 
   const STYLES = {
     input:
@@ -66,15 +102,21 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
             </div>
           </div>
         </div> */}
+
           <div className="mb-5 flex flex-col gap-2">
             <p className="mb-2">프로필 이미지</p>
             <p className="text-xs text-gray-500 text-center">
               이미지 크기는 100KB ~ 10MB 이내로 등록가능합니다.
             </p>
-            <InputGroupPic
+
+            <ImageCropper
               onImageChange={handleImageChange}
               initialImage={profileFile}
               initialPreviewUrl={profileImage}
+              allowedAspectRatios={['1:1']} // 프로필은 1:1 비율만 사용
+              defaultAspectRatio="1:1"
+              renderPreview={renderProfilePreview}
+              renderUploadBox={renderUploadBox}
             />
           </div>
 
