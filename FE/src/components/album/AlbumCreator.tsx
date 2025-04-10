@@ -50,6 +50,19 @@ const AlbumCreator = ({
     return true;
   };
 
+  // 모달 닫기
+  const handleCloseModal = () => {
+    resetForm();
+    onClose();
+  };
+
+  // 폼 초기화 함수
+  const resetForm = () => {
+    setAlbumName('');
+    setAlbumDescription('');
+    setSelectedColor('#f4e2dc');
+  };
+
   // 앨범 생성 시작 (동기 함수)
   const handleCreateAlbumStart = () => {
     if (!validateAlbumForm() || isCreatingAlbum) {
@@ -78,13 +91,8 @@ const AlbumCreator = ({
       // 앨범 목록 다시 불러오기
       await onCreateComplete();
 
-      // 입력 필드 초기화
-      setAlbumName('');
-      setAlbumDescription('');
-      setSelectedColor('#f4e2dc');
-
       // 모달 닫기
-      onClose();
+      handleCloseModal();
     } catch (error) {
       showAlertMessage('앨범 생성에 실패했습니다. 다시 시도해주세요.', 'red');
     } finally {
@@ -102,7 +110,7 @@ const AlbumCreator = ({
       {showAlert && <Alert message={alertMessage} color={alertColor} />}
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleCloseModal}
         title="앨범 생성"
         confirmButtonText={isCreatingAlbum ? '생성 중...' : '생성하기'}
         cancelButtonText="취소하기"
