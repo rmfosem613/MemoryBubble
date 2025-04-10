@@ -1,16 +1,6 @@
 import React from 'react';
 import '@/components/introduce/scrollAnimation.css';
 
-import pic1 from '@/assets/intro/1.png'
-import pic2 from '@/assets/intro/2.png'
-import pic3 from '@/assets/intro/3.png'
-import pic4 from '@/assets/intro/4.png'
-import pic5 from '@/assets/intro/5.png'
-import pic6 from '@/assets/intro/6.png'
-import pic7 from '@/assets/intro/7.png'
-import pic9 from '@/assets/intro/9.png'
-import pic10 from '@/assets/intro/10.png'
-
 import fam1 from '@/assets/intro/fam1.webp'
 import fam2 from '@/assets/intro/fam2.webp'
 import fam3 from '@/assets/intro/fam3.webp'
@@ -25,6 +15,15 @@ import fam11 from '@/assets/intro/fam11.webp'
 import fam12 from '@/assets/intro/fam12.webp'
 import fam13 from '@/assets/intro/fam13.webp'
 import fam14 from '@/assets/intro/fam14.webp'
+import fam15 from '@/assets/intro/fam15.webp'
+import fam16 from '@/assets/intro/fam16.webp'
+import fam17 from '@/assets/intro/fam17.webp'
+import fam18 from '@/assets/intro/fam18.webp'
+import fam19 from '@/assets/intro/fam19.webp'
+import fam20 from '@/assets/intro/fam20.webp'
+import fam21 from '@/assets/intro/fam21.webp'
+import fam22 from '@/assets/intro/fam22.webp'
+import fam23 from '@/assets/intro/fam23.webp'
 
 const ScrollingBackground = () => {
   return (
@@ -34,29 +33,29 @@ const ScrollingBackground = () => {
         <div className='scroll-container w-[25%] rotate-6'>
           <ul className='scroll-up w-full'>
             <li className='h-[30%] py-2'>
-              <img src={pic1} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
+              <img src={fam21} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic2} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
+              <img src={fam23} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic3} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
+              <img src={fam19} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic1} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
+              <img src={fam21} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
             </li>
             {/* 복제된 요소들 (무한 스크롤용) */}
             <li className='h-[30%] py-2'>
-              <img src={pic1} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
+              <img src={fam21} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic2} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
+              <img src={fam23} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic3} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
+              <img src={fam19} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic1} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
+              <img src={fam21} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
             </li>
           </ul>
         </div>
@@ -65,29 +64,29 @@ const ScrollingBackground = () => {
         <div className='scroll-container w-[25%] rotate-6'>
           <ul className='scroll-down w-full'>
             <li className='h-[30%] py-2'>
-              <img src={pic1} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
+              <img src={fam21} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic10} className='h-full w-full rounded-[10px] object-cover' alt="Image 10" />
+              <img src={fam22} className='h-full w-full rounded-[10px] object-cover' alt="Image 10" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic2} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
+              <img src={fam23} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic7} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
+              <img src={fam15} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
             </li>
             {/* 복제된 요소들 (무한 스크롤용) */}
             <li className='h-[30%] py-2'>
-              <img src={pic1} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
+              <img src={fam21} className='h-full w-full rounded-[10px] object-cover' alt="Image 1" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic10} className='h-full w-full rounded-[10px] object-cover' alt="Image 10" />
+              <img src={fam22} className='h-full w-full rounded-[10px] object-cover' alt="Image 10" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic2} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
+              <img src={fam23} className='h-full w-full rounded-[10px] object-cover' alt="Image 2" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic7} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
+              <img src={fam15} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
             </li>
           </ul>
         </div>
@@ -96,29 +95,29 @@ const ScrollingBackground = () => {
         <div className='scroll-container w-[25%] rotate-6'>
           <ul className='scroll-up w-full'>
             <li className='h-[30%] py-2'>
-              <img src={pic4} className='h-full w-full rounded-[10px] object-cover' alt="Image 4" />
+              <img src={fam18} className='h-full w-full rounded-[10px] object-cover' alt="Image 4" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic6} className='h-full w-full rounded-[10px] object-cover' alt="Image 6" />
+              <img src={fam17} className='h-full w-full rounded-[10px] object-cover' alt="Image 6" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic9} className='h-full w-full rounded-[10px] object-cover' alt="Image 9" />
+              <img src={fam20} className='h-full w-full rounded-[10px] object-cover' alt="Image 9" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic3} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
+              <img src={fam19} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
             </li>
             {/* 복제된 요소들 (무한 스크롤용) */}
             <li className='h-[30%] py-2'>
-              <img src={pic4} className='h-full w-full rounded-[10px] object-cover' alt="Image 4" />
+              <img src={fam18} className='h-full w-full rounded-[10px] object-cover' alt="Image 4" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic6} className='h-full w-full rounded-[10px] object-cover' alt="Image 6" />
+              <img src={fam17} className='h-full w-full rounded-[10px] object-cover' alt="Image 6" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic9} className='h-full w-full rounded-[10px] object-cover' alt="Image 9" />
+              <img src={fam20} className='h-full w-full rounded-[10px] object-cover' alt="Image 9" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic3} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
+              <img src={fam19} className='h-full w-full rounded-[10px] object-cover' alt="Image 3" />
             </li>
           </ul>
         </div>
@@ -133,10 +132,10 @@ const ScrollingBackground = () => {
               <img src={fam14} className='h-full w-full rounded-[10px] object-cover' alt="Image 4" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic7} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
+              <img src={fam15} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic5} className='h-full w-full rounded-[10px] object-cover' alt="Image 5" />
+              <img src={fam16} className='h-full w-full rounded-[10px] object-cover' alt="Image 5" />
             </li>
             {/* 복제된 요소들 (무한 스크롤용) */}
             <li className='h-[30%] py-2'>
@@ -146,10 +145,10 @@ const ScrollingBackground = () => {
               <img src={fam14} className='h-full w-full rounded-[10px] object-cover' alt="Image 4" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic7} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
+              <img src={fam15} className='h-full w-full rounded-[10px] object-cover' alt="Image 7" />
             </li>
             <li className='h-[30%] py-2'>
-              <img src={pic5} className='h-full w-full rounded-[10px] object-cover' alt="Image 5" />
+              <img src={fam16} className='h-full w-full rounded-[10px] object-cover' alt="Image 5" />
             </li>
           </ul>
         </div>
