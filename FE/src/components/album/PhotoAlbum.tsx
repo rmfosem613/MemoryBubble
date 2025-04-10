@@ -282,6 +282,14 @@ function PhotoAlbum() {
     return true; // 모달 닫기
   };
 
+  // 앨범 수정 모달 닫힐 때 필드 초기화하는 함수 추가
+  const handleEditAlbumModalClose = () => {
+    // 모달이 닫힐 때 입력 필드를 기존 값으로 초기화
+    setNewAlbumName('');
+    setNewAlbumContent(albumContent);
+    editAlbumModal.close();
+  };
+
   const handleChangeThumnailWrapper = () => {
     handleChangeThumnail();
     showAlert('썸네일이 변경되었습니다.', 'green');
@@ -531,7 +539,7 @@ function PhotoAlbum() {
       {/* 앨범명 수정 모달 */}
       <Modal
         isOpen={editAlbumModal.isOpen}
-        onClose={editAlbumModal.close}
+        onClose={handleEditAlbumModalClose}
         title="앨범 정보 수정"
         confirmButtonText="저장하기"
         cancelButtonText="취소하기"
