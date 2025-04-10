@@ -143,6 +143,14 @@ public class AlbumService {
         return albumRepository.findById(id).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
     }
 
+    public Album getBasicAlbum(Long familyId) {
+        return albumRepository.findFirstByFamilyIdOrderByCreatedAtAsc(familyId).orElseThrow(()->new AlbumException(ALBUM_NOT_FOUND));
+    }
+
+    public Integer getPhotoLength(Long albumId) {
+        return photoRepository.countByAlbumId(albumId);
+    }
+
     private AlbumDto convertToDto(Album album) {
         return AlbumDto.builder()
                 .albumId(album.getId())

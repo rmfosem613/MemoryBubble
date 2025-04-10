@@ -9,6 +9,7 @@ import com.ssafy.memorybubble.api.file.service.FileService;
 import com.ssafy.memorybubble.api.user.dto.UserInfoDto;
 import com.ssafy.memorybubble.api.user.service.UserService;
 import com.ssafy.memorybubble.common.util.Validator;
+import com.ssafy.memorybubble.domain.Album;
 import com.ssafy.memorybubble.domain.Family;
 import com.ssafy.memorybubble.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -174,6 +175,13 @@ public class FamilyService {
             presignedUrl = fileService.getUploadPresignedUrl(key);
 
             family.updateFamilyNameAndThumbnail(request.getFamilyName(), key);
+
+            // 추억 보관함의 썸네일이 없으면 업데이트
+            Album album = albumService.getBasicAlbum(family.getId());
+            if(albumService.getPhotoLength(album.getId())==0) {
+                album.updateThumbnail(key);
+            }
+
         } else {
             family.updateFamilyName(request.getFamilyName());
         }
