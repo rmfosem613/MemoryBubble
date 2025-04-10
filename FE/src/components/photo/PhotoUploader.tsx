@@ -696,6 +696,14 @@ const PhotoUploader = ({
           </div>
         </div>
 
+        {isUploadingPhotos && (
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm text-red-200 font-medium">
+              업로드 진행중...
+            </span>
+          </div>
+        )}
+
         {/* 앨범 선택 컴포넌트 */}
         {albumSelectComponent}
 
