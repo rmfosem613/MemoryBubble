@@ -133,6 +133,9 @@ function FontDownload({ fontId }: FontDownloadProps) {
 
   return (
     <div className="container">
+      {alertState && (
+        <Alert message={alertState.message} color={alertState.color} />
+      )}
       <div className="flex items-baseline justify-between mb-3">
         <Title text="나의 손글씨" />
         <p className="pt-1 pl-2 text-gray-600 text-subtitle-1-lg font-p-500">
@@ -168,10 +171,6 @@ function FontDownload({ fontId }: FontDownloadProps) {
         onDeleteSuccess={handleDeleteSuccess}
         onDeleteError={handleDeleteError}
       />
-
-      {alertState && (
-        <Alert message={alertState.message} color={alertState.color} />
-      )}
     </div>
   );
 }
