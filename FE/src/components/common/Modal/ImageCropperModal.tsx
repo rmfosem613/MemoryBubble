@@ -54,6 +54,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   });
   const [completedCrop, setCompletedCrop] = useState<PercentCrop | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [imgWidth, setImgWidth] = useState(0);
   const [imgHeight, setImgHeight] = useState(0);
   const [isCropComplete, setIsCropComplete] = useState(false);
@@ -93,6 +94,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       const url = URL.createObjectURL(currentImageFile);
       setPreviewUrl(url);
       setIsCropComplete(false);
+      setIsImageLoading(true);
 
       return () => {
         URL.revokeObjectURL(url);
@@ -127,6 +129,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     const { width, height } = e.currentTarget;
     setImgWidth(width);
     setImgHeight(height);
+    setIsImageLoading(false);
 
     setSelectedRatio("4:3");
     const aspect = getAspectValue();
@@ -447,8 +450,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         cancelButtonText={cancelButtonText}
         onConfirm={handleApplyCrop}
         onCancel={handleCancelAll}
-        isConfirmDisabled={isLoading}
-        isCancelDisabled={isLoading}
+        isConfirmDisabled={isLoading || isImageLoading}
+        isCancelDisabled={isLoading || isImageLoading}
       >
         {renderModalContent()}
       </Modal>
