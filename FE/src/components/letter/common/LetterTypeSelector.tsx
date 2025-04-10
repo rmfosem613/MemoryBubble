@@ -1,18 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLetterStore } from '@/stores/useLetterStore';
+import Modal from '@/components/common/Modal/Modal';
 import Alert from '@/components/common/Alert';
 
 function LetterTypeSelector() {
-  const { letterType, setLetterType, cassetteData } = useLetterStore();
+  const {
+    letterType,
+    setLetterType,
+    cassetteData,
+    updateCassetteData,
+    setTextContent,
+  } = useLetterStore();
   const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertColor, setAlertColor] = useState("red");
-  const [pendingType, setPendingType] = useState<'TEXT' | 'AUDIO' | null>(null);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertColor, setAlertColor] = useState('red');
+  // const [pendingType, setPendingType] = useState<'TEXT' | 'AUDIO' | null>(null);
+
+  // 모달 관련 상태 추가
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalAction, setModalAction] = useState<
+    'TEXT_FROM_AUDIO' | 'AUDIO_FROM_TEXT' | null
+  >(null);
 
   const { textContent } = useLetterStore();
 
   // 알림 메시지 표시
-  const showAlertMessage = (message: string, color: string = "red") => {
+  const showAlertMessage = (message: string, color: string = 'red') => {
     setAlertMessage(message);
     setAlertColor(color);
     setShowAlert(true);
@@ -25,16 +39,22 @@ function LetterTypeSelector() {
   // 타입 전환 핸들러
   const handleTypeChange = (type: 'TEXT' | 'AUDIO') => {
     // 현재 선택된 타입과 같은 경우 무시
+    if (letterType === type) return;
+
     if (letterType === 'AUDIO' && type === 'TEXT') {
       // 녹음 중일 때는 타입 변경 막기
       if (cassetteData.isRecording) {
-        showAlertMessage('녹음이 진행 중입니다. 녹음을 중지한 후 변경할 수 있습니다.', 'red');
+        showAlertMessage(
+          '녹음이 진행 중입니다. 녹음을 중지한 후 변경할 수 있습니다.',
+          'red',
+        );
         return; // 타입 변경 중단
       }
-      // 녹음된 내용만 있는 경우
+      // 녹음된 내용만 있는 경우 - 모달 표시로 변경
       else if (cassetteData.isRecorded) {
-        showAlertMessage('보내지 않은 카세트 편지가 있습니다. 녹음 상태를 초기화해 주세요.', 'red');
-        setPendingType(type);
+        setModalMessage('녹음 음성이 있습니다. 이동하면 내용이 사라집니다.');
+        setModalAction('TEXT_FROM_AUDIO');
+        setIsModalOpen(true);
         return;
       }
     }
@@ -42,37 +62,59 @@ function LetterTypeSelector() {
     if (letterType === 'TEXT' && type === 'AUDIO') {
       // 텍스트 편지에 내용이 있는지 확인
       if (textContent && textContent.trim() !== '') {
-        showAlertMessage('작성 중이던 편지가 있습니다. 내용을 모두 지우고 이동할 수 있습니다.', 'red');
-        setPendingType(type);
+        setModalMessage(
+          '작성 중이던 편지가 있습니다. 이동하면 내용이 사라집니다.',
+        );
+        setModalAction('AUDIO_FROM_TEXT');
+        setIsModalOpen(true);
         return;
       }
     }
-    setLetterType(type);
 
+    // 제약 조건이 없는 경우 바로 타입 변경
+    setLetterType(type);
+  };
+
+  // 모달 확인 버튼 핸들러
+  const handleModalConfirm = () => {
+    if (modalAction === 'TEXT_FROM_AUDIO') {
+      // 녹음 내용 초기화
+      updateCassetteData({
+        isRecorded: false,
+        isRecording: false,
+        recordingUrl: null,
+        recordingDuration: 0,
+      });
+
+      // 텍스트 편지로 변경
+      setLetterType('TEXT');
+    } else if (modalAction === 'AUDIO_FROM_TEXT') {
+      // 텍스트 내용 초기화
+      setTextContent('');
+      setLetterType('AUDIO');
+    }
+
+    // 모달 닫기
+    setIsModalOpen(false);
+    setModalAction(null);
+
+    return true; // 모달을 닫습니다
   };
 
   return (
     <>
-      {showAlert && (
-        <Alert
-          message={alertMessage}
-          color={alertColor}
-          showButtons={true}
-          confirmButton={() => {
-            // 확인 버튼 처리 - 타입 변경
-            if (pendingType) {
-              setLetterType(pendingType);
-              setPendingType(null);
-            }
-            setShowAlert(false);
-          }}
-          cancelButton={() => {
-            // 취소 버튼 처리 - 타입 변경 취소
-            setPendingType(null);
-            setShowAlert(false);
-          }}
-        />
-      )}
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+
+      {/* 모달 컴포넌트 추가 */}
+      <Modal
+        isOpen={isModalOpen}
+        title="편지 타입 변경"
+        confirmButtonText="확인"
+        cancelButtonText="취소"
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleModalConfirm}>
+        <p>{modalMessage}</p>
+      </Modal>
 
       <div className="border-2 border-gray-300 h-[46px] rounded-[8px] grid grid-cols-2">
         <div className="flex p-1" onClick={() => handleTypeChange('TEXT')}>
