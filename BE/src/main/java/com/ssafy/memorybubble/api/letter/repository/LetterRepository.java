@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface LetterRepository extends JpaRepository<Letter, Long> {
     // List<Letter> findByReceiverId(Long receiverId);
-    @Query("SELECT l from Letter l JOIN FETCH l.sender WHERE l.receiver.id = :receiverId ORDER BY l.createdAt")
+    @Query("SELECT l from Letter l JOIN FETCH l.sender WHERE l.receiver.id = :receiverId ORDER BY l.createdAt DESC")
     List<Letter> findByReceiverIdWithSender(@Param("receiverId") Long receiverId);
     boolean existsByReceiverIdAndIsReadFalse(Long receiverId);
 }
