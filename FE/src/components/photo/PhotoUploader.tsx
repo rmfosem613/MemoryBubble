@@ -385,7 +385,7 @@ const PhotoUploader = ({
     if (updatedFiles.length === 0) {
       showAlertMessage("모든 이미지가 취소되었습니다.", "red");
     } else if (updatedFiles.length < selectedFiles.length) {
-      showAlertMessage(`처리되지 않은 이미지가 취소되었습니다. (${updatedFiles.length}개 남음)`, "red");
+      showAlertMessage(`처리되지 않은 이미지가 취소되었습니다.`, "red");
     }
   }
 
