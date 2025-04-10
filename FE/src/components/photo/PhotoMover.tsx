@@ -7,6 +7,7 @@ import Alert from "@/components/common/Alert";
 interface Album {
   id: number;
   title: string;
+  photoCount: number;
 }
 
 interface PhotoMoverProps {
@@ -144,7 +145,7 @@ function PhotoMover({
             앨범 선택하기
           </p>
           <DropDown
-            albums={albums}
+            albums={albums.filter(album => album.photoCount + photoIds.length <= 30)}
             currentAlbumId={sourceAlbumId || undefined}
             onSelectAlbum={handleTargetAlbumSelect}
             placeholder="앨범을 선택해주세요"

@@ -26,7 +26,7 @@ export const usePhotoAlbum = () => {
   // 추가: 현재 사진의 메시지 데이터를 저장할 상태
   const [photoMessages, setPhotoMessages] = useState<any[]>([]);
 
-  const [allAlbums, setAllAlbums] = useState<{ id: number; title: string }[]>(
+  const [allAlbums, setAllAlbums] = useState<{ id: number; title: string, photoCount: number }[]>(
     [],
   );
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
@@ -111,6 +111,7 @@ export const usePhotoAlbum = () => {
         const formattedAlbums = response.data.map((album: any) => ({
           id: album.albumId,
           title: album.albumName,
+          photoCount: album.photoLength,
         }));
 
         console.log('변환된 앨범 데이터:', formattedAlbums);
