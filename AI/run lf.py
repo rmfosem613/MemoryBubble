@@ -1,23 +1,38 @@
-import torch
 import json
-import random
-import os
-from sconf import Config
-from collections import defaultdict
 from pathlib import Path
 from PIL import Image
+from itertools import chain
+
+import torch
+from sconf import Config
 from torchvision import transforms
+
+transform = transforms.Compose([
+    transforms.Resize((128, 128)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.5], [0.5])
+])
 import pdb
+from collections import defaultdict
+from base.dataset import read_font, render
+from base.utils import save_tensor_to_image, load_reference
+from LF.models import Generator
+from inference import infer_LF
 
-
-from DM.models import Generator
-from inference import infer_DM
+from LF.models import Generator
+from inference import infer_LF
 
 def load_reference(data_dir, extension, ref_chars):
-    key_dir_dict, key_ref_dict = load_img_data(data_dir, char_filter=ref_chars, extension=extension)
-    print(ref_chars)
-    def load_img(key, char):
-        return Image.open(str(key_dir_dict[key][char] / f"{char}.{extension}"))
+    if extension == "ttf":
+        key_font_dict, key_ref_dict = load_ttf_data(data_dir, char_filter=ref_chars, extension=extension)
+
+        def load_img(key, char):
+            return render(key_font_dict[key], char)
+    else:
+        key_dir_dict, key_ref_dict = load_img_data(data_dir, char_filter=ref_chars, extension=extension)
+        print(ref_chars)
+        def load_img(key, char):
+            return Image.open(str(key_dir_dict[key][char] / f"{char}.{extension}"))
 
     return key_ref_dict, load_img
 
@@ -83,23 +98,37 @@ def load_img_data_from_single_dir(data_dir, char_filter=None, extension="png", n
 
 def infer_all_char():
 
-    weight_path = "result/dm/checkpoints/last.pth"  
-    decomposition = "data/kor/decomposition_DM.json"
-    n_heads = 3
-    n_comps = 68
+    weight_path = "result/lf2-20/checkpoints/200000.pth" 
+    # weight_path = "result/lf2/checkpoints/100000.pth" 
+    emb_dim = 8
+    decomposition = "data/kor/decomposition.json"  #{가:[ㄱ,ㅏ],...}
+    primals = "data/kor/primals.json"  # ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ',  
+                                       # 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ']
 
-    cfg = Config("cfgs/DM/default.yaml")
+
     decomposition = json.load(open(decomposition))
-    
-    gen = Generator(n_heads=n_heads, n_comps=n_comps).cuda().eval()
+    primals = json.load(open(primals))
+    n_comps = len(primals)
 
+    def decompose_to_ids(char):
+        dec = decomposition[char]
+        comp_ids = [primals.index(d) for d in dec]
+        return comp_ids
+
+    cfg = Config("cfgs/LF/p2/default.yaml")
+    gen = Generator(n_comps=n_comps, emb_dim=emb_dim).cuda().eval()
+
+    # add_safe_globals([ScalarFloat, CommentedSeq])
     weight = torch.load(weight_path, weights_only=False)
-    gen.load_state_dict(weight["generator_ema"])
+    if "generator_ema" in weight:
+        weight = weight["generator_ema"]
+    gen.load_state_dict(weight)
 
     ref_path = "./dataset/user"
     extension = "png"
     # ref_chars = "값같곬곶깎넋늪닫닭닻됩뗌략몃밟볘뺐뽙솩쐐앉않얘얾엌옳읊죨쮜춰츌퀭틔핀핥훟"    # 36자
     ref_chars = "값같곬곶깎꽃넋녘늪닫닭닻됩뗌략릎많몃밝밟볘뺐뽙삶섧솩쌓쐐앉얹않앓얘얾엌옳읊죨쮜쯢춰츌퀭틔핀핥훑훟"  # 48자
+    # ref_chars = "값릎쯢훑"    # 4자
     ref_dict, load_img = load_reference(ref_path, extension, ref_chars)
 
     print("ref_dict 내용:", ref_dict)
@@ -112,17 +141,13 @@ def infer_all_char():
         korean_chars += chr(code)
 
     save_dir = Path("./model_output")
+    source_path = "data/kor/source.ttf"
+    source_ext = "ttf"
     batch_size = 16
     
-
-    infer_DM(gen, save_dir, korean_chars, ref_dict, load_img, decomposition, batch_size)
-
-
-    files = []
-    for filename in os.listdir(save_dir):
-        files.append(filename)
-    
-    print(f"{save_dir}에 {len(files)} 파일 저장")
+    # pdb.set_trace()
+    infer_LF(gen, save_dir, source_path, source_ext, korean_chars, ref_dict, load_img,
+         decomposition, primals, batch_size)
 
 
 if __name__ == "__main__":
