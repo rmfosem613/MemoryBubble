@@ -15,8 +15,9 @@ import java.time.LocalDate;
 @Builder
 public class LetterRequest {
     @NotNull Type type;
-    @Size(max = 400) String content;
+    @Size(max = 1200) String content;
     LocalDate openAt;
     @NotBlank String backgroundColor;
     @NotNull Long receiverId;
+    Long duration;
 }

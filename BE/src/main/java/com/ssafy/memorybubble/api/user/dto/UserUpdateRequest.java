@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @Getter
-public class UserRequest {
+public class UserUpdateRequest {
     LocalDate birth;
     Gender gender;
     String name;

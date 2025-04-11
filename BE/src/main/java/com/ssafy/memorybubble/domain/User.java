@@ -36,10 +36,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @ColumnDefault("true")
-    @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    private Boolean active;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -56,7 +52,7 @@ public class User {
     }
 
     @Builder
-    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Boolean active, Role role) {
+    public User(Family family, String email, String name, String profile, String phoneNumber, Gender gender, LocalDate birth, Role role) {
         this.family = family;
         this.email = email;
         this.name = name;
@@ -64,7 +60,6 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.gender = gender;
         this.birth = birth;
-        this.active = active;
         this.role = role;
     }
 }

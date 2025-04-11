@@ -69,6 +69,7 @@ public class LetterService {
                 .openAt(request.getOpenAt())
                 .sender(sender)
                 .receiver(receiver)
+                .duration(request.getDuration())
                 .build();
 
         letterRepository.save(letter);
@@ -154,6 +155,7 @@ public class LetterService {
                 .openAt(letter.getOpenAt())
                 .backgroundColor(letter.getBackgroundColor())
                 .content(content)
+                .duration(letter.getDuration())
                 .build();
     }
 }

@@ -28,7 +28,8 @@ public class Letter {
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    @Column(name = "letter_content", nullable = false, length = 1610)
+    @Column(name = "letter_content", nullable = false, columnDefinition = "TEXT")
+    @Lob
     private String content;
 
     @Enumerated(EnumType.STRING)
@@ -49,12 +50,14 @@ public class Letter {
     @Column(length = 30)
     private String backgroundColor;
 
+    private Long duration;
+
     public void updateIsRead(Boolean isRead) {
         this.isRead = isRead;
     }
 
     @Builder
-    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDate openAt, Boolean isRead, String backgroundColor) {
+    public Letter(User receiver, User sender, String content, Type type, LocalDateTime createdAt, LocalDate openAt, Boolean isRead, String backgroundColor, Long duration) {
         this.receiver = receiver;
         this.sender = sender;
         this.content = content;
@@ -63,6 +66,7 @@ public class Letter {
         this.openAt = openAt;
         this.isRead = isRead;
         this.backgroundColor = backgroundColor;
+        this.duration = duration;
     }
 
     @PrePersist

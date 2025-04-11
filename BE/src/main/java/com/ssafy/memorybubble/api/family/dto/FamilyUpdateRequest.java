@@ -9,7 +9,8 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class FamilyRequest {
+public class FamilyUpdateRequest {
     @NotBlank @Size(min = 1, max = 10, message = "그룹 이름은 1자 이상 10자 이하여야 합니다")
     String familyName;
+    Boolean isThumbnailUpdate;
 }
