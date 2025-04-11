@@ -20,8 +20,8 @@ export const FONT_STEP_CONTENTS: Record<number, StepContent> = {
     title: '나의 손글씨 파일 업로드',
     content:
       '다운받은 PDF 파일에 나의 손글씨를 작성하여 업로드해주세요. 손글씨 작성 시 깔끔하게 작성해주세요.\n\n' +
-      'PDF 파일은 여러 번 다운로드 받을 수 있습니다.\n\n' +
-      '작성이 완료되었다면 다운받은 png 파일명을 변경하지 말고 그대로 업로드 해 주시길 바랍니다. \n',
+      '작성이 완료되었다면 다운받은 png 파일명을 변경하지 말고 그대로 업로드 해 주시길 바랍니다. \n' +
+      'PNG, JPG 파일도 업로드가 가능합니다. \n',
   },
   3: {
     title: '폰트 정보 입력',
@@ -34,7 +34,7 @@ export const FONT_STEP_CONTENTS: Record<number, StepContent> = {
       '• 욕설, 차별, 혐오, 비방 등의 표현은 사용할 수 없습니다.\n' +
       '• 법적 문제 발생 시 책임은 사용자에게 있습니다.',
   },
-};  
+};
 
 // 기본 내용
 export const DEFAULT_STEP_CONTENT: StepContent = {
