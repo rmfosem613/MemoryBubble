@@ -46,7 +46,7 @@ function BasicPhotoAlbumPage() {
   const [isThumbnailMode, setIsThumbnailMode] = useState(false);
 
   // 앨범 이동 관련 상태
-  const [albums, setAlbums] = useState<{ id: number; title: string }[]>([]);
+  const [albums, setAlbums] = useState<{ id: number; title: string, photoCount: number }[]>([]);
 
   // 확대 사진 상태
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
@@ -87,7 +87,8 @@ function BasicPhotoAlbumPage() {
         const albumsData = await fetchAlbums();
         const formattedAlbums = albumsData.map(album => ({
           id: album.albumId,
-          title: album.albumName
+          title: album.albumName,
+          photoCount: album.photoLength
         }));
         setAlbums(formattedAlbums);
       } catch (error) {
@@ -232,7 +233,7 @@ function BasicPhotoAlbumPage() {
   // 앨범 이동 모달 열기
   const openMoveAlbumModal = () => {
     if (selectedPhotos.length === 0) {
-      showAlertMessage("이동할 사진을 먼저 선택해주세요.");
+      showAlertMessage("이동할 사진을 먼저 선택해주세요.", "red");
       return;
     }
     moveAlbumModal.open();

@@ -5,7 +5,7 @@ import useUserApi from '@/apis/useUserApi';
 // 커스텀 알림 타입 정의
 interface CustomAlert {
   message: string;
-  color: 'red' | 'green';
+  color: 'red' | 'green' | 'gray' | 'blue';
   isVisible: boolean;
 }
 
@@ -15,7 +15,7 @@ const kakaoConfig = {
 };
 
 const useUserInfo = () => {
-  const { user } = useUserStore();
+  const { user, resetUser } = useUserStore();
   const { getFamilyInviteCode, logout } = useUserApi();
 
   // 드롭다운 관련 상태
@@ -32,7 +32,7 @@ const useUserInfo = () => {
 
   // 커스텀 알림 표시 함수
   const showCustomAlert = useCallback(
-    (message: string, color: 'red' | 'green') => {
+    (message: string, color: 'red' | 'green' | 'gray' | 'blue') => {
       setCustomAlert({
         message,
         color,
@@ -93,17 +93,15 @@ const useUserInfo = () => {
         // 토큰 삭제 및 페이지 이동 처리
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        useUserStore.getState().resetUser();
-        //window.location.href = '/kakao';
+        resetUser();
       }
     } catch (error) {
       // 오류가 발생해도 토큰 삭제 및 페이지 이동 처리
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      useUserStore.getState().resetUser();
-      //window.location.href = '/kakao';
+      resetUser();
     }
-  }, [logout]);
+  }, [logout, resetUser]);
 
   return {
     // 상태

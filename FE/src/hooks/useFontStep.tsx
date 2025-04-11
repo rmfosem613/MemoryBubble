@@ -7,7 +7,7 @@ export type Step = {
 };
 
 export const FONT_STEP: Step[] = [
-  { id: 1, title: '준비하기', description: '준비물과 진행단계를 설명드려요' },
+  { id: 1, title: '준비하기', description: '템플릿을 다운받아 주세요' },
   {
     id: 2,
     title: '나의 손글씨 업로드',

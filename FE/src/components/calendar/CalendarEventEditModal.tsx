@@ -15,16 +15,18 @@ interface CalendarEventEditModalProps {
     endDate?: string;
     albumId?: number | null;
   } | null;
+  showAlert: (message: string, color: string) => void;
 }
 
 function CalendarEventEditModal({
   isOpen,
   close,
   event,
+  showAlert,
 }: CalendarEventEditModalProps) {
   if (!event) return null;
 
-  const { updateEvent } = useCalendarEventStore();
+  const { updateEvent, startYear, endYear } = useCalendarEventStore();
   const { user } = useUserStore();
   const [scheduleContent, setScheduleContent] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -49,19 +51,14 @@ function CalendarEventEditModal({
   const handleSubmit = async () => {
     if (!event) return false;
 
-    const newErrors = { title: '', date: '' };
-    // 일정 유효성 검사
-    if (scheduleContent.trim() === '') {
-      newErrors.title = '일정을 입력해주세요.';
+    // 에러 메시지가 있는지 확인
+    if (errors.title || errors.date) {
+      return false; // 에러가 있으면 제출 중단
     }
-    // 날짜 유효성 검사
-    if (!startDate || !endDate) {
-      newErrors.date = '날짜를 입력(선택)해주세요.';
-    }
-    setErrors(newErrors);
 
-    // 에러 메시지가 하나라도 있으면 false 반환
-    if (newErrors.title || newErrors.date) {
+    // 빈값 확인 (최종 확인)
+    if (!scheduleContent.trim()) {
+      setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
       return false;
     }
 
@@ -86,22 +83,50 @@ function CalendarEventEditModal({
       if (response.status === 200) {
         // 스토어 상태 업데이트
         updateEvent(event.scheduleId, response.data);
+        showAlert('일정이 수정되었습니다.', 'green');
         return true;
       }
     } catch (error) {
       console.error('일정 수정 실패:', error);
-      alert('일정 수정에 실패했습니다. 다시 시도해주세요.');
+      showAlert('일정 수정에 실패했습니다. 다시 시도해주세요.', 'red');
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 시작 날짜 변경
+  // 일정 내용 변경 처리 함수 추가
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    // 50자 이하일 때만 상태 업데이트
+    if (newValue.length <= 50) {
+      setScheduleContent(newValue);
+      setErrors((prev) => ({ ...prev, title: '' }));
+    }
+  };
+
+  // 일정 내용 blur 처리 함수 추가
+  const handleContentBlur = () => {
+    // 양쪽 공백 제거하고 바로 상태 업데이트
+    const trimmedContent = scheduleContent.trim();
+    setScheduleContent(trimmedContent);
+
+    // 빈값 유효성 검사
+    if (!trimmedContent) {
+      setErrors((prev) => ({ ...prev, title: '일정을 입력해주세요.' }));
+    }
+  };
+
+  // 시작 날짜 변경 수정
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
     setStartDate(newStartDate);
-    setErrors((prev) => ({ ...prev, date: '' })); // 날짜 에러 메시지 초기화
+
+    // 시작일이 비어있는지 확인
+    if (!newStartDate || !endDate) {
+      setErrors((prev) => ({ ...prev, date: '날짜를 선택해주세요.' }));
+      return;
+    }
 
     // 시작일이 종료일보다 나중이면 종료일을 시작일과 같게 설정
     const start = new Date(newStartDate + 'T00:00:00');
@@ -109,13 +134,21 @@ function CalendarEventEditModal({
     if (start > end) {
       setEndDate(newStartDate);
     }
+
+    // 에러가 없으면 에러 메시지 초기화
+    setErrors((prev) => ({ ...prev, date: '' }));
   };
 
-  // 종료 날짜 변경
+  // 종료 날짜 변경 수정
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEndDate = e.target.value;
     setEndDate(newEndDate);
-    setErrors((prev) => ({ ...prev, date: '' })); // 날짜 에러 메시지 초기화
+
+    // 종료일이 비어있는지 확인
+    if (!startDate || !newEndDate) {
+      setErrors((prev) => ({ ...prev, date: '날짜를 선택해주세요.' }));
+      return;
+    }
 
     // 종료일이 시작일보다 이전이면 시작일을 종료일과 같게 설정
     const start = new Date(startDate + 'T00:00:00');
@@ -123,9 +156,10 @@ function CalendarEventEditModal({
     if (end < start) {
       setStartDate(newEndDate);
     }
-  };
 
-  if (!event) return null;
+    // 에러가 없으면 에러 메시지 초기화
+    setErrors((prev) => ({ ...prev, date: '' }));
+  };
 
   return (
     <Modal
@@ -154,9 +188,12 @@ function CalendarEventEditModal({
             value={scheduleContent}
             maxLength={50}
             rows={2}
-            onChange={(e) => {
-              setErrors((prev) => ({ ...prev, title: '' }));
-              setScheduleContent(e.target.value);
+            onChange={handleContentChange}
+            onBlur={handleContentBlur}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault(); // 엔터 키 기본 동작 방지
+              }
             }}
           />
           {errors.title && (
@@ -165,7 +202,12 @@ function CalendarEventEditModal({
         </div>
         {/* 기간 */}
         <div className="flex flex-col gap-1 mb-6">
-          <label htmlFor="event-date">기간</label>
+          <label htmlFor="event-date">
+            기간{' '}
+            <span className="text-sm text-gray-500">
+              (날짜를 선택해주세요.)
+            </span>
+          </label>
           <div className="flex items-center gap-2">
             <input
               id="start-date"
@@ -173,6 +215,9 @@ function CalendarEventEditModal({
               className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full hover:cursor-pointer"
               value={startDate}
               onChange={handleStartDateChange}
+              min={`${startYear}-01-01`}
+              max={`${endYear}-12-31`}
+              onKeyDown={(e) => e.preventDefault()}
             />
             <span className="px-2">~</span>
             <input
@@ -181,6 +226,9 @@ function CalendarEventEditModal({
               className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full hover:cursor-pointer"
               value={endDate}
               onChange={handleEndDateChange}
+              min={`${startYear}-01-01`}
+              max={`${endYear}-12-31`}
+              onKeyDown={(e) => e.preventDefault()}
             />
           </div>
           {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}

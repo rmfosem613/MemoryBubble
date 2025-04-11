@@ -9,7 +9,7 @@ interface AuthProviderProps {
 }
 
 // 인증이 필요하지 않은 공개 경로 목록
-const publicRoutes = ["/login", "/oauth/callback", "/kakao"] 
+const publicRoutes = ["/login", "/oauth/callback", "/introduce"] 
 
 function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true) 
@@ -66,7 +66,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         // 오류 발생 시 토큰 삭제 후 로그인 페이지로 이동
         localStorage.removeItem("accessToken") 
         localStorage.removeItem("refreshToken") 
-        navigate("/kakao") 
+        navigate("/introduce") 
       } finally {
         setIsLoading(false) 
       }
@@ -93,8 +93,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       navigate("/enter")  // 가족 정보 입력 페이지로 이동
     } else if (!birth && location.pathname !== "/join") {
       navigate("/join")  // 추가 회원 가입 페이지로 이동
-    } else if (location.pathname === "/kakao") {
-      navigate("/")  // 로그인 후 메인 페이지로 이동
+    } else if (location.pathname === "/introduce") {
+      navigate("/main")  // 로그인 후 메인 페이지로 이동
     }
   } 
 

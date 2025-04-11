@@ -27,7 +27,7 @@
 }
 
 .winter .single-day-event {
-  @apply !bg-winter-100 !border-winter-200;
+  @apply !bg-winter-200 lg:!bg-winter-100 lg:!border-winter-200;
 }
 
 .winter .fc-daygrid-more-link {
@@ -61,7 +61,7 @@
 }
 
 .spring .single-day-event {
-  @apply !bg-spring-100 !border-spring-200;
+  @apply !bg-spring-200 lg:!bg-spring-100 lg:!border-spring-200;
 }
 
 .spring .fc-daygrid-more-link {
@@ -95,7 +95,7 @@
 }
 
 .summer .single-day-event {
-  @apply !bg-summer-100 !border-summer-200;
+  @apply !bg-summer-200 lg:!bg-summer-100 lg:!border-summer-200;
 }
 
 .summer .fc-daygrid-more-link {
@@ -129,7 +129,7 @@
 }
 
 .autumn .single-day-event {
-  @apply !bg-autumn-100 !border-autumn-200;
+  @apply !bg-autumn-200 lg:!bg-autumn-100 lg:!border-autumn-200;
 }
 
 .autumn .fc-daygrid-more-link {
@@ -185,7 +185,7 @@
 }
 
 .fc-daygrid-day-frame {
-  @apply lg:!min-h-[105px] lg:!max-h-[105px];
+  @apply !cursor-pointer lg:!min-h-[105px] lg:!max-h-[105px];
 }
 
 /* 이전달 및 다음달 날짜 */
@@ -193,7 +193,7 @@
   @apply !bg-inherit;
 }
 .fc-day-disabled .fc-daygrid-day-frame {
-  @apply !border-none;
+  @apply !border-none !cursor-default;
 }
 
 /* 오늘 날짜 */

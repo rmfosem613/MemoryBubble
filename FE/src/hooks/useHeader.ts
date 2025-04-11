@@ -4,6 +4,11 @@ import useUserStore from '@/stores/useUserStore';
 import useUserApi from '@/apis/useUserApi';
 import { useHasCompleteProfile } from './useUserSatus';
 
+const kakaoConfig = {
+  client_id: import.meta.env.VITE_KAKAO_REST_API_KEY,
+  logout_redirect_uri: import.meta.env.VITE_KAKAO_LOGOUT_REDIRECT_URI,
+};
+
 const useHeader = () => {
   const { resetUser } = useUserStore();
   const { logout, checkUnreadLetter } = useUserApi();
@@ -67,11 +72,6 @@ const useHeader = () => {
     }
   }, [checkUnreadLetter, hasCompleteProfile, location.pathname]);
 
-  // 메인 경로인지 확인
-  const isMainPath = useCallback(() => {
-    return location.pathname === '/';
-  }, [location.pathname]);
-
   // 경로 일치하는지 확인
   const isActivePath = useCallback(
     (path: string) => {
@@ -82,22 +82,21 @@ const useHeader = () => {
 
   // 로그아웃 처리
   const handleLogout = useCallback(async () => {
+    window.location.href = `https://kauth.kakao.com/oauth/logout?client_id=${kakaoConfig.client_id}&logout_redirect_uri=${kakaoConfig.logout_redirect_uri}`;
     try {
-      // 로그아웃 API 호출
+      // 로컬 로그아웃 및 토큰 삭제 처리
       const response = await logout();
       if (response.status === 200) {
         // 토큰 삭제 및 페이지 이동 처리
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         resetUser();
-        window.location.href = '/kakao';
       }
     } catch (error) {
       // 오류가 발생해도 토큰 삭제 및 페이지 이동 처리
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       resetUser();
-      window.location.href = '/kakao';
     }
   }, [logout, resetUser]);
 
@@ -106,7 +105,6 @@ const useHeader = () => {
     menuRef,
     buttonRef,
     isUnread,
-    isMainPath,
     isActivePath,
     toggleMenu,
     closeMenu,

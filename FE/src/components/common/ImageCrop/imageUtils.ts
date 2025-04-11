@@ -280,3 +280,230 @@ export const uploadImageToS3 = async (
     return false;
   }
 };
+
+/**
+ * 이미지 파일을 다운샘플링하여 미리보기용 이미지와 메타데이터를 생성합니다.
+ * @param file 원본 이미지 파일
+ * @param maxWidth 최대 너비 (픽셀)
+ * @param maxHeight 최대 높이 (픽셀)
+ * @param quality JPEG 품질 (0-1)
+ * @returns 다운샘플링된 이미지 Blob과 메타데이터
+ */
+export const createDownsampledImage = (
+  file: File,
+  maxWidth: number = 800,
+  maxHeight: number = 600,
+  quality: number = 0.8
+): Promise<{
+  file: File;
+  blob: Blob;
+  width: number;
+  height: number;
+  preview: string;
+  originalFile: File;
+}> => {
+  return new Promise((resolve, reject) => {
+    // 파일 읽기
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+
+      img.onload = () => {
+        // 메모리 해제
+        URL.revokeObjectURL(img.src);
+
+        // 원본 크기 저장
+        const originalWidth = img.width;
+        const originalHeight = img.height;
+
+        // 새 크기 계산
+        let width = originalWidth;
+        let height = originalHeight;
+
+        // 최대 크기 초과 시 비율 유지하며 리사이징
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.floor(width * ratio);
+          height = Math.floor(height * ratio);
+        }
+
+        // 캔버스 생성
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          reject(new Error('캔버스 컨텍스트를 생성할 수 없습니다'));
+          return;
+        }
+
+        // 이미지 그리기
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // 이미지 생성 및 반환
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Blob을 생성할 수 없습니다'));
+            return;
+          }
+
+          // 미리보기 URL 생성
+          const previewUrl = URL.createObjectURL(blob);
+
+          // 다운샘플링된 파일 생성
+          const downsampledFile = new File(
+            [blob],
+            file.name,
+            { type: 'image/jpeg' } // 미리보기는 JPEG으로 통일
+          );
+
+          resolve({
+            file: downsampledFile,
+            blob,
+            width,
+            height,
+            preview: previewUrl,
+            originalFile: file
+          });
+        }, 'image/jpeg', quality);
+      };
+
+      img.onerror = () => {
+        reject(new Error('이미지 로드 실패'));
+      };
+
+      // 이미지 로드
+      img.src = e.target?.result as string;
+    };
+
+    reader.onerror = () => {
+      reject(new Error('파일 읽기 실패'));
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
+ * 원본 이미지에 크롭을 적용하고 업로드용으로 최적화합니다.
+ * @param originalFile 원본 파일
+ * @param previewWidth 미리보기 이미지 너비
+ * @param previewHeight 미리보기 이미지 높이
+ * @param cropData 크롭 데이터 (x, y, width, height)
+ * @param maxWidth 최대 출력 너비
+ * @param maxHeight 최대 출력 높이
+ * @param quality 출력 품질 (0-1)
+ * @returns 최적화된 크롭 이미지 File
+ */
+export const applyOriginalCrop = (
+  originalFile: File,
+  previewWidth: number,
+  previewHeight: number,
+  cropData: { x: number; y: number; width: number; height: number },
+  maxWidth: number = 1920,
+  maxHeight: number = 1080,
+  quality: number = 0.85
+): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const img = new Image();
+
+      img.onload = () => {
+        // 메모리 해제
+        URL.revokeObjectURL(img.src);
+
+        // 원본과 미리보기 크기 비율 계산
+        const scaleFactor = img.width / previewWidth;
+
+        // 원본 이미지 기준 크롭 영역 계산
+        const scaledCrop = {
+          x: cropData.x * scaleFactor,
+          y: cropData.y * scaleFactor,
+          width: cropData.width * scaleFactor,
+          height: cropData.height * scaleFactor
+        };
+
+        // 최종 출력 크기 계산
+        let finalWidth = scaledCrop.width;
+        let finalHeight = scaledCrop.height;
+
+        // 최대 크기 초과 시 비율 유지하며 리사이징
+        if (finalWidth > maxWidth || finalHeight > maxHeight) {
+          const ratio = Math.min(maxWidth / finalWidth, maxHeight / finalHeight);
+          finalWidth = Math.floor(finalWidth * ratio);
+          finalHeight = Math.floor(finalHeight * ratio);
+        }
+
+        // 캔버스 생성
+        const canvas = document.createElement('canvas');
+        canvas.width = finalWidth;
+        canvas.height = finalHeight;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          reject(new Error('캔버스 컨텍스트를 생성할 수 없습니다'));
+          return;
+        }
+
+        // 크롭 및 리사이징 적용
+        ctx.drawImage(
+          img,
+          scaledCrop.x,
+          scaledCrop.y,
+          scaledCrop.width,
+          scaledCrop.height,
+          0, 0,
+          finalWidth,
+          finalHeight
+        );
+
+        // 최종 이미지 생성
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Blob을 생성할 수 없습니다'));
+            return;
+          }
+
+          // 동일한 파일명 유지하고 타입만 변경
+          resolve(new File([blob], originalFile.name, {
+            type: originalFile.type // 원본 타입 유지 또는 'image/webp'로 변경 가능
+          }));
+        }, originalFile.type, quality);
+      };
+
+      img.onerror = () => {
+        reject(new Error('이미지 로드 실패'));
+      };
+
+      img.src = e.target?.result as string;
+    };
+
+    reader.onerror = () => {
+      reject(new Error('파일 읽기 실패'));
+    };
+
+    reader.readAsDataURL(originalFile);
+  });
+};
+
+/**
+ * 이미지 크롭 작업을 위한 메타데이터를 저장합니다.
+ * 미리보기 최적화 및 원본 크롭 작업에 필요한 정보를 관리합니다.
+ */
+export interface ImageProcessingMetadata {
+  originalFile: File;
+  previewFile: File;
+  previewUrl: string;
+  previewWidth: number;
+  previewHeight: number;
+  cropData?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  processedFile?: File;
+}

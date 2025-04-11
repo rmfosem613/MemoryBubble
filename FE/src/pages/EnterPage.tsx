@@ -1,45 +1,43 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useUserApi from '@/apis/useUserApi'
 import useUserStore from '@/stores/useUserStore'
 import Button from "@/components/common/Button/Button"
 import Alert from '@/components/common/Alert'
+
 function EnterPage() {
   const [inviteCode, setInviteCode] = useState('')
-  const [alert, setAlert] = useState<{ show: boolean, message: string, color: string }>({
-    show: false,
-    message: '',
-    color: 'red'
-  })
-  
+
   const navigate = useNavigate()
   const { verifyFamilyCode } = useUserApi()
   const { setUser } = useUserStore()
 
-  // alert가 표시된 후 3초 뒤에 자동으로 사라지게 함
-  useEffect(() => {
-    if (alert.show) {
-      const timer = setTimeout(() => {
-        setAlert({ ...alert, show: false });
-      }, 3000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [alert]);
+  // 알림 관련 상태
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("red");
+
+  // 알림 메시지 표시
+  const showAlertMessage = (message: string, color: string = "red") => {
+    setAlertMessage(message);
+    setAlertColor(color);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3500);
+  };
 
   // 그룹 가입하기 버튼 클릭 처리 및 페이지 이동
   const handleJoinClick = async () => {
     if (!inviteCode.trim()) {
+      showAlertMessage("초대코드를 입력해주세요.", "red");
       return;
     }
 
     // 중간에 공백이 있는지 검사
     if (inviteCode.includes(' ')) {
-      setAlert({
-        show: true,
-        message: '유효하지 않은 초대코드입니다.',
-        color: 'red'
-      })
+      showAlertMessage("유효하지 않은 초대코드입니다.", "red");
       return;
     }
 
@@ -53,11 +51,7 @@ function EnterPage() {
       }
     } catch (error: any) {
       console.error('초대 코드 검증 실패:', error)
-      setAlert({
-        show: true,
-        message: '유효하지 않은 초대코드입니다.',
-        color: 'red'
-      })
+      showAlertMessage("유효하지 않은 초대코드입니다.", "red");
     }
   }
 
@@ -67,6 +61,8 @@ function EnterPage() {
 
   return (
     <>
+      {showAlert && <Alert message={alertMessage} color={alertColor} />}
+
       <div className="container flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center w-full max-w-[550px] px-4 py-8">
           <h1 className="text-h2-lg font-p-700 mb-2">추억방울 만들기</h1>
@@ -93,7 +89,7 @@ function EnterPage() {
           </div>
         </div>
       </div>
-      {alert.show && <Alert message={alert.message} color={alert.color} />}
+
     </>
   )
 }

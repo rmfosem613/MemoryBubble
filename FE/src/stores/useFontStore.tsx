@@ -111,7 +111,7 @@ const useFontStore = create<FontState>((set, get) => ({
 
       // 1단계: 폰트 이름 정보만 포함하는 요청 보내기
       const fontData = {
-        fontName: fontNameKo,
+        fontName: fontNameKo.trim(),
       };
 
       // 첫 번째 API 요청 (폰트 정보 제출)

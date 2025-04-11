@@ -3,6 +3,7 @@ import LetterCard from '@/components/storage/LetterCard';
 import LetterAnimation from '@/components/storage/animation/LetterAnimation';
 import { LetterData } from '@/types/Letter';
 import apiClient from '@/apis/apiClient';
+import Alert from '../common/Alert';
 
 function ReceivedLetterContent() {
   const [letters, setLetters] = useState<LetterData[]>([]);
@@ -10,6 +11,9 @@ function ReceivedLetterContent() {
   const [isAnimationOpen, setIsAnimationOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>('');
 
   // API에서 편지 목록 가져오기
   const fetchLetters = async () => {
@@ -46,6 +50,28 @@ function ReceivedLetterContent() {
       setIsAnimationOpen(true);
     } catch (error) {
       console.error('편지 상세 정보 가져오기 실패:', error);
+
+      // 403 에러 처리
+      if (error.response && error.response.status === 403) {
+        // 해당 편지의 openAt 정보 활용
+        if (letter.openAt) {
+          const openAtDate = new Date(letter.openAt);
+          const currentDate = new Date();
+
+          if (openAtDate > currentDate) {
+            // 미래 날짜인 경우 알림 메시지 설정
+            setAlertMessage(
+              `이 편지는 ${openAtDate.toLocaleDateString()} 이후에 열람 가능합니다.`,
+            );
+            setShowAlert(true);
+
+            // 일정 시간 후 알림 닫기
+            setTimeout(() => {
+              setShowAlert(false);
+            }, 3500);
+          }
+        }
+      }
     }
   };
 
@@ -89,8 +115,9 @@ function ReceivedLetterContent() {
   // 편지가 있는 경우 표시할 내용
   return (
     <>
+      {showAlert && <Alert message={alertMessage} color="blue" />}
       <div className="p-6 h-full overflow-y-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 select-none">
           {letters.map((letter, index) => (
             <LetterCard
               key={index}

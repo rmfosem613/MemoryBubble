@@ -22,7 +22,7 @@ function LetterStoragePage() {
 
   return (
     <>
-      <div className="container mt-[17px]">
+      <div className="container pt-[17px] pb-4 h-screen flex flex-col">
         <Title text="편지보관함" />
 
         <div className='mt-[12px] flex justify-between'>
@@ -37,14 +37,14 @@ function LetterStoragePage() {
           </div>
         </div>
 
-        <div className='border-2 border-gray-300 h-[490px] rounded-[8px] mt-[3px]'>
+        <div className='border-2 border-gray-300 h-full min-h-[460px] rounded-[8px] mt-[3px]'>
           {storageType === 'new' ? <NewLetterContent /> : <ReceivedLetterContent />}
         </div>
 
       </div>
 
-      <img src={postBox} className='absolute bottom-0 ml-[110px] w-[120px]'/>
-      <img src={doll} className='absolute bottom-0 mr-[130px] right-0'/>
+      <img src={postBox} className='absolute bottom-0 ml-[110px] w-[120px] invisible lg:visible select-none'/>
+      <img src={doll} className='absolute bottom-0 mr-[130px] right-0 invisible lg:visible select-none'/>
     </>
   )
 }

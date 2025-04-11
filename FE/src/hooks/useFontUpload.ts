@@ -16,7 +16,7 @@ export interface FontFile {
 export interface AlertState {
   visible: boolean;
   message: string;
-  color: 'red' | 'green' | 'gray';
+  color: 'red' | 'green' | 'gray' | 'blue';
 }
 
 export const useFontUpload = (selectedRequest: FontRequest | null) => {
@@ -25,7 +25,7 @@ export const useFontUpload = (selectedRequest: FontRequest | null) => {
 
   // Alert 표시 함수
   const showAlert = useCallback(
-    (message: string, color: 'red' | 'green' | 'gray') => {
+    (message: string, color: 'red' | 'green' | 'gray' | 'blue') => {
       setAlertState({ visible: true, message, color });
 
       // 3초 후에 알림 숨기기

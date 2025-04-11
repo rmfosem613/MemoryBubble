@@ -23,7 +23,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         className="absolute z-50 bg-blue-500 text-white font-p-500 py-2 px-3 rounded-[8px] bottom-[10px] right-[10px]"
       >
         {/* 이미지 재업로드 */}
-        <Upload width={"20px"}/>
+        <Upload width={"20px"} />
       </button>
     </div>
   )
@@ -51,8 +51,8 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         onImageChange={onImageChange}
         initialImage={initialImage}
         initialPreviewUrl={initialPreviewUrl}
-        allowedAspectRatios={["4:3", "3:4", "1:1"]} // 그룹 이미지는 4:3, 3:4 비율 허용
-        defaultAspectRatio="4:3" // 초기 crop 비율
+        allowedAspectRatios={["1:1", "4:3", "3:4"]} // 그룹 이미지는 4:3, 3:4 비율 허용
+        defaultAspectRatio="1:1" // 초기 crop 비율
         minSize={100} // 최소 100KB
         maxSize={10}   // 최대 10MB
         imageQuality={1.0} // 최대 품질
@@ -60,7 +60,7 @@ function InputGroupPic({ onImageChange, initialImage = null, initialPreviewUrl =
         renderUploadBox={renderUploadBox}
         cropperClassName="top-[67px]" // 기존 top 위치 유지
         // 아래부터 이름 변경 가능
-        modalTitle="이미지 자르기" 
+        modalTitle="이미지 자르기"
         applyButtonText="적용"
         resetButtonText="초기화"
         cancelButtonText="취소"

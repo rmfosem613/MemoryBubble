@@ -9,6 +9,7 @@ export interface Photo {
   id: number;
   src: string;
   alt: string;
+  isThumbnail: boolean; // 썸네일 여부
 }
 
 export const usePhotoAlbum = () => {
@@ -25,14 +26,73 @@ export const usePhotoAlbum = () => {
   // 추가: 현재 사진의 메시지 데이터를 저장할 상태
   const [photoMessages, setPhotoMessages] = useState<any[]>([]);
 
-  const [allAlbums, setAllAlbums] = useState<{ id: number; title: string }[]>(
+  const [allAlbums, setAllAlbums] = useState<{ id: number; title: string, photoCount: number }[]>(
     [],
   );
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
 
+  const [loadingImages, setLoadingImages] = useState<Record<number, boolean>>(
+    {},
+  );
+
   const { id } = useParams();
   const { user } = useUserstore();
   const { familyFonts, isFamilyFontsLoaded, fetchFamilyFonts } = useFontStore();
+
+  const preloadImage = (src: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
+
+  const preloadAdjacentImages = async () => {
+    if (!photos || photos.length <= 1) return;
+
+    // 다음 이미지와 이전 이미지의 인덱스 계산
+    const prevIndex = currentIndex === 0 ? photos.length - 1 : currentIndex - 1;
+    const nextIndex = currentIndex === photos.length - 1 ? 0 : currentIndex + 1;
+
+    // 현재 이미지의 로딩 상태 설정
+    setLoadingImages((prev) => ({ ...prev, [currentIndex]: true }));
+
+    try {
+      // 다음 이미지와 이전 이미지 프리로딩 시작
+      const preloadPromises = [prevIndex, nextIndex].map((index) => {
+        if (photos[index]?.src) {
+          // src에 너비 파라미터 추가 (현재 렌더링 방식과 일치)
+          const imgSrc = photos[index].src + '&w=800';
+          return preloadImage(imgSrc).then(() => {
+            // 해당 이미지 로딩 완료 표시
+            setLoadingImages((prev) => ({ ...prev, [index]: false }));
+          });
+        }
+        return Promise.resolve();
+      });
+
+      // 병렬로 프리로딩 수행
+      await Promise.all(preloadPromises);
+    } catch (error) {
+      console.error('이미지 프리로딩 중 오류 발생:', error);
+    } finally {
+      // 현재 이미지 로딩 완료 표시
+      setLoadingImages((prev) => ({ ...prev, [currentIndex]: false }));
+    }
+  };
+
+  // currentIndex가 변경될 때마다 주변 이미지 프리로딩
+  useEffect(() => {
+    if (photos && photos.length > 0) {
+      preloadAdjacentImages();
+    }
+  }, [currentIndex, photos]);
+
+  // isImageLoading 함수 - 특정 인덱스의 이미지 로딩 상태 확인
+  const isImageLoading = (index: number): boolean => {
+    return loadingImages[index] === true;
+  };
 
   // 컴포넌트 마운트 시 가족 폰트 정보 미리 로드
   useEffect(() => {
@@ -51,6 +111,7 @@ export const usePhotoAlbum = () => {
         const formattedAlbums = response.data.map((album: any) => ({
           id: album.albumId,
           title: album.albumName,
+          photoCount: album.photoLength,
         }));
 
         console.log('변환된 앨범 데이터:', formattedAlbums);
@@ -88,10 +149,11 @@ export const usePhotoAlbum = () => {
         }
 
         // Photo 인터페이스에 맞게 데이터 변환
-        const formattedPhotos: Photo[] = photoList.map((photo: any) => ({
+        const formattedPhotos: Photo[] = photoList.map((photo) => ({
           id: photo.photoId,
           src: photo.photoUrl,
           alt: `앨범 사진 ${photo.photoId}`,
+          isThumbnail: photo.isThumbnail,
         }));
 
         setPhotos(formattedPhotos);
@@ -142,6 +204,7 @@ export const usePhotoAlbum = () => {
           id: photo.photoId,
           src: photo.photoUrl,
           alt: `앨범 사진 ${photo.photoId}`,
+          isThumbnail: photo.isThumbnail,
         }));
 
         // 사진 목록 업데이트
@@ -171,8 +234,8 @@ export const usePhotoAlbum = () => {
 
       // 요청 body 객체 생성
       const data = {
-        albumName: newAlbumName || albumTitle, // 새 이름이 없으면 기존 이름 사용
-        albumContent: newAlbumContent,
+        albumName: newAlbumName.trim() || albumTitle, // 새 이름이 없으면 기존 이름 사용
+        albumContent: newAlbumContent.trim(),
       };
 
       // API 요청 보내기
@@ -203,6 +266,24 @@ export const usePhotoAlbum = () => {
         `/api/albums/${id}/thumbnail`,
         data,
       );
+      // 현재 앨범의 사진 목록 다시 가져오기
+      if (id) {
+        const response = await apiClient.get(`/api/albums/${id}`);
+
+        // API 응답에서 photoList 배열 추출
+        const photoList = response.data.photoList || [];
+
+        // Photo 인터페이스에 맞게 데이터 변환
+        const formattedPhotos: Photo[] = photoList.map((photo: any) => ({
+          id: photo.photoId,
+          src: photo.photoUrl,
+          alt: `앨범 사진 ${photo.photoId}`,
+          isThumbnail: photo.isThumbnail,
+        }));
+
+        // 사진 목록 업데이트
+        setPhotos(formattedPhotos);
+      }
 
       console.log('썸네일 변경 성공:', response.data);
     } catch (error) {
@@ -253,20 +334,6 @@ export const usePhotoAlbum = () => {
     );
     setIsFlipped(false);
   };
-
-  // 키보드 이벤트 처리 (왼쪽/오른쪽 화살표)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        goToPrevious();
-      } else if (e.key === 'ArrowRight') {
-        goToNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [photos.length]);
 
   // 현재 이미지, 이전 이미지, 다음 이미지 인덱스 계산
   const getPrevIndex = () => {
@@ -334,5 +401,6 @@ export const usePhotoAlbum = () => {
     albumId: id, // 현재 앨범 ID 반환
     refreshPhotos,
     fontInfoList: familyFonts,
+    isImageLoading,
   };
 };

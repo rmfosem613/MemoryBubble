@@ -45,7 +45,7 @@ function OAuthCallback() {
       if (role === 'ADMIN') {
         navigate('/admin');
       } else {
-        navigate("/");
+        navigate("/main");
       }
     }
     handleAuthentication();

@@ -14,7 +14,7 @@ interface FontResponse {
 interface AlertState {
   visible: boolean;
   message: string;
-  color: 'red' | 'green' | 'gray';
+  color: 'red' | 'green' | 'gray' | 'blue';
 }
 
 interface UseFontDownloadReturn {
@@ -25,7 +25,7 @@ interface UseFontDownloadReturn {
   fontFamily: string | null;
   fontName: string | null;
   alertState: AlertState | null;
-  showAlert: (message: string, color: 'red' | 'green' | 'gray') => void;
+  showAlert: (message: string, color: 'red' | 'green' | 'gray' | 'blue') => void;
 }
 
 export const useFontDownload = (): UseFontDownloadReturn => {
@@ -35,7 +35,7 @@ export const useFontDownload = (): UseFontDownloadReturn => {
   const [alertState, setAlertState] = useState<AlertState | null>(null);
 
   // Alert 표시 함수
-  const showAlert = (message: string, color: 'red' | 'green' | 'gray') => {
+  const showAlert = (message: string, color: 'red' | 'green' | 'gray' | 'blue') => {
     setAlertState({ visible: true, message, color });
 
     // 3초 후에 알림 숨기기

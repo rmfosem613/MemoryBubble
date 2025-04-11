@@ -14,6 +14,7 @@ import { DraggableLetter } from './DraggableLetter';
 import LetterAnimation from '@/components/storage/animation/LetterAnimation';
 
 import apiClient from '@/apis/apiClient';
+import Alert from '../common/Alert';
 
 interface NewLetterContentProps {
   initialLetters?: LetterData[];
@@ -26,6 +27,9 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
   const [letters, setLetters] = useState<LetterData[]>(initialLetters);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   // 선택된 편지와 애니메이션 상태 추가
   const [selectedLetter, setSelectedLetter] = useState<LetterData | null>(null);
@@ -87,7 +91,6 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
     try {
       const response = await apiClient.get(`/api/letters/${id}`);
       console.log(response.data, '편지 상세 정보');
-      console.log(response.data.content, '편지 상세 정보 내용');
 
       // 상세 정보를 상태에 저장
       setSelectedLetter(response.data);
@@ -98,6 +101,29 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
       setLetters((prev) => prev.filter((letter) => letter.letterId !== id));
     } catch (error) {
       console.error('편지 상세 정보 가져오기 실패:', error);
+
+      // 403 에러 처리
+      if (error.response && error.response.status === 403) {
+        // 편지의 상세 정보를 가져오지 못했으므로, 목록에서 해당 편지의 정보를 사용
+        const letterInfo = letters.find((letter) => letter.letterId === id);
+
+        // 알림 메시지 설정
+        if (letterInfo && letterInfo.openAt) {
+          const openAtDate = new Date(letterInfo.openAt);
+          setAlertMessage(
+            `이 편지는 ${openAtDate.toLocaleDateString()} 이후에 열람 가능합니다.`,
+          );
+        } else {
+          setAlertMessage('아직 열람할 수 없는 편지입니다.');
+        }
+
+        setShowAlert(true);
+
+        // 일정 시간 후 알림 닫기
+        setTimeout(() => {
+          setShowAlert(false);
+        }, 3500);
+      }
     }
   };
 
@@ -110,12 +136,10 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center h-full p-4">
-      <h2 className="text-2xl font-bold text-gray-700 mb-4">새 편지함</h2>
-
+    <div className="flex flex-col items-center h-full">
       <div
         ref={containerRef}
-        className="w-full h-[calc(100%-3rem)] relative bg-white/50 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+        className="w-full h-full relative overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">편지를 불러오는 중입니다...</p>
@@ -169,6 +193,7 @@ const NewLetterContent: React.FC<NewLetterContentProps> = ({
         isOpen={isAnimationOpen}
         onClose={handleCloseAnimation}
       />
+      {showAlert && <Alert message={alertMessage} color="blue" />}
     </div>
   );
 };

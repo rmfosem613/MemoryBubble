@@ -9,7 +9,7 @@ interface AlertProps {
   showButtons?: boolean;
 }
 
-// color 예시 : green, red, gray
+// color 예시 : green, red, gray, blue
 const Alert = ({ message, color, confirmButton, cancelButton, showButtons = false }: AlertProps) => {
   const [visible, setVisible] = useState(true);
 
@@ -30,15 +30,22 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
       return {
         border: "border-red-200",
         bg: "bg-red-100",
-        text: "text-red-700"
+        text: "text-red-300"
       };
     } else if (color === "green") {
       return {
         border: "border-green-200",
         bg: "bg-green-100",
-        text: "text-green-700"
+        text: "text-green-300"
       };
-    } else {
+    } else if (color === "blue") {
+      return {
+        border: "border-alert-blue-200",
+        bg: "bg-alert-blue-100",
+        text: "text-alert-blue-300"
+      };
+    }
+    else {
       return {
         border: "border-gray-200",
         bg: "bg-gray-100",
@@ -60,10 +67,9 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
     if (cancelButton) cancelButton();
     setVisible(false);
   };
-
   return (
-    <div className="fixed top-0 w-full flex justify-center items-center z-[9999] pointer-events-auto">
-      <div className={`px-4 py-4 mt-20 flex flex-col min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
+    <div className="fixed left-1/2 transform -translate-x-1/2 z-[9999] pointer-events-auto mt-[64px]">
+      < div className={`px-4 py-4 flex flex-col min-w-[300px] rounded-lg border border-1 ${colorClasses.border} ${colorClasses.bg}`}>
         <div className="flex justify-between items-center space-x-6">
           <div className="flex space-x-2 items-center">
             <AlertCircle className={`w-4 h-4 ${colorClasses.text}`} />
@@ -86,8 +92,8 @@ const Alert = ({ message, color, confirmButton, cancelButton, showButtons = fals
         </div>
 
 
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

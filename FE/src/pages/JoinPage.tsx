@@ -1,30 +1,31 @@
-import { useEffect, useState } from "react";
-import { ChevronRight } from "lucide-react";
-import Button from "@/components/common/Button/Button";
+import { useEffect, useState } from 'react';
+import { ChevronRight, Loader2 } from 'lucide-react';
+import Button from '@/components/common/Button/Button';
 
-import InputInfo from "@/components/join/InputInfo";
-import InputBirth from "@/components/join/InputBirth";
-import InputPic from "@/components/join/InputPic";
+import InputInfo from '@/components/join/InputInfo';
+import InputBirth from '@/components/join/InputBirth';
+import InputPic from '@/components/join/InputPic';
 
 import { useNavigate } from 'react-router-dom';
-import useUserApi from "@/apis/useUserApi";
+import useUserApi from '@/apis/useUserApi';
 
-import Title from "@/components/common/Title";
-import Alert from "@/components/common/Alert";
-import useUserStore from "@/stores/useUserStore";
-import useUser from "@/hooks/useUser";
+import Title from '@/components/common/Title';
+import Alert from '@/components/common/Alert';
+import useUserStore from '@/stores/useUserStore';
+import useUser from '@/hooks/useUser';
 
 // react-icons를 대신할 커스텀 컴포넌트
 const CircleNumber = ({ number, isActive }) => {
-  const bgColor = isActive ? "#7DABF8" : "#E1E1E8";
-  const textColor = isActive ? "#FFFFFF" : "#4B4B51";
+  const bgColor = isActive ? '#7DABF8' : '#E1E1E8';
+  const textColor = isActive ? '#FFFFFF' : '#4B4B51';
 
   return (
     <div
       className="relative flex items-center justify-center rounded-full mr-[6px] w-[21px] h-[21px]"
-      style={{ backgroundColor: bgColor }}
-    >
-      <span className="text-sm font-bold" style={{ color: textColor }}>{number}</span>
+      style={{ backgroundColor: bgColor }}>
+      <span className="text-sm font-bold" style={{ color: textColor }}>
+        {number}
+      </span>
     </div>
   );
 };
@@ -32,7 +33,12 @@ const CircleNumber = ({ number, isActive }) => {
 const CircleCheck = () => {
   return (
     <div className="relative flex items-center justify-center rounded-full mr-[6px] w-[22px] h-[22px] bg-[#1959B8]">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="14" height="14">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="white"
+        width="14"
+        height="14">
         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
       </svg>
     </div>
@@ -44,27 +50,27 @@ function JoinPage() {
   const { user } = useUserStore();
   const { joinFamily, uploadImageWithPresignedUrl } = useUserApi();
   const { fetchProfileAndFamilyInfo } = useUser();
-  
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [name, setName] = useState("");
-  const [gender, setGender] = useState("");
+  const [name, setName] = useState('');
+  const [gender, setGender] = useState('');
   // const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePrefix, setPhonePrefix] = useState('010');
   const [phoneMiddle, setPhoneMiddle] = useState('');
   const [phoneSuffix, setPhoneSuffix] = useState('');
-  const [birth, setBirth] = useState("");
+  const [birth, setBirth] = useState('');
   const [profileImage, setProfileImage] = useState(null);
-  const [profileImagePreview, setProfileImagePreview] = useState(null)
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [showAlert, setShowAlert] = useState(false);
 
   // 폼 유효성 검사 상태
-  const [nameError, setNameError] = useState("");
-  const [genderError, setGenderError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [birthError, setBirthError] = useState("");
-  const [imageError, setImageError] = useState("");
+  const [nameError, setNameError] = useState('');
+  const [genderError, setGenderError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [birthError, setBirthError] = useState('');
+  const [imageError, setImageError] = useState('');
 
   useEffect(() => {
     const shouldShowAlert = sessionStorage.getItem('showJoinAlert');
@@ -77,17 +83,33 @@ function JoinPage() {
 
   // 다음 버튼 클릭 시 실행되는 함수
   const handleNext = async () => {
+    // 이미 로딩 중이면 중복 클릭 방지
+    if (isLoading) return;
+
     if (currentStep === 1) {
       // 개인정보 유효성 검사
       let hasError = false;
 
-      if (!name) {
-        setNameError("이름을 입력해주세요.");
+      const trimName = name.trim();
+      if (!trimName) {
+        setNameError('이름을 입력해주세요.');
         hasError = true;
+      } else if (trimName.length < 1) {
+        setNameError('이름은 최소 1글자 이상이어야 합니다.');
+        hasError = true;
+      } else if (trimName.length > 10) {
+        setNameError('이름은 최대 10글자까지 가능합니다.');
+        hasError = true;
+      } else {
+        setNameError('');
+      }
+
+      if (trimName !== name) {
+        setName(trimName);
       }
 
       if (!gender) {
-        setGenderError("성별을 선택해주세요.");
+        setGenderError('성별을 선택해주세요.');
         hasError = true;
       }
 
@@ -96,11 +118,11 @@ function JoinPage() {
         hasError = true;
       }*/
 
-      if(!phonePrefix || !phoneMiddle || !phoneSuffix) {
-        setPhoneError("전화번호를 입력해주세요.");
+      if (!phonePrefix || !phoneMiddle || !phoneSuffix) {
+        setPhoneError('전화번호를 입력해주세요.');
         hasError = true;
       } else if (phoneMiddle.length !== 4 || phoneSuffix.length !== 4) {
-        setPhoneError("전화번호 형식이 올바르지 않습니다.");
+        setPhoneError('전화번호 형식이 올바르지 않습니다.');
         hasError = true;
       }
 
@@ -110,11 +132,13 @@ function JoinPage() {
     } else if (currentStep === 2) {
       // 생일 입력 유효성 검사
       if (!birth) {
-        setBirthError("생일을 입력해주세요.");
+        setBirthError('생일을 입력해주세요.');
         return;
-      }
-      else if(birth < "1900-01-01" || birth > new Date().toISOString().split('T')[0]) {
-        setBirthError("생일이 올바르지 않습니다.");
+      } else if (
+        birth < '1900-01-01' ||
+        birth > new Date().toISOString().split('T')[0]
+      ) {
+        setBirthError('생일이 올바르지 않습니다.');
         return;
       }
 
@@ -122,16 +146,16 @@ function JoinPage() {
     } else {
       // 마지막 단계: 이미지 등록 및 제출
       if (!profileImage) {
-        setImageError("프로필 사진을 등록해주세요.");
+        setImageError('프로필 사진을 등록해주세요.');
         return;
       }
 
       try {
         setIsLoading(true);
-        setError("");
+        setError('');
 
         // 성별을 API 포맷에 맞게 변환
-        const genderCode = gender === "여자" ? "F" : "M";
+        const genderCode = gender === '여자' ? 'F' : 'M';
         // 휴대폰번호 변환
         const phoneNumber = `${phonePrefix}-${phoneMiddle}-${phoneSuffix}`;
 
@@ -141,7 +165,7 @@ function JoinPage() {
           birth: birth,
           name: name,
           phoneNumber: phoneNumber,
-          gender: genderCode
+          gender: genderCode,
         });
 
         const data = response.data;
@@ -155,22 +179,22 @@ function JoinPage() {
             // presigned URL을 통해 이미지 업로드 (useUserApi 사용)
             await uploadImageWithPresignedUrl(
               data.presignedUrl,
-              new File([imageBlob], data.fileName, { type: 'image/webp' })
+              new File([imageBlob], data.fileName, { type: 'image/webp' }),
             );
           } catch (uploadError) {
-            console.error("이미지 업로드 실패:", uploadError);
+            console.error('이미지 업로드 실패:', uploadError);
             // 이미지 업로드 실패해도 계속 진행
           }
         }
 
-         // 사용자 정보 조회 및 상태 업데이트
+        // 사용자 정보 조회 및 상태 업데이트
         await fetchProfileAndFamilyInfo(user.userId, user.familyId);
 
         // 가입 성공 후 메인 페이지로 이동
-        navigate('/');
+        navigate('/main');
       } catch (err) {
-        console.error("가입 실패:", err);
-        setError("가입에 실패했습니다. 다시 시도해주세요.");
+        console.error('가입 실패:', err);
+        setError('가입에 실패했습니다. 다시 시도해주세요.');
       } finally {
         setIsLoading(false);
       }
@@ -209,27 +233,27 @@ function JoinPage() {
 
   // 이전 단계로 돌아가기
   const handlePrev = () => {
-    if (currentStep > 1) {
+    if (currentStep > 1 && !isLoading) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   // 단계에 따라 텍스트 색상을 변경하는 함수
   const getTextColor = (step) => {
-    if (step === currentStep) return "text-blue-500";
-    if (step < currentStep) return "text-blue-600";
-    return "text-gray-500";
+    if (step === currentStep) return 'text-blue-500';
+    if (step < currentStep) return 'text-blue-600';
+    return 'text-gray-500';
   };
 
   // 자식 컴포넌트에서 받은 폼 데이터 처리 함수
   const handleNameChange = (value) => {
     setName(value);
-    setNameError("");
+    setNameError('');
   };
 
   const handleGenderChange = (value) => {
     setGender(value);
-    setGenderError("");
+    setGenderError('');
   };
 
   /*const handlePhoneChange = (value) => {
@@ -239,48 +263,45 @@ function JoinPage() {
 
   const handlePhonePrefix = (value) => {
     setPhonePrefix(value);
-    setPhoneError("");
-  }
+    setPhoneError('');
+  };
   const handlePhoneMiddle = (value) => {
     setPhoneMiddle(value);
-    setPhoneError("");
-  }
+    setPhoneError('');
+  };
   const handlePhoneSuffix = (value) => {
     setPhoneSuffix(value);
-    setPhoneError("");
-  }
+    setPhoneError('');
+  };
 
   const handleBirthChange = (value) => {
     setBirth(value);
-    setBirthError("");
+    setBirthError('');
   };
 
   const handleImageChange = (file) => {
     setProfileImage(file);
 
     if (file) {
-      const fileReader = new FileReader()
+      const fileReader = new FileReader();
       fileReader.onload = () => {
-        setProfileImagePreview(fileReader.result)
-      }
-      fileReader.readAsDataURL(file)
+        setProfileImagePreview(fileReader.result);
+      };
+      fileReader.readAsDataURL(file);
     }
 
-    setImageError("");
+    setImageError('');
   };
 
   return (
     <>
-      {showAlert && (
-        <Alert message="그룹 생성을 완료해주세요." color="red" />
-      )}
+      {showAlert && <Alert message="그룹 생성을 완료해주세요." color="red" />}
 
       <div className="container">
         <Title text="그룹 가입하기" />
       </div>
 
       <div className="flex mt-[10px] items-center justify-center">
-
         {/* 앞에 흰색 배경의 div */}
         <div className="px-10 py-[40px] w-[440px] h-[550px] border border-gray-300 bg-white rounded-[8px] flex flex-col z-30">
           <div className="flex-grow">
@@ -291,7 +312,10 @@ function JoinPage() {
                 ) : (
                   <CircleNumber number={1} isActive={currentStep >= 1} />
                 )}
-                <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(1)}`}>개인정보</p>
+                <p
+                  className={`font-p-500 text-subtitle-1-lg ${getTextColor(1)}`}>
+                  개인정보
+                </p>
               </div>
 
               <ChevronRight color="#4B4B51" size={20} />
@@ -302,14 +326,20 @@ function JoinPage() {
                 ) : (
                   <CircleNumber number={2} isActive={currentStep >= 2} />
                 )}
-                <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(2)}`}>생일입력</p>
+                <p
+                  className={`font-p-500 text-subtitle-1-lg ${getTextColor(2)}`}>
+                  생일입력
+                </p>
               </div>
 
               <ChevronRight color="#4B4B51" size={20} />
 
               <div className="flex justify-center items-center">
                 <CircleNumber number={3} isActive={currentStep >= 3} />
-                <p className={`font-p-500 text-subtitle-1-lg ${getTextColor(3)}`}>사진등록</p>
+                <p
+                  className={`font-p-500 text-subtitle-1-lg ${getTextColor(3)}`}>
+                  사진등록
+                </p>
               </div>
             </div>
 
@@ -358,13 +388,35 @@ function JoinPage() {
           <div className="flex justify-end mt-auto">
             <div className="flex space-x-2">
               {currentStep > 1 && (
-                <Button name="이전" color="white" onClick={handlePrev} />
+                <div style={{ pointerEvents: isLoading ? 'none' : 'auto' }}>
+                  <Button name="이전" color="white" onClick={handlePrev} />
+                </div>
               )}
-              <Button
-                name={currentStep === 3 ? (isLoading ? "처리 중..." : "완료") : "다음"}
-                color="blue"
-                onClick={handleNext}
-              />
+
+              {/* 완료/다음 버튼 래퍼 */}
+              <div
+                className="relative"
+                style={{ width: currentStep === 3 ? '80px' : '80px' }}>
+                {/* 로딩 오버레이 */}
+                {isLoading && currentStep === 3 && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10 bg-white bg-opacity-50 rounded-[8px]">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                  </div>
+                )}
+
+                {/* 실제 버튼 */}
+                <div
+                  style={{
+                    opacity: isLoading && currentStep === 3 ? 0.7 : 1,
+                    pointerEvents: isLoading ? 'none' : 'auto',
+                  }}>
+                  <Button
+                    name={currentStep === 3 ? '완료' : '다음'}
+                    color="blue"
+                    onClick={handleNext}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -372,11 +424,8 @@ function JoinPage() {
         {/* 세 번째 파란색 배경의 div */}
         <div className="absolute ml-[60px] px-8 py-[40px] w-[440px] h-[510px] bg-blue-500 rounded-[8px] flex flex-col z-10px" />
 
-
         {/* 두 번째 하늘색 배경의 div */}
         <div className="absolute ml-[30px] px-8 py-[40px] w-[440px] h-[530px] bg-blue-300 rounded-[8px] flex flex-col z-20px" />
-
-
       </div>
     </>
   );

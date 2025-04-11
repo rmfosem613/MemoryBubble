@@ -17,7 +17,12 @@ function InputBirth({ onBirthChange, birthError, initialBirth = "" }) {
 
   return (
     <div>
-      <p className="mb-[10px] font-p-500 text-subtitle-1-lg">생일</p>
+      <p className="mb-[10px] font-p-500 text-subtitle-1-lg">
+        생일{' '}
+        <span className="text-gray-500 text-subtitle-2-lg pl-1">
+          (1900-01-01~{today})
+        </span>
+      </p>
       {/* 생일 입력 필드 */}
       <input
         type="date"

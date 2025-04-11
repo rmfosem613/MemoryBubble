@@ -5,7 +5,7 @@ export interface AlbumData {
   description: string;
   imageUrl: string;
   bgColor: string;
-  photoCount: string;
+  photoCount: number;
 }
 
 // SlidingAlbumList에서 부모 컴포넌트로 전달할 props 타입 정의

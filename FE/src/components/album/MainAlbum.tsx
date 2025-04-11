@@ -78,7 +78,7 @@ function MainAlbum({
           <p className="text-h4-lg font-p-700 mt-auto">{title || "앨범"}</p>
           <p className="text-p-sm break-words overflow-wrap-normal">{description || ""}</p>
           <p className="text-p-lg mt-auto text-right">
-            <span className="font-bold">{photoCount || 0}</span>의 순간
+            <span className="font-bold">{photoCount || 0}</span>장의 순간
           </p>
         </div>
       </div>

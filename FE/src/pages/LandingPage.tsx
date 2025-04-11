@@ -5,12 +5,14 @@ interface LoadingPageProps {
   message?: string;
   redirectTo?: string;
   duration?: number;
+  onLoadingComplete?: () => void;
 }
 
 const LandingPage: React.FC<LoadingPageProps> = ({
   message = '추억방울',
-  redirectTo = '/introduce',
-  duration = 2000, // 로딩 시간 (밀리초)
+  redirectTo = null,
+  duration = 1000, // 로딩 시간 (밀리초)
+  onLoadingComplete
 }) => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState<number>(0);
@@ -26,13 +28,19 @@ const LandingPage: React.FC<LoadingPageProps> = ({
         if (newProgress >= 100) {
           clearInterval(interval);
           setShowCurtain(true);
-          
+
           // 커튼 애니메이션 후 리다이렉션
           setTimeout(() => {
-            navigate(redirectTo);
-          }, 1500); // 커튼 애니메이션에 충분한 시간 부여
-          
-          return 300;
+            if (onLoadingComplete) {
+              onLoadingComplete();
+            } else if (redirectTo) {
+              navigate(redirectTo);
+            } else {
+              console.log("화면 전환");
+            }
+          }, 500); // 커튼 애니메이션에 충분한 시간 부여
+
+          return 100;
         }
 
         return newProgress;
@@ -43,15 +51,15 @@ const LandingPage: React.FC<LoadingPageProps> = ({
     return () => {
       clearInterval(interval);
     };
-  }, [navigate, redirectTo, duration]);
+  }, [navigate, duration, redirectTo, onLoadingComplete]);
 
   return (
     <>
       <div className='justify-end pt-[60px] relative h-screen overflow-hidden'>
         {/* 검은색 커튼 */}
-        <div 
-          className='absolute inset-0 bg-black z-50 transition-transform duration-1000 ease-in-out'
-          style={{ 
+        <div
+          className='absolute inset-0 bg-black z-50 transition-transform duration-500 ease-in-out'
+          style={{
             transform: showCurtain ? 'translateY(0)' : 'translateY(100%)',
           }}
         ></div>
