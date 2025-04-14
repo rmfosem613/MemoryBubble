@@ -1,0 +1,468 @@
+﻿진행 상태,담당자,분류,주기능,상세 기능,URI,Method,Description,Request,Response,HTTP Status
+완료,민주 김,회원관리,"회원가입, 로그인","카카오톡 회원가입, 로그인",/api/auth/login,GET,"로그인, 회원가입",,,"200, 401"
+완료,민주 김,회원관리,accessToken 재발급,401을 받았을 때 만료된 accessToken 재발급,/api/auth/reissue,GET,만료된 accessToken 재발급을 위해 refreshToken으로 요청,"[ Header ]
+- Content-Type: application/json
+
+[Body]
+{
+  “refreshToken”:  
+}","{
+  “accessToken”:  “eyJhbGciOiJIUzI1NiJ9…”
+}",200
+완료,민주 김,회원관리,,"로그인 후 user_id, family_id 반환",/api/users/me,GET,,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+  “userId”: 1,
+  “familyId”: 1 // 가입 안했으면 null
+  “role”: “USER”
+}","200, 401"
+완료,민주 김,회원관리,,프로필,/api/users/{userId},GET,회원 이름 최대 10자,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+  “name”: “ㅇㅇㅇ”
+  “profileUrl”: “https://..”
+  “birth”: “2000-01-01”
+  “phoneNumber”: “010-1234-5678”
+  “familyId”: 1
+  “gender”: “F”
+}","200, 403, 404"
+완료,민주 김,"편지, 회원관리",,안 읽은 편지가 있는지,/api/users/letter,GET,"읽지 않은 편지가 있으면 true, 없으면 fasle","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+  “isUnread”: true/false
+}","200, 404"
+완료,민주 김,회원관리,회원정보 수정,회원정보 수정,/api/users/{userId},PATCH,,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “birth”: “2000-01-01”
+  “gender”: “F”
+  “name”:  “ㅇㅇㅇ”
+  “phoneNumber”: “010-1234-5678”
+  “isProfileUpdate”: true/false
+}
+
+바꾸고 싶은 것만 내용에 담아서 전달
+{
+  “name”: “이름 변경”
+}","{
+  ""presignedUrl"": “https://.."",
+  ""fileName"": ""users/{UUID}""
+}","200, 401, 403, 404"
+완료,민주 김,회원관리,,로그아웃,/api/auth/logout,GET,,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+}","200, 400, 401"
+완료,현진,손글씨,손글씨 관리,폰트 조회하기,/api/fonts,GET,"만들어진 폰트 조회
+& 폰트 다운로드 링크","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+  “fontId”: 1,
+  “fontName”: 한글명(김싸피체),
+  “createdAt”: “2025-04-09T05..”,
+  “presignedUrl”: 폰트 다운로드 링크 
+  ""fileName"": ""font/{userId}/김싸피체.ttf"",
+  “status”: “NOT_CREATED” 
+}","200, 401"
+완료,현진,손글씨,,폰트 삭제하기,/api/fonts/{fontId},DELETE,만들어진 내 폰트 삭제 요청,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+}","200, 401, 403, 404"
+완료,현진,손글씨,손글씨 폰트화,폰트 템플릿 다운로드,/api/fonts/template,GET,템플릿을 제공하는 방식일 경우 다운로드 받을 수 있는 링크 제공,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+  “presignedUrl”: 템플릿 다운로드 링크
+  “fileName”: template/fontTemplate.zip
+}","200, 401"
+완료,현진,손글씨,,폰트 생성 요청 (폰트 템플릿 업로드),/api/fonts,POST,폰트 이름 & 작성한 템플릿 이미지 저장할 Presigned URL 제공,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+   “fontName”: 한글명
+}","[
+  {
+     ""presignedUrl"": ""…"",
+     ""fileName"": ""template/{userId}/1.png”
+  },
+  …
+]","200, 400, 401, 404"
+완료,현진,"관리자, 손글씨",,폰트 생성 요청 목록,/api/admin/fonts,GET,폰트 생성을 요청한 사용자 목록 반환,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","[
+   {
+      “fontId”: 폰트 ID
+      “userName”: 요청한 사용자 이름,
+      “fontName”: 요청한 폰트 이름,
+      “createdAt”: “2025-04-09T..”,
+      “files”: [
+         {
+            ""presignedUrl”: “…”
+            “fileName”: “template/{userId}/1.png”
+         },
+         …
+      ]
+   },
+   …
+]","200, 401, 403"
+완료,현진,"관리자, 손글씨",,폰트 생성 완료,/api/admin/fonts/{fontId},POST,"파일 이름 DB 저장
+관리자에게 알림 전송
+프론트에게 presignedUrl 응답하면 프론트쪽에서 ttf 파일 S3에 저장
+","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+","{
+  “presignedUrl”: ttf 파일 업로드 링크
+  “fileName”: “font/{userId}/{fontName}.ttf”
+}","200, 401, 403, 404"
+완료,현진,"관리자, 손글씨",,폰트 생성 취소,/api/admin/fonts/{fontId},DELETE,"파일 형식이 잘못 됐을 경우 취소, 신청한 사용자에게 알림 전송","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+}","200, 401, 403, 404"
+완료,현진,"그룹, 손글씨",,가족 폰트 조회,/api/fonts/family/{familyId},GET,"그룹 내의 전체 폰트 조회
+
+• NOT_CREATED: 폰트 생성을 요청한 적이 없는 경우
+• REQUESTED: 폰트 생성이 요청되어 처리 중인 경우
+• DONE: 폰트 생성이 완료되어 사용이 가능한 경우","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","[
+ {
+   “userId”: 1,
+   “userName”: “ㅇㅇㅇ”,
+   “fontName”: “aaa”,
+   “fileName”: “font/{userId}/{fontName}.ttf”
+   “status”: “NOT_CREATED”
+  },
+  …
+]","200, 401, 403"
+완료,민주 김,그룹,가족 생성,가족 생성하기,/api/family,POST,"가족 이름 정해서 가족 생성
+- 가족 이름 최대 10자","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “familyName”: “가족 이름”,
+}","{
+ “familyId”: 생성한 가족 ID
+ ""presignedUrl"": “https://.."",
+ ""fileName"": ""family/{UUID}.png""
+}","200, 400, 401"
+완료,민주 김,그룹,,가족 초대코드 만들기(보기),/api/family/{familyId}/invite,GET,"초대 코드는 Redis에 저장
+만들어진 이후 24시간동안 유효","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+","{
+  “code”: 12345678
+}","200, 401, 403"
+완료,민주 김,그룹,,가족 정보 보기,/api/family/{familyId},GET,"헤더에서 가족 정보(가족 이름, 썸네일, 구성원 정보) 받기 ","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+  “familyName”: “구미에 오손도손 가족”,
+  “thumbnailUrl”: “https://…”,
+  “familyMembers”: [
+     {
+        “userId”: 1,
+        “name”: “엄마”,
+        “profileUrl”: “https://..”
+        “birth”: “2000-01-01”,
+        “phoneNumber”: “010-1234-5678”
+      }
+   ]
+}","200, 400, 401"
+완료,민주 김,그룹,,가족 정보 수정하기,/api/family/{familyId},PATCH,,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “familyName”: “수정”,
+  “isThumbnailUpdate”: true/false
+}","{
+  ”familyId”: 1,
+  ""presignedUrl"": ""https://.."",
+  ""fileName"": ""family/{UUID}.png""
+}","200, 400, 401"
+완료,민주 김,그룹,그룹 가입,"초대 코드 확인하기 ",/api/family/code,POST,그룹 가입시 초대코드 입력해서 유효한 초대코드인지 확인,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “code”: “12345678”
+}","{
+  “famliyId”: 1
+}","200, 400, 401"
+완료,민주 김,그룹,,"가족 가입하기 ",/api/family/join,POST,"그룹 가입시 생년월일, 성별, 이름, 전화번호 입력 받음
+
+이름 10자","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “familyId”: 1,
+  “birth”: “2025-01-01”,
+  “gender”: “F”,
+  “name”: “닉네임”,
+  “phoneNumber”: “010-1234-5678”
+}","{
+""presignedUrl"": ""…"",
+""fileName"": ""user/{UUID}""
+}","200, 400, 401"
+완료,민주 김,"그룹, 앨범",앨범,앨범 생성(기본 앨범 제외),/api/albums,POST,"앨범 이름
+
+앨범 제목: 2 ~ 7자
+앨범 설명: 2 ~ 60자","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “familyId”: 1,
+  “albumName”: “이름”, 
+  “albumContent”: “내용”,
+  “backgroundColor”: “#FFFFFF”
+}","{
+}","200, 401, 403"
+완료,민주 김,"그룹, 앨범",,앨범 전체 조회 및 검색,/api/albums?name=aaa,GET,"앨범 목록, 썸네일 반환","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+","[
+    {
+      “albumId”: 1
+      “albumName”:  “추억 보관함”
+      “albumContent”: “추억을 저장해보세요”
+      “thumbnailUrl”: “https ://s3..”
+      “backgroundColor”: “#FFFFFF”
+      “photoLength”:  앨범 속 사진 개수 (30장 제한)
+     },
+    …
+]
+","200, 401, 403"
+완료,민주 김,"그룹, 앨범",,앨범 상세 조회,/api/albums/{albumId},GET,앨범에 포함된 사진 id와 url을 반환,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+   “albumName”: “추억 보관함”,
+   “albumContent”: “추억을 저장해보세요”
+   “photoList”: [
+    {
+      “photoId”: 1
+      “photoUrl”: “https://s3..”,
+      “isThumbnail”: true/false
+    },
+    …
+  ]
+}","200, 401, 403"
+완료,민주 김,"그룹, 앨범",,"앨범 수정(이름, 내용)",/api/albums/{albumId},PATCH,앨범 정보 수정,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “albumName”: “변경”,
+  “albumContent”:  “내용 변경”
+}","{
+  “albumName”: “변경”,
+  “albumContent”: “내용 변경”
+}","200, 401, 403"
+완료,민주 김,"그룹, 앨범",,사진 상세 조회,/api/photos/{photoId},GET,사진을 눌렀을 때 해당 사진의 감상평을 보여줌,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","[
+     {
+        “type”: AUDIO/TEXT
+        “content”:  음성이면 url, 텍스트면 내용
+        “createdAt”: “2025-04-09T06..”,
+        “writer”: 작성자 이름,
+        “writerId”: 1 작성자 id
+      },
+      …
+]","200, 401, 403, 404"
+완료,민주 김,"그룹, 앨범",,앨범에서 다른 앨범으로 사진 이동,/api/albums/{albumId}/move,PATCH,사진의 앨범ID를 변경함,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “albumId”: 이동하려는 앨범 id
+  “photoList”: [1, 2, 3]  이동하려는 사진 id 목록
+}","{
+  “albumId”: 이동하는 앨범 아이디
+}","200, 401, 403, 404"
+완료,민주 김,"그룹, 앨범",,앨범 대표 이미지 선택(변경),/api/albums/{albumId}/thumbnail,PATCH,"앨범의 대표 이미지 변경
+","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “photoId”: 변경하려는 앨범의 대표 이미지 id
+}","{
+}","200, 400, 401, 403, 404"
+완료,민주 김,"그룹, 앨범",사진,사진 업로드,/api/photos,POST,"앨범에 사진을 업로드(최대 5장) ","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “albumId”: 1, 업로드하려는 앨범 id
+  “photoLength”: 3, 업로드하려는 사진 갯수
+}","[
+  {
+     ""presignedUrl"": “https://s3..”,
+     ""fileName"": ""album/{familyId}/{UUD}.png”
+  },
+  …
+]","200, 401, 403"
+완료,민주 김,"그룹, 앨범",,사진 감상평 작성,/api/photos/{photoId}/review,POST,사진마다 감상평 작성,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “type”: 감상평 유형 (TEXT, AUDIO)
+  “content”: 감상평 내용(AUDIO일 경우 null)
+}","AUDIO
+{
+  “presignedUrl”: “https://…”,
+  “fileName”: “album/{familyId}/review/{UUID}”
+}
+TEXT
+{ 
+}","200, 401, 403, 404"
+완료,민주 김,"그룹, 일정",일정 업로드,일정 전체 조회 (월별),/api/schedules?family_id={family_id}&year=2025&month=3,GET,그룹에 등록되어 있는 전체 일정 조회,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","[
+    {
+       “scheduleId”: 1,
+       “scheduleContent”: “내용”
+       “startDate”: “2025-04-09”,
+       “endDate”:  “2025-04-09”,
+       “albumId”: 연결되어 있는 앨범이 없으면 null
+    },
+    …
+]","200, 401, 403"
+완료,민주 김,"그룹, 일정",,일정 추가,/api/schedules,POST,"그룹 일정 등록
+일정 내용 최대 50자","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “familyId”: 1,
+  “startDate”: “2025-04-09”,
+  “endDdate”: “2025-04-09”,
+  “content”: “내용”
+  “albumId”: 앨범과 연결하고 싶은 경우
+}","{
+       “scheduleId”: 1,
+       “scheduleContent”:  “내용”,
+       “startDate”:  “2025-04-09”,
+       “endDate”:  “2025-04-09”,
+       “albumId”: 1 (연결되어 있는 앨범이 없으면 null)
+}","200, 401, 403"
+완료,민주 김,"그룹, 일정",,일정 수정,/api/schedules/{schedule_id},PATCH,그룹 일정 수정,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “familyId”: 1,
+  “startDate”: “2025-04-09”
+  “endDate”: “2025-04-09”
+  “content”: “내용”,
+  “albumId”: 1
+}
+
+변경하고 싶은 부분만 보냄
+{
+  “startDate”: “2025-03-23”,
+  “endDate”: “2025-04-07”,
+  “content”: “수정”
+}
+","{
+       “scheduleId”: 1,
+       “scheduleContent”:  “내용”,
+       “startDate”:  “2025-04-09”,
+       “endDate”:  “2025-04-09”,
+       “albumId”: 1 (연결되어 있는 앨범이 없으면 null)
+}","200, 400, 401, 403, 404"
+완료,민주 김,"그룹, 일정",,일정 삭제,/api/schedules/{schedule_id},DELETE,그룹 일정 삭제,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+}","200, 401, 403, 404"
+완료,민주 김,"그룹, 일정",,앨범 연결,/api/schedules/{schedule_id}/link,POST,일정에 앨범을 연결,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “albumId”: 1
+}
+null이면 연결 끊음","{
+       “scheduleId”: 1
+       “scheduleContent”: “내용”
+       “startDate”: “2025-04-09”
+       “endDate”:  “2025-04-09”
+       “albumId”: 연결되어 있는 앨범이 없으면 null
+}","200, 401, 403, 404"
+완료,민주 김,"그룹, 편지",편지 작성,편지 보내기,/api/letters,POST,"편지를 보냈으면 받은 사람에게 편지가 왔다고 알림을 보냄
+","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+[ Body ]
+{
+  “type”: 편지 유형 (TEXT, AUDIO)
+  “content”: 편지 내용, AUDIO면 null
+  “openAt”: 열리면 좋겠는 날짜 지정, 없으면 null
+  “backgroundColor”: 편지지 색 지정
+  “receiverId”: 받는 유저 id,
+  “duration”: 음성 편지 재생 길이
+}","AUDIO
+{
+  “presignedUrl”: “https://..”,
+  “fileName”: “letter/{UUID}”
+}
+TEXT
+{ 
+}","200, 401, 403"
+완료,민주 김,"그룹, 편지",편지 조회,편지 목록,/api/letters,GET,받은 편지(느린 편지 포함) 모두 조회,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token} ","[
+   {
+      “letterId”: 
+      “senderName”: 편지 보낸 사람 이름
+      “type”: TEXT/AUDIO
+      “createdAt”: 편지 작성일
+      “openAt”: 편지 열람 가능일
+      “backgroundColor”: 편지 배경색
+      “isRead”: 아직 안열어봤으면 false, 열어봤으면 true 
+   },
+   …  
+]","200, 401"
+완료,민주 김,"그룹, 편지",,편지 상세 조회,/api/letters/{letter_id},GET,"받은 편지, 시간이 지난 느린 편지 조회
+
+읽음 여부true로 변경","[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}","{
+   “senderName”: 편지 보낸 사람 이름,
+   “senderId” : 편지 보낸 사람 id,
+   “type”: TEXT/AUDIO
+   “content”: 편지 타입이 AUDIO라면 url, TEXT면 내용
+   “createdAt”: 편지 전송일
+   “openAt”: 편지 열람 가능일
+   “backgroundColor”: 편지지 색,
+   “duration”: 음성 편지 재생 길이
+}","200, 401, 404"
+완료,민주 김,알림,,로그인 시 fcm 토큰 저장,/api/fcm,POST,,"[ Header ]
+- Content-Type: application/json
+- Authorization : Bearer {Access Token}
+
+{
+  “token”: “e4bxRj…”
+}","{
+}","200, 401"
