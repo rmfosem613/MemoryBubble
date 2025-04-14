@@ -95,7 +95,14 @@
 <br /><br />
 
 ### 방울 캘린더
-<img src="https://lab.ssafy.com/s12-webmobile1-sub1/S12P11D201/-/raw/master/img/func_video_4.gif?ref_type=heads" />
+추억 보관함<br />
+<img src="" />
+
+그 외 앨범<br />
+<img src="" />
+
+엽서<br />
+<img src="" />
 
 <br /><br />
 
