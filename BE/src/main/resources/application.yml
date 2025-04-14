@@ -1,0 +1,71 @@
+spring:
+  profiles:
+    include: dev
+  application:
+    name: MemoryBubble
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${mysql.url}
+    username: ${mysql.username}
+    password: ${mysql.password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+        registration:
+          kakao:
+            client-id: ${oauth2.client-id}
+            client-secret: ${oauth2.client-secret}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            client-name: kakao
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+  cloud:
+    aws:
+      region:
+        static: ${aws.region}
+      credentials:
+        access-key: ${aws.access-key}
+        secret-key: ${aws.secret-key}
+      s3:
+        bucket: ${aws.bucket}
+      cloudfront:
+        domain: https://dc7a8e6v5khzi.cloudfront.net
+        distribution-id: ${cloudfront.distribution-id}
+        key-pair-id: ${cloudfront.key-pair-id}
+        private-key-path: ${cloudfront.private-key-path}
+jwt:
+  secret: ${jwt.secret}
+baseUrl: ${url}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.security.oauth2: DEBUG
+#    org.springframework.web: DEBUG

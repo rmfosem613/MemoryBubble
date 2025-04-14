@@ -1,0 +1,378 @@
+/* 편지 애니메이션 관련 CSS */
+:root {
+  --mail: #555B77;
+  --mail-triangle: #494F69;
+  --mail-background: #404660;
+  --mail-shadow: #D1D6EE;
+}
+
+#unsubscribe {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* z-index: 5; */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Overlay for when paper is open */
+#unsubscribe::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 5;
+  /* 오버레이는 낮은 z-index */
+}
+
+#unsubscribe .letter {
+  width: 200px;
+  /* 봉투 너비 증가 */
+  height: 150px;
+  /* 봉투 높이 증가 */
+  position: relative;
+  animation: letter 2s ease infinite;
+  z-index: 6;
+  /* 봉투 z-index */
+}
+
+/* 편지 봉투 앞면 */
+#unsubscribe .letter:before,
+#unsubscribe .letter:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+  /* 봉투 높이에 맞게 조정 */
+  z-index: 20;
+}
+
+/* 편지 봉투 앞면의 양 옆 */
+#unsubscribe .letter:before {
+  background: var(--mail);
+  clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+}
+
+/* 편지 봉투 앞면의 아래 */
+#unsubscribe .letter:after {
+  background: var(--mail-triangle);
+  clip-path: polygon(0 100%, 50% 55%, 100% 100%);
+}
+
+/* 편지 봉투 뒷면 */
+#unsubscribe .letter .background {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--mail-background);
+  clip-path: polygon(0 50px, 50% 0, 100% 50px, 100% 100%, 0 100%);
+}
+
+#unsubscribe .letter .shadow {
+  background: black;
+  width: 180px;
+  /* 그림자 너비 증가 */
+  height: 8px;
+  /* 그림자 높이 증가 */
+  border-radius: 50%;
+  position: absolute;
+  top: 110%;
+  left: 10px;
+  background: var(--mail-shadow);
+  animation: shadow 2s ease infinite;
+}
+
+/* 여기에서 편지 위치 변경 가능 */
+#unsubscribe .letter .body {
+  padding: 25px;
+  /* 패딩 증가 */
+  display: flex;
+  flex-direction: column;
+  bottom: 30px;
+  left: -290px;
+  /* 위치 조정 */
+  border-radius: 12px;
+  /* 모서리 반경 증가 */
+  background: white;
+  /* 카세트 타입은 transparent로 덮어씀 */
+  position: absolute;
+  /* Initial state: horizontal (already rotated 90deg) */
+  transform: translateY(48%) translateZ(0) scale(.2, .16) rotate(90deg);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  /* 그림자 강화 */
+  z-index: 5;
+  /* 편지 본문 z-index 증가 */
+}
+
+/* 캐서트 타입일 우 위치 조정 */
+#unsubscribe .letter .body[style*="width: 650px"] {
+  left: -225px;
+  bottom: 70px;
+}
+
+#unsubscribe .letter .body .headline {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px;
+  /* 패딩 증가 */
+}
+
+#unsubscribe .letter .body .headline .close {
+  cursor: pointer;
+  z-index: 40;
+
+}
+
+#unsubscribe .letter .body .headline .close svg {
+  width: 28px;
+  /* 아이콘 크기 증가 */
+  height: 28px;
+}
+
+#unsubscribe .letter .body .letter-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 15px;
+  /* 내부 패딩 증가 */
+  position: relative;
+  /* 상대 위치 지정 */
+  /* background-color: #494F69; */
+}
+
+/* 편지 내용 스타일링 */
+/* 편지 To */
+#unsubscribe .letter .body .letter-content p {
+  margin-bottom: 1.5rem;
+  font-size: 25px;
+  /* 폰트 크기 증가 */
+}
+
+#unsubscribe .letter .body .letter-content br {
+  margin-bottom: 0.7rem;
+}
+
+/* 편지 내용 배경 라인 */
+#unsubscribe .letter .body .letter-content .text-lg {
+  background-size: 100% 40px;
+  /* 라인 간격 증가 */
+  background-image: linear-gradient(transparent 39px, rgba(200, 200, 200, 0.5) 1px);
+  line-height: 40px;
+  /* 줄 간격 증가 */
+  font-size: 1.25rem;
+  /* 텍스트 크기 증가 */
+  padding: 0 10px;
+}
+
+/* 편지 보이기 */
+#unsubscribe.show-game {
+  opacity: 1;
+  visibility: visible;
+}
+
+#unsubscribe.show-game::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+#unsubscribe.show-game .letter {
+  animation-play-state: paused;
+  z-index: 5;
+  /* 봉투 z-index 유지 */
+  position: relative;
+}
+
+/* 편지가 뒤로감 */
+#unsubscribe.show-game .letter .body {
+  animation: paper .8s linear forwards;
+  z-index: 5;
+  /* 편지 본문 z-index 유지 */
+}
+
+/* 카세트 타입 애니메이션 */
+#unsubscribe.show-game .letter .body[style*="width: 650px"] {
+  animation: paper-cassette .8s linear forwards;
+  z-index: 30;
+  /* background-color: transparent; */
+  background-color: white;
+}
+
+#unsubscribe.show-game .letter .shadow {
+  animation-play-state: paused;
+}
+
+/* 편지 숨기기 */
+#unsubscribe.hide-game {
+  opacity: 1;
+  visibility: visible;
+}
+
+#unsubscribe.hide-game::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+#unsubscribe.hide-game .letter .body {
+  animation: paper-back .8s linear forwards;
+  z-index: 30;
+  /* 편지 본문 z-index 유지 */
+}
+
+/* 카세트 타입 닫기 애니메이션 */
+#unsubscribe.hide-game .letter .body[style*="width: 650px"] {
+  animation: paper-cassette-back .8s linear forwards;
+  z-index: 30;
+  /* background-color: transparent; */
+  background-color: white;
+}
+
+@keyframes paper {
+  30% {
+    z-index: 30;
+    /* 편지 본문 z-index 유지 */
+    transform: translateY(30%) translateZ(0) scale(.2, .16) rotate(90deg);
+  }
+
+  60%,
+  100% {
+    z-index: 30;
+    /* 편지 본문 z-index 유지 */
+  }
+
+  60% {
+    transform: translateY(0) translateZ(0) scale(.2, .16) rotate(45deg);
+  }
+
+  100% {
+    transform: translateY(45%) translateZ(0) scale(0.75, 0.75) rotate(0deg);
+    /* 최종 크기 증가 */
+  }
+}
+
+/* 카세트 타입 펼치기 애니메이션 */
+@keyframes paper-cassette {
+  30% {
+    z-index: 30;
+    transform: translateY(18%) translateZ(0) scale(.2, .16) rotate(90deg);
+  }
+
+  60%,
+  100% {
+    z-index: 30;
+  }
+
+  60% {
+    transform: translateY(0) translateZ(0) scale(.2, .16) rotate(45deg);
+  }
+
+  100% {
+    transform: translateY(50%) translateZ(0) scale(0.75, 0.75) rotate(0deg);
+  }
+}
+
+@keyframes paper-back {
+  0% {
+    transform: translateY(50%) translateZ(0) scale(0.95, 0.95) rotate(0deg);
+    /* 시작 크기 조정 */
+    z-index: 30;
+    /* 편지 본문 z-index 유지 */
+  }
+
+  30% {
+    transform: translateY(0) translateZ(0) scale(.2, .16) rotate(45deg);
+    z-index: 30;
+    /* 편지 본문 z-index 유지 */
+  }
+
+  60% {
+    z-index: 30;
+    /* 편지 본문 z-index 유지 */
+    transform: translateY(18%) translateZ(0) scale(.2, .16) rotate(90deg);
+  }
+
+  100% {
+    z-index: 5;
+    /* 편지 본문 z-index 유지 */
+    transform: translateY(36%) translateZ(0) scale(.2, .16) rotate(90deg);
+  }
+}
+
+/* 카세트 타입 닫기 애니메이션 */
+@keyframes paper-cassette-back {
+  0% {
+    transform: translateY(30%) translateZ(0) scale(0.75, 0.75) rotate(0deg);
+    z-index: 30;
+  }
+
+  30% {
+    transform: translateY(0) translateZ(0) scale(.2, .16) rotate(45deg);
+    z-index: 30;
+  }
+
+  60% {
+    z-index: 30;
+    transform: translateY(10%) translateZ(0) scale(.2, .16) rotate(90deg);
+  }
+
+  100% {
+    z-index: 5;
+    transform: translateY(36%) translateZ(0) scale(.2, .16) rotate(90deg);
+  }
+}
+
+/* 편지 위아래로 두둥실 */
+@keyframes letter {
+  50% {
+    transform: translateY(-8px);
+    /* 애니메이션 움직임 범위 증가 */
+  }
+}
+
+/* 그림자 작아지게 */
+@keyframes shadow {
+  50% {
+    opacity: .7;
+    transform: translateY(8px) scale(.8);
+    /* 그림자 움직임 범위 증가 */
+  }
+}
+
+/* Wave Animation Keyframes */
+@keyframes drift {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-drift {
+  animation: drift 25s infinite linear;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
