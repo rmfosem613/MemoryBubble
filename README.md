@@ -200,6 +200,8 @@
 
 ## ✏ 프로젝트 진행
 
+### 프로젝트 전체 관리 방법
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/프로젝트관리방법.png?ref_type=heads" width="700" />
 
 ### Notion
 
