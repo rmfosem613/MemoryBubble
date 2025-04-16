@@ -84,13 +84,13 @@
 
 ### 추억 갤러리
 추억 보관함<br />
-<img src="" />
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/추억보관함.gif?ref_type=heads" />
 
-그 외 앨범<br />
-<img src="" />
+앨범 <br />
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/앨범.gif?ref_type=heads" />
 
 엽서<br />
-<img src="" />
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/엽서.gif?ref_type=heads" />
 
 <br /><br />
 
@@ -101,6 +101,14 @@
 ### 방울 캘린더
 <img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/캘린더.gif?ref_type=heads"  /> 
 <br /><br />
+
+### 가입
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/초대코드.gif?ref_type=heads" />
+
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/가입.gif?ref_type=heads" />
+<br /><br />
+
+
 
 ### 로그인(카카오)
 <img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/로그인.gif?ref_type=heads" />
