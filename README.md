@@ -74,27 +74,15 @@
 
 
 ### 나만의 손글씨
-사용자 페이지 <br />
-<img src="" /> 
+폰트 생성 요청 <br />
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/폰트생성요청.gif?ref_type=heads" /> 
 <br />
 
-관리자 페이지<br />
-<img src="" />
+폰트 생성 완료 <br />
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/폰트생성완료.gif?ref_type=heads" />
 <br /><br />
 
 ### 추억 갤러리
-<img src="" /> 
-<br /><br />
-
-### 편지
-보내는 페이지<br />
-<img src="" />
-<br />
-받는 페이지<br />
-<img src="" />
-<br /><br />
-
-### 방울 캘린더
 추억 보관함<br />
 <img src="" />
 
@@ -106,10 +94,21 @@
 
 <br /><br />
 
-### 로그인(카카오)
-<img src="" />
+### 편지
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/편지.gif?ref_type=heads" />
 <br /><br />
 
+### 방울 캘린더
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/캘린더.gif?ref_type=heads"  /> 
+<br /><br />
+
+### 로그인(카카오)
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/로그인.gif?ref_type=heads" />
+<br /><br />
+
+### 로그아웃(카카오)
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/로그아웃.gif?ref_type=heads" />
+<br /><br />
 
 ### 블루그린 배포
 <img src="" />
