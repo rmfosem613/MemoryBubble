@@ -1,7 +1,6 @@
 # 추억 방울
 ### SSAFY 12기 특화 프로젝트 - D201 Team 2학년 1반
-
-<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/intro.png?ref_type=heads" />
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/main.gif?ref_type=heads" />
 
 > 가족만의 글씨체로 추억과 일상을 공유하는 디지털 가족 앨범 서비스
 
