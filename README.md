@@ -280,18 +280,8 @@
 
 ## 📊 모니터링 통계
 
+<img src="https://lab.ssafy.com/s12-ai-image-sub1/S12P21D201/-/raw/master/img/모니터링.png?ref_type=heads" width="700" />
 
-<br />
-
-<details>
-<summary>부하테스트 분석 결과</summary>
-<div markdown="1">
-
-</div>
-</details>
-
-
-<br />
 
 
 <div id="8"></div>
